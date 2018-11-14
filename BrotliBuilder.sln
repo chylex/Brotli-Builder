@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27703.2042
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrotliBuilder", "BrotliBuilder\BrotliBuilder.csproj", "{3684F055-8D45-42D6-AE8B-7F8C895994E0}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnitTests", "UnitTests\UnitTests.fsproj", "{D0854D9E-E442-42B2-922F-0CB1BEAAE8BC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -15,6 +17,9 @@ Global
 		{3684F055-8D45-42D6-AE8B-7F8C895994E0}.Debug|x64.Build.0 = Debug|x64
 		{3684F055-8D45-42D6-AE8B-7F8C895994E0}.Release|x64.ActiveCfg = Release|x64
 		{3684F055-8D45-42D6-AE8B-7F8C895994E0}.Release|x64.Build.0 = Release|x64
+		{D0854D9E-E442-42B2-922F-0CB1BEAAE8BC}.Debug|x64.ActiveCfg = Debug|x64
+		{D0854D9E-E442-42B2-922F-0CB1BEAAE8BC}.Debug|x64.Build.0 = Debug|x64
+		{D0854D9E-E442-42B2-922F-0CB1BEAAE8BC}.Release|x64.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
