@@ -74,9 +74,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BrotliBuilder\BrotliBuilder.csproj">
-      <Name>BrotliBuilder</Name>
-      <Project>{3684f055-8d45-42d6-ae8b-7f8c895994e0}</Project>
+    <ProjectReference Include="..\BrotliLib\BrotliLib.csproj">
+      <Name>BrotliLib</Name>
+      <Project>{09692edc-dc35-46a9-83c6-746e447f3b86}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
