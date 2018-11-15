@@ -111,6 +111,21 @@ module Mutability =
 
         Assert.Equal(expected, stream.ToString())
 
+    [<Theory>]
+    [<InlineData("", "")>]
+    [<InlineData("0", "")>]
+    [<InlineData("0", "1")>]
+    [<InlineData("11110000", "1010")>]
+    let ``appending stream to another stream in either direction yields correct text representation`` (first: string, second: string) =
+        let firstsecond = BitStream(first)
+        firstsecond.AddAll(BitStream(second))
+
+        let secondfirst = BitStream(second)
+        secondfirst.AddAll(BitStream(first))
+
+        Assert.Equal(first + second, firstsecond.ToString())
+        Assert.Equal(second + first, secondfirst.ToString())
+
 
 module Cloning =
     [<Theory>]

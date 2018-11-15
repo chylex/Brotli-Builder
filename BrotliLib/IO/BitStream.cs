@@ -115,6 +115,16 @@ namespace BrotliLib.IO{
 
             ++Length;
         }
+        
+        /// <summary>
+        /// Appends all bits from the provided <paramref name="stream"/> to the end of this stream.
+        /// </summary>
+        /// <param name="stream">Input stream.</param>
+        public void AddAll(BitStream stream){
+            foreach(bool bit in stream){
+                Add(bit);
+            }
+        }
 
         #endregion
 
