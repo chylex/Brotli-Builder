@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="IO\TestBitStream.fs" />
     <Compile Include="IO\TestBitReader.fs" />
+    <Compile Include="IO\TestBitWriter.fs" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

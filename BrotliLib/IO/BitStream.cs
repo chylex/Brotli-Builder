@@ -126,6 +126,13 @@ namespace BrotliLib.IO{
             }
         }
 
+        /// <summary>
+        /// Returns a <see cref="BitWriter"/> instance that appends to the end of the stream.
+        /// </summary>
+        public BitWriter GetWriter(){
+            return new BitWriter(this);
+        }
+
         #endregion
 
         #region Enumeration
