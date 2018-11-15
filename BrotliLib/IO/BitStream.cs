@@ -139,6 +139,13 @@ namespace BrotliLib.IO{
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+        /// <summary>
+        /// Returns a <see cref="BitReader"/> instance that traverses the stream.
+        /// </summary>
+        public BitReader GetReader(){
+            return new BitReader(this);
+        }
+
         #endregion
 
         #region Conversion

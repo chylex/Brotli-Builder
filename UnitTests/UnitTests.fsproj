@@ -57,6 +57,7 @@
   <Import Project="..\packages\xunit.core.2.4.1\build\xunit.core.targets" Condition="Exists('..\packages\xunit.core.2.4.1\build\xunit.core.targets')" />
   <ItemGroup>
     <Compile Include="IO\TestBitStream.fs" />
+    <Compile Include="IO\TestBitReader.fs" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
