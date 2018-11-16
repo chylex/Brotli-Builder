@@ -4,11 +4,51 @@ using System.Drawing;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using BrotliBuilder.Blocks;
 using BrotliBuilder.Utils;
 using BrotliLib.Brotli;
 
 namespace BrotliBuilder{
     partial class FormMain : Form{
+        private class BuildingBlockContext : IBuildingBlockContext{
+            public event EventHandler<EventArgs> Notified;
+
+            private readonly FormMain owner;
+            private readonly Panel container;
+            private readonly IBuildingBlockContext parent;
+            private readonly int depth;
+
+            public BuildingBlockContext(FormMain owner, Panel container, IBuildingBlockContext parent = null, int depth = 0){
+                this.owner = owner;
+                this.container = container;
+                this.parent = parent;
+                this.depth = depth;
+            }
+
+            public void SetChildBlock(Func<IBuildingBlockContext, UserControl> blockFactory){
+                int childDepth = depth + 1;
+                var controls = container.Controls;
+                
+                while(childDepth < controls.Count){
+                    controls.RemoveAt(childDepth);
+                }
+
+                if (blockFactory != null){
+                    controls.Add(blockFactory(new BuildingBlockContext(owner, container, this, childDepth)));
+                }
+            }
+
+            public void NotifyParent(EventArgs args){
+                Notified?.Invoke(container.Controls[depth], args);
+
+                if (parent == null){
+                    owner.RegenerateBrotliStream();
+                }
+                else{
+                    parent.NotifyParent(args);
+                }
+            }
+        }
 
         // Instance
 
