@@ -10,6 +10,15 @@ namespace BrotliLib.Brotli.Components{
     /// https://tools.ietf.org/html/rfc7932#section-9.3
     /// </summary>
     public abstract class MetaBlock{
+        internal class Context{
+            public MetaBlock MetaBlock { get; }
+            public BrotliGlobalState State { get; }
+
+            public Context(MetaBlock metaBlock, BrotliGlobalState state){
+                this.MetaBlock = metaBlock;
+                this.State = state;
+            }
+        }
 
         // Data
 
@@ -21,8 +30,8 @@ namespace BrotliLib.Brotli.Components{
             this.DataLength = dataLength;
         }
 
-        internal abstract void SerializeContents(BitWriter writer);
-        internal abstract void DeserializeContents(BitReader reader);
+        internal abstract void SerializeContents(BitWriter writer, BrotliGlobalState state);
+        internal abstract void DeserializeContents(BitReader reader, BrotliGlobalState state);
 
         // Types
 
@@ -33,8 +42,8 @@ namespace BrotliLib.Brotli.Components{
         public class LastEmpty : MetaBlock{
             public LastEmpty() : base(true, DataLength.Empty){}
 
-            internal override void SerializeContents(BitWriter writer){}
-            internal override void DeserializeContents(BitReader reader){}
+            internal override void SerializeContents(BitWriter writer, BrotliGlobalState state){}
+            internal override void DeserializeContents(BitReader reader, BrotliGlobalState state){}
         }
         
         /// <inheritdoc />
@@ -46,8 +55,8 @@ namespace BrotliLib.Brotli.Components{
 
             public PaddedEmpty() : base(false, DataLength.Empty){}
 
-            internal override void SerializeContents(BitWriter writer) => PaddedEmptyMetaBlockContents.Serializer.ToBits(writer, Contents, this);
-            internal override void DeserializeContents(BitReader reader) => Contents = PaddedEmptyMetaBlockContents.Serializer.FromBits(reader, this);
+            internal override void SerializeContents(BitWriter writer, BrotliGlobalState state) => PaddedEmptyMetaBlockContents.Serializer.ToBits(writer, Contents, new Context(this, state));
+            internal override void DeserializeContents(BitReader reader, BrotliGlobalState state) => Contents = PaddedEmptyMetaBlockContents.Serializer.FromBits(reader, new Context(this, state));
         }
         
         /// <inheritdoc />
@@ -57,10 +66,14 @@ namespace BrotliLib.Brotli.Components{
         public class Uncompressed : MetaBlock{
             public UncompressedMetaBlockContents Contents { get; set; }
 
-            public Uncompressed(DataLength dataLength) : base(false, dataLength){}
+            internal Uncompressed(DataLength dataLength) : base(false, dataLength){}
 
-            internal override void SerializeContents(BitWriter writer) => UncompressedMetaBlockContents.Serializer.ToBits(writer, Contents, this);
-            internal override void DeserializeContents(BitReader reader) => Contents = UncompressedMetaBlockContents.Serializer.FromBits(reader, this);
+            public Uncompressed(byte[] data) : base(false, new DataLength(data.Length)){
+                this.Contents = new UncompressedMetaBlockContents(data);
+            }
+
+            internal override void SerializeContents(BitWriter writer, BrotliGlobalState state) => UncompressedMetaBlockContents.Serializer.ToBits(writer, Contents, new Context(this, state));
+            internal override void DeserializeContents(BitReader reader, BrotliGlobalState state) => Contents = UncompressedMetaBlockContents.Serializer.FromBits(reader, new Context(this, state));
         }
         
         /// <inheritdoc />
@@ -72,8 +85,8 @@ namespace BrotliLib.Brotli.Components{
 
             public Compressed(bool isLast, DataLength dataLength) : base(isLast, dataLength){}
 
-            internal override void SerializeContents(BitWriter writer) => CompressedMetaBlockContents.Serializer.ToBits(writer, Contents, this);
-            internal override void DeserializeContents(BitReader reader) => Contents = CompressedMetaBlockContents.Serializer.FromBits(reader, this);
+            internal override void SerializeContents(BitWriter writer, BrotliGlobalState state) => CompressedMetaBlockContents.Serializer.ToBits(writer, Contents, new Context(this, state));
+            internal override void DeserializeContents(BitReader reader, BrotliGlobalState state) => Contents = CompressedMetaBlockContents.Serializer.FromBits(reader, new Context(this, state));
         }
 
         // Serialization
@@ -134,13 +147,13 @@ namespace BrotliLib.Brotli.Components{
         public static readonly IBitSerializer<MetaBlock, BrotliGlobalState> Serializer = new BitSerializer<MetaBlock, BrotliGlobalState>(
             fromBits: (reader, context) => {
                 MetaBlock mb = MetaBlockBaseSerializer.FromBits(reader, context);
-                mb.DeserializeContents(reader);
+                mb.DeserializeContents(reader, context);
                 return mb;
             },
 
             toBits: (writer, obj, context) => {
                 MetaBlockBaseSerializer.ToBits(writer, obj, context);
-                obj.SerializeContents(writer);
+                obj.SerializeContents(writer, context);
             }
         );
     }

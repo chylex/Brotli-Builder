@@ -5,7 +5,7 @@ namespace BrotliLib.Brotli.Components.Contents{
 
         // Serialization
 
-        public static readonly IBitSerializer<UncompressedMetaBlockContents, MetaBlock> Serializer = new BitSerializer<UncompressedMetaBlockContents, MetaBlock>(
+        internal static readonly IBitSerializer<UncompressedMetaBlockContents, MetaBlock.Context> Serializer = new BitSerializer<UncompressedMetaBlockContents, MetaBlock.Context>(
             fromBits: (reader, context) => {
                 // TODO
                 return new UncompressedMetaBlockContents();
