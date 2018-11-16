@@ -1,0 +1,126 @@
+﻿using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
+using BrotliBuilder.Utils;
+using BrotliLib.Brotli;
+
+namespace BrotliBuilder{
+    partial class FormMain : Form{
+
+        // Instance
+
+        private BrotliFileStructure brotliFile = BrotliFileStructure.NewEmpty();
+        private string lastFileName = "compressed";
+
+        private readonly AsyncWorker<string> workerStream;
+        private readonly AsyncWorker<string> workerOutput;
+
+        public FormMain(){
+            InitializeComponent();
+
+            textBoxBitStream.SetPlainTextMode();
+            textBoxDecompressedOutput.SetPlainTextMode();
+
+            workerStream = new AsyncWorker<string>("GenBits");
+            workerOutput = new AsyncWorker<string>("GenOutput");
+
+            SetupWorker(
+                workerStream,
+                textBoxBitStream,
+                statusBarPanelTimeBits,
+                ms => "Generated bit stream in " + ms + " ms.",
+                () => "Error generating bit stream."
+            );
+
+            SetupWorker(
+                workerOutput,
+                textBoxDecompressedOutput,
+                statusBarPanelTimeOutput,
+                ms => "Generated output in " + ms + " ms.",
+                () => "Error generating output."
+            );
+
+            OnNewBrotliFile();
+        }
+
+        private void OnNewBrotliFile(){
+            flowPanelBlocks.Controls.Clear();
+            RegenerateBrotliStream();
+        }
+
+        // Output generation
+
+        private void SetupWorker(AsyncWorker<string> worker, RichTextBox tb, StatusBarPanel status, Func<long, string> funcStatusTextSuccess, Func<string> funcStatusTextFailure){
+            worker.WorkFinished += (sender, args) => {
+                tb.ForeColor = SystemColors.WindowText;
+                tb.Text = args.Result;
+                status.Text = funcStatusTextSuccess(args.Stopwatch.ElapsedMilliseconds);
+            };
+
+            worker.WorkCrashed += (sender, args) => {
+                tb.ForeColor = Color.Red;
+                tb.Text = Regex.Replace(args.Exception.ToString(), " in (.*):", " : ");
+                status.Text = funcStatusTextFailure();
+            };
+        }
+
+        private void timerRegenerationDelay_Tick(object sender, EventArgs e){
+            timerRegenerationDelay.Stop();
+
+            statusBarPanelTimeBits.Text = "Generating...";
+            statusBarPanelTimeOutput.Text = "Generating...";
+
+            workerStream.Start(() => brotliFile.Serialize().ToString());
+            workerOutput.Start(() => brotliFile.GetDecompressionState().OutputAsUTF8);
+        }
+
+        private void RegenerateBrotliStream(){
+            timerRegenerationDelay.Stop();
+            timerRegenerationDelay.Start();
+        }
+
+        // Menu events
+
+        private void menuItemOpen_Click(object sender, EventArgs e){
+            using(OpenFileDialog dialog = new OpenFileDialog{
+                Title = "Open Compressed File",
+                Filter = "Brotli (*.br)|*.br|All Files (*.*)|*.*",
+                FileName = lastFileName,
+                DefaultExt = "br"
+            }){
+                if (dialog.ShowDialog() == DialogResult.OK){
+                    lastFileName = dialog.FileName;
+
+                    try{
+                        brotliFile = BrotliFileStructure.FromBytes(File.ReadAllBytes(lastFileName));
+                        OnNewBrotliFile();
+                    }catch(Exception ex){
+                        Debug.WriteLine(ex.ToString());
+                        MessageBox.Show(ex.Message, "File Open Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void menuItemSave_Click(object sender, EventArgs e){
+            using(SaveFileDialog dialog = new SaveFileDialog{
+                Title = "Save Compressed File",
+                Filter = "Brotli (*.br)|*.br|All Files (*.*)|*.*",
+                FileName = lastFileName,
+                DefaultExt = "br"
+            }){
+                if (dialog.ShowDialog() == DialogResult.OK){
+                    lastFileName = dialog.FileName;
+                    File.WriteAllBytes(lastFileName, brotliFile.Serialize().ToByteArray());
+                }
+            }
+        }
+
+        private void menuItemExit_Click(object sender, EventArgs e){
+            Close();
+        }
+    }
+}
