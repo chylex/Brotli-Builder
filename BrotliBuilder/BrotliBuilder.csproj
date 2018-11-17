@@ -45,6 +45,12 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Blocks\Structure\BuildUncompressedMetaBlock.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Blocks\Structure\BuildUncompressedMetaBlock.Designer.cs">
+      <DependentUpon>BuildUncompressedMetaBlock.cs</DependentUpon>
+    </Compile>
     <Compile Include="Blocks\Structure\BuildWindowSize.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -97,6 +103,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Blocks\BuildFileStructure.resx">
       <DependentUpon>BuildFileStructure.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Blocks\Structure\BuildUncompressedMetaBlock.resx">
+      <DependentUpon>BuildUncompressedMetaBlock.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Blocks\Structure\BuildWindowSize.resx">
       <DependentUpon>BuildWindowSize.cs</DependentUpon>

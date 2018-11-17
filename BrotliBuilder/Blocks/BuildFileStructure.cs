@@ -4,6 +4,8 @@ using System.Windows.Forms;
 using BrotliBuilder.Blocks.Structure;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
+using BrotliLib.Brotli.Components.Contents;
+using BrotliLib.Brotli.Components.Header;
 
 namespace BrotliBuilder.Blocks{
     partial class BuildFileStructure : UserControl{
@@ -93,7 +95,7 @@ namespace BrotliBuilder.Blocks{
         }
 
         private void buttonAddMetaBlockUncompressed_Click(object sender, EventArgs e){
-            // TODO
+            AddMetaBlock(new MetaBlock.Uncompressed(new byte[0]));
         }
 
         private void buttonAddMetaBlockEmpty_Click(object sender, EventArgs e){
@@ -158,6 +160,9 @@ namespace BrotliBuilder.Blocks{
                 switch(Value){
                     // TODO
 
+                    case MetaBlock.Uncompressed u:
+                        return ctx => new BuildUncompressedMetaBlock(ctx, u.Contents);
+
                     default:
                         return null;
                 }
@@ -165,6 +170,14 @@ namespace BrotliBuilder.Blocks{
 
             public void HandleNotification(EventArgs args){
                 switch(args){
+                    case BuildUncompressedMetaBlock.UncompressedBytesNotifyArgs ubna:
+                        if (Value is MetaBlock.Uncompressed u){
+                            u.Contents = new UncompressedMetaBlockContents(ubna.Bytes);
+                            u.DataLength = new DataLength(ubna.Bytes.Length);
+                        }
+
+                        break;
+
                     // TODO
                 }
             }
