@@ -206,6 +206,7 @@
             this.Name = "FormMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Brotli Builder";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMain_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeBits)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding2)).EndInit();

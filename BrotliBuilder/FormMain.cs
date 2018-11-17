@@ -54,6 +54,7 @@ namespace BrotliBuilder{
 
         private BrotliFileStructure brotliFile = BrotliFileStructure.NewEmpty();
         private string lastFileName = "compressed";
+        private bool isDirty = false;
 
         private readonly AsyncWorker<string> workerStream;
         private readonly AsyncWorker<string> workerOutput;
@@ -89,7 +90,9 @@ namespace BrotliBuilder{
         private void OnNewBrotliFile(){
             flowPanelBlocks.Controls.Clear();
             flowPanelBlocks.Controls.Add(new BuildFileStructure(new BuildingBlockContext(this, flowPanelBlocks), brotliFile));
+
             RegenerateBrotliStream();
+            isDirty = false;
         }
 
         // Output generation
@@ -119,8 +122,28 @@ namespace BrotliBuilder{
         }
 
         private void RegenerateBrotliStream(){
+            isDirty = true;
             timerRegenerationDelay.Stop();
             timerRegenerationDelay.Start();
+        }
+
+        // Form events
+
+        private void FormMain_FormClosing(object sender, FormClosingEventArgs e){
+            if (isDirty){
+                DialogResult result = MessageBox.Show("Would you like to save changes before exiting?", "Unsaved Changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+                if (result == DialogResult.Cancel){
+                    e.Cancel = true;
+                }
+                else if (result == DialogResult.Yes){
+                    menuItemSave_Click(null, EventArgs.Empty); // sets isDirty to false on success
+
+                    if (isDirty){
+                        e.Cancel = true;
+                    }
+                }
+            }
         }
 
         // Menu events
@@ -129,7 +152,7 @@ namespace BrotliBuilder{
             using(OpenFileDialog dialog = new OpenFileDialog{
                 Title = "Open Compressed File",
                 Filter = "Brotli (*.br)|*.br|All Files (*.*)|*.*",
-                FileName = lastFileName,
+                FileName = Path.GetFileName(lastFileName),
                 DefaultExt = "br"
             }){
                 if (dialog.ShowDialog() == DialogResult.OK){
@@ -150,12 +173,14 @@ namespace BrotliBuilder{
             using(SaveFileDialog dialog = new SaveFileDialog{
                 Title = "Save Compressed File",
                 Filter = "Brotli (*.br)|*.br|All Files (*.*)|*.*",
-                FileName = lastFileName,
+                FileName = Path.GetFileName(lastFileName),
                 DefaultExt = "br"
             }){
                 if (dialog.ShowDialog() == DialogResult.OK){
                     lastFileName = dialog.FileName;
+
                     File.WriteAllBytes(lastFileName, brotliFile.Serialize().ToByteArray());
+                    isDirty = false;
                 }
             }
         }
