@@ -7,6 +7,8 @@ using System.Windows.Forms;
 using BrotliBuilder.Blocks;
 using BrotliBuilder.Utils;
 using BrotliLib.Brotli;
+using BrotliLib.Brotli.Components;
+using BrotliLib.Brotli.Encode;
 
 namespace BrotliBuilder{
     partial class FormMain : Form{
@@ -201,6 +203,40 @@ namespace BrotliBuilder{
 
         private void menuItemExit_Click(object sender, EventArgs e){
             Close();
+        }
+
+        private void OpenFileWithEncoder(WindowSize windowSize, IBrotliEncoder encoder){
+            if (PromptUnsavedChanges("Would you like to save changes before opening a new file?")){
+                return;
+            }
+
+            using(OpenFileDialog dialog = new OpenFileDialog{
+                Title = "Open File to Encode",
+                Filter = "All Files (*.*)|*.*",
+                FileName = Path.GetFileName(lastFileName)
+            }){
+                if (dialog.ShowDialog() == DialogResult.OK){
+                    lastFileName = dialog.FileName;
+
+                    byte[] bytes;
+
+                    try{
+                        bytes = File.ReadAllBytes(lastFileName);
+                    }catch(Exception ex){
+                        Debug.WriteLine(ex.ToString());
+                        MessageBox.Show(ex.Message, "File Open Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    
+                    try{
+                        brotliFile = BrotliFileStructure.FromEncoder(windowSize, encoder, bytes);
+                        OnNewBrotliFile();
+                    }catch(Exception ex){
+                        Debug.WriteLine(ex.ToString());
+                        MessageBox.Show(ex.Message, "File Encode Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
         }
     }
 }

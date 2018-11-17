@@ -29,6 +29,8 @@
             this.menuItemOpen = new System.Windows.Forms.MenuItem();
             this.menuItemSave = new System.Windows.Forms.MenuItem();
             this.menuItemExit = new System.Windows.Forms.MenuItem();
+            this.menuItemTools = new System.Windows.Forms.MenuItem();
+            this.menuItemEncodeFile = new System.Windows.Forms.MenuItem();
             this.flowPanelBlocks = new System.Windows.Forms.FlowLayoutPanel();
             this.textBoxBitStream = new System.Windows.Forms.RichTextBox();
             this.labelBitStream = new System.Windows.Forms.Label();
@@ -49,7 +51,8 @@
             // mainMenu
             // 
             this.mainMenu.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItemFile});
+            this.menuItemFile,
+            this.menuItemTools});
             // 
             // menuItemFile
             // 
@@ -58,7 +61,6 @@
             this.menuItemOpen,
             this.menuItemSave,
             this.menuItemExit});
-            this.menuItemFile.Shortcut = System.Windows.Forms.Shortcut.CtrlF;
             this.menuItemFile.Text = "&File";
             // 
             // menuItemOpen
@@ -80,6 +82,18 @@
             this.menuItemExit.Index = 2;
             this.menuItemExit.Text = "Exit";
             this.menuItemExit.Click += new System.EventHandler(this.menuItemExit_Click);
+            // 
+            // menuItemTools
+            // 
+            this.menuItemTools.Index = 1;
+            this.menuItemTools.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuItemEncodeFile});
+            this.menuItemTools.Text = "&Tools";
+            // 
+            // menuItemEncodeFile
+            // 
+            this.menuItemEncodeFile.Index = 0;
+            this.menuItemEncodeFile.Text = "&Encode File...";
             // 
             // flowPanelBlocks
             // 
@@ -234,5 +248,7 @@
         private System.Windows.Forms.StatusBarPanel statusBarPanelPadding1;
         private System.Windows.Forms.StatusBarPanel statusBarPanelPadding2;
         private System.Windows.Forms.Timer timerRegenerationDelay;
+        private System.Windows.Forms.MenuItem menuItemTools;
+        private System.Windows.Forms.MenuItem menuItemEncodeFile;
     }
 }
