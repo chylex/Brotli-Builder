@@ -87,12 +87,35 @@ namespace BrotliBuilder{
             OnNewBrotliFile();
         }
 
+        // File state handling
+
         private void OnNewBrotliFile(){
             flowPanelBlocks.Controls.Clear();
             flowPanelBlocks.Controls.Add(new BuildFileStructure(new BuildingBlockContext(this, flowPanelBlocks), brotliFile));
 
             RegenerateBrotliStream();
             isDirty = false;
+        }
+
+        private bool PromptUnsavedChanges(string message){
+            if (!isDirty){
+                return false;
+            }
+
+            DialogResult result = MessageBox.Show(message, "Unsaved Changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+            if (result == DialogResult.Cancel){
+                return true;
+            }
+            else if (result == DialogResult.Yes){
+                menuItemSave_Click(null, EventArgs.Empty); // sets isDirty to false on success
+
+                if (isDirty){
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         // Output generation
@@ -130,25 +153,16 @@ namespace BrotliBuilder{
         // Form events
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e){
-            if (isDirty){
-                DialogResult result = MessageBox.Show("Would you like to save changes before exiting?", "Unsaved Changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
-
-                if (result == DialogResult.Cancel){
-                    e.Cancel = true;
-                }
-                else if (result == DialogResult.Yes){
-                    menuItemSave_Click(null, EventArgs.Empty); // sets isDirty to false on success
-
-                    if (isDirty){
-                        e.Cancel = true;
-                    }
-                }
-            }
+            e.Cancel = PromptUnsavedChanges("Would you like to save changes before exiting?");
         }
 
         // Menu events
 
         private void menuItemOpen_Click(object sender, EventArgs e){
+            if (PromptUnsavedChanges("Would you like to save changes before opening a new file?")){
+                return;
+            }
+
             using(OpenFileDialog dialog = new OpenFileDialog{
                 Title = "Open Compressed File",
                 Filter = "Brotli (*.br)|*.br|All Files (*.*)|*.*",
