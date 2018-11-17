@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using BrotliLib.Brotli.Components;
+using BrotliLib.Brotli.Encode;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli{
@@ -19,6 +20,18 @@ namespace BrotliLib.Brotli{
 
         public static BrotliFileStructure FromBytes(byte[] bytes){
             return Serializer.FromBits(new BitStream(bytes).GetReader(), new BrotliGlobalState());
+        }
+
+        public static BrotliFileStructure FromEncoder(WindowSize windowSize, IBrotliEncoder encoder, byte[] bytes){
+            BrotliFileStructure bfs = new BrotliFileStructure{
+                WindowSize = windowSize
+            };
+
+            foreach(MetaBlock metaBlock in encoder.GenerateMetaBlocks(bytes)){
+                bfs.MetaBlocks.Add(metaBlock);
+            }
+
+            return bfs;
         }
 
         // Data
