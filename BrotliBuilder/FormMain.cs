@@ -88,6 +88,7 @@ namespace BrotliBuilder{
 
         private void OnNewBrotliFile(){
             flowPanelBlocks.Controls.Clear();
+            flowPanelBlocks.Controls.Add(new BuildFileStructure(new BuildingBlockContext(this, flowPanelBlocks), brotliFile));
             RegenerateBrotliStream();
         }
 
