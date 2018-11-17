@@ -8,18 +8,22 @@ namespace BrotliLib.IO{
     public class BitStream : IEnumerable<bool>{
         private const char False = '0';
         private const char True = '1';
+        
+        private const int CombinationBits = 8;
+        private const int CombinationMask = (1 << CombinationBits) - 1;
+        private static readonly string[] Combinations = Enumerable.Range(0, 1 << CombinationBits).Select(i => string.Join("", Convert.ToString(i, 2).PadLeft(CombinationBits, '0').Reverse())).ToArray();
 
         private const int ByteSize = 8;
         internal const int BytesPerEntry = sizeof(ulong);
         internal const int BitEntrySize = ByteSize * BytesPerEntry;
+        private const int BitEntryMask = BitEntrySize - 1;
 
         // Instance
 
         public int Length { get; private set; }
         
-        private readonly LinkedList<ulong> bitCollection = new LinkedList<ulong>();
-        private LinkedListNode<ulong> lastNode;
-        private int lastNodeIndex;
+        private readonly List<ulong> entryCollection = new List<ulong>(128);
+        private int LastEntryIndex => entryCollection.Count - 1;
         
         #region Construction
 
@@ -27,8 +31,7 @@ namespace BrotliLib.IO{
         /// Initializes an empty <see cref="BitStream"/>.
         /// </summary>
         public BitStream(){
-            this.lastNode = this.bitCollection.AddLast(0L);
-            this.lastNodeIndex = 0;
+            this.entryCollection.Add(0UL);
         }
 
         /// <summary>
@@ -57,11 +60,10 @@ namespace BrotliLib.IO{
                 int offset = index % BytesPerEntry;
 
                 if (offset == 0 && index > 0){
-                    this.lastNode = this.bitCollection.AddLast(0L);
-                    this.lastNodeIndex += BitEntrySize;
+                    this.entryCollection.Add(0UL);
                 }
                 
-                this.lastNode.Value |= (ulong)value << (ByteSize * offset);
+                this.entryCollection[LastEntryIndex] |= (ulong)value << (ByteSize * offset);
                 ++index;
             }
 
@@ -73,12 +75,7 @@ namespace BrotliLib.IO{
         /// </summary>
         /// <param name="source">Source stream.</param>
         private BitStream(BitStream source){
-            foreach(ulong bitEntry in source.bitCollection){
-                this.bitCollection.AddLast(bitEntry);
-            }
-
-            this.lastNode = this.bitCollection.Last;
-            this.lastNodeIndex = source.lastNodeIndex;
+            this.entryCollection.AddRange(source.entryCollection);
             this.Length = source.Length;
         }
 
@@ -98,19 +95,18 @@ namespace BrotliLib.IO{
         /// </summary>
         /// <param name="bit">Input bit.</param>
         public void Add(bool bit){
-            int offset = Length - lastNodeIndex;
+            int offset = Length & BitEntryMask;
 
-            if (offset >= BitEntrySize){
-                lastNode = bitCollection.AddLast(0L);
-                lastNodeIndex += BitEntrySize;
+            if (offset == BitEntryMask){
+                entryCollection.Add(0UL);
                 offset -= BitEntrySize;
             }
             
             if (bit){
-                lastNode.Value |= 1UL << offset;
+                entryCollection[LastEntryIndex] |= 1UL << offset;
             }
             else{
-                lastNode.Value &= lastNode.Value & ~(1UL << offset);
+                entryCollection[LastEntryIndex] &= entryCollection[LastEntryIndex] & ~(1UL << offset);
             }
 
             ++Length;
@@ -131,14 +127,13 @@ namespace BrotliLib.IO{
         /// </summary>
         /// <param name="value">Input byte.</param>
         internal void AddByte(byte value){
-            int offset = Length - lastNodeIndex;
+            int offset = Length & BitEntryMask;
 
-            lastNode.Value |= (ulong)value << offset;
+            entryCollection[LastEntryIndex] |= (ulong)value << offset;
             Length += ByteSize;
 
             if (offset + ByteSize >= BitEntrySize){
-                lastNode = bitCollection.AddLast(0L);
-                lastNodeIndex += BitEntrySize;
+                entryCollection.Add(0UL);
             }
         }
         
@@ -147,10 +142,8 @@ namespace BrotliLib.IO{
         /// </summary>
         /// <param name="value">Input bytes combined into an <see cref="ulong"/>.</param>
         internal void AddLong(ulong value){
-            lastNode.Value = value;
-            lastNode = bitCollection.AddLast(0L);
-
-            lastNodeIndex += BitEntrySize;
+            entryCollection[LastEntryIndex] = value;
+            entryCollection.Add(0UL);
             Length += BitEntrySize;
         }
 
@@ -171,7 +164,7 @@ namespace BrotliLib.IO{
         public IEnumerator<bool> GetEnumerator(){
             int bitsLeft = Length;
 
-            foreach(ulong bitEntry in bitCollection){
+            foreach(ulong bitEntry in entryCollection){
                 for(int bitIndex = 0; bitIndex < BitEntrySize; bitIndex++){
                     if (--bitsLeft < 0){
                         yield break;
@@ -204,7 +197,7 @@ namespace BrotliLib.IO{
             byte[] bytes = new byte[(Length + ByteSize - 1) / ByteSize];
             int index = -1;
 
-            foreach(ulong bitEntry in bitCollection){
+            foreach(ulong bitEntry in entryCollection){
                 if (++index >= bytes.Length){
                     break;
                 }
@@ -228,9 +221,26 @@ namespace BrotliLib.IO{
         /// </summary>
         public override string ToString(){
             StringBuilder build = new StringBuilder(Length);
+            int bitsLeft = Length;
 
-            foreach(bool bit in this){
-                build.Append(bit ? True : False);
+            foreach(ulong bitEntry in entryCollection){
+                if (bitsLeft < BitEntrySize){
+                    break;
+                }
+
+                bitsLeft -= BitEntrySize;
+
+                for(int index = 0; index < BitEntrySize; index += CombinationBits){
+                    build.Append(Combinations[(bitEntry >> index) & CombinationMask]);
+                }
+            }
+
+            ulong lastValue = entryCollection[LastEntryIndex];
+
+            while(bitsLeft > 0){
+                build.Append((lastValue & 1) == 1 ? True : False);
+                lastValue = lastValue >> 1;
+                --bitsLeft;
             }
 
             return build.ToString();
@@ -246,7 +256,7 @@ namespace BrotliLib.IO{
         public override int GetHashCode(){
             int hash = Length * 17;
 
-            foreach(ulong bitEntry in bitCollection){
+            foreach(ulong bitEntry in entryCollection){
                 hash = unchecked((hash * 31) + (bitEntry.GetHashCode()));
             }
 
@@ -258,7 +268,7 @@ namespace BrotliLib.IO{
         /// </summary>
         /// <param name="obj"></param>
         public override bool Equals(object obj){
-            return obj is BitStream other && Length == other.Length && bitCollection.SequenceEqual(other.bitCollection);
+            return obj is BitStream other && Length == other.Length && entryCollection.SequenceEqual(other.entryCollection);
         }
 
         #endregion
