@@ -53,7 +53,11 @@ namespace BrotliLib.Brotli.Components{
         public class PaddedEmpty : MetaBlock{
             public PaddedEmptyMetaBlockContents Contents { get; set; }
 
-            public PaddedEmpty() : base(false, DataLength.Empty){}
+            internal PaddedEmpty() : base(false, DataLength.Empty){}
+
+            public PaddedEmpty(byte[] data) : this(){
+                this.Contents = new PaddedEmptyMetaBlockContents(data);
+            }
 
             internal override void SerializeContents(BitWriter writer, BrotliGlobalState state) => PaddedEmptyMetaBlockContents.Serializer.ToBits(writer, Contents, new Context(this, state));
             internal override void DeserializeContents(BitReader reader, BrotliGlobalState state) => Contents = PaddedEmptyMetaBlockContents.Serializer.FromBits(reader, new Context(this, state));
