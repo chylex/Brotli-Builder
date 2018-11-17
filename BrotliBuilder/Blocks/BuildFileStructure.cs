@@ -129,7 +129,9 @@ namespace BrotliBuilder.Blocks{
         }
 
         private void buttonDeleteMetaBlock_Click(object sender, EventArgs e){
-            if (listElements.SelectedItem is StructureMetaBlockItem item){
+            if (listElements.SelectedItem is StructureMetaBlockItem item &&
+                MessageBox.Show($"Are you sure you want to permanently delete this meta-block?{Environment.NewLine}{item}", "Delete Meta-Block", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes
+            ){
                 brotliFile.MetaBlocks.Remove(item.Value);
                 RegenerateElementList(selectIndex: Math.Min(listElements.SelectedIndex, listElements.Items.Count - 2), notifyParent: true);
             }
