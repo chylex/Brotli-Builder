@@ -103,7 +103,7 @@ namespace BrotliBuilder.Blocks{
                 AddMetaBlock(new MetaBlock.LastEmpty());
             }
             else{
-                // TODO
+                AddMetaBlock(new MetaBlock.PaddedEmpty(new byte[0]));
             }
         }
 
@@ -159,6 +159,8 @@ namespace BrotliBuilder.Blocks{
             public Func<IBuildingBlockContext, UserControl> CreateStructureBlock(){
                 switch(Value){
                     // TODO
+                    case MetaBlock.PaddedEmpty pe:
+                        return ctx => new BuildEmptyMetaBlock(ctx, pe.Contents);
 
                     case MetaBlock.Uncompressed u:
                         return ctx => new BuildUncompressedMetaBlock(ctx, u.Contents);
@@ -170,6 +172,13 @@ namespace BrotliBuilder.Blocks{
 
             public void HandleNotification(EventArgs args){
                 switch(args){
+                    case BuildEmptyMetaBlock.HiddenBytesNotifyArgs hbna:
+                        if (Value is MetaBlock.PaddedEmpty pe){
+                            pe.Contents = new PaddedEmptyMetaBlockContents(hbna.Bytes);
+                        }
+
+                        break;
+
                     case BuildUncompressedMetaBlock.UncompressedBytesNotifyArgs ubna:
                         if (Value is MetaBlock.Uncompressed u){
                             u.Contents = new UncompressedMetaBlockContents(ubna.Bytes);
