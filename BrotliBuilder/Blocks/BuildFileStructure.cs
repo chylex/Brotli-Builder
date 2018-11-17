@@ -36,9 +36,11 @@ namespace BrotliBuilder.Blocks{
         }
 
         private void context_Notified(object sender, EventArgs e){
-            // TODO
             if (e is BuildWindowSize.WindowSizeNotifyArgs wsna){
                 brotliFile.WindowSize = wsna.NewWindowSize;
+            }
+            else if (listElements.SelectedItem is StructureMetaBlockItem smbi){
+                smbi.HandleNotification(e);
             }
             
             listElements.SelectedValueChanged -= listElements_SelectedValueChanged;
