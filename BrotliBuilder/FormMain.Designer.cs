@@ -31,6 +31,7 @@
             this.menuItemExit = new System.Windows.Forms.MenuItem();
             this.menuItemTools = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeFile = new System.Windows.Forms.MenuItem();
+            this.menuItemEncodeUncompressedMBs = new System.Windows.Forms.MenuItem();
             this.flowPanelBlocks = new System.Windows.Forms.FlowLayoutPanel();
             this.textBoxBitStream = new System.Windows.Forms.RichTextBox();
             this.labelBitStream = new System.Windows.Forms.Label();
@@ -93,7 +94,16 @@
             // menuItemEncodeFile
             // 
             this.menuItemEncodeFile.Index = 0;
+            this.menuItemEncodeFile.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuItemEncodeUncompressedMBs});
             this.menuItemEncodeFile.Text = "&Encode File...";
+            // 
+            // menuItemEncodeUncompressedMBs
+            // 
+            this.menuItemEncodeUncompressedMBs.Index = 0;
+            this.menuItemEncodeUncompressedMBs.Shortcut = System.Windows.Forms.Shortcut.Ctrl0;
+            this.menuItemEncodeUncompressedMBs.Text = "Into Uncompressed Meta-Blocks";
+            this.menuItemEncodeUncompressedMBs.Click += new System.EventHandler(this.menuItemEncodeUncompressedMBs_Click);
             // 
             // flowPanelBlocks
             // 
@@ -250,5 +260,6 @@
         private System.Windows.Forms.Timer timerRegenerationDelay;
         private System.Windows.Forms.MenuItem menuItemTools;
         private System.Windows.Forms.MenuItem menuItemEncodeFile;
+        private System.Windows.Forms.MenuItem menuItemEncodeUncompressedMBs;
     }
 }
