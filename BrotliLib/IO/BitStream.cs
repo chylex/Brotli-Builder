@@ -10,8 +10,8 @@ namespace BrotliLib.IO{
         private const char True = '1';
 
         private const int ByteSize = 8;
-        private const int BytesPerEntry = sizeof(ulong);
-        private const int BitEntrySize = ByteSize * BytesPerEntry;
+        internal const int BytesPerEntry = sizeof(ulong);
+        internal const int BitEntrySize = ByteSize * BytesPerEntry;
 
         // Instance
 
@@ -124,6 +124,34 @@ namespace BrotliLib.IO{
             foreach(bool bit in stream){
                 Add(bit);
             }
+        }
+
+        /// <summary>
+        /// Appends a byte to the end of the stream. Intended to use in <see cref="BitWriter"/> only after the stream is byte-aligned, otherwise the behavior is undefined.
+        /// </summary>
+        /// <param name="value">Input byte.</param>
+        internal void AddByte(byte value){
+            int offset = Length - lastNodeIndex;
+
+            lastNode.Value |= (ulong)value << offset;
+            Length += ByteSize;
+
+            if (offset + ByteSize >= BitEntrySize){
+                lastNode = bitCollection.AddLast(0L);
+                lastNodeIndex += BitEntrySize;
+            }
+        }
+        
+        /// <summary>
+        /// Appends 4 bytes to the end of the stream. Intended to use in <see cref="BitWriter"/> only after the stream is long-aligned, otherwise the behavior is undefined.
+        /// </summary>
+        /// <param name="value">Input bytes combined into an <see cref="ulong"/>.</param>
+        internal void AddLong(ulong value){
+            lastNode.Value = value;
+            lastNode = bitCollection.AddLast(0L);
+
+            lastNodeIndex += BitEntrySize;
+            Length += BitEntrySize;
         }
 
         /// <summary>

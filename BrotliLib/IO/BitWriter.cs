@@ -61,8 +61,30 @@ namespace BrotliLib.IO{
         public void WriteAlignedBytes(byte[] bytes){
             AlignToByteBoundary();
 
-            foreach(byte b in bytes){
-                WriteChunk(ByteSize, b);
+            int index = 0;
+
+            while(index < bytes.Length && stream.Length % BitStream.BitEntrySize != 0){
+                stream.AddByte(bytes[index]);
+                ++index;
+            }
+
+            while(index < bytes.Length - BitStream.BytesPerEntry){
+                ulong value = bytes[index];
+                value |= (ulong)bytes[index + 1] << 8;
+                value |= (ulong)bytes[index + 2] << 16;
+                value |= (ulong)bytes[index + 3] << 24;
+                value |= (ulong)bytes[index + 4] << 32;
+                value |= (ulong)bytes[index + 5] << 40;
+                value |= (ulong)bytes[index + 6] << 48;
+                value |= (ulong)bytes[index + 7] << 56;
+
+                stream.AddLong(value);
+                index += BitStream.BytesPerEntry;
+            }
+
+            while(index < bytes.Length){
+                stream.AddByte(bytes[index]);
+                ++index;
             }
         }
     }
