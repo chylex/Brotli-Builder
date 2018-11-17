@@ -45,11 +45,17 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Blocks\Structure\BuildWindowSize.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Blocks\BuildFileStructure.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Blocks\BuildFileStructure.Designer.cs">
       <DependentUpon>BuildFileStructure.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Blocks\Structure\BuildWindowSize.Designer.cs">
+      <DependentUpon>BuildWindowSize.cs</DependentUpon>
     </Compile>
     <Compile Include="Blocks\IBuildingBlockContext.cs" />
     <Compile Include="FormMain.cs">
@@ -91,6 +97,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Blocks\BuildFileStructure.resx">
       <DependentUpon>BuildFileStructure.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Blocks\Structure\BuildWindowSize.resx">
+      <DependentUpon>BuildWindowSize.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>

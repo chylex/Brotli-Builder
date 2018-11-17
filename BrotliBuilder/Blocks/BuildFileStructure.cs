@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Windows.Forms;
+using BrotliBuilder.Blocks.Structure;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
 
@@ -36,6 +37,9 @@ namespace BrotliBuilder.Blocks{
 
         private void context_Notified(object sender, EventArgs e){
             // TODO
+            if (e is BuildWindowSize.WindowSizeNotifyArgs wsna){
+                brotliFile.WindowSize = wsna.NewWindowSize;
+            }
             
             listElements.SelectedValueChanged -= listElements_SelectedValueChanged;
             listElements.Items[listElements.SelectedIndex] = listElements.SelectedItem; // update item text
@@ -50,7 +54,7 @@ namespace BrotliBuilder.Blocks{
                 context.SetChildBlock(null);
             }
             else if (selected is StructureWindowSizeItem){
-                // TODO
+                context.SetChildBlock(ctx => new BuildWindowSize(ctx, brotliFile.WindowSize));
             }
             else if (selected is StructureMetaBlockItem smbi){
                 context.SetChildBlock(smbi.CreateStructureBlock());
