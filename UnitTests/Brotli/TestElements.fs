@@ -64,3 +64,20 @@ module DataLength =
     [<InlineData(16777217)>]
     let ``constructing data length with invalid amount of bytes throws exception`` (bytes: int) =
         Assert.Throws<ArgumentOutOfRangeException>(fun () -> DataLength(bytes) |> ignore)
+
+
+module VariableLength11Code =
+    let values = seq { 1..256 }
+
+    [<Fact>]
+    let ``converting to and from bits yields same object`` () =
+        for value in values do
+            let code = VariableLength11Code(value)
+            Assert.Equal(code, Helper.convert code null VariableLength11Code.Serializer)
+        
+    [<Theory>]
+    [<InlineData(-1)>]
+    [<InlineData(0)>]
+    [<InlineData(257)>]
+    let ``constructing variable length code with invalid value throws exception`` (value: int) =
+        Assert.Throws<ArgumentOutOfRangeException>(fun () -> VariableLength11Code(value) |> ignore)
