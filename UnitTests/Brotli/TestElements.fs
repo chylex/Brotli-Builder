@@ -81,3 +81,23 @@ module VariableLength11Code =
     [<InlineData(257)>]
     let ``constructing variable length code with invalid value throws exception`` (value: int) =
         Assert.Throws<ArgumentOutOfRangeException>(fun () -> VariableLength11Code(value) |> ignore)
+
+
+module DistanceParameters =
+    let cartesian a b = [for va in a do for vb in b -> (va, vb)]
+
+    let postfix = seq { 0uy..3uy }
+    let directbits = seq { 0uy..15uy }
+
+    [<Fact>]
+    let ``converting to and from bits yields same object`` () =
+        for (pb, db) in cartesian postfix directbits do
+            let parameters = DistanceParameters(pb, db)
+            Assert.Equal(parameters, Helper.convert parameters null DistanceParameters.Serializer)
+        
+    [<Theory>]
+    [<InlineData(4, 0)>]
+    [<InlineData(0, 16)>]
+    [<InlineData(4, 16)>]
+    let ``constructing distance parameters with invalid value throws exception`` (pb: byte, db: byte) =
+        Assert.Throws<ArgumentOutOfRangeException>(fun () -> DistanceParameters(pb, db) |> ignore)
