@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Brotli\TestElements.fs" />
     <Compile Include="Huffman\TestHuffmanNode.fs" />
+    <Compile Include="Huffman\TestHuffmanGenerator.fs" />
     <Compile Include="IO\TestBitStream.fs" />
     <Compile Include="IO\TestBitReader.fs" />
     <Compile Include="IO\TestBitWriter.fs" />
