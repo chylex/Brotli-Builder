@@ -12,6 +12,10 @@ using BrotliLib.Brotli.Encode;
 
 namespace BrotliBuilder{
     partial class FormMain : Form{
+        private const int LimitOutputLength = 16384;
+
+        #region Building block context
+
         private class BuildingBlockContext : IBuildingBlockContext{
             public event EventHandler<EventArgs> Notified;
 
@@ -44,7 +48,7 @@ namespace BrotliBuilder{
                 Notified?.Invoke(container.Controls[depth], args);
 
                 if (parent == null){
-                    owner.RegenerateBrotliStream();
+                    owner.RegenerateBrotliStream(markAsDirty: true);
                 }
                 else{
                     parent.NotifyParent(args);
@@ -52,7 +56,7 @@ namespace BrotliBuilder{
             }
         }
 
-        // Instance
+        #endregion
 
         private BrotliFileStructure brotliFile = BrotliFileStructure.NewEmpty();
         private string lastFileName = "compressed";
@@ -89,13 +93,13 @@ namespace BrotliBuilder{
             OnNewBrotliFile();
         }
 
-        // File state handling
+        #region File state handling
 
         private void OnNewBrotliFile(){
             flowPanelBlocks.Controls.Clear();
             flowPanelBlocks.Controls.Add(new BuildFileStructure(new BuildingBlockContext(this, flowPanelBlocks), brotliFile));
 
-            RegenerateBrotliStream();
+            RegenerateBrotliStream(markAsDirty: false);
             isDirty = false;
         }
 
@@ -120,12 +124,20 @@ namespace BrotliBuilder{
             return false;
         }
 
-        // Output generation
+        #endregion
+
+        #region Output generation
 
         private void SetupWorker(AsyncWorker<string> worker, RichTextBox tb, StatusBarPanel status, Func<long, string> funcStatusTextSuccess, Func<string> funcStatusTextFailure){
             worker.WorkFinished += (sender, args) => {
+                string result = args.Result;
+
+                if (menuItemLimitOutput.Checked && result.Length > LimitOutputLength){
+                    result = result.Substring(0, LimitOutputLength) + "(...)";
+                }
+
                 tb.ForeColor = SystemColors.WindowText;
-                tb.Text = args.Result;
+                tb.Text = result;
                 status.Text = funcStatusTextSuccess(args.Stopwatch.ElapsedMilliseconds);
             };
 
@@ -139,6 +151,9 @@ namespace BrotliBuilder{
         private void timerRegenerationDelay_Tick(object sender, EventArgs e){
             timerRegenerationDelay.Stop();
 
+            textBoxBitStream.ForeColor = SystemColors.GrayText;
+            textBoxDecompressedOutput.ForeColor = SystemColors.GrayText;
+
             statusBarPanelTimeBits.Text = "Generating...";
             statusBarPanelTimeOutput.Text = "Generating...";
 
@@ -146,19 +161,23 @@ namespace BrotliBuilder{
             workerOutput.Start(() => brotliFile.GetDecompressionState().OutputAsUTF8);
         }
 
-        private void RegenerateBrotliStream(){
-            isDirty = true;
+        private void RegenerateBrotliStream(bool markAsDirty){
+            isDirty = isDirty || markAsDirty;
             timerRegenerationDelay.Stop();
             timerRegenerationDelay.Start();
         }
 
-        // Form events
+        #endregion
+
+        #region Form events
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e){
             e.Cancel = PromptUnsavedChanges("Would you like to save changes before exiting?");
         }
 
-        // Menu events
+        #endregion
+
+        #region Menu events (File)
 
         private void menuItemOpen_Click(object sender, EventArgs e){
             if (PromptUnsavedChanges("Would you like to save changes before opening a new file?")){
@@ -205,6 +224,19 @@ namespace BrotliBuilder{
             Close();
         }
 
+        #endregion
+
+        #region Menu events (View)
+
+        private void menuItemLimitOutput_Click(object sender, EventArgs e){
+            menuItemLimitOutput.Checked = !menuItemLimitOutput.Checked;
+            RegenerateBrotliStream(markAsDirty: false);
+        }
+
+        #endregion
+
+        #region Menu events (Tools)
+
         private void menuItemEncodeUncompressedMBs_Click(object sender, EventArgs e){
             OpenFileWithEncoder(WindowSize.Default, new EncodeUncompressedOnly());
         }
@@ -242,5 +274,7 @@ namespace BrotliBuilder{
                 }
             }
         }
+
+        #endregion
     }
 }

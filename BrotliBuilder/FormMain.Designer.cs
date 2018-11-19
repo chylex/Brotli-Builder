@@ -43,6 +43,8 @@
             this.statusBarPanelPadding2 = new System.Windows.Forms.StatusBarPanel();
             this.statusBarPanelTimeOutput = new System.Windows.Forms.StatusBarPanel();
             this.timerRegenerationDelay = new System.Windows.Forms.Timer(this.components);
+            this.menuItemView = new System.Windows.Forms.MenuItem();
+            this.menuItemLimitOutput = new System.Windows.Forms.MenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeBits)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding2)).BeginInit();
@@ -53,6 +55,7 @@
             // 
             this.mainMenu.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItemFile,
+            this.menuItemView,
             this.menuItemTools});
             // 
             // menuItemFile
@@ -86,7 +89,7 @@
             // 
             // menuItemTools
             // 
-            this.menuItemTools.Index = 1;
+            this.menuItemTools.Index = 2;
             this.menuItemTools.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItemEncodeFile});
             this.menuItemTools.Text = "&Tools";
@@ -211,6 +214,20 @@
             this.timerRegenerationDelay.Interval = 300;
             this.timerRegenerationDelay.Tick += new System.EventHandler(this.timerRegenerationDelay_Tick);
             // 
+            // menuItemView
+            // 
+            this.menuItemView.Index = 1;
+            this.menuItemView.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuItemLimitOutput});
+            this.menuItemView.Text = "&View";
+            // 
+            // menuItemLimitOutput
+            // 
+            this.menuItemLimitOutput.Checked = true;
+            this.menuItemLimitOutput.Index = 0;
+            this.menuItemLimitOutput.Text = "Limit Output Length";
+            this.menuItemLimitOutput.Click += new System.EventHandler(this.menuItemLimitOutput_Click);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -261,5 +278,7 @@
         private System.Windows.Forms.MenuItem menuItemTools;
         private System.Windows.Forms.MenuItem menuItemEncodeFile;
         private System.Windows.Forms.MenuItem menuItemEncodeUncompressedMBs;
+        private System.Windows.Forms.MenuItem menuItemView;
+        private System.Windows.Forms.MenuItem menuItemLimitOutput;
     }
 }
