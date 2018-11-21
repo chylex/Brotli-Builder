@@ -38,7 +38,7 @@ namespace BrotliLib.Brotli.Components{
 
         // Serialization
 
-        public static readonly IBitSerializer<WindowSize, object> Serializer = new BitSerializer<WindowSize, object>(
+        public static readonly IBitSerializer<WindowSize, NoContext> Serializer = new BitSerializer<WindowSize, NoContext>(
             fromBits: (reader, context) => {
                 int wbits;
 

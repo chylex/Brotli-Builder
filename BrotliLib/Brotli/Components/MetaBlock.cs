@@ -104,7 +104,7 @@ namespace BrotliLib.Brotli.Components{
                     return new LastEmpty();
                 }
 
-                DataLength dataLength = DataLength.Serializer.FromBits(reader, null);
+                DataLength dataLength = DataLength.Serializer.FromBits(reader, NoContext.Value);
 
                 if (dataLength.UncompressedBytes == 0){
                     return new PaddedEmpty();
@@ -135,7 +135,7 @@ namespace BrotliLib.Brotli.Components{
                     writer.WriteBit(false);
                 }
 
-                DataLength.Serializer.ToBits(writer, obj.DataLength, null);
+                DataLength.Serializer.ToBits(writer, obj.DataLength, NoContext.Value);
 
                 if (obj is Uncompressed){
                     if (obj.IsLast){

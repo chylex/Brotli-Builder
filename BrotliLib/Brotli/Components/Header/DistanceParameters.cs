@@ -41,7 +41,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Serialization
 
-        public static readonly IBitSerializer<DistanceParameters, object> Serializer = new BitSerializer<DistanceParameters, object>(
+        public static readonly IBitSerializer<DistanceParameters, NoContext> Serializer = new BitSerializer<DistanceParameters, NoContext>(
             fromBits: (reader, context) => {
                 int postfixBitCount = reader.NextChunk(2);
                 int directCodeBits = reader.NextChunk(4);

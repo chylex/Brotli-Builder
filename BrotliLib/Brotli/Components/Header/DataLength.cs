@@ -55,7 +55,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Serialization
 
-        public static readonly IBitSerializer<DataLength, object> Serializer = new BitSerializer<DataLength, object>(
+        public static readonly IBitSerializer<DataLength, NoContext> Serializer = new BitSerializer<DataLength, NoContext>(
             fromBits: (reader, context) => {
                 int chunkNibbles;
 		        

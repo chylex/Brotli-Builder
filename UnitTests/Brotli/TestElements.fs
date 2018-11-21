@@ -20,7 +20,7 @@ module WindowSize =
     [<Theory>]
     [<MemberData("values")>]
     let ``converting to and from bits yields same object`` (ws: WindowSize) =
-        Assert.Equal(ws, Helper.convert ws null WindowSize.Serializer)
+        Assert.Equal(ws, Helper.convert ws NoContext.Value WindowSize.Serializer)
 
     [<Theory>]
     [<InlineData(-1)>]
@@ -43,7 +43,7 @@ module DataLength =
     let ``converting to and from bits yields same object`` () =
         for bytes in values do // ReSharper doesn't play nice with enumeration disabled
             let dl = DataLength(bytes)
-            Assert.Equal(dl, Helper.convert dl null DataLength.Serializer)
+            Assert.Equal(dl, Helper.convert dl NoContext.Value DataLength.Serializer)
 
     [<Theory>]
     [<InlineData(0, 0)>]
@@ -73,7 +73,7 @@ module VariableLength11Code =
     let ``converting to and from bits yields same object`` () =
         for value in values do
             let code = VariableLength11Code(value)
-            Assert.Equal(code, Helper.convert code null VariableLength11Code.Serializer)
+            Assert.Equal(code, Helper.convert code NoContext.Value VariableLength11Code.Serializer)
         
     [<Theory>]
     [<InlineData(-1)>]
@@ -93,7 +93,7 @@ module DistanceParameters =
     let ``converting to and from bits yields same object`` () =
         for (pb, db) in cartesian postfix directbits do
             let parameters = DistanceParameters(pb, db)
-            Assert.Equal(parameters, Helper.convert parameters null DistanceParameters.Serializer)
+            Assert.Equal(parameters, Helper.convert parameters NoContext.Value DistanceParameters.Serializer)
         
     [<Theory>]
     [<InlineData(4, 0)>]

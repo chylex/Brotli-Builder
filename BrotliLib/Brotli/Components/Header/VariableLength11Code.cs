@@ -32,7 +32,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Serialization
 
-        public static readonly IBitSerializer<VariableLength11Code, object> Serializer = new BitSerializer<VariableLength11Code, object>(
+        public static readonly IBitSerializer<VariableLength11Code, NoContext> Serializer = new BitSerializer<VariableLength11Code, NoContext>(
             fromBits: (reader, context) => {
                 if (!reader.NextBit()){
                     return new VariableLength11Code(MinValue);
