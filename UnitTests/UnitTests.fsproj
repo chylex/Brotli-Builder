@@ -57,6 +57,7 @@
   <Import Project="..\packages\xunit.core.2.4.1\build\xunit.core.targets" Condition="Exists('..\packages\xunit.core.2.4.1\build\xunit.core.targets')" />
   <ItemGroup>
     <Compile Include="Brotli\TestElements.fs" />
+    <Compile Include="Collections\TestRingBuffer.fs" />
     <Compile Include="Huffman\TestHuffmanNode.fs" />
     <Compile Include="Huffman\TestHuffmanGenerator.fs" />
     <Compile Include="IO\TestBitStream.fs" />
