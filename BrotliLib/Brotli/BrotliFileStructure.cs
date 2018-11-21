@@ -10,22 +10,17 @@ namespace BrotliLib.Brotli{
     /// </summary>
     public sealed class BrotliFileStructure{
         public static BrotliFileStructure NewEmpty(){
-            BrotliFileStructure bfs = new BrotliFileStructure{
-                WindowSize = WindowSize.Default
-            };
-
+            BrotliFileStructure bfs = new BrotliFileStructure(WindowSize.Default);
             bfs.MetaBlocks.Add(new MetaBlock.LastEmpty());
             return bfs;
         }
 
         public static BrotliFileStructure FromBytes(byte[] bytes){
-            return Serializer.FromBits(new BitStream(bytes).GetReader(), new BrotliGlobalState());
+            return Serializer.FromBits(new BitStream(bytes).GetReader(), null);
         }
 
         public static BrotliFileStructure FromEncoder(WindowSize windowSize, IBrotliEncoder encoder, byte[] bytes){
-            BrotliFileStructure bfs = new BrotliFileStructure{
-                WindowSize = windowSize
-            };
+            BrotliFileStructure bfs = new BrotliFileStructure(windowSize);
 
             foreach(MetaBlock metaBlock in encoder.GenerateMetaBlocks(bytes)){
                 bfs.MetaBlocks.Add(metaBlock);
@@ -39,17 +34,22 @@ namespace BrotliLib.Brotli{
         public WindowSize WindowSize { get; set; }
         public readonly IList<MetaBlock> MetaBlocks = new List<MetaBlock>();
         
-        private BrotliFileStructure(){}
+        private BrotliFileStructure(WindowSize windowSize){
+            this.WindowSize = windowSize;
+        }
+
+        private BrotliGlobalState CreateNewContext(){
+            return new BrotliGlobalState(WindowSize);
+        }
 
         public BitStream Serialize(){
             BitStream stream = new BitStream();
-            BrotliGlobalState state = new BrotliGlobalState();
-            Serializer.ToBits(stream.GetWriter(), this, state);
+            Serializer.ToBits(stream.GetWriter(), this, CreateNewContext());
             return stream;
         }
 
         public BrotliGlobalState GetDecompressionState(){
-            BrotliGlobalState state = new BrotliGlobalState();
+            BrotliGlobalState state = CreateNewContext();
             Serializer.FromBits(Serialize().GetReader(), state);
             return state;
         }
@@ -62,12 +62,13 @@ namespace BrotliLib.Brotli{
 
         private static readonly IBitSerializer<BrotliFileStructure, BrotliGlobalState> Serializer = new BitSerializer<BrotliFileStructure, BrotliGlobalState>(
             fromBits: (reader, context) => {
-                BrotliFileStructure bfs = new BrotliFileStructure{
-                    WindowSize = WindowSize.Serializer.FromBits(reader, context)
-                };
+                WindowSize windowSize = WindowSize.Serializer.FromBits(reader, NoContext.Value);
+
+                BrotliFileStructure bfs = new BrotliFileStructure(windowSize);
+                BrotliGlobalState state = bfs.CreateNewContext();
 
                 while(true){
-                    MetaBlock metaBlock = MetaBlock.Serializer.FromBits(reader, context);
+                    MetaBlock metaBlock = MetaBlock.Serializer.FromBits(reader, state);
                     bfs.MetaBlocks.Add(metaBlock);
 
                     if (metaBlock.IsLast){
@@ -79,10 +80,12 @@ namespace BrotliLib.Brotli{
             },
 
             toBits: (writer, obj, context) => {
-                WindowSize.Serializer.ToBits(writer, obj.WindowSize, context);
+                WindowSize.Serializer.ToBits(writer, obj.WindowSize, NoContext.Value);
+
+                BrotliGlobalState state = obj.CreateNewContext();
 
                 foreach(MetaBlock metaBlock in obj.MetaBlocks){
-                    MetaBlock.Serializer.ToBits(writer, metaBlock, context);
+                    MetaBlock.Serializer.ToBits(writer, metaBlock, state);
                 }
             }
         );
