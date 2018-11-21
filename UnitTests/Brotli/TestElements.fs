@@ -5,6 +5,7 @@ open System
 open BrotliLib.IO
 open BrotliLib.Brotli.Components
 open BrotliLib.Brotli.Components.Header
+open BrotliLib.Brotli.Components.Utils
 
 
 module Helper =
@@ -101,3 +102,12 @@ module DistanceParameters =
     [<InlineData(4, 16)>]
     let ``constructing distance parameters with invalid value throws exception`` (pb: byte, db: byte) =
         Assert.Throws<ArgumentOutOfRangeException>(fun () -> DistanceParameters(pb, db) |> ignore)
+
+
+module LiteralContextMode =
+    let values: obj array seq = Enum.GetValues(typeof<LiteralContextMode>) :?> (LiteralContextMode[]) |> Seq.map(fun value -> [| value |])
+
+    [<Theory>]
+    [<MemberData("values")>]
+    let ``converting to and from bits yields same object`` (mode: LiteralContextMode) =
+        Assert.Equal(mode, Helper.convert mode NoContext.Value LiteralContextModes.Serializer)
