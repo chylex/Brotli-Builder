@@ -14,7 +14,15 @@ module Helper =
         HuffmanNode.Leaf('b')
     )
 
-    let depth2 = HuffmanNode.Path(
+    let depth2count3 = HuffmanNode.Path(
+        HuffmanNode.Path(
+            HuffmanNode.Leaf('a'),
+            HuffmanNode.Leaf('b')
+        ),
+        HuffmanNode.Leaf('c')
+    )
+
+    let depth2count4 = HuffmanNode.Path(
         HuffmanNode.Path(
             HuffmanNode.Leaf('a'),
             HuffmanNode.Leaf('b')
@@ -24,6 +32,24 @@ module Helper =
             HuffmanNode.Leaf('d')
         )
     )
+
+
+module Count =
+    [<Fact>]
+    let ``a leaf node has 1 symbol`` () =
+        Assert.Equal(1, Helper.leaf.SymbolCount)
+        
+    [<Fact>]
+    let ``a path of depth 1 has 2 symbols`` () =
+        Assert.Equal(2, Helper.depth1.SymbolCount)
+        
+    [<Fact>]
+    let ``a path of depth 2 with 3 symbols returns correct value`` () =
+        Assert.Equal(3, Helper.depth2count3.SymbolCount)
+        
+    [<Fact>]
+    let ``a path of depth 2 with 4 symbols returns correct value`` () =
+        Assert.Equal(4, Helper.depth2count4.SymbolCount)
 
 
 module Traversal =
@@ -37,15 +63,21 @@ module Traversal =
         Assert.Equal('b', Helper.depth1.LookupValue(BitStream("1").GetReader()))
         
     [<Fact>]
-    let ``a path of depth 2 returns correct values for each path`` () =
-        Assert.Equal('a', Helper.depth2.LookupValue(BitStream("00").GetReader()))
-        Assert.Equal('b', Helper.depth2.LookupValue(BitStream("01").GetReader()))
-        Assert.Equal('c', Helper.depth2.LookupValue(BitStream("10").GetReader()))
-        Assert.Equal('d', Helper.depth2.LookupValue(BitStream("11").GetReader()))
+    let ``a path of depth 2 with 3 symbols returns correct values for each path`` () =
+        Assert.Equal('a', Helper.depth2count3.LookupValue(BitStream("00").GetReader()))
+        Assert.Equal('b', Helper.depth2count3.LookupValue(BitStream("01").GetReader()))
+        Assert.Equal('c', Helper.depth2count3.LookupValue(BitStream("1").GetReader()))
+        
+    [<Fact>]
+    let ``a path of depth 2 with 4 symbols returns correct values for each path`` () =
+        Assert.Equal('a', Helper.depth2count4.LookupValue(BitStream("00").GetReader()))
+        Assert.Equal('b', Helper.depth2count4.LookupValue(BitStream("01").GetReader()))
+        Assert.Equal('c', Helper.depth2count4.LookupValue(BitStream("10").GetReader()))
+        Assert.Equal('d', Helper.depth2count4.LookupValue(BitStream("11").GetReader()))
 
     [<Fact>]
     let ``running out of bits returns default value`` () =
-        Assert.Equal(Unchecked.defaultof<char>, Helper.depth2.LookupValue(BitStream("0").GetReader()))
+        Assert.Equal(Unchecked.defaultof<char>, Helper.depth2count4.LookupValue(BitStream("0").GetReader()))
 
 
 module ValueMap =
@@ -63,10 +95,18 @@ module ValueMap =
         }, Helper.depth1.GenerateValueMap())
 
     [<Fact>]
-    let ``a path of depth 2 returns its values mapped to correct bit streams`` () =
+    let ``a path of depth 2 with 3 symbols returns its values mapped to correct bit streams`` () =
+        Assert.Equal<IEnumerable<KeyValuePair<_, _>>>(seq {
+            yield KeyValuePair('a', BitStream("00"))
+            yield KeyValuePair('b', BitStream("01"))
+            yield KeyValuePair('c', BitStream("1"))
+        }, Helper.depth2count3.GenerateValueMap())
+
+    [<Fact>]
+    let ``a path of depth 2 with 4 symbols returns its values mapped to correct bit streams`` () =
         Assert.Equal<IEnumerable<KeyValuePair<_, _>>>(seq {
             yield KeyValuePair('a', BitStream("00"))
             yield KeyValuePair('b', BitStream("01"))
             yield KeyValuePair('c', BitStream("10"))
             yield KeyValuePair('d', BitStream("11"))
-        }, Helper.depth2.GenerateValueMap())
+        }, Helper.depth2count4.GenerateValueMap())

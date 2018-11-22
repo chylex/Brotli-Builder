@@ -7,12 +7,14 @@ namespace BrotliLib.Huffman{
         /// Leaf node that contains a <see cref="value"/> of type <code>T</code>.
         /// </summary>
         public sealed class Leaf : HuffmanNode<T>{
+            public override int SymbolCount => 1;
+
             private readonly T value;
             
             public Leaf(T value){
                 this.value = value;
             }
-            
+
             public override T LookupValue(BitReader bits){
                 return value;
             }
