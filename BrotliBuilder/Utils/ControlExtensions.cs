@@ -7,5 +7,19 @@ namespace BrotliBuilder.Utils{
             // Visual Studio is garbage and the designer crashes if DataGridView is extended, so reflection it is
             dataGridView.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(dataGridView, true, null);
         }
+
+        public static void SetValueInstantly(this ProgressBar progressBar, int value){
+            // update progres bar instantly
+            if (value == progressBar.Maximum){
+                progressBar.Maximum++;
+                progressBar.Value = value + 1;
+                progressBar.Maximum--;
+            }
+            else{
+                progressBar.Value = value + 1;
+            }
+
+            progressBar.Value = value;
+        }
     }
 }
