@@ -41,6 +41,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
@@ -70,6 +72,12 @@
       <DependentUpon>BuildWindowSize.cs</DependentUpon>
     </Compile>
     <Compile Include="Blocks\IBuildingBlockContext.cs" />
+    <Compile Include="Dialogs\FormStaticDictionary.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\FormStaticDictionary.Designer.cs">
+      <DependentUpon>FormStaticDictionary.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -119,6 +127,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Blocks\Structure\BuildWindowSize.resx">
       <DependentUpon>BuildWindowSize.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\FormStaticDictionary.resx">
+      <DependentUpon>FormStaticDictionary.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>

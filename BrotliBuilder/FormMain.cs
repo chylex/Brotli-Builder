@@ -5,9 +5,11 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using BrotliBuilder.Blocks;
+using BrotliBuilder.Dialogs;
 using BrotliBuilder.Utils;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
+using BrotliLib.Brotli.Dictionary.Source;
 using BrotliLib.Brotli.Encode;
 
 namespace BrotliBuilder{
@@ -236,6 +238,25 @@ namespace BrotliBuilder{
         #endregion
 
         #region Menu events (Tools)
+
+        private void menuItemStaticDictionary_Click(object sender, EventArgs e){
+            using(OpenFileDialog dialog = new OpenFileDialog{
+                Title = "Static Dictionary",
+                Filter = "All Files (*.*)|*.*"
+            }){
+                if (dialog.ShowDialog() == DialogResult.OK){
+                    try{
+                        using(BrotliDefaultDictionary dict = new BrotliDefaultDictionary(new MemorySource(dialog.FileName)))
+                        using(FormStaticDictionary form = new FormStaticDictionary(dict)){
+                            form.ShowDialog();
+                        }
+                    }catch(Exception ex){
+                        Debug.WriteLine(ex.ToString());
+                        MessageBox.Show(ex.Message, "Static Dictionary Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
 
         private void menuItemEncodeUncompressedMBs_Click(object sender, EventArgs e){
             OpenFileWithEncoder(WindowSize.Default, new EncodeUncompressedOnly());
