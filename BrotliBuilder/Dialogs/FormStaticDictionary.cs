@@ -13,7 +13,7 @@ using BrotliLib.Brotli.Dictionary.Transform;
 
 namespace BrotliBuilder.Dialogs{
     public partial class FormStaticDictionary : Form{
-        private const char FormatSpace = '⎵';
+        private static readonly char FormatSpace = Environment.OSVersion.Version >= new Version(6, 2) ? '⎵' : '␣';
 
         private static readonly NumberFormatInfo FormatCounters = new NumberFormatInfo{
             NumberGroupSeparator = " ",
