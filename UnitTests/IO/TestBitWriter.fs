@@ -5,7 +5,7 @@ open System
 open BrotliLib.IO
 
 
-module WriteBit =
+module WriteBits =
     [<Fact>]
     let ``writing bit by bit to existing stream yields correct text representation`` () =
         let stream = BitStream("01")
@@ -15,6 +15,14 @@ module WriteBit =
         writer.WriteBit(false);
         writer.WriteBit(true);
 
+        Assert.Equal("011101", stream.ToString())
+        
+    [<Fact>]
+    let ``writing a bit stream to existing stream yields correct text representation`` () =
+        let stream = BitStream("01")
+        let writer = stream.GetWriter()
+        writer.WriteBits(BitStream("1101"))
+        
         Assert.Equal("011101", stream.ToString())
 
 

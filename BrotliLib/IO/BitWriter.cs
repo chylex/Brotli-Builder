@@ -25,6 +25,14 @@ namespace BrotliLib.IO{
         public void WriteBit(bool bit){
             stream.Add(bit);
         }
+        
+        /// <summary>
+        /// Writes all bits from the provided bit stream.
+        /// </summary>
+        /// <param name="bits">Input bit stream.</param>
+        public void WriteBits(BitStream bits){
+            stream.AddAll(bits);
+        }
 
         /// <summary>
         /// Writes a sequence of the specified amount of bits, using the least significant bits from the provided value.
