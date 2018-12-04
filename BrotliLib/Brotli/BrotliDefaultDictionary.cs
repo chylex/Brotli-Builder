@@ -5,6 +5,7 @@ using BrotliLib.Brotli.Dictionary;
 using BrotliLib.Brotli.Dictionary.Format;
 using BrotliLib.Brotli.Dictionary.Source;
 using BrotliLib.Brotli.Dictionary.Transform;
+using BrotliLib.Resources;
 
 namespace BrotliLib.Brotli{
     /// <summary>
@@ -13,6 +14,8 @@ namespace BrotliLib.Brotli{
     /// https://tools.ietf.org/html/rfc7932#appendix-B
     /// </summary>
     public sealed class BrotliDefaultDictionary : BrotliDictionary{
+        public static BrotliDefaultDictionary Embedded => new BrotliDefaultDictionary(new StreamSource(Resource.Get("dict")));
+
         private static readonly IDictionaryFormat DefaultFormat = new BitDepthFormat(new int[]{
             0, 0, 0, 0, 10, 10, 11, 11, 10, 10, 10, 10, 10, 9, 9, 8, 7, 7, 8, 7, 7, 6, 6, 5, 5
         });

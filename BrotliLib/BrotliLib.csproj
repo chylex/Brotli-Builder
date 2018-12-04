@@ -13,4 +13,8 @@
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\dict" />
+  </ItemGroup>
+
 </Project>
