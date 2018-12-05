@@ -46,10 +46,15 @@
             this.statusBarPanelPadding2 = new System.Windows.Forms.StatusBarPanel();
             this.statusBarPanelTimeOutput = new System.Windows.Forms.StatusBarPanel();
             this.timerRegenerationDelay = new System.Windows.Forms.Timer(this.components);
+            this.splitContainerMain = new System.Windows.Forms.SplitContainer();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeBits)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeOutput)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).BeginInit();
+            this.splitContainerMain.Panel1.SuspendLayout();
+            this.splitContainerMain.Panel2.SuspendLayout();
+            this.splitContainerMain.SuspendLayout();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -133,8 +138,7 @@
             // 
             // flowPanelBlocks
             // 
-            this.flowPanelBlocks.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.flowPanelBlocks.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.flowPanelBlocks.AutoScroll = true;
             this.flowPanelBlocks.BackColor = System.Drawing.SystemColors.Control;
@@ -147,55 +151,54 @@
             // 
             // textBoxBitStream
             // 
-            this.textBoxBitStream.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBoxBitStream.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxBitStream.DetectUrls = false;
             this.textBoxBitStream.Font = new System.Drawing.Font("Consolas", 9.75F);
-            this.textBoxBitStream.Location = new System.Drawing.Point(12, 458);
-            this.textBoxBitStream.Margin = new System.Windows.Forms.Padding(3, 3, 3, 9);
+            this.textBoxBitStream.Location = new System.Drawing.Point(12, 18);
             this.textBoxBitStream.Name = "textBoxBitStream";
             this.textBoxBitStream.ReadOnly = true;
             this.textBoxBitStream.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.textBoxBitStream.Size = new System.Drawing.Size(984, 96);
-            this.textBoxBitStream.TabIndex = 2;
+            this.textBoxBitStream.Size = new System.Drawing.Size(984, 98);
+            this.textBoxBitStream.TabIndex = 1;
             this.textBoxBitStream.Text = "";
             // 
             // labelBitStream
             // 
             this.labelBitStream.AutoSize = true;
-            this.labelBitStream.Location = new System.Drawing.Point(9, 440);
+            this.labelBitStream.Location = new System.Drawing.Point(9, 0);
             this.labelBitStream.Name = "labelBitStream";
             this.labelBitStream.Size = new System.Drawing.Size(61, 15);
-            this.labelBitStream.TabIndex = 1;
+            this.labelBitStream.TabIndex = 0;
             this.labelBitStream.Text = "Bit Stream";
             // 
             // labelDecompressedOutput
             // 
             this.labelDecompressedOutput.AutoSize = true;
-            this.labelDecompressedOutput.Location = new System.Drawing.Point(9, 563);
+            this.labelDecompressedOutput.Location = new System.Drawing.Point(9, 0);
             this.labelDecompressedOutput.Name = "labelDecompressedOutput";
             this.labelDecompressedOutput.Size = new System.Drawing.Size(126, 15);
-            this.labelDecompressedOutput.TabIndex = 3;
+            this.labelDecompressedOutput.TabIndex = 0;
             this.labelDecompressedOutput.Text = "Decompressed Output";
             // 
             // textBoxDecompressedOutput
             // 
-            this.textBoxDecompressedOutput.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBoxDecompressedOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxDecompressedOutput.DetectUrls = false;
             this.textBoxDecompressedOutput.Font = new System.Drawing.Font("Consolas", 9.75F);
-            this.textBoxDecompressedOutput.Location = new System.Drawing.Point(12, 581);
-            this.textBoxDecompressedOutput.Margin = new System.Windows.Forms.Padding(3, 3, 3, 12);
+            this.textBoxDecompressedOutput.Location = new System.Drawing.Point(12, 18);
             this.textBoxDecompressedOutput.Name = "textBoxDecompressedOutput";
             this.textBoxDecompressedOutput.ReadOnly = true;
             this.textBoxDecompressedOutput.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.textBoxDecompressedOutput.Size = new System.Drawing.Size(984, 96);
-            this.textBoxDecompressedOutput.TabIndex = 4;
+            this.textBoxDecompressedOutput.Size = new System.Drawing.Size(984, 98);
+            this.textBoxDecompressedOutput.TabIndex = 1;
             this.textBoxDecompressedOutput.Text = "";
             // 
             // statusBar
             // 
-            this.statusBar.Dock = System.Windows.Forms.DockStyle.None;
             this.statusBar.Location = new System.Drawing.Point(0, 687);
             this.statusBar.Name = "statusBar";
             this.statusBar.Panels.AddRange(new System.Windows.Forms.StatusBarPanel[] {
@@ -206,7 +209,7 @@
             this.statusBar.ShowPanels = true;
             this.statusBar.Size = new System.Drawing.Size(1008, 22);
             this.statusBar.SizingGrip = false;
-            this.statusBar.TabIndex = 5;
+            this.statusBar.TabIndex = 2;
             // 
             // statusBarPanelPadding1
             // 
@@ -237,22 +240,42 @@
             this.timerRegenerationDelay.Interval = 300;
             this.timerRegenerationDelay.Tick += new System.EventHandler(this.timerRegenerationDelay_Tick);
             // 
+            // splitContainerMain
+            // 
+            this.splitContainerMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.splitContainerMain.IsSplitterFixed = true;
+            this.splitContainerMain.Location = new System.Drawing.Point(0, 435);
+            this.splitContainerMain.Name = "splitContainerMain";
+            this.splitContainerMain.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainerMain.Panel1
+            // 
+            this.splitContainerMain.Panel1.Controls.Add(this.labelBitStream);
+            this.splitContainerMain.Panel1.Controls.Add(this.textBoxBitStream);
+            // 
+            // splitContainerMain.Panel2
+            // 
+            this.splitContainerMain.Panel2.Controls.Add(this.textBoxDecompressedOutput);
+            this.splitContainerMain.Panel2.Controls.Add(this.labelDecompressedOutput);
+            this.splitContainerMain.Size = new System.Drawing.Size(1008, 246);
+            this.splitContainerMain.SplitterDistance = 119;
+            this.splitContainerMain.SplitterWidth = 8;
+            this.splitContainerMain.TabIndex = 1;
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLight;
             this.ClientSize = new System.Drawing.Size(1008, 709);
+            this.Controls.Add(this.splitContainerMain);
             this.Controls.Add(this.statusBar);
-            this.Controls.Add(this.textBoxDecompressedOutput);
-            this.Controls.Add(this.labelDecompressedOutput);
-            this.Controls.Add(this.labelBitStream);
-            this.Controls.Add(this.textBoxBitStream);
             this.Controls.Add(this.flowPanelBlocks);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
             this.Menu = this.mainMenu;
+            this.MinimumSize = new System.Drawing.Size(480, 640);
             this.Name = "FormMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Brotli Builder";
@@ -261,8 +284,13 @@
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeBits)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeOutput)).EndInit();
+            this.splitContainerMain.Panel1.ResumeLayout(false);
+            this.splitContainerMain.Panel1.PerformLayout();
+            this.splitContainerMain.Panel2.ResumeLayout(false);
+            this.splitContainerMain.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).EndInit();
+            this.splitContainerMain.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -290,5 +318,6 @@
         private System.Windows.Forms.MenuItem menuItemView;
         private System.Windows.Forms.MenuItem menuItemLimitOutput;
         private System.Windows.Forms.MenuItem menuItemStaticDictionary;
+        private System.Windows.Forms.SplitContainer splitContainerMain;
     }
 }
