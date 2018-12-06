@@ -54,20 +54,16 @@ namespace BrotliLib.IO{
         /// </summary>
         /// <param name="bytes">Input byte array segment.</param>
         public BitStream(byte[] bytes) : this(){
-            int index = 0;
-
             foreach(byte value in bytes){
-                int offset = index % BytesPerEntry;
+                int offset = Length & BitEntryMask;
 
-                if (offset == 0 && index > 0){
+                if (offset == 0 && Length > 0){
                     this.entryCollection.Add(0UL);
                 }
                 
-                this.entryCollection[LastEntryIndex] |= (ulong)value << (ByteSize * offset);
-                ++index;
+                this.entryCollection[LastEntryIndex] |= (ulong)value << offset;
+                Length += ByteSize;
             }
-
-            this.Length = ByteSize * index;
         }
 
         /// <summary>
@@ -97,9 +93,8 @@ namespace BrotliLib.IO{
         public void Add(bool bit){
             int offset = Length & BitEntryMask;
 
-            if (offset == BitEntryMask){
+            if (offset == 0 && Length > 0){
                 entryCollection.Add(0UL);
-                offset -= BitEntrySize;
             }
             
             if (bit){

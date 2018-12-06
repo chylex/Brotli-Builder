@@ -105,11 +105,20 @@ module Mutability =
     [<InlineData("10", true, false)>]
     [<InlineData("11110000", true, true, true, true, false, false, false, false)>]
     [<InlineData("11110000111100001", true, true, true, true, false, false, false, false, true, true, true, true, false, false, false, false, true)>]
-    let ``appending to empty stream yields correct text representation`` (expected: string, [<ParamArray>] values: bool array) =
+    let ``appending few bits to empty stream yields correct text representation`` (expected: string, [<ParamArray>] values: bool array) =
         let stream = BitStream()
         Array.iter (stream.Add) <| values
 
         Assert.Equal(expected, stream.ToString())
+
+    [<Fact>]
+    let ``appending many bits to empty stream yields correct text representation`` () =
+        let stream = BitStream()
+
+        for _ in 0..256 do
+            stream.Add(true)
+
+        Assert.Equal(String.replicate 257 "1", stream.ToString())
 
     [<Theory>]
     [<InlineData("", "")>]
