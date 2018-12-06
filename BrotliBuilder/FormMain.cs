@@ -11,6 +11,7 @@ using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Dictionary.Source;
 using BrotliLib.Brotli.Encode;
+using BrotliLib.IO;
 
 namespace BrotliBuilder{
     partial class FormMain : Form{
@@ -70,15 +71,15 @@ namespace BrotliBuilder{
         public FormMain(){
             InitializeComponent();
 
-            textBoxBitStream.SetPlainTextMode();
-            textBoxDecompressedOutput.SetPlainTextMode();
+            textBoxGenBitStream.SetPlainTextMode();
+            textBoxGenOutput.SetPlainTextMode();
 
             workerStream = new AsyncWorker<string>("GenBits");
             workerOutput = new AsyncWorker<string>("GenOutput");
 
             SetupWorker(
                 workerStream,
-                textBoxBitStream,
+                textBoxGenBitStream,
                 statusBarPanelTimeBits,
                 ms => "Generated bit stream in " + ms + " ms.",
                 () => "Error generating bit stream."
@@ -86,20 +87,39 @@ namespace BrotliBuilder{
 
             SetupWorker(
                 workerOutput,
-                textBoxDecompressedOutput,
+                textBoxGenOutput,
                 statusBarPanelTimeOutput,
                 ms => "Generated output in " + ms + " ms.",
                 () => "Error generating output."
             );
 
+            splitContainerOuter.Panel2Collapsed = true;
             OnNewBrotliFile();
         }
 
         #region File state handling
 
+        private void LoadExistingBrotliFile(byte[] bytes){
+            brotliFile = BrotliFileStructure.FromBytes(bytes);
+            OnNewBrotliFile();
+
+            BitStream bits = new BitStream(bytes);
+            textBoxOrigBitStream.Text = bits.ToString();
+
+            try{
+                UpdateTextBox(textBoxOrigOutput, brotliFile.GetDecompressionState(bits).OutputAsUTF8);
+            }catch(Exception ex){
+                UpdateTextBox(textBoxOrigOutput, ex);
+            }
+
+            splitContainerOuter.Panel2Collapsed = false;
+        }
+
         private void OnNewBrotliFile(){
             flowPanelBlocks.Controls.Clear();
             flowPanelBlocks.Controls.Add(new BuildFileStructure(new BuildingBlockContext(this, flowPanelBlocks), brotliFile));
+
+            splitContainerOuter.Panel2Collapsed = true;
 
             RegenerateBrotliStream(markAsDirty: false);
             isDirty = false;
@@ -130,22 +150,28 @@ namespace BrotliBuilder{
 
         #region Output generation
 
+        private void UpdateTextBox(RichTextBox tb, string text){
+            if (menuItemLimitOutput.Checked && text.Length > LimitOutputLength){
+                text = text.Substring(0, LimitOutputLength) + "(...)";
+            }
+
+            tb.ForeColor = SystemColors.WindowText;
+            tb.Text = text;
+        }
+
+        private void UpdateTextBox(RichTextBox tb, Exception ex){
+            tb.ForeColor = Color.Red;
+            tb.Text = Regex.Replace(ex.ToString(), " in (.*):", " : ");
+        }
+
         private void SetupWorker(AsyncWorker<string> worker, RichTextBox tb, StatusBarPanel status, Func<long, string> funcStatusTextSuccess, Func<string> funcStatusTextFailure){
             worker.WorkFinished += (sender, args) => {
-                string result = args.Result;
-
-                if (menuItemLimitOutput.Checked && result.Length > LimitOutputLength){
-                    result = result.Substring(0, LimitOutputLength) + "(...)";
-                }
-
-                tb.ForeColor = SystemColors.WindowText;
-                tb.Text = result;
+                UpdateTextBox(tb, args.Result);
                 status.Text = funcStatusTextSuccess(args.Stopwatch.ElapsedMilliseconds);
             };
 
             worker.WorkCrashed += (sender, args) => {
-                tb.ForeColor = Color.Red;
-                tb.Text = Regex.Replace(args.Exception.ToString(), " in (.*):", " : ");
+                UpdateTextBox(tb, args.Exception);
                 status.Text = funcStatusTextFailure();
             };
         }
@@ -153,14 +179,14 @@ namespace BrotliBuilder{
         private void timerRegenerationDelay_Tick(object sender, EventArgs e){
             timerRegenerationDelay.Stop();
 
-            textBoxBitStream.ForeColor = SystemColors.GrayText;
-            textBoxDecompressedOutput.ForeColor = SystemColors.GrayText;
+            textBoxGenBitStream.ForeColor = SystemColors.GrayText;
+            textBoxGenOutput.ForeColor = SystemColors.GrayText;
 
             statusBarPanelTimeBits.Text = "Generating...";
             statusBarPanelTimeOutput.Text = "Generating...";
 
             workerStream.Start(() => brotliFile.Serialize().ToString());
-            workerOutput.Start(() => brotliFile.GetDecompressionState().OutputAsUTF8);
+            workerOutput.Start(() => brotliFile.GetDecompressionState(brotliFile.Serialize()).OutputAsUTF8);
         }
 
         private void RegenerateBrotliStream(bool markAsDirty){
@@ -196,8 +222,7 @@ namespace BrotliBuilder{
                     lastFileName = dialog.FileName;
 
                     try{
-                        brotliFile = BrotliFileStructure.FromBytes(File.ReadAllBytes(lastFileName));
-                        OnNewBrotliFile();
+                        LoadExistingBrotliFile(File.ReadAllBytes(lastFileName));
                     }catch(Exception ex){
                         Debug.WriteLine(ex.ToString());
                         MessageBox.Show(ex.Message, "File Open Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
