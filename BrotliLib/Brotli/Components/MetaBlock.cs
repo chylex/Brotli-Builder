@@ -137,13 +137,11 @@ namespace BrotliLib.Brotli.Components{
 
                 DataLength.Serializer.ToBits(writer, obj.DataLength, NoContext.Value);
 
-                if (obj is Uncompressed){
-                    if (obj.IsLast){
-                        throw new InvalidOperationException("An uncompressed meta-block cannot also be the last.");
-                    }
-                    else{
-                        writer.WriteBit(true);
-                    }
+                if (!obj.IsLast){
+                    writer.WriteBit(obj is Uncompressed);
+                }
+                else if (obj is Uncompressed){
+                    throw new InvalidOperationException("An uncompressed meta-block cannot also be the last.");
                 }
             }
         );
