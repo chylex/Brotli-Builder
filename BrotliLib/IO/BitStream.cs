@@ -55,13 +55,9 @@ namespace BrotliLib.IO{
         /// <param name="bytes">Input byte array segment.</param>
         public BitStream(byte[] bytes) : this(){
             foreach(byte value in bytes){
-                int offset = Length & BitEntryMask;
-
-                if (offset == 0 && Length > 0){
-                    this.entryCollection.Add(0UL);
-                }
+                int offset = PrepareOffsetForNextBit();
                 
-                this.entryCollection[LastEntryIndex] |= (ulong)value << offset;
+                entryCollection[LastEntryIndex] |= (ulong)value << offset;
                 Length += ByteSize;
             }
         }
@@ -87,15 +83,24 @@ namespace BrotliLib.IO{
         #region Mutation
 
         /// <summary>
-        /// Appends a bit to the end of the stream.
+        /// Returns the position of the next bit within the current <see cref="ulong"/> entry, adding a new entry if needed.
         /// </summary>
-        /// <param name="bit">Input bit.</param>
-        public void Add(bool bit){
+        private int PrepareOffsetForNextBit(){
             int offset = Length & BitEntryMask;
 
             if (offset == 0 && Length > 0){
                 entryCollection.Add(0UL);
             }
+
+            return offset;
+        }
+
+        /// <summary>
+        /// Appends a bit to the end of the stream.
+        /// </summary>
+        /// <param name="bit">Input bit.</param>
+        public void Add(bool bit){
+            int offset = PrepareOffsetForNextBit();
             
             if (bit){
                 entryCollection[LastEntryIndex] |= 1UL << offset;
@@ -122,23 +127,20 @@ namespace BrotliLib.IO{
         /// </summary>
         /// <param name="value">Input byte.</param>
         internal void AddByte(byte value){
-            int offset = Length & BitEntryMask;
+            int offset = PrepareOffsetForNextBit();
 
             entryCollection[LastEntryIndex] |= (ulong)value << offset;
             Length += ByteSize;
-
-            if (offset + ByteSize >= BitEntrySize){
-                entryCollection.Add(0UL);
-            }
         }
         
         /// <summary>
-        /// Appends 4 bytes to the end of the stream. Intended to use in <see cref="BitWriter"/> only after the stream is long-aligned, otherwise the behavior is undefined.
+        /// Appends 8 bytes to the end of the stream. Intended to use in <see cref="BitWriter"/> only after the stream is long-aligned, otherwise the behavior is undefined.
         /// </summary>
         /// <param name="value">Input bytes combined into an <see cref="ulong"/>.</param>
         internal void AddLong(ulong value){
+            PrepareOffsetForNextBit();
+
             entryCollection[LastEntryIndex] = value;
-            entryCollection.Add(0UL);
             Length += BitEntrySize;
         }
 
