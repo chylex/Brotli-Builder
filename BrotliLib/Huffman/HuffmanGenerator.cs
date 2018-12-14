@@ -7,11 +7,14 @@ namespace BrotliLib.Huffman{
     /// <summary>
     /// Provides utilities for generating Huffman trees.
     /// </summary>
-    public static class HuffmanGenerator<T>{
+    public static class HuffmanGenerator<T> where T : IComparable<T>{
+
+        #region Bit paths
+
         /// <summary>
         /// Pairs a symbol with the length of its path in a tree.
         /// </summary>
-        public class Entry{
+        public sealed class Entry : IComparable<Entry>{
             public T Symbol { get; }
             public byte Bits { get; }
 
@@ -19,15 +22,27 @@ namespace BrotliLib.Huffman{
                 Symbol = symbol;
                 Bits = bits;
             }
+
+            public int CompareTo(Entry other){
+                return Bits == other.Bits ? Symbol.CompareTo(other.Symbol) : Bits.CompareTo(other.Bits);
+            }
+
+            public override string ToString(){
+                return "{ Symbol = " + Symbol + ", Bits = " + Bits + " }";
+            }
+        }
+
+        public static Entry MakeEntry(T symbol, byte bits){
+            return new Entry(symbol, bits);
         }
 
         /// <summary>
-        /// Generates a Huffman tree from a mapping of symbols to the lengths of their paths in the tree.
+        /// Generates a canonical Huffman tree from a mapping of symbols to the lengths of their paths in the tree. Symbols of same length will be ordered by their <see cref="IComparable{T}"/> implementation.
         /// If the list contains a single symbol with any length, a <see cref="HuffmanNode{T}.Leaf"/> node will be returned, that always returns the symbol without advancing the enumerator.
         /// </summary>
-        /// <param name="entries">Ordered alphabet with each symbol mapped to its path length.</param>
+        /// <param name="entries">Alphabet with each symbol mapped to its path length.</param>
         /// <exception cref="ArgumentException">Thrown when the list of entries is empty or it contains 2+ symbols and at least one of them has a path length of 0, and when the described paths generate unreachable symbols.</exception>
-        public static HuffmanNode<T> GenerateFromBitCounts(IList<Entry> entries){
+        public static HuffmanNode<T> FromBitCountsCanonical(IList<Entry> entries){
             if (entries.Count == 1){
                 return new HuffmanNode<T>.Leaf(entries[0].Symbol);
             }
@@ -49,14 +64,14 @@ namespace BrotliLib.Huffman{
                 nextCode[bits - 1] = code;
             }
 
-            Dictionary<BitStream, T> symbolPaths = new Dictionary<BitStream, T>(bitCounts.Count);
+            var symbolPaths = new Dictionary<BitStream, T>(bitCounts.Count);
 
-            foreach(Entry entry in entries){
+            foreach(Entry entry in entries.OrderBy(entry => entry)){
                 int pathCode = nextCode[entry.Bits - 1]++;
                 symbolPaths[new BitStream(Convert.ToString(pathCode, 2).PadLeft(entry.Bits, '0'))] = entry.Symbol;
             }
 
-            return GenerateFromSymbolPaths(symbolPaths);
+            return FromSymbolPaths(symbolPaths);
         }
 
         /// <summary>
@@ -64,7 +79,7 @@ namespace BrotliLib.Huffman{
         /// </summary>
         /// <param name="paths">Mapping of bit paths to the symbols. All possible paths must terminate in a symbol.</param>
         /// <exception cref="ArgumentException">Thrown when the <paramref name="paths"/> dictionary is missing a possible path, or a path is unreachable.</exception>
-        public static HuffmanNode<T> GenerateFromSymbolPaths(Dictionary<BitStream, T> paths){
+        public static HuffmanNode<T> FromSymbolPaths(Dictionary<BitStream, T> paths){
             int longestBranch = paths.Select(path => path.Key.Length).DefaultIfEmpty(0).Max();
             int totalLeaves = 0;
 
