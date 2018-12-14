@@ -137,6 +137,10 @@ namespace BrotliLib.Brotli.Components{
 
                 DataLength.Serializer.ToBits(writer, obj.DataLength, NoContext.Value);
 
+                if (obj.DataLength.ChunkNibbles == 0){
+                    return;
+                }
+
                 if (!obj.IsLast){
                     writer.WriteBit(obj is Uncompressed);
                 }
