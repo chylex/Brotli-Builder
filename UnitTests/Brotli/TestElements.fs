@@ -4,6 +4,7 @@ open Xunit
 open System
 open BrotliLib.IO
 open BrotliLib.Brotli.Components
+open BrotliLib.Brotli.Components.Data
 open BrotliLib.Brotli.Components.Header
 open BrotliLib.Brotli.Components.Utils
 open BrotliLib.Huffman
@@ -186,3 +187,95 @@ module LiteralContextMode =
     [<MemberData("values")>]
     let ``converting to and from bits yields same object`` (mode: LiteralContextMode) =
         Assert.Equal(mode, Helper.convert mode NoContext.Value LiteralContextModes.Serializer)
+
+
+module InsertCopyLengths =
+    let icCodes = seq { 0..703 } |> Seq.map(fun value -> InsertCopyLengthCode(value)) |> Seq.toArray
+
+    let insertRanges = [|
+        seq { 0..0 }
+        seq { 1..1 }
+        seq { 2..2 }
+        seq { 3..3 }
+        seq { 4..4 }
+        seq { 5..5 }
+        seq { 6..7 }
+        seq { 8..9 }
+        seq { 10..13 }
+        seq { 14..17 }
+        seq { 18..25 }
+        seq { 26..33 }
+        seq { 34..49 }
+        seq { 50..65 }
+        seq { 66..97 }
+        seq { 98..129 }
+        seq { 130..193 }
+        seq { 194..321 }
+        seq { 322..577 }
+        seq { 578..1089 }
+        seq { 1090..2113 }
+        seq { yield! seq { 2114..2200 }; yield! seq { 6100..6209 } }
+        seq { yield! seq { 6210..6300 }; yield! seq { 22000..22593 } }
+        seq { yield! seq { 22594..23000 }; yield! seq { 16799000..16799809 } }
+    |]
+
+    let copyRanges = [|
+        seq { 2..2 }
+        seq { 3..3 }
+        seq { 4..4 }
+        seq { 5..5 }
+        seq { 6..6 }
+        seq { 7..7 }
+        seq { 8..8 }
+        seq { 9..9 }
+        seq { 10..11 }
+        seq { 12..13 }
+        seq { 14..17 }
+        seq { 18..21 }
+        seq { 22..29 }
+        seq { 30..37 }
+        seq { 38..53 }
+        seq { 54..69 }
+        seq { 70..101 }
+        seq { 102..133 }
+        seq { 134..197 }
+        seq { 198..325 }
+        seq { 326..581 }
+        seq { 582..1093 }
+        seq { 1094..2117 }
+        seq { yield! seq { 2118..2200 }; yield! seq { 16779000..16779333 } }
+    |]
+
+    let insertRangesObj : obj array seq = seq {
+        yield! insertRanges |> Seq.indexed |> Seq.map(fun (index, seq) -> [| box index; box seq |])
+    }
+
+    let copyRangesObj : obj array seq = seq {
+        yield! copyRanges |> Seq.indexed |> Seq.map(fun (index, seq) -> [| box index; box seq |])
+    }
+    
+    [<Theory>]
+    [<MemberData("insertRangesObj")>]
+    let ``converting insert lengths to and from bits yields same object`` (insertCode: int, insertRange: int seq) =
+        let validCodes = icCodes |> Seq.filter(fun icCode -> icCode.InsertCode = insertCode) |> Seq.toArray
+        Assert.Equal((if insertCode < 8 then 40 else 24), validCodes.Length)
+
+        for insertLength in insertRange do
+            for icCode in validCodes do
+                let lengths = InsertCopyLengths(insertLength, copyRanges.[icCode.CopyCode] |> Seq.head)
+
+                Assert.True(lengths.CanEncodeUsing(icCode))
+                Assert.Equal(lengths, Helper.convert lengths icCode InsertCopyLengths.Serializer)
+    
+    [<Theory>]
+    [<MemberData("copyRangesObj")>]
+    let ``converting copy lengths to and from bits yields same object`` (copyCode: int, copyRange: int seq) =
+        let validCodes = icCodes |> Seq.filter(fun icCode -> icCode.CopyCode = copyCode) |> Seq.toArray
+        Assert.Equal((if copyCode < 16 then 32 else 24), validCodes.Length)
+
+        for copyLength in copyRange do
+            for icCode in validCodes do
+                let lengths = InsertCopyLengths(insertRanges.[icCode.InsertCode] |> Seq.head, copyLength)
+
+                Assert.True(lengths.CanEncodeUsing(icCode))
+                Assert.Equal(lengths, Helper.convert lengths icCode InsertCopyLengths.Serializer)
