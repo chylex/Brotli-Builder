@@ -6,6 +6,7 @@ open BrotliLib.IO
 open BrotliLib.Brotli.Components
 open BrotliLib.Brotli.Components.Header
 open BrotliLib.Brotli.Components.Utils
+open BrotliLib.Huffman
 
 
 module Helper =
@@ -102,6 +103,80 @@ module DistanceParameters =
     [<InlineData(4, 16)>]
     let ``constructing distance parameters with invalid value throws exception`` (pb: byte, db: byte) =
         Assert.Throws<ArgumentOutOfRangeException>(fun () -> DistanceParameters(pb, db) |> ignore)
+
+
+module HuffmanTree =
+    let simple : obj array seq = seq {
+        yield [| HuffmanTree(HuffmanNode.Leaf('a')) |]
+        
+        yield [| HuffmanTree(HuffmanGenerator<char>.FromBitCountsCanonical([|
+            HuffmanGenerator<_>.Entry('a', 1uy)
+            HuffmanGenerator<_>.Entry('b', 1uy)
+        |])) |]
+
+        yield [| HuffmanTree(HuffmanGenerator<char>.FromBitCountsCanonical([|
+            HuffmanGenerator<_>.Entry('a', 1uy)
+            HuffmanGenerator<_>.Entry('b', 2uy)
+            HuffmanGenerator<_>.Entry('c', 2uy)
+        |])) |]
+
+        yield [| HuffmanTree(HuffmanGenerator<char>.FromBitCountsCanonical([|
+            HuffmanGenerator<_>.Entry('a', 2uy)
+            HuffmanGenerator<_>.Entry('b', 2uy)
+            HuffmanGenerator<_>.Entry('c', 2uy)
+            HuffmanGenerator<_>.Entry('d', 2uy)
+        |])) |]
+
+        yield [| HuffmanTree(HuffmanGenerator<char>.FromBitCountsCanonical([|
+            HuffmanGenerator<_>.Entry('a', 1uy)
+            HuffmanGenerator<_>.Entry('b', 2uy)
+            HuffmanGenerator<_>.Entry('c', 3uy)
+            HuffmanGenerator<_>.Entry('d', 3uy)
+        |])) |]
+    }
+
+    let complex : obj array seq = seq {
+        yield [| HuffmanTree(HuffmanGenerator<char>.FromBitCountsCanonical([|
+            HuffmanGenerator<_>.Entry('a', 1uy)
+            HuffmanGenerator<_>.Entry('b', 2uy)
+            HuffmanGenerator<_>.Entry('c', 3uy)
+            HuffmanGenerator<_>.Entry('d', 4uy)
+            HuffmanGenerator<_>.Entry('e', 4uy)
+        |])) |]
+
+        yield [| HuffmanTree(HuffmanGenerator<char>.FromBitCountsCanonical([|
+            HuffmanGenerator<_>.Entry('c', 1uy)
+            HuffmanGenerator<_>.Entry('a', 3uy)
+            HuffmanGenerator<_>.Entry('b', 3uy)
+            HuffmanGenerator<_>.Entry('e', 3uy)
+            HuffmanGenerator<_>.Entry('d', 4uy)
+            HuffmanGenerator<_>.Entry('f', 4uy)
+        |])) |]
+
+        yield [| HuffmanTree(HuffmanGenerator<char>.FromBitCountsCanonical([|
+            HuffmanGenerator<_>.Entry('a', 3uy)
+            HuffmanGenerator<_>.Entry('b', 3uy)
+            HuffmanGenerator<_>.Entry('c', 3uy)
+            HuffmanGenerator<_>.Entry('d', 3uy)
+            HuffmanGenerator<_>.Entry('e', 3uy)
+            HuffmanGenerator<_>.Entry('f', 3uy)
+            HuffmanGenerator<_>.Entry('g', 3uy)
+            HuffmanGenerator<_>.Entry('h', 4uy)
+            HuffmanGenerator<_>.Entry('i', 4uy)
+        |])) |]
+    }
+
+    let context = HuffmanTree<char>.Context(AlphabetSize(256), (fun value -> char value), (fun symbol -> int symbol))
+
+    [<Theory>]
+    [<MemberData("simple")>]
+    let ``converting to and from bits yields same object (simple)`` (tree: HuffmanTree<char>) =
+        Assert.Equal<HuffmanTree<_>>(tree, Helper.convert tree context HuffmanTree<_>.Serializer)
+
+    [<Theory>]
+    [<MemberData("complex")>]
+    let ``converting to and from bits yields same object (complex)`` (tree: HuffmanTree<char>) =
+        Assert.Equal<HuffmanTree<_>>(tree, Helper.convert tree context HuffmanTree<_>.Serializer)
 
 
 module LiteralContextMode =

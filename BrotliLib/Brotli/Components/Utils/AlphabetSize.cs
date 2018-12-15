@@ -10,7 +10,7 @@ namespace BrotliLib.Brotli.Components.Utils{
         /// </summary>
         public int BitsPerSymbol{
             get{
-                int size = Value - 1;
+                int size = SymbolCount - 1;
                 int bitsPerSymbol = 0;
             
                 while(size > 0){
@@ -25,14 +25,14 @@ namespace BrotliLib.Brotli.Components.Utils{
         /// <summary>
         /// Amount of symbols in the alphabet.
         /// </summary>
-        public int Value { get; }
+        public int SymbolCount { get; }
         
-        public AlphabetSize(int value){
-            if (value < 0){
-                throw new ArgumentOutOfRangeException(nameof(value), "Alphabet cannot have a negative amount of symbols.");
+        public AlphabetSize(int symbolCount){
+            if (symbolCount < 0){
+                throw new ArgumentOutOfRangeException(nameof(symbolCount), "Alphabet cannot have a negative amount of symbols.");
             }
 
-            this.Value = value;
+            this.SymbolCount = symbolCount;
         }
     }
 }
