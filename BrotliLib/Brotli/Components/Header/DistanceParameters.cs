@@ -14,6 +14,7 @@ namespace BrotliLib.Brotli.Components.Header{
         // Data
 
         public int DirectCodeCount => DirectCodeBits << PostfixBitCount;
+        public AlphabetSize AlphabetSize => new AlphabetSize(16 + DirectCodeCount + (48 << PostfixBitCount));
 
         public byte PostfixBitCount { get; }
         public byte DirectCodeBits { get; }
