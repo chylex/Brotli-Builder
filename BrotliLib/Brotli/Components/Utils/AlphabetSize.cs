@@ -8,10 +8,10 @@ namespace BrotliLib.Brotli.Components.Utils{
         /// <summary>
         /// Returns the minimum amount of bits required to represent every symbol in the alphabet.
         /// </summary>
-        public int BitsPerSymbol{
+        public byte BitsPerSymbol{
             get{
                 int size = SymbolCount - 1;
-                int bitsPerSymbol = 0;
+                byte bitsPerSymbol = 0;
             
                 while(size > 0){
                     size >>= 1;

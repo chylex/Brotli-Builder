@@ -7,7 +7,8 @@ using ComplexLengthNode = BrotliLib.Huffman.HuffmanNode<byte>;
 
 namespace BrotliLib.Brotli.Components.Header{
     partial class HuffmanTree<T>{
-        private const int SymbolBitSpace = 1 << 15;
+        public const int DefaultMaxDepth = 15;
+        private const int SymbolBitSpace = 1 << DefaultMaxDepth;
 
         /// <summary>
         /// https://tools.ietf.org/html/rfc7932#section-3.5

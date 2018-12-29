@@ -10,7 +10,7 @@ namespace BrotliLib.Brotli.Components.Header{
         /// </summary>
         private static readonly IBitSerializer<HuffmanTree<T>, Context> SimpleCodeSerializer = new BitSerializer<HuffmanTree<T>, Context>(
             fromBits: (reader, context) => {
-                int bitsPerSymbol = context.AlphabetSize.BitsPerSymbol;
+                byte bitsPerSymbol = context.AlphabetSize.BitsPerSymbol;
                 int symbolCount = 1 + reader.NextChunk(2);
 
                 T[] symbols = Enumerable.Range(0, symbolCount).Select(_ => context.BitsToSymbol(reader.NextChunk(bitsPerSymbol))).ToArray();
@@ -21,7 +21,7 @@ namespace BrotliLib.Brotli.Components.Header{
             },
 
             toBits: (writer, obj, context) => {
-                int bitsPerSymbol = context.AlphabetSize.BitsPerSymbol;
+                byte bitsPerSymbol = context.AlphabetSize.BitsPerSymbol;
 
                 writer.WriteChunk(2, obj.Root.SymbolCount - 1);
 
