@@ -30,45 +30,30 @@
             this.menuItemSave = new System.Windows.Forms.MenuItem();
             this.menuItemExit = new System.Windows.Forms.MenuItem();
             this.menuItemView = new System.Windows.Forms.MenuItem();
+            this.menuItemWrapOutput = new System.Windows.Forms.MenuItem();
             this.menuItemLimitOutput = new System.Windows.Forms.MenuItem();
             this.menuItemTools = new System.Windows.Forms.MenuItem();
             this.menuItemStaticDictionary = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeFile = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeUncompressedMBs = new System.Windows.Forms.MenuItem();
             this.flowPanelBlocks = new System.Windows.Forms.FlowLayoutPanel();
-            this.textBoxGenBitStream = new System.Windows.Forms.RichTextBox();
-            this.labelGenBitStream = new System.Windows.Forms.Label();
-            this.labelGenOutput = new System.Windows.Forms.Label();
-            this.textBoxGenOutput = new System.Windows.Forms.RichTextBox();
             this.statusBar = new System.Windows.Forms.StatusBar();
             this.statusBarPanelPadding1 = new System.Windows.Forms.StatusBarPanel();
             this.statusBarPanelTimeBits = new System.Windows.Forms.StatusBarPanel();
             this.statusBarPanelPadding2 = new System.Windows.Forms.StatusBarPanel();
             this.statusBarPanelTimeOutput = new System.Windows.Forms.StatusBarPanel();
             this.timerRegenerationDelay = new System.Windows.Forms.Timer(this.components);
-            this.splitContainerLeft = new System.Windows.Forms.SplitContainer();
             this.splitContainerOuter = new System.Windows.Forms.SplitContainer();
-            this.splitContainerRight = new System.Windows.Forms.SplitContainer();
-            this.labelOrigBitStream = new System.Windows.Forms.Label();
-            this.textBoxOrigBitStream = new System.Windows.Forms.RichTextBox();
-            this.textBoxOrigOutput = new System.Windows.Forms.RichTextBox();
-            this.labelOrigOutput = new System.Windows.Forms.Label();
+            this.brotliFilePanelGenerated = new BrotliBuilder.Components.BrotliFilePanel();
+            this.brotliFilePanelOriginal = new BrotliBuilder.Components.BrotliFilePanel();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeBits)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeOutput)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainerLeft)).BeginInit();
-            this.splitContainerLeft.Panel1.SuspendLayout();
-            this.splitContainerLeft.Panel2.SuspendLayout();
-            this.splitContainerLeft.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerOuter)).BeginInit();
             this.splitContainerOuter.Panel1.SuspendLayout();
             this.splitContainerOuter.Panel2.SuspendLayout();
             this.splitContainerOuter.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainerRight)).BeginInit();
-            this.splitContainerRight.Panel1.SuspendLayout();
-            this.splitContainerRight.Panel2.SuspendLayout();
-            this.splitContainerRight.SuspendLayout();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -111,13 +96,19 @@
             // 
             this.menuItemView.Index = 1;
             this.menuItemView.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuItemWrapOutput,
             this.menuItemLimitOutput});
             this.menuItemView.Text = "&View";
             // 
+            // menuItemWrapOutput
+            // 
+            this.menuItemWrapOutput.Index = 0;
+            this.menuItemWrapOutput.Text = "Wrap Output";
+            this.menuItemWrapOutput.Click += new System.EventHandler(this.menuItemWrapOutput_Click);
+            // 
             // menuItemLimitOutput
             // 
-            this.menuItemLimitOutput.Checked = true;
-            this.menuItemLimitOutput.Index = 0;
+            this.menuItemLimitOutput.Index = 1;
             this.menuItemLimitOutput.Text = "Limit Output Length";
             this.menuItemLimitOutput.Click += new System.EventHandler(this.menuItemLimitOutput_Click);
             // 
@@ -163,56 +154,6 @@
             this.flowPanelBlocks.TabIndex = 0;
             this.flowPanelBlocks.WrapContents = false;
             // 
-            // textBoxGenBitStream
-            // 
-            this.textBoxGenBitStream.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxGenBitStream.DetectUrls = false;
-            this.textBoxGenBitStream.Font = new System.Drawing.Font("Consolas", 9.75F);
-            this.textBoxGenBitStream.Location = new System.Drawing.Point(12, 20);
-            this.textBoxGenBitStream.Name = "textBoxGenBitStream";
-            this.textBoxGenBitStream.ReadOnly = true;
-            this.textBoxGenBitStream.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.textBoxGenBitStream.Size = new System.Drawing.Size(478, 101);
-            this.textBoxGenBitStream.TabIndex = 1;
-            this.textBoxGenBitStream.Text = "";
-            // 
-            // labelGenBitStream
-            // 
-            this.labelGenBitStream.AutoSize = true;
-            this.labelGenBitStream.Location = new System.Drawing.Point(9, 2);
-            this.labelGenBitStream.Margin = new System.Windows.Forms.Padding(3, 2, 3, 0);
-            this.labelGenBitStream.Name = "labelGenBitStream";
-            this.labelGenBitStream.Size = new System.Drawing.Size(118, 15);
-            this.labelGenBitStream.TabIndex = 0;
-            this.labelGenBitStream.Text = "Generated Bit Stream";
-            // 
-            // labelGenOutput
-            // 
-            this.labelGenOutput.AutoSize = true;
-            this.labelGenOutput.Location = new System.Drawing.Point(9, 2);
-            this.labelGenOutput.Margin = new System.Windows.Forms.Padding(3, 2, 3, 0);
-            this.labelGenOutput.Name = "labelGenOutput";
-            this.labelGenOutput.Size = new System.Drawing.Size(102, 15);
-            this.labelGenOutput.TabIndex = 0;
-            this.labelGenOutput.Text = "Generated Output";
-            // 
-            // textBoxGenOutput
-            // 
-            this.textBoxGenOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxGenOutput.DetectUrls = false;
-            this.textBoxGenOutput.Font = new System.Drawing.Font("Consolas", 9.75F);
-            this.textBoxGenOutput.Location = new System.Drawing.Point(12, 20);
-            this.textBoxGenOutput.Name = "textBoxGenOutput";
-            this.textBoxGenOutput.ReadOnly = true;
-            this.textBoxGenOutput.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.textBoxGenOutput.Size = new System.Drawing.Size(478, 101);
-            this.textBoxGenOutput.TabIndex = 1;
-            this.textBoxGenOutput.Text = "";
-            // 
             // statusBar
             // 
             this.statusBar.Location = new System.Drawing.Point(0, 687);
@@ -256,28 +197,6 @@
             this.timerRegenerationDelay.Interval = 300;
             this.timerRegenerationDelay.Tick += new System.EventHandler(this.timerRegenerationDelay_Tick);
             // 
-            // splitContainerLeft
-            // 
-            this.splitContainerLeft.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainerLeft.IsSplitterFixed = true;
-            this.splitContainerLeft.Location = new System.Drawing.Point(0, 0);
-            this.splitContainerLeft.Margin = new System.Windows.Forms.Padding(0);
-            this.splitContainerLeft.Name = "splitContainerLeft";
-            this.splitContainerLeft.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainerLeft.Panel1
-            // 
-            this.splitContainerLeft.Panel1.Controls.Add(this.labelGenBitStream);
-            this.splitContainerLeft.Panel1.Controls.Add(this.textBoxGenBitStream);
-            // 
-            // splitContainerLeft.Panel2
-            // 
-            this.splitContainerLeft.Panel2.Controls.Add(this.textBoxGenOutput);
-            this.splitContainerLeft.Panel2.Controls.Add(this.labelGenOutput);
-            this.splitContainerLeft.Size = new System.Drawing.Size(502, 252);
-            this.splitContainerLeft.SplitterDistance = 124;
-            this.splitContainerLeft.TabIndex = 0;
-            // 
             // splitContainerOuter
             // 
             this.splitContainerOuter.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -288,86 +207,32 @@
             // 
             // splitContainerOuter.Panel1
             // 
-            this.splitContainerOuter.Panel1.Controls.Add(this.splitContainerLeft);
+            this.splitContainerOuter.Panel1.Controls.Add(this.brotliFilePanelGenerated);
             // 
             // splitContainerOuter.Panel2
             // 
-            this.splitContainerOuter.Panel2.Controls.Add(this.splitContainerRight);
+            this.splitContainerOuter.Panel2.Controls.Add(this.brotliFilePanelOriginal);
             this.splitContainerOuter.Size = new System.Drawing.Size(1008, 252);
             this.splitContainerOuter.SplitterDistance = 502;
             this.splitContainerOuter.TabIndex = 1;
             // 
-            // splitContainerRight
+            // brotliFilePanelGenerated
             // 
-            this.splitContainerRight.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainerRight.IsSplitterFixed = true;
-            this.splitContainerRight.Location = new System.Drawing.Point(0, 0);
-            this.splitContainerRight.Margin = new System.Windows.Forms.Padding(0);
-            this.splitContainerRight.Name = "splitContainerRight";
-            this.splitContainerRight.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            this.brotliFilePanelGenerated.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.brotliFilePanelGenerated.LabelPrefix = "Generated";
+            this.brotliFilePanelGenerated.Location = new System.Drawing.Point(0, 0);
+            this.brotliFilePanelGenerated.Name = "brotliFilePanelGenerated";
+            this.brotliFilePanelGenerated.Size = new System.Drawing.Size(502, 252);
+            this.brotliFilePanelGenerated.TabIndex = 0;
             // 
-            // splitContainerRight.Panel1
+            // brotliFilePanelOriginal
             // 
-            this.splitContainerRight.Panel1.Controls.Add(this.labelOrigBitStream);
-            this.splitContainerRight.Panel1.Controls.Add(this.textBoxOrigBitStream);
-            // 
-            // splitContainerRight.Panel2
-            // 
-            this.splitContainerRight.Panel2.Controls.Add(this.textBoxOrigOutput);
-            this.splitContainerRight.Panel2.Controls.Add(this.labelOrigOutput);
-            this.splitContainerRight.Size = new System.Drawing.Size(502, 252);
-            this.splitContainerRight.SplitterDistance = 124;
-            this.splitContainerRight.TabIndex = 0;
-            // 
-            // labelOrigBitStream
-            // 
-            this.labelOrigBitStream.AutoSize = true;
-            this.labelOrigBitStream.Location = new System.Drawing.Point(9, 2);
-            this.labelOrigBitStream.Margin = new System.Windows.Forms.Padding(3, 2, 3, 0);
-            this.labelOrigBitStream.Name = "labelOrigBitStream";
-            this.labelOrigBitStream.Size = new System.Drawing.Size(106, 15);
-            this.labelOrigBitStream.TabIndex = 0;
-            this.labelOrigBitStream.Text = "Original Bit Stream";
-            // 
-            // textBoxOrigBitStream
-            // 
-            this.textBoxOrigBitStream.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxOrigBitStream.DetectUrls = false;
-            this.textBoxOrigBitStream.Font = new System.Drawing.Font("Consolas", 9.75F);
-            this.textBoxOrigBitStream.Location = new System.Drawing.Point(12, 20);
-            this.textBoxOrigBitStream.Name = "textBoxOrigBitStream";
-            this.textBoxOrigBitStream.ReadOnly = true;
-            this.textBoxOrigBitStream.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.textBoxOrigBitStream.Size = new System.Drawing.Size(478, 101);
-            this.textBoxOrigBitStream.TabIndex = 1;
-            this.textBoxOrigBitStream.Text = "";
-            // 
-            // textBoxOrigOutput
-            // 
-            this.textBoxOrigOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxOrigOutput.DetectUrls = false;
-            this.textBoxOrigOutput.Font = new System.Drawing.Font("Consolas", 9.75F);
-            this.textBoxOrigOutput.Location = new System.Drawing.Point(12, 20);
-            this.textBoxOrigOutput.Name = "textBoxOrigOutput";
-            this.textBoxOrigOutput.ReadOnly = true;
-            this.textBoxOrigOutput.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.textBoxOrigOutput.Size = new System.Drawing.Size(478, 101);
-            this.textBoxOrigOutput.TabIndex = 1;
-            this.textBoxOrigOutput.Text = "";
-            // 
-            // labelOrigOutput
-            // 
-            this.labelOrigOutput.AutoSize = true;
-            this.labelOrigOutput.Location = new System.Drawing.Point(9, 2);
-            this.labelOrigOutput.Margin = new System.Windows.Forms.Padding(3, 2, 3, 0);
-            this.labelOrigOutput.Name = "labelOrigOutput";
-            this.labelOrigOutput.Size = new System.Drawing.Size(90, 15);
-            this.labelOrigOutput.TabIndex = 0;
-            this.labelOrigOutput.Text = "Original Output";
+            this.brotliFilePanelOriginal.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.brotliFilePanelOriginal.LabelPrefix = "Original";
+            this.brotliFilePanelOriginal.Location = new System.Drawing.Point(0, 0);
+            this.brotliFilePanelOriginal.Name = "brotliFilePanelOriginal";
+            this.brotliFilePanelOriginal.Size = new System.Drawing.Size(502, 252);
+            this.brotliFilePanelOriginal.TabIndex = 0;
             // 
             // FormMain
             // 
@@ -389,22 +254,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeBits)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeOutput)).EndInit();
-            this.splitContainerLeft.Panel1.ResumeLayout(false);
-            this.splitContainerLeft.Panel1.PerformLayout();
-            this.splitContainerLeft.Panel2.ResumeLayout(false);
-            this.splitContainerLeft.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainerLeft)).EndInit();
-            this.splitContainerLeft.ResumeLayout(false);
             this.splitContainerOuter.Panel1.ResumeLayout(false);
             this.splitContainerOuter.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerOuter)).EndInit();
             this.splitContainerOuter.ResumeLayout(false);
-            this.splitContainerRight.Panel1.ResumeLayout(false);
-            this.splitContainerRight.Panel1.PerformLayout();
-            this.splitContainerRight.Panel2.ResumeLayout(false);
-            this.splitContainerRight.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainerRight)).EndInit();
-            this.splitContainerRight.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -415,12 +268,8 @@
         private System.Windows.Forms.MenuItem menuItemFile;
         private System.Windows.Forms.MenuItem menuItemExit;
         private System.Windows.Forms.FlowLayoutPanel flowPanelBlocks;
-        private System.Windows.Forms.RichTextBox textBoxGenBitStream;
         private System.Windows.Forms.MenuItem menuItemSave;
-        private System.Windows.Forms.Label labelGenBitStream;
         private System.Windows.Forms.MenuItem menuItemOpen;
-        private System.Windows.Forms.Label labelGenOutput;
-        private System.Windows.Forms.RichTextBox textBoxGenOutput;
         private System.Windows.Forms.StatusBar statusBar;
         private System.Windows.Forms.StatusBarPanel statusBarPanelTimeBits;
         private System.Windows.Forms.StatusBarPanel statusBarPanelTimeOutput;
@@ -433,12 +282,9 @@
         private System.Windows.Forms.MenuItem menuItemView;
         private System.Windows.Forms.MenuItem menuItemLimitOutput;
         private System.Windows.Forms.MenuItem menuItemStaticDictionary;
-        private System.Windows.Forms.SplitContainer splitContainerLeft;
         private System.Windows.Forms.SplitContainer splitContainerOuter;
-        private System.Windows.Forms.SplitContainer splitContainerRight;
-        private System.Windows.Forms.Label labelOrigBitStream;
-        private System.Windows.Forms.RichTextBox textBoxOrigBitStream;
-        private System.Windows.Forms.RichTextBox textBoxOrigOutput;
-        private System.Windows.Forms.Label labelOrigOutput;
+        private System.Windows.Forms.MenuItem menuItemWrapOutput;
+        private Components.BrotliFilePanel brotliFilePanelGenerated;
+        private Components.BrotliFilePanel brotliFilePanelOriginal;
     }
 }

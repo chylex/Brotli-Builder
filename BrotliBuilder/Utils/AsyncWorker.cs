@@ -1,51 +1,29 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace BrotliBuilder.Utils{
-    sealed class AsyncWorker<T>{
-        public class FinishedArgs : EventArgs{
-            public T Result { get; }
-            public Stopwatch Stopwatch { get; }
+    sealed class AsyncWorker{
+        public delegate void Work(Action<Action> sync);
 
-            public FinishedArgs(T result, Stopwatch stopwatch){
-                this.Result = result;
-                this.Stopwatch = stopwatch;
-            }
-        }
-
-        public class CrashedArgs : EventArgs{
-            public Exception Exception { get; }
-
-            public CrashedArgs(Exception exception){
-                this.Exception = exception;
-            }
-        }
-
-        public event EventHandler<FinishedArgs> WorkFinished;
-        public event EventHandler<CrashedArgs> WorkCrashed;
-        public event EventHandler<EventArgs> WorkAborted;
-
-        public bool IsBusy => currentThread?.IsAlive == true;
+        public string Name { get; set; }
 
         private readonly TaskFactory taskFactory = new TaskFactory(TaskScheduler.FromCurrentSynchronizationContext());
-        private readonly string threadName;
         private Thread currentThread;
-
-        public AsyncWorker(string threadName){
-            this.threadName = threadName;
-        }
         
-        public void Start(Func<T> action){
+        public void Start(Work action){
             Abort();
 
-            currentThread = new Thread(Work){
-                Name = threadName,
+            void Worker(){
+                action(callback => taskFactory.StartNew(callback));
+            }
+
+            currentThread = new Thread(Worker){
+                Name = this.Name,
                 IsBackground = true
             };
 
-            currentThread.Start(action);
+            currentThread.Start();
         }
 
         public void Abort(){
@@ -54,22 +32,6 @@ namespace BrotliBuilder.Utils{
             if (thread != null && thread.IsAlive){
                 thread.Abort();
                 currentThread = null;
-            }
-        }
-
-        private void Work(object data){
-            Func<T> action = (Func<T>)data;
-
-            try{
-                Stopwatch stopwatch = Stopwatch.StartNew();
-                T result = action.Invoke();
-                stopwatch.Stop();
-
-                taskFactory.StartNew(() => WorkFinished?.Invoke(this, new FinishedArgs(result, stopwatch)));
-            }catch(ThreadAbortException){
-                taskFactory.StartNew(() => WorkAborted?.Invoke(this, EventArgs.Empty));
-            }catch(Exception e){
-                taskFactory.StartNew(() => WorkCrashed?.Invoke(this, new CrashedArgs(e)));
             }
         }
     }

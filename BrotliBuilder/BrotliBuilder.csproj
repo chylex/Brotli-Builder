@@ -92,6 +92,15 @@
       <DependentUpon>BuildWindowSize.cs</DependentUpon>
     </Compile>
     <Compile Include="Blocks\IBuildingBlockContext.cs" />
+    <Compile Include="Components\BrotliFilePanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Components\BrotliFilePanel.Designer.cs">
+      <DependentUpon>BrotliFilePanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Components\RicherTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Dialogs\FormStaticDictionary.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -147,6 +156,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Blocks\Structure\BuildWindowSize.resx">
       <DependentUpon>BuildWindowSize.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Components\BrotliFilePanel.resx">
+      <DependentUpon>BrotliFilePanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\FormStaticDictionary.resx">
       <DependentUpon>FormStaticDictionary.cs</DependentUpon>

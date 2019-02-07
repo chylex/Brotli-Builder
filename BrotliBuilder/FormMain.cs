@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using BrotliBuilder.Blocks;
 using BrotliBuilder.Dialogs;
-using BrotliBuilder.Utils;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
-using BrotliLib.Brotli.Dictionary.Source;
 using BrotliLib.Brotli.Encode;
-using BrotliLib.IO;
 
 namespace BrotliBuilder{
     partial class FormMain : Form{
@@ -64,35 +59,11 @@ namespace BrotliBuilder{
         private BrotliFileStructure brotliFile = BrotliFileStructure.NewEmpty();
         private string lastFileName = "compressed";
         private bool isDirty = false;
-
-        private readonly AsyncWorker<string> workerStream;
-        private readonly AsyncWorker<string> workerOutput;
-
+        
         public FormMain(){
             InitializeComponent();
-
-            textBoxGenBitStream.SetPlainTextMode();
-            textBoxGenOutput.SetPlainTextMode();
-
-            workerStream = new AsyncWorker<string>("GenBits");
-            workerOutput = new AsyncWorker<string>("GenOutput");
-
-            SetupWorker(
-                workerStream,
-                textBoxGenBitStream,
-                statusBarPanelTimeBits,
-                ms => "Generated bit stream in " + ms + " ms.",
-                () => "Error generating bit stream."
-            );
-
-            SetupWorker(
-                workerOutput,
-                textBoxGenOutput,
-                statusBarPanelTimeOutput,
-                ms => "Generated output in " + ms + " ms.",
-                () => "Error generating output."
-            );
-
+            
+            menuItemLimitOutput_Click(this, EventArgs.Empty);
             splitContainerOuter.Panel2Collapsed = true;
             OnNewBrotliFile();
         }
@@ -100,29 +71,52 @@ namespace BrotliBuilder{
         #region File state handling
 
         private void LoadExistingBrotliFile(byte[] bytes){
-            brotliFile = BrotliFileStructure.FromBytes(bytes);
-            OnNewBrotliFile();
-
-            BitStream bits = new BitStream(bytes);
-            textBoxOrigBitStream.Text = bits.ToString();
-
-            try{
-                UpdateTextBox(textBoxOrigOutput, brotliFile.GetDecompressionState(bits).OutputAsUTF8);
-            }catch(Exception ex){
-                UpdateTextBox(textBoxOrigOutput, ex);
-            }
-
             splitContainerOuter.Panel2Collapsed = false;
+            statusBarPanelTimeBits.Text = "Decompressing...";
+            statusBarPanelTimeOutput.Text = "Decompressing...";
+
+            flowPanelBlocks.Controls.Clear();
+            brotliFilePanelGenerated.InvalidatePanel();
+
+            brotliFilePanelOriginal.LoadBrotliFile(bytes, file => {
+                brotliFile = file;
+                OnNewBrotliFile();
+            });
         }
 
         private void OnNewBrotliFile(){
             flowPanelBlocks.Controls.Clear();
             flowPanelBlocks.Controls.Add(new BuildFileStructure(new BuildingBlockContext(this, flowPanelBlocks), brotliFile));
 
-            splitContainerOuter.Panel2Collapsed = true;
-
             RegenerateBrotliStream(markAsDirty: false);
             isDirty = false;
+        }
+        
+        private void timerRegenerationDelay_Tick(object sender, EventArgs e){
+            timerRegenerationDelay.Stop();
+            
+            statusBarPanelTimeBits.Text = "Generating...";
+            statusBarPanelTimeOutput.Text = "Generating...";
+
+            brotliFilePanelGenerated.LoadBrotliFile(
+                brotliFile,
+
+                onSerializedStopwatch =>
+                    statusBarPanelTimeBits.Text = onSerializedStopwatch == null ?
+                        "Error generating bit stream." :
+                        "Generated bit stream in " + onSerializedStopwatch.ElapsedMilliseconds + " ms.",
+
+                onDecompressedStopwatch =>
+                    statusBarPanelTimeOutput.Text = onDecompressedStopwatch == null ?
+                        "Error generating output." :
+                        "Generated output in " + onDecompressedStopwatch.ElapsedMilliseconds + " ms."
+            );
+        }
+
+        private void RegenerateBrotliStream(bool markAsDirty){
+            isDirty = isDirty || markAsDirty;
+            timerRegenerationDelay.Stop();
+            timerRegenerationDelay.Start();
         }
 
         private bool PromptUnsavedChanges(string message){
@@ -144,55 +138,6 @@ namespace BrotliBuilder{
             }
 
             return false;
-        }
-
-        #endregion
-
-        #region Output generation
-
-        private void UpdateTextBox(RichTextBox tb, string text){
-            if (menuItemLimitOutput.Checked && text.Length > LimitOutputLength){
-                text = text.Substring(0, LimitOutputLength) + "(...)";
-            }
-
-            tb.ForeColor = SystemColors.WindowText;
-            tb.Text = text;
-        }
-
-        private void UpdateTextBox(RichTextBox tb, Exception ex){
-            tb.ForeColor = Color.Red;
-            tb.Text = Regex.Replace(ex.ToString(), " in (.*):", " : ");
-        }
-
-        private void SetupWorker(AsyncWorker<string> worker, RichTextBox tb, StatusBarPanel status, Func<long, string> funcStatusTextSuccess, Func<string> funcStatusTextFailure){
-            worker.WorkFinished += (sender, args) => {
-                UpdateTextBox(tb, args.Result);
-                status.Text = funcStatusTextSuccess(args.Stopwatch.ElapsedMilliseconds);
-            };
-
-            worker.WorkCrashed += (sender, args) => {
-                UpdateTextBox(tb, args.Exception);
-                status.Text = funcStatusTextFailure();
-            };
-        }
-
-        private void timerRegenerationDelay_Tick(object sender, EventArgs e){
-            timerRegenerationDelay.Stop();
-
-            textBoxGenBitStream.ForeColor = SystemColors.GrayText;
-            textBoxGenOutput.ForeColor = SystemColors.GrayText;
-
-            statusBarPanelTimeBits.Text = "Generating...";
-            statusBarPanelTimeOutput.Text = "Generating...";
-
-            workerStream.Start(() => brotliFile.Serialize().ToString());
-            workerOutput.Start(() => brotliFile.GetDecompressionState(brotliFile.Serialize()).OutputAsUTF8);
-        }
-
-        private void RegenerateBrotliStream(bool markAsDirty){
-            isDirty = isDirty || markAsDirty;
-            timerRegenerationDelay.Stop();
-            timerRegenerationDelay.Start();
         }
 
         #endregion
@@ -255,9 +200,18 @@ namespace BrotliBuilder{
 
         #region Menu events (View)
 
+        private void menuItemWrapOutput_Click(object sender, EventArgs e){
+            bool enable = !menuItemWrapOutput.Checked;
+            menuItemWrapOutput.Checked = enable;
+
+            brotliFilePanelGenerated.WordWrapOutput = brotliFilePanelOriginal.WordWrapOutput = enable;
+        }
+
         private void menuItemLimitOutput_Click(object sender, EventArgs e){
-            menuItemLimitOutput.Checked = !menuItemLimitOutput.Checked;
-            RegenerateBrotliStream(markAsDirty: false);
+            bool enable = !menuItemLimitOutput.Checked;
+            menuItemLimitOutput.Checked = enable;
+
+            brotliFilePanelGenerated.MaxLength = brotliFilePanelOriginal.MaxLength = enable ? LimitOutputLength : -1;
         }
 
         #endregion
@@ -265,21 +219,13 @@ namespace BrotliBuilder{
         #region Menu events (Tools)
 
         private void menuItemStaticDictionary_Click(object sender, EventArgs e){
-            using(OpenFileDialog dialog = new OpenFileDialog{
-                Title = "Static Dictionary",
-                Filter = "All Files (*.*)|*.*"
-            }){
-                if (dialog.ShowDialog() == DialogResult.OK){
-                    try{
-                        using(BrotliDefaultDictionary dict = new BrotliDefaultDictionary(new MemorySource(dialog.FileName)))
-                        using(FormStaticDictionary form = new FormStaticDictionary(dict)){
-                            form.ShowDialog();
-                        }
-                    }catch(Exception ex){
-                        Debug.WriteLine(ex.ToString());
-                        MessageBox.Show(ex.Message, "Static Dictionary Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+            try{
+                using(FormStaticDictionary form = new FormStaticDictionary(BrotliDefaultDictionary.Embedded)){
+                    form.ShowDialog();
                 }
+            }catch(Exception ex){
+                Debug.WriteLine(ex.ToString());
+                MessageBox.Show(ex.Message, "Static Dictionary Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -309,6 +255,8 @@ namespace BrotliBuilder{
                         MessageBox.Show(ex.Message, "File Open Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
+
+                    splitContainerOuter.Panel2Collapsed = true;
                     
                     try{
                         brotliFile = BrotliFileStructure.FromEncoder(windowSize, encoder, bytes);
@@ -322,5 +270,6 @@ namespace BrotliBuilder{
         }
 
         #endregion
+        
     }
 }
