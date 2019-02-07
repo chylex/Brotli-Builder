@@ -44,6 +44,8 @@ namespace BrotliBuilder.Blocks{
             else if (listElements.SelectedItem is StructureMetaBlockItem smbi){
                 smbi.HandleNotification(e);
             }
+
+            brotliFile.Fixup();
             
             listElements.SelectedValueChanged -= listElements_SelectedValueChanged;
             listElements.Items[listElements.SelectedIndex] = listElements.SelectedItem; // update item text
@@ -87,6 +89,7 @@ namespace BrotliBuilder.Blocks{
             }
 
             brotliFile.MetaBlocks.Insert(insertAt, metaBlock);
+            brotliFile.Fixup();
             RegenerateElementList(selectIndex: insertAt + 1, notifyParent: true);
         }
 
@@ -115,6 +118,7 @@ namespace BrotliBuilder.Blocks{
                 if (newIndex >= 0 && newIndex < brotliFile.MetaBlocks.Count){
                     brotliFile.MetaBlocks.RemoveAt(currentIndex);
                     brotliFile.MetaBlocks.Insert(newIndex, item.Value);
+                    brotliFile.Fixup();
                     RegenerateElementList(selectIndex: newIndex + 1, notifyParent: true);
                 }
             }
@@ -133,6 +137,7 @@ namespace BrotliBuilder.Blocks{
                 MessageBox.Show($"Are you sure you want to permanently delete this meta-block?{Environment.NewLine}{item}", "Delete Meta-Block", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes
             ){
                 brotliFile.MetaBlocks.Remove(item.Value);
+                brotliFile.Fixup();
                 RegenerateElementList(selectIndex: Math.Min(listElements.SelectedIndex, listElements.Items.Count - 2), notifyParent: true);
             }
         }

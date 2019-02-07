@@ -42,6 +42,12 @@ namespace BrotliLib.Brotli{
             return new BrotliGlobalState(BrotliDefaultDictionary.Embedded, WindowSize);
         }
 
+        public void Fixup(){
+            for(int index = 0, last = MetaBlocks.Count - 1; index <= last; index++){
+                MetaBlocks[index].IsLast = index == last;
+            }
+        }
+
         public BitStream Serialize(){
             BitStream stream = new BitStream();
             Serializer.ToBits(stream.GetWriter(), this, null);
