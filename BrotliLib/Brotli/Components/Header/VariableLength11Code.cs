@@ -21,13 +21,22 @@ namespace BrotliLib.Brotli.Components.Header{
 
             this.Value = value;
         }
-
-        public override int GetHashCode(){
-            return Value;
-        }
+        
+        // Object
 
         public override bool Equals(object obj){
-            return obj is VariableLength11Code other && other.Value == Value;
+            return obj is VariableLength11Code code &&
+                   Value == code.Value;
+        }
+
+        public override int GetHashCode(){
+            unchecked{
+                return -1937169414 + Value.GetHashCode();
+            }
+        }
+
+        public override string ToString(){
+            return "Value = " + Value;
         }
 
         // Serialization

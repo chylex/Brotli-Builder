@@ -64,16 +64,21 @@ namespace BrotliLib.Brotli.Components.Data{
             return CompactedCode.CompareTo(other.CompactedCode);
         }
 
-        public override int GetHashCode(){
-            return CompactedCode;
-        }
+        // Object
 
         public override bool Equals(object obj){
-            return obj is InsertCopyLengthCode other && other.CompactedCode == CompactedCode;
+            return obj is InsertCopyLengthCode code &&
+                   CompactedCode == code.CompactedCode;
+        }
+
+        public override int GetHashCode(){
+            unchecked{
+                return 905739190 + CompactedCode.GetHashCode();
+            }
         }
 
         public override string ToString(){
-            return "{ Compacted = " + CompactedCode + " }";
+            return "CompactedCode = " + CompactedCode + " (InsertCode = " + InsertCode + ", CopyCode = " + CopyCode + ", UseDistanceCodeZero = " + UseDistanceCodeZero + ")";
         }
     }
 }

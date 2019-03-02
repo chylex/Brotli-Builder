@@ -19,6 +19,25 @@ namespace BrotliLib.Brotli.Components.Contents{
             this.BlockSwitchCommands = blockSwitchCommands;
         }
 
+        // Object
+
+        public override bool Equals(object obj){
+            return obj is CompressedMetaBlockContents contents &&
+                   EqualityComparer<MetaBlockCompressionHeader>.Default.Equals(Header, contents.Header) &&
+                   EqualityComparer<IReadOnlyList<InsertCopyCommand>>.Default.Equals(InsertCopyCommands, contents.InsertCopyCommands) &&
+                   EqualityComparer<BlockSwitchCommandMap>.Default.Equals(BlockSwitchCommands, contents.BlockSwitchCommands);
+        }
+
+        public override int GetHashCode(){
+            unchecked{
+                var hashCode = -1778056541;
+                hashCode = hashCode * -1521134295 + EqualityComparer<MetaBlockCompressionHeader>.Default.GetHashCode(Header);
+                hashCode = hashCode * -1521134295 + EqualityComparer<IReadOnlyList<InsertCopyCommand>>.Default.GetHashCode(InsertCopyCommands);
+                hashCode = hashCode * -1521134295 + EqualityComparer<BlockSwitchCommandMap>.Default.GetHashCode(BlockSwitchCommands);
+                return hashCode;
+            }
+        }
+
         // Context
 
         internal abstract class DataContext : MetaBlock.Context{

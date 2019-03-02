@@ -34,5 +34,22 @@ namespace BrotliLib.Brotli.Components.Utils{
 
             this.SymbolCount = symbolCount;
         }
+
+        // Object
+
+        public override bool Equals(object obj){
+            var size = obj as AlphabetSize?;
+            return SymbolCount == size?.SymbolCount;
+        }
+
+        public override int GetHashCode(){
+            unchecked{
+                return -1048165080 + SymbolCount.GetHashCode();
+            }
+        }
+
+        public override string ToString(){
+            return "SymbolCount = " + SymbolCount + " (BitsPerSymbol = " + BitsPerSymbol + ")";
+        }
     }
 }

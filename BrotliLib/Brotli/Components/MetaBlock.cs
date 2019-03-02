@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Contents;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.IO;
+
+#pragma warning disable CS0659
 
 namespace BrotliLib.Brotli.Components{
     /// <summary>
@@ -32,6 +35,11 @@ namespace BrotliLib.Brotli.Components{
 
         internal abstract void SerializeContents(BitWriter writer, BrotliGlobalState state);
         internal abstract void DeserializeContents(BitReader reader, BrotliGlobalState state);
+        
+        protected bool Equals(MetaBlock other){
+            return IsLast == other.IsLast &&
+                   EqualityComparer<DataLength>.Default.Equals(DataLength, other.DataLength);
+        }
 
         // Types
 
@@ -41,6 +49,10 @@ namespace BrotliLib.Brotli.Components{
         /// </summary>
         public class LastEmpty : MetaBlock{
             public LastEmpty() : base(true, DataLength.Empty){}
+
+            public override bool Equals(object obj){
+                return obj is LastEmpty;
+            }
 
             internal override void SerializeContents(BitWriter writer, BrotliGlobalState state){}
             internal override void DeserializeContents(BitReader reader, BrotliGlobalState state){}
@@ -59,6 +71,11 @@ namespace BrotliLib.Brotli.Components{
                 this.Contents = new PaddedEmptyMetaBlockContents(data);
             }
 
+            public override bool Equals(object obj){
+                return obj is PaddedEmpty other &&
+                       Contents.Equals(other.Contents);
+            }
+
             internal override void SerializeContents(BitWriter writer, BrotliGlobalState state) => PaddedEmptyMetaBlockContents.Serializer.ToBits(writer, Contents, new Context(this, state));
             internal override void DeserializeContents(BitReader reader, BrotliGlobalState state) => Contents = PaddedEmptyMetaBlockContents.Serializer.FromBits(reader, new Context(this, state));
         }
@@ -75,6 +92,12 @@ namespace BrotliLib.Brotli.Components{
             public Uncompressed(byte[] data) : base(false, new DataLength(data.Length)){
                 this.Contents = new UncompressedMetaBlockContents(data);
             }
+            
+            public override bool Equals(object obj){
+                return obj is Uncompressed other &&
+                       base.Equals(other) &&
+                       Contents.Equals(other.Contents);
+            }
 
             internal override void SerializeContents(BitWriter writer, BrotliGlobalState state) => UncompressedMetaBlockContents.Serializer.ToBits(writer, Contents, new Context(this, state));
             internal override void DeserializeContents(BitReader reader, BrotliGlobalState state) => Contents = UncompressedMetaBlockContents.Serializer.FromBits(reader, new Context(this, state));
@@ -88,6 +111,12 @@ namespace BrotliLib.Brotli.Components{
             public CompressedMetaBlockContents Contents { get; set; }
 
             public Compressed(bool isLast, DataLength dataLength) : base(isLast, dataLength){}
+            
+            public override bool Equals(object obj){
+                return obj is Compressed other &&
+                       base.Equals(other) &&
+                       Contents.Equals(other.Contents);
+            }
 
             internal override void SerializeContents(BitWriter writer, BrotliGlobalState state) => CompressedMetaBlockContents.Serializer.ToBits(writer, Contents, new Context(this, state));
             internal override void DeserializeContents(BitReader reader, BrotliGlobalState state) => Contents = CompressedMetaBlockContents.Serializer.FromBits(reader, new Context(this, state));
@@ -164,3 +193,5 @@ namespace BrotliLib.Brotli.Components{
         );
     }
 }
+
+#pragma warning restore CS0659

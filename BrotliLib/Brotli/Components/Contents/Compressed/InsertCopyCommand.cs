@@ -24,6 +24,25 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
             this.CopyDistance = copyDistance;
         }
 
+        // Object
+
+        public override bool Equals(object obj){
+            return obj is InsertCopyCommand command &&
+                   EqualityComparer<InsertCopyLengths>.Default.Equals(Lengths, command.Lengths) &&
+                   EqualityComparer<IReadOnlyList<byte>>.Default.Equals(Literals, command.Literals) &&
+                   EqualityComparer<int?>.Default.Equals(CopyDistance, command.CopyDistance);
+        }
+
+        public override int GetHashCode(){
+            unchecked{
+                var hashCode = -558486850;
+                hashCode = hashCode * -1521134295 + EqualityComparer<InsertCopyLengths>.Default.GetHashCode(Lengths);
+                hashCode = hashCode * -1521134295 + EqualityComparer<IReadOnlyList<byte>>.Default.GetHashCode(Literals);
+                hashCode = hashCode * -1521134295 + EqualityComparer<int?>.Default.GetHashCode(CopyDistance);
+                return hashCode;
+            }
+        }
+
         // Serialization
 
         internal static readonly IBitSerializer<InsertCopyCommand, CompressedMetaBlockContents.DataContext> Serializer = new BitSerializer<InsertCopyCommand, CompressedMetaBlockContents.DataContext>(

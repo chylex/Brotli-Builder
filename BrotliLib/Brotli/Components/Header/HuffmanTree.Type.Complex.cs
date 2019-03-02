@@ -161,16 +161,21 @@ namespace BrotliLib.Brotli.Components.Header{
             return Code.CompareTo(other.Code);
         }
 
-        public override int GetHashCode(){
-            return Code;
-        }
+        // Object
 
         public override bool Equals(object obj){
-            return obj is ComplexLengthCode other && Code == other.Code;
+            return obj is ComplexLengthCode code &&
+                   Code == code.Code;
+        }
+
+        public override int GetHashCode(){
+            unchecked{
+                return -434485196 + Code.GetHashCode();
+            }
         }
 
         public override string ToString(){
-            return "{ Code = " + Code + " }";
+            return "Code = " + Code;
         }
 
         // Serialization

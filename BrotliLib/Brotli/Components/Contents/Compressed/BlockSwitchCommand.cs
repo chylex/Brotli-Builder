@@ -12,6 +12,23 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
             this.Length = length;
         }
 
+        // Object
+
+        public override bool Equals(object obj){
+            return obj is BlockSwitchCommand command &&
+                   TypeCode == command.TypeCode &&
+                   Length == command.Length;
+        }
+
+        public override int GetHashCode(){
+            unchecked{
+                var hashCode = 229038177;
+                hashCode = hashCode * -1521134295 + TypeCode.GetHashCode();
+                hashCode = hashCode * -1521134295 + Length.GetHashCode();
+                return hashCode;
+            }
+        }
+
         // Serialization
         
         public static readonly IBitSerializer<BlockSwitchCommand, BlockTypeInfo> Serializer = new BitSerializer<BlockSwitchCommand, BlockTypeInfo>(

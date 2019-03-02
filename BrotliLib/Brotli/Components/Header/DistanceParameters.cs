@@ -32,12 +32,25 @@ namespace BrotliLib.Brotli.Components.Header{
             this.DirectCodeBits = directCodeBits;
         }
 
-        public override int GetHashCode(){
-            return (PostfixBitCount << 8) + DirectCodeBits;
-        }
+        // Object
 
         public override bool Equals(object obj){
-            return obj is DistanceParameters other && other.PostfixBitCount == PostfixBitCount && other.DirectCodeCount == DirectCodeCount;
+            return obj is DistanceParameters parameters &&
+                   PostfixBitCount == parameters.PostfixBitCount &&
+                   DirectCodeBits == parameters.DirectCodeBits;
+        }
+
+        public override int GetHashCode(){
+            unchecked{
+                var hashCode = -1784343327;
+                hashCode = hashCode * -1521134295 + PostfixBitCount.GetHashCode();
+                hashCode = hashCode * -1521134295 + DirectCodeBits.GetHashCode();
+                return hashCode;
+            }
+        }
+
+        public override string ToString(){
+            return "PostfixBitCount = " + PostfixBitCount + ", DirectCodeBits = " + DirectCodeBits + " (DirectCodeCount = " + DirectCodeCount + ", AlphabetSize = { " + AlphabetSize + " })";
         }
 
         // Serialization

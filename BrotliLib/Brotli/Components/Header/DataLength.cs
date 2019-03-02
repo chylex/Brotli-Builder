@@ -44,13 +44,26 @@ namespace BrotliLib.Brotli.Components.Header{
         }
 
         public DataLength(int uncompressedBytes) : this(CalculateNibblesRequired(uncompressedBytes), uncompressedBytes){}
-
-        public override int GetHashCode(){
-            return UncompressedBytes;
-        }
+        
+        // Object
 
         public override bool Equals(object obj){
-            return obj is DataLength other && other.ChunkNibbles == ChunkNibbles && other.UncompressedBytes == UncompressedBytes;
+            return obj is DataLength length &&
+                   ChunkNibbles == length.ChunkNibbles &&
+                   UncompressedBytes == length.UncompressedBytes;
+        }
+
+        public override int GetHashCode(){
+            unchecked{
+                var hashCode = 1631702163;
+                hashCode = hashCode * -1521134295 + ChunkNibbles.GetHashCode();
+                hashCode = hashCode * -1521134295 + UncompressedBytes.GetHashCode();
+                return hashCode;
+            }
+        }
+
+        public override string ToString(){
+            return "ChunkNibbles = " + ChunkNibbles + ", UncompressedBytes = " + UncompressedBytes;
         }
 
         // Serialization

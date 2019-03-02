@@ -49,6 +49,12 @@ namespace BrotliLib.Brotli.Components.Header{
             return GetEnumerator();
         }
 
+        // Object
+
+        public override bool Equals(object obj){
+            return obj is HuffmanTree<T> other && reverseLookup.SequenceEqual(other.reverseLookup);
+        }
+
         public override int GetHashCode(){
             int hash = reverseLookup.Count * 17;
 
@@ -58,10 +64,6 @@ namespace BrotliLib.Brotli.Components.Header{
             }
 
             return hash;
-        }
-
-        public override bool Equals(object obj){
-            return obj is HuffmanTree<T> other && reverseLookup.SequenceEqual(other.reverseLookup);
         }
 
         // Context

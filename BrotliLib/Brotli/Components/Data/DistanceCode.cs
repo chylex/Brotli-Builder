@@ -48,16 +48,21 @@ namespace BrotliLib.Brotli.Components.Data{
             return Code.CompareTo(other.Code);
         }
 
-        public override int GetHashCode(){
-            return Code;
-        }
+        // Object
 
         public override bool Equals(object obj){
-            return obj is DistanceCode other && other.Code == Code;
+            return obj is DistanceCode code &&
+                   Code == code.Code;
+        }
+
+        public override int GetHashCode(){
+            unchecked{
+                return -434485196 + Code.GetHashCode();
+            }
         }
 
         public override string ToString(){
-            return "{ Code = " + Code + " }";
+            return "Code = " + Code;
         }
 
         // Types

@@ -74,7 +74,7 @@ namespace BrotliLib.Markers{
         }
 
         public override string ToString(){
-            return Marker == null ? "{ Empty }" : "{ Depth = " + Depth + ", Index = " + Marker.IndexStart + "-" + Marker.IndexEnd + " }";
+            return Marker == null ? "Empty" : "Depth = " + Depth + ", Index = " + Marker.IndexStart + "-" + Marker.IndexEnd;
         }
     }
 }

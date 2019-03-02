@@ -44,6 +44,35 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
             this.DistanceTrees = distanceTrees;
         }
 
+        // Object
+
+        public override bool Equals(object obj){
+            return obj is MetaBlockCompressionHeader header &&
+                   EqualityComparer<CategoryMap<BlockTypeInfo>>.Default.Equals(BlockTypes, header.BlockTypes) &&
+                   EqualityComparer<DistanceParameters>.Default.Equals(DistanceParameters, header.DistanceParameters) &&
+                   EqualityComparer<IReadOnlyList<LiteralContextMode>>.Default.Equals(LiteralCtxModes, header.LiteralCtxModes) &&
+                   EqualityComparer<ContextMap>.Default.Equals(LiteralCtxMap, header.LiteralCtxMap) &&
+                   EqualityComparer<ContextMap>.Default.Equals(DistanceCtxMap, header.DistanceCtxMap) &&
+                   EqualityComparer<IReadOnlyList<LiteralTree>>.Default.Equals(LiteralTrees, header.LiteralTrees) &&
+                   EqualityComparer<IReadOnlyList<InsertCopyTree>>.Default.Equals(InsertCopyTrees, header.InsertCopyTrees) &&
+                   EqualityComparer<IReadOnlyList<DistanceTree>>.Default.Equals(DistanceTrees, header.DistanceTrees);
+        }
+
+        public override int GetHashCode(){
+            unchecked{
+                var hashCode = -301170250;
+                hashCode = hashCode * -1521134295 + EqualityComparer<CategoryMap<BlockTypeInfo>>.Default.GetHashCode(BlockTypes);
+                hashCode = hashCode * -1521134295 + EqualityComparer<DistanceParameters>.Default.GetHashCode(DistanceParameters);
+                hashCode = hashCode * -1521134295 + EqualityComparer<IReadOnlyList<LiteralContextMode>>.Default.GetHashCode(LiteralCtxModes);
+                hashCode = hashCode * -1521134295 + EqualityComparer<ContextMap>.Default.GetHashCode(LiteralCtxMap);
+                hashCode = hashCode * -1521134295 + EqualityComparer<ContextMap>.Default.GetHashCode(DistanceCtxMap);
+                hashCode = hashCode * -1521134295 + EqualityComparer<IReadOnlyList<LiteralTree>>.Default.GetHashCode(LiteralTrees);
+                hashCode = hashCode * -1521134295 + EqualityComparer<IReadOnlyList<InsertCopyTree>>.Default.GetHashCode(InsertCopyTrees);
+                hashCode = hashCode * -1521134295 + EqualityComparer<IReadOnlyList<DistanceTree>>.Default.GetHashCode(DistanceTrees);
+                return hashCode;
+            }
+        }
+        
         // Serialization
         
         private static ContextMap ReadContextMap(BitReader reader, Category category, CategoryMap<BlockTypeInfo> blockTypes){

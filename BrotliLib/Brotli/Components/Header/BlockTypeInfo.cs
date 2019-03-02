@@ -32,24 +32,26 @@ namespace BrotliLib.Brotli.Components.Header{
             this.TypeCodeTree = typeCodeTree;
             this.LengthCodeTree = lengthCodeTree;
         }
-        
+
+        // Object
+
+        public override bool Equals(object obj){
+            return obj is BlockTypeInfo info &&
+                   Count == info.Count &&
+                   InitialLength == info.InitialLength &&
+                   EqualityComparer<BlockTypeCodeTree>.Default.Equals(TypeCodeTree, info.TypeCodeTree) &&
+                   EqualityComparer<BlockLengthCodeTree>.Default.Equals(LengthCodeTree, info.LengthCodeTree);
+        }
+
         public override int GetHashCode(){
             unchecked{
-                var hashCode = -1945866543;
+                var hashCode = 1953717823;
                 hashCode = hashCode * -1521134295 + Count.GetHashCode();
                 hashCode = hashCode * -1521134295 + InitialLength.GetHashCode();
                 hashCode = hashCode * -1521134295 + EqualityComparer<BlockTypeCodeTree>.Default.GetHashCode(TypeCodeTree);
                 hashCode = hashCode * -1521134295 + EqualityComparer<BlockLengthCodeTree>.Default.GetHashCode(LengthCodeTree);
                 return hashCode;
             }
-        }
-
-        public override bool Equals(object obj){
-            return obj is BlockTypeInfo other &&
-                   Count == other.Count &&
-                   InitialLength == other.InitialLength &&
-                   EqualityComparer<BlockTypeCodeTree>.Default.Equals(TypeCodeTree, other.TypeCodeTree) &&
-                   EqualityComparer<BlockLengthCodeTree>.Default.Equals(LengthCodeTree, other.LengthCodeTree);
         }
 
         // Serialization

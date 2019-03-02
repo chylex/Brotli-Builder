@@ -71,16 +71,25 @@ namespace BrotliLib.Brotli.Components.Data{
             );
         }
 
-        public override int GetHashCode(){
-            return unchecked(31 * InsertLength + CopyLength);
-        }
+        // Object
 
         public override bool Equals(object obj){
-            return obj is InsertCopyLengths other && InsertLength == other.InsertLength && CopyLength == other.CopyLength;
+            return obj is InsertCopyLengths lengths &&
+                   InsertLength == lengths.InsertLength &&
+                   CopyLength == lengths.CopyLength;
+        }
+
+        public override int GetHashCode(){
+            unchecked{
+                var hashCode = -1099318212;
+                hashCode = hashCode * -1521134295 + InsertLength.GetHashCode();
+                hashCode = hashCode * -1521134295 + CopyLength.GetHashCode();
+                return hashCode;
+            }
         }
 
         public override string ToString(){
-            return "{ InsertLength = " + InsertLength + ", CopyLength = " + CopyLength + " }";
+            return "InsertLength = " + InsertLength + ", CopyLength = " + CopyLength;
         }
 
         // Serialization

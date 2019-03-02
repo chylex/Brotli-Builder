@@ -28,12 +28,21 @@ namespace BrotliLib.Brotli.Components{
             this.Bits = wbits;
         }
 
-        public override int GetHashCode(){
-            return Bits;
-        }
+        // Object
 
         public override bool Equals(object obj){
-            return obj is WindowSize other && other.Bits == Bits;
+            return obj is WindowSize size &&
+                   Bits == size.Bits;
+        }
+
+        public override int GetHashCode(){
+            unchecked{
+                return -943821695 + Bits.GetHashCode();
+            }
+        }
+
+        public override string ToString(){
+            return "Bits = " + Bits + " (Bytes = " + Bytes + ")";
         }
 
         // Serialization

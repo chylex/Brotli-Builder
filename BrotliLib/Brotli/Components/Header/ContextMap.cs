@@ -26,17 +26,24 @@ namespace BrotliLib.Brotli.Components.Header{
         public byte DetermineTreeID(int blockID, int contextID){
             return contextMap[blockID * TreesPerBlockType + contextID];
         }
-        
-        public override int GetHashCode(){
-            int hash = 1980284268;
-            hash = unchecked((hash * -1521134295) + TreeCount);
-            hash = unchecked((hash * -1521134295) + TreesPerBlockType);
-            hash = unchecked((hash * -1521134295) + ((IStructuralEquatable)contextMap).GetHashCode(EqualityComparer<byte[]>.Default));
-            return hash;
-        }
+
+        // Object
 
         public override bool Equals(object obj){
-            return obj is ContextMap other && TreeCount == other.TreeCount && TreesPerBlockType == other.TreesPerBlockType && contextMap.SequenceEqual(other.contextMap);
+            return obj is ContextMap map &&
+                   TreeCount == map.TreeCount &&
+                   TreesPerBlockType == map.TreesPerBlockType &&
+                   EqualityComparer<byte[]>.Default.Equals(contextMap, map.contextMap);
+        }
+
+        public override int GetHashCode(){
+            unchecked{
+                var hashCode = 1980284268;
+                hashCode = hashCode * -1521134295 + TreeCount.GetHashCode();
+                hashCode = hashCode * -1521134295 + TreesPerBlockType.GetHashCode();
+                hashCode = hashCode * -1521134295 + EqualityComparer<byte[]>.Default.GetHashCode(contextMap);
+                return hashCode;
+            }
         }
 
         // Serialization

@@ -43,6 +43,19 @@ namespace BrotliLib.Brotli.Components.Contents{
             this.hiddenData = hiddenData;
         }
 
+        // Object
+
+        public override bool Equals(object obj){
+            return obj is PaddedEmptyMetaBlockContents contents &&
+                   EqualityComparer<byte[]>.Default.Equals(hiddenData, contents.hiddenData);
+        }
+
+        public override int GetHashCode(){
+            unchecked{
+                return 1863676209 + EqualityComparer<byte[]>.Default.GetHashCode(hiddenData);
+            }
+        }
+        
         // Serialization
 
         internal static readonly IBitSerializer<PaddedEmptyMetaBlockContents, MetaBlock.Context> Serializer = new BitSerializer<PaddedEmptyMetaBlockContents, MetaBlock.Context>(
