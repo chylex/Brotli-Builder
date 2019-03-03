@@ -175,7 +175,11 @@ namespace BrotliLib.Brotli.Components.Header{
         }
 
         public override string ToString(){
-            return "Code = " + Code;
+            switch(Code){
+                case Repeat: return "Repeat";
+                case Skip: return "Skip";
+                default: return "Length = " + Code;
+            }
         }
 
         // Serialization

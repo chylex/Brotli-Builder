@@ -35,7 +35,7 @@ namespace BrotliLib.Huffman{
             }
 
             public override string ToString(){
-                return "Symbol = " + Symbol + ", Bits = " + Bits;
+                return "Bits = " + Bits + ", Symbol = { " + Symbol + " }";
             }
         }
 

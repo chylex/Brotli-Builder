@@ -62,7 +62,7 @@ namespace BrotliLib.Brotli.Components.Data{
         }
 
         public override string ToString(){
-            return "Code = " + Code;
+            return "Code = " + Code + " | " + GetType().Name;
         }
 
         // Types
@@ -106,6 +106,10 @@ namespace BrotliLib.Brotli.Components.Data{
             protected override void WriteValue(BrotliGlobalState state, int value, BitWriter writer){
                 // no extra bits
             }
+
+            public override string ToString(){
+                return base.ToString() + " | Value = buffer[" + index + "] " + (offset < 0 ? "- " + (-offset) : "+ " + offset);
+            }
         }
 
         /// <inheritdoc />
@@ -129,6 +133,10 @@ namespace BrotliLib.Brotli.Components.Data{
 
             protected override void WriteValue(BrotliGlobalState state, int value, BitWriter writer){
                 // no extra bits
+            }
+
+            public override string ToString(){
+                return base.ToString() + " | Value = " + encodedValue;
             }
         }
 
@@ -162,14 +170,16 @@ namespace BrotliLib.Brotli.Components.Data{
             }
 
             protected override int ReadValue(BrotliGlobalState state, BitReader reader){
-                int extraBitValue = reader.NextChunk(extraBitCount);
-                int topValue = extraBitValue + topOffset;
-
-                return (topValue << postfixBitCount) + bottomOffset;
+                return CalculateValue(reader.NextChunk(extraBitCount));
             }
 
             protected override void WriteValue(BrotliGlobalState state, int value, BitWriter writer){
                 writer.WriteChunk(extraBitCount, FindExtraBitValue(value));
+            }
+
+            private int CalculateValue(int extraBitValue){
+                int topValue = extraBitValue + topOffset;
+                return (topValue << postfixBitCount) + bottomOffset;
             }
 
             private int FindExtraBitValue(int value){
@@ -181,6 +191,10 @@ namespace BrotliLib.Brotli.Components.Data{
                 else{
                     return (withoutBottomOffset >> postfixBitCount) - topOffset;
                 }
+            }
+
+            public override string ToString(){
+                return base.ToString() + " | Value in [" + CalculateValue(0) + "; " + CalculateValue((1 << extraBitCount) - 1) + "]";
             }
         }
         
