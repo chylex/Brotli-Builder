@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Contents.Compressed;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Brotli.Markers;
+using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.Collections;
 using BrotliLib.IO;
 using BlockSwitchCommandMap = BrotliLib.Brotli.Components.Utils.CategoryMap<System.Collections.Generic.IReadOnlyList<BrotliLib.Brotli.Components.Contents.Compressed.BlockSwitchCommand>>;
@@ -102,10 +104,10 @@ namespace BrotliLib.Brotli.Components.Contents{
         private class ReaderDataContext : DataContext{
             public BlockSwitchCommandMap BlockSwitchCommands => blockSwitchCommands.Select<IReadOnlyList<BlockSwitchCommand>>((_, list) => list.AsReadOnly());
             
-            private readonly BitReader reader;
+            private readonly MarkedBitReader reader;
             private readonly CategoryMap<List<BlockSwitchCommand>> blockSwitchCommands;
 
-            public ReaderDataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header, BitReader reader) : base(wrapped, header){
+            public ReaderDataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header, MarkedBitReader reader) : base(wrapped, header){
                 this.reader = reader;
                 this.blockSwitchCommands = new CategoryMap<List<BlockSwitchCommand>>(_ => new List<BlockSwitchCommand>());
             }
@@ -140,16 +142,20 @@ namespace BrotliLib.Brotli.Components.Contents{
 
         // Serialization
 
-        internal static readonly IBitSerializer<CompressedMetaBlockContents, MetaBlock.Context> Serializer = new BitSerializer<CompressedMetaBlockContents, MetaBlock.Context>(
+        internal static readonly IBitSerializer<CompressedMetaBlockContents, MetaBlock.Context> Serializer = new MarkedBitSerializer<CompressedMetaBlockContents, MetaBlock.Context>(
             fromBits: (reader, context) => {
                 MetaBlockCompressionHeader header = MetaBlockCompressionHeader.Serializer.FromBits(reader, context);
 
                 ReaderDataContext dataContext = new ReaderDataContext(context, header, reader);
                 List<InsertCopyCommand> icCommands = new List<InsertCopyCommand>();
                 
+                reader.MarkStart();
+                
                 do{
                     icCommands.Add(InsertCopyCommand.Serializer.FromBits(reader, dataContext));
                 }while(dataContext.NeedsMoreData);
+
+                reader.MarkEnd(new TitleMarker("Command List"));
                 
                 return new CompressedMetaBlockContents(header, icCommands, dataContext.BlockSwitchCommands);
             },

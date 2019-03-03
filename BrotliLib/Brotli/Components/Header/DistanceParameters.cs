@@ -1,5 +1,6 @@
 ﻿using System;
 using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Brotli.Markers;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components.Header{
@@ -55,10 +56,12 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Serialization
 
-        public static readonly IBitSerializer<DistanceParameters, NoContext> Serializer = new BitSerializer<DistanceParameters, NoContext>(
+        public static readonly IBitSerializer<DistanceParameters, NoContext> Serializer = new MarkedBitSerializer<DistanceParameters, NoContext>(
+            markerTitle: "Distance Parameters",
+
             fromBits: (reader, context) => {
-                int postfixBitCount = reader.NextChunk(2);
-                int directCodeBits = reader.NextChunk(4);
+                int postfixBitCount = reader.NextChunk(2, "NPOSTFIX");
+                int directCodeBits = reader.NextChunk(4, "NDIRECT >> 4");
 
                 return new DistanceParameters((byte)postfixBitCount, (byte)directCodeBits);
             },

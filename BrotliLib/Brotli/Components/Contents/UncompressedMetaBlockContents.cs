@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using BrotliLib.Brotli.Markers;
+using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components.Contents{
@@ -33,7 +35,7 @@ namespace BrotliLib.Brotli.Components.Contents{
         
         // Serialization
 
-        internal static readonly IBitSerializer<UncompressedMetaBlockContents, MetaBlock.Context> Serializer = new BitSerializer<UncompressedMetaBlockContents, MetaBlock.Context>(
+        internal static readonly IBitSerializer<UncompressedMetaBlockContents, MetaBlock.Context> Serializer = new MarkedBitSerializer<UncompressedMetaBlockContents, MetaBlock.Context>(
             fromBits: (reader, context) => {
                 byte[] bytes = new byte[context.MetaBlock.DataLength.UncompressedBytes];
 
@@ -41,9 +43,14 @@ namespace BrotliLib.Brotli.Components.Contents{
                     throw new InvalidOperationException("Uncompressed meta-block must not be empty.");
                 }
 
+                reader.AlignToByteBoundary();
+                reader.MarkStart();
+
                 for(int index = 0; index < bytes.Length; index++){
-                    bytes[index] = reader.NextAlignedByte();
+                    bytes[index] = reader.NextAlignedByte("byte");
                 }
+
+                reader.MarkEnd(new TitleMarker("Uncompressed Bytes"));
 
                 context.State.Output(bytes);
                 return new UncompressedMetaBlockContents(bytes);

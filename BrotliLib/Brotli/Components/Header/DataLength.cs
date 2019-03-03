@@ -1,4 +1,5 @@
 ﻿using System;
+using BrotliLib.Brotli.Markers;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components.Header{
@@ -68,19 +69,21 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Serialization
 
-        public static readonly IBitSerializer<DataLength, NoContext> Serializer = new BitSerializer<DataLength, NoContext>(
-            fromBits: (reader, context) => {
-                int chunkNibbles;
-		        
-                switch(reader.NextChunk(2)){
-                    case 0b00: chunkNibbles = 4; break;
-                    case 0b01: chunkNibbles = 5; break;
-                    case 0b10: chunkNibbles = 6; break;
-                    case 0b11: chunkNibbles = 0; break;
-                    default: throw new InvalidOperationException("Reading two bits somehow returned a value outside [0, 3].");
-                }
+        public static readonly IBitSerializer<DataLength, NoContext> Serializer = new MarkedBitSerializer<DataLength, NoContext>(
+            markerTitle: "Data Length",
 
-                int uncompressedBytes = (chunkNibbles == 0) ? 0 : 1 + reader.NextChunk(4 * chunkNibbles);
+            fromBits: (reader, context) => {
+                int chunkNibbles = reader.NextChunk(2, "MNIBBLES", value => {
+                    switch(value){
+                        case 0b00: return 4;
+                        case 0b01: return 5;
+                        case 0b10: return 6;
+                        case 0b11: return 0;
+                        default: throw new InvalidOperationException("Reading two bits somehow returned a value outside [0, 3].");
+                    }
+                });
+		        
+                int uncompressedBytes = (chunkNibbles == 0) ? 0 : reader.NextChunk(4 * chunkNibbles, "MLEN", value => 1 + value);
 
                 return new DataLength(chunkNibbles, uncompressedBytes);
             },

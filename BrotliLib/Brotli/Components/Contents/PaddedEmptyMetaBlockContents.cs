@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using BrotliLib.Brotli.Markers;
+using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components.Contents{
@@ -58,20 +61,25 @@ namespace BrotliLib.Brotli.Components.Contents{
         
         // Serialization
 
-        internal static readonly IBitSerializer<PaddedEmptyMetaBlockContents, MetaBlock.Context> Serializer = new BitSerializer<PaddedEmptyMetaBlockContents, MetaBlock.Context>(
+        internal static readonly IBitSerializer<PaddedEmptyMetaBlockContents, MetaBlock.Context> Serializer = new MarkedBitSerializer<PaddedEmptyMetaBlockContents, MetaBlock.Context>(
             fromBits: (reader, context) => {
-                if (reader.NextBit()){
+                if (reader.NextBit("reserved")){
                     throw new InvalidOperationException("Reserved bit in empty meta-block must be 0.");
                 }
+                
+                int skipDescriptionBytes = reader.NextChunk(2, "MSKIPBYTES");
+                int skipLength = (skipDescriptionBytes == 0) ? 0 : reader.NextChunk(8 * skipDescriptionBytes, "MSKIPLEN", value => 1 + value);
 
-                int lengthDescriptionBytes = reader.NextChunk(2);
-                byte[] bytes = new byte[(lengthDescriptionBytes == 0) ? 0 : 1 + reader.NextChunk(8 * lengthDescriptionBytes)];
+                byte[] bytes = new byte[skipLength];
                 
                 reader.AlignToByteBoundary();
+                reader.MarkStart();
                 
                 for(int index = 0; index < bytes.Length; index++){
-                    bytes[index] = reader.NextAlignedByte();
+                    bytes[index] = reader.NextAlignedByte("byte");
                 }
+
+                reader.MarkEnd(new TitleMarker("Skipped Bytes"));
 
                 return new PaddedEmptyMetaBlockContents(bytes);
             },

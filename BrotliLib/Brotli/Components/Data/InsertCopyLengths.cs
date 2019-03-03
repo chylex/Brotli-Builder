@@ -1,4 +1,5 @@
-﻿using BrotliLib.IO;
+﻿using BrotliLib.Brotli.Markers;
+using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components.Data{
     /// <summary>
@@ -94,13 +95,13 @@ namespace BrotliLib.Brotli.Components.Data{
 
         // Serialization
 
-        public static readonly IBitSerializer<InsertCopyLengths, InsertCopyLengthCode> Serializer = new BitSerializer<InsertCopyLengths, InsertCopyLengthCode>(
+        public static readonly IBitSerializer<InsertCopyLengths, InsertCopyLengthCode> Serializer = new MarkedBitSerializer<InsertCopyLengths, InsertCopyLengthCode>(
             fromBits: (reader, context) => {
                 int insertCode = context.InsertCode;
                 int copyCode = context.CopyCode;
 
-                int insertLength = InsertCodeValueOffsets[insertCode] + reader.NextChunk(InsertCodeExtraBits[insertCode]);
-                int copyLength = CopyCodeValueOffsets[copyCode] + reader.NextChunk(CopyCodeExtraBits[copyCode]);
+                int insertLength = reader.NextChunk(InsertCodeExtraBits[insertCode], "ILEN", value => InsertCodeValueOffsets[insertCode] + value);
+                int copyLength = reader.NextChunk(CopyCodeExtraBits[copyCode], "CLEN", value => CopyCodeValueOffsets[copyCode] + value);
 
                 return new InsertCopyLengths(insertLength, copyLength);
             },

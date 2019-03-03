@@ -1,5 +1,6 @@
 ﻿using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
+using BrotliLib.Brotli.Markers;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components.Contents.Compressed{
@@ -31,12 +32,14 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
 
         // Serialization
         
-        public static readonly IBitSerializer<BlockSwitchCommand, BlockTypeInfo> Serializer = new BitSerializer<BlockSwitchCommand, BlockTypeInfo>(
-            fromBits: (reader, context) => {
-                int typeCode = context.TypeCodeTree.Root.LookupValue(reader);
+        public static readonly IBitSerializer<BlockSwitchCommand, BlockTypeInfo> Serializer = new MarkedBitSerializer<BlockSwitchCommand, BlockTypeInfo>(
+            markerTitle: "Block Switch Command",
 
-                var lengthCode = context.LengthCodeTree.Root.LookupValue(reader);
-                int lengthValue = BlockLengthCode.Serializer.FromBits(reader, lengthCode);
+            fromBits: (reader, context) => {
+                int typeCode = reader.ReadValue(context.TypeCodeTree.Root, "BTYPE (code)");
+                
+                var lengthCode = reader.ReadValue(context.LengthCodeTree.Root, "BLEN (code)");
+                int lengthValue = reader.ReadValue(BlockLengthCode.Serializer, lengthCode, "BLEN (value)");
 
                 return new BlockSwitchCommand(typeCode, lengthValue);
             },

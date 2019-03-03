@@ -2,6 +2,8 @@
 using BrotliLib.IO;
 using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Data;
+using BrotliLib.Brotli.Markers;
+using BrotliLib.Brotli.Markers.Data;
 using BlockTypeCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<int>;
 using BlockLengthCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.BlockLengthCode>;
 
@@ -60,20 +62,24 @@ namespace BrotliLib.Brotli.Components.Header{
             return new BlockTypeCodeTree.Context(new AlphabetSize(count + 2), value => value, symbol => symbol);
         }
 
-        public static readonly IBitSerializer<BlockTypeInfo, NoContext> Serializer = new BitSerializer<BlockTypeInfo, NoContext>(
-            fromBits: (reader, context) => {
-                int count = VariableLength11Code.Serializer.FromBits(reader, NoContext.Value).Value;
+        public static readonly IBitSerializer<BlockTypeInfo, Category?> Serializer = new MarkedBitSerializer<BlockTypeInfo, Category?>(
+            markerTitle: context => "Block Type Info (" + context + ")",
 
+            fromBits: (reader, context) => {
+                char cat = context.Value.Id();
+                
+                int count = reader.ReadValue(VariableLength11Code.Serializer, NoContext.Value, "NBLTYPES" + cat, value => value.Value);
+                
                 if (count == 1){
                     return Empty;
                 }
                 
-                var blockTypeCode = BlockTypeCodeTree.Serializer.FromBits(reader, GetBlockTypeCodeTreeContext(count));
-                var blockLengthCode = BlockLengthCodeTree.Serializer.FromBits(reader, BlockLengthCode.TreeContext);
-
-                var initialLengthCode = blockLengthCode.Root.LookupValue(reader);
-                var initialLength = BlockLengthCode.Serializer.FromBits(reader, initialLengthCode);
-
+                var blockTypeCode = reader.ReadStructure(BlockTypeCodeTree.Serializer, GetBlockTypeCodeTreeContext(count), "HTREE_BTYPE_" + cat);
+                var blockLengthCode = reader.ReadStructure(BlockLengthCodeTree.Serializer, BlockLengthCode.TreeContext, "HTREE_BLEN_" + cat);
+                
+                var initialLengthCode = reader.ReadValue(blockLengthCode.Root, "BLEN_" + cat + " (code)");
+                var initialLength = reader.ReadValue(BlockLengthCode.Serializer, initialLengthCode, "BLEN_" + cat + " (value)");
+                
                 return new BlockTypeInfo(count, initialLength, blockTypeCode, blockLengthCode);
             },
 

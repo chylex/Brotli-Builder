@@ -16,6 +16,15 @@ namespace BrotliLib.Brotli.Components.Utils{
             Category.Literal, Category.InsertCopy, Category.Distance
         };
 
+        public static char Id(this Category category){
+            switch(category){
+                case Category.Literal:    return 'L';
+                case Category.InsertCopy: return 'I';
+                case Category.Distance:   return 'D';
+                default: throw new InvalidOperationException("Invalid category: " + category);
+            }
+        }
+
         public static int HuffmanTreesPerBlockType(this Category category){
             switch(category){
                 case Category.Literal:    return 64;

@@ -1,7 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Brotli.Markers;
+using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.Huffman;
 using BrotliLib.IO;
 
@@ -52,35 +53,44 @@ namespace BrotliLib.Brotli.Components.Header{
             return new HuffmanTree<int>.Context(new AlphabetSize(alphabetSize), bits => bits, symbol => symbol);
         }
 
-        public static readonly IBitSerializer<ContextMap, KeyValuePair<Category, BlockTypeInfo>> Serializer = new BitSerializer<ContextMap, KeyValuePair<Category, BlockTypeInfo>>(
+        public static readonly IBitSerializer<ContextMap, KeyValuePair<Category, BlockTypeInfo>> Serializer = new MarkedBitSerializer<ContextMap, KeyValuePair<Category, BlockTypeInfo>>(
+            markerTitle: context => "Context Map (" + context.Key + ")",
+
             fromBits: (reader, context) => {
                 var (category, blockTypeInfo) = context;
-
-                int treeCount = VariableLength11Code.Serializer.FromBits(reader, NoContext.Value).Value;
+                
+                int treeCount = reader.ReadValue(VariableLength11Code.Serializer, NoContext.Value, "NTREES", value => value.Value);
                 int treesPerBlockType = category.HuffmanTreesPerBlockType();
 
                 byte[] contextMap = new byte[treesPerBlockType * blockTypeInfo.Count];
 
                 if (treeCount > 1){
-                    byte runLengthCodeCount = (byte)(reader.NextBit() ? 1 + reader.NextChunk(4) : 0);
-
+                    byte runLengthCodeCount = (byte)reader.MarkValue("RLEMAX", () => reader.NextBit() ? 1 + reader.NextChunk(4) : 0);
+                    
                     var codeContext = GetCodeTreeContext(treeCount + runLengthCodeCount);
-                    var codeLookup = HuffmanTree<int>.Serializer.FromBits(reader, codeContext).Root;
+                    var codeLookup = reader.ReadStructure(HuffmanTree<int>.Serializer, codeContext, "code tree").Root;
                     
                     for(int index = 0; index < contextMap.Length; index++){
+                        reader.MarkStart();
+
                         int code = codeLookup.LookupValue(reader);
 
                         if (code > 0){
                             if (code <= runLengthCodeCount){
                                 index += (1 << code) + reader.NextChunk(code) - 1;
+
+                                reader.MarkEnd(new TextMarker("skip to index " + (index + 1)));
+                                continue;
                             }
                             else{
                                 contextMap[index] = (byte)(code - runLengthCodeCount);
                             }
                         }
+                        
+                        reader.MarkEnd(new TextMarker("CMAP" + category.Id() + "[" + index + "]", contextMap[index]));
                     }
 
-                    if (reader.NextBit()){
+                    if (reader.NextBit("IMTF")){
                         MoveToFront.Decode(contextMap);
                     }
                 }

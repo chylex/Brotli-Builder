@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Brotli.Markers;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components.Contents.Compressed{
@@ -45,7 +46,9 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
 
         // Serialization
 
-        internal static readonly IBitSerializer<InsertCopyCommand, CompressedMetaBlockContents.DataContext> Serializer = new BitSerializer<InsertCopyCommand, CompressedMetaBlockContents.DataContext>(
+        internal static readonly IBitSerializer<InsertCopyCommand, CompressedMetaBlockContents.DataContext> Serializer = new MarkedBitSerializer<InsertCopyCommand, CompressedMetaBlockContents.DataContext>(
+            markerTitle: "Insert & Copy Command",
+
             fromBits: (reader, context) => {
                 MetaBlockCompressionHeader header = context.Header;
                 BrotliGlobalState state = context.State;
@@ -53,8 +56,8 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                 // Insert&copy lengths
                 
                 int icBlockID = context.NextBlockID(Category.InsertCopy);
-                InsertCopyLengthCode icCode = header.InsertCopyTrees[icBlockID].Root.LookupValue(reader);
-                InsertCopyLengths icValues = InsertCopyLengths.Serializer.FromBits(reader, icCode);
+                InsertCopyLengthCode icCode = reader.ReadValue(header.InsertCopyTrees[icBlockID].Root, "length code");
+                InsertCopyLengths icValues = reader.ReadStructure(InsertCopyLengths.Serializer, icCode, "length values");
 
                 int insertLength = icValues.InsertLength;
                 int copyLength = icValues.CopyLength;
@@ -68,7 +71,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                     int contextID = context.NextLiteralContextID(header.LiteralCtxModes[blockID]);
                     int treeID = header.LiteralCtxMap.DetermineTreeID(blockID, contextID);
 
-                    Literal literal = header.LiteralTrees[treeID].Root.LookupValue(reader);
+                    Literal literal = reader.ReadValue(header.LiteralTrees[treeID].Root, "literal");
 
                     literals[insertIndex] = literal;
                     context.WriteLiteral(literal);
@@ -91,8 +94,8 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                     int contextID = Math.Min(3, copyLength - 2);
                     int treeID = header.DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
-                    DistanceCode distanceCode = header.DistanceTrees[treeID].Root.LookupValue(reader);
-                    distanceValue = DistanceCode.Serializer.FromBits(reader, distanceCode.MakeContext(state));
+                    DistanceCode distanceCode = reader.ReadValue(header.DistanceTrees[treeID].Root, "distance code");
+                    distanceValue = reader.ReadValue(DistanceCode.Serializer, distanceCode.MakeContext(state), "distance value");
                 }
 
                 context.WriteCopy(copyLength, distanceValue, useDistanceCodeZero);

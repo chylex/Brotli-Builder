@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using BrotliLib.Brotli.Markers;
+using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.Huffman;
 using BrotliLib.IO;
 using ComplexLengthNode = BrotliLib.Huffman.HuffmanNode<byte>;
@@ -10,16 +12,18 @@ namespace BrotliLib.Brotli.Components.Header{
         public const int DefaultMaxDepth = 15;
         private const int SymbolBitSpace = 1 << DefaultMaxDepth;
 
+        private const byte NoForcedCode = byte.MaxValue;
+
         /// <summary>
         /// https://tools.ietf.org/html/rfc7932#section-3.5
         /// </summary>
-        private static readonly IBitSerializer<HuffmanTree<T>, Context> ComplexCodeSerializer = new BitSerializer<HuffmanTree<T>, Context>(
+        private static readonly IBitSerializer<HuffmanTree<T>, Context> ComplexCodeSerializer = new MarkedBitSerializer<HuffmanTree<T>, Context>(
             fromBits: (reader, context) => {
                 Func<int, T> getSymbol = context.BitsToSymbol;
 
                 var defaultRepeatCode = new HuffmanGenerator<T>.Entry(getSymbol(0), ComplexLengthCode.DefaultRepeatCode);
                 var lengthCodes = ComplexLengthCode.Read(reader, context.SkippedComplexCodeLengths);
-                byte nextForcedCode = byte.MaxValue;
+                byte nextForcedCode = NoForcedCode;
 
                 int symbolIndex = 0;
                 int symbolCount = context.AlphabetSize.SymbolCount;
@@ -27,23 +31,37 @@ namespace BrotliLib.Brotli.Components.Header{
 
                 int bitSpaceRemaining = SymbolBitSpace;
 
+                reader.MarkStart();
+
+                void AddMarkedSymbol(HuffmanGenerator<T>.Entry entry){
+                    symbolEntries.Add(entry);
+                    reader.MarkOne(new TextMarker("entry", entry));
+                }
+
                 while(bitSpaceRemaining > 0 && symbolIndex < symbolCount){
                     byte nextCode;
 
-                    if (nextForcedCode == byte.MaxValue){
+                    if (nextForcedCode == NoForcedCode){
+                        reader.MarkStart();
                         nextCode = lengthCodes.LookupValue(reader).Code;
+                        reader.MarkEnd(new TextMarker("code", nextCode));
                     }
                     else{
+                        reader.MarkOne(new TextMarker("code", nextForcedCode));
                         nextCode = nextForcedCode;
-                        nextForcedCode = byte.MaxValue;
+                        nextForcedCode = NoForcedCode;
                     }
 
                     if (nextCode == ComplexLengthCode.Skip){
+                        reader.MarkStart();
+
                         int skipCount = 3 + reader.NextChunk(3);
 
                         while((nextForcedCode = lengthCodes.LookupValue(reader).Code) == ComplexLengthCode.Skip){
                             skipCount = 8 * (skipCount - 2) + 3 + reader.NextChunk(3);
                         }
+
+                        reader.MarkEnd(new TextMarker("skip count", skipCount));
 
                         symbolIndex += skipCount;
                     }
@@ -51,26 +69,32 @@ namespace BrotliLib.Brotli.Components.Header{
                         byte repeatedCode = symbolEntries.DefaultIfEmpty(defaultRepeatCode).Select(entry => entry.Bits).Last(value => value > 0);
                         int sumPerRepeat = SymbolBitSpace >> repeatedCode;
 
+                        reader.MarkStart();
+
                         int repeatCount = 3 + reader.NextChunk(2);
 
                         while(bitSpaceRemaining - sumPerRepeat * repeatCount > 0 && (nextForcedCode = lengthCodes.LookupValue(reader).Code) == ComplexLengthCode.Repeat){
                             repeatCount = 4 * (repeatCount - 2) + 3 + reader.NextChunk(2);
                         }
 
+                        reader.MarkEnd(new TextMarker("repeat count", repeatCount));
+
                         bitSpaceRemaining -= sumPerRepeat * repeatCount;
                     
                         while(--repeatCount >= 0){
-                            symbolEntries.Add(new HuffmanGenerator<T>.Entry(getSymbol(symbolIndex++), repeatedCode));
+                            AddMarkedSymbol(new HuffmanGenerator<T>.Entry(getSymbol(symbolIndex++), repeatedCode));
                         }
                     }
                     else if (nextCode == 0){
                         ++symbolIndex;
                     }
                     else if (nextCode <= ComplexLengthCode.MaxLength){
-                        symbolEntries.Add(new HuffmanGenerator<T>.Entry(getSymbol(symbolIndex++), nextCode));
+                        AddMarkedSymbol(new HuffmanGenerator<T>.Entry(getSymbol(symbolIndex++), nextCode));
                         bitSpaceRemaining -= SymbolBitSpace >> nextCode;
                     }
                 }
+
+                reader.MarkEnd(new TitleMarker("Symbols"));
 
                 return new HuffmanTree<T>(HuffmanGenerator<T>.FromBitCountsCanonical(symbolEntries));
             },
@@ -208,11 +232,11 @@ namespace BrotliLib.Brotli.Components.Header{
             }
         }
 
-        public static HuffmanNode<ComplexLengthCode> Read(BitReader reader, int skippedAmount){
+        public static HuffmanNode<ComplexLengthCode> Read(MarkedBitReader reader, int skippedAmount) => reader.MarkTitle("Bit Lengths", () => {
             byte[] bitCounts = new byte[Codes.Length];
 
             for(int index = skippedAmount, bitSpaceRemaining = LengthBitSpace; bitSpaceRemaining > 0 && index < Order.Length; index++){
-                byte bitCount = Lengths.LookupValue(reader);
+                byte bitCount = reader.ReadValue(Lengths, "bit length for code " + Order[index]);
 
                 if (bitCount != 0){
                     bitCounts[Order[index]] = bitCount;
@@ -224,6 +248,6 @@ namespace BrotliLib.Brotli.Components.Header{
             var filteredLengthEntries = lengthEntries.Where(entry => entry.Bits > 0).ToArray();
 
             return HuffmanGenerator<ComplexLengthCode>.FromBitCountsCanonical(filteredLengthEntries.Length == 0 ? lengthEntries : filteredLengthEntries);
-        }
+        });
     }
 }

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Contents;
 using BrotliLib.Brotli.Components.Header;
+using BrotliLib.Brotli.Markers;
+using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.IO;
 
 #pragma warning disable CS0659
@@ -124,10 +126,10 @@ namespace BrotliLib.Brotli.Components{
 
         // Serialization
         
-        private static readonly IBitSerializer<MetaBlock, BrotliGlobalState> MetaBlockBaseSerializer = new BitSerializer<MetaBlock, BrotliGlobalState>(
+        private static readonly IBitSerializer<MetaBlock, BrotliGlobalState> MetaBlockBaseSerializer = new MarkedBitSerializer<MetaBlock, BrotliGlobalState>(
             fromBits: (reader, context) => {
-                bool isLast = reader.NextBit();
-                bool isLastEmpty = isLast && reader.NextBit();
+                bool isLast = reader.NextBit("ISLAST");
+                bool isLastEmpty = isLast && reader.NextBit("ISLASTEMPTY");
 
                 if (isLastEmpty){
                     return new LastEmpty();
@@ -139,7 +141,7 @@ namespace BrotliLib.Brotli.Components{
                     return new PaddedEmpty();
                 }
                 
-                bool isUncompressed = !isLast && reader.NextBit();
+                bool isUncompressed = !isLast && reader.NextBit("ISUNCOMPRESSED");
 
                 if (isUncompressed){
                     return new Uncompressed(dataLength);
@@ -179,10 +181,17 @@ namespace BrotliLib.Brotli.Components{
             }
         );
 
-        public static readonly IBitSerializer<MetaBlock, BrotliGlobalState> Serializer = new BitSerializer<MetaBlock, BrotliGlobalState>(
+        public static readonly IBitSerializer<MetaBlock, BrotliGlobalState> Serializer = new MarkedBitSerializer<MetaBlock, BrotliGlobalState>(
             fromBits: (reader, context) => {
-                MetaBlock mb = MetaBlockBaseSerializer.FromBits(reader, context);
+                reader.MarkStart();
+
+                MetaBlock mb = reader.ReadStructure(MetaBlockBaseSerializer, context, "Header");
+                
+                reader.MarkStart();
                 mb.DeserializeContents(reader, context);
+                reader.MarkEnd(new TitleMarker("Contents"));
+
+                reader.MarkEnd(new TitleMarker("Meta-Block (" + mb.GetType().Name + ")"));
                 return mb;
             },
 

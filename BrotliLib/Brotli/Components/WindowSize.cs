@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using BrotliLib.Brotli.Markers;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components{
@@ -47,30 +48,32 @@ namespace BrotliLib.Brotli.Components{
 
         // Serialization
 
-        public static readonly IBitSerializer<WindowSize, NoContext> Serializer = new BitSerializer<WindowSize, NoContext>(
+        public static readonly IBitSerializer<WindowSize, NoContext> Serializer = new MarkedBitSerializer<WindowSize, NoContext>(
+            markerTitle: "Window Size",
+
             fromBits: (reader, context) => {
-                int wbits;
-
-                if (!reader.NextBit()){ // [0]
-                    wbits = 16;
-                }
-                else{
-                    int next = reader.NextChunk(3); // [1xxx]
-
-                    if (next != 0){
-                        wbits = 17 + next;
+                int wbits = reader.MarkValue("WBITS", () => {
+                    if (!reader.NextBit()){ // [0]
+                        return 16;
                     }
                     else{
-                        next = reader.NextChunk(3); // [1000xxx]
+                        int next = reader.NextChunk(3); // [1xxx]
 
-                        switch(next){
-                            case 1: throw new InvalidOperationException("Invalid window size, 1000001 is a reserved value.");
-                            case 0: wbits = 17; break;
-                            default: wbits = 8 + next; break;
+                        if (next != 0){
+                            return 17 + next;
+                        }
+                        else{
+                            next = reader.NextChunk(3); // [1000xxx]
+
+                            switch(next){
+                                case 1: throw new InvalidOperationException("Invalid window size, 1000001 is a reserved value.");
+                                case 0: return 17;
+                                default: return 8 + next;
+                            }
                         }
                     }
-                }
-
+                });
+                
                 return new WindowSize(wbits);
             },
 

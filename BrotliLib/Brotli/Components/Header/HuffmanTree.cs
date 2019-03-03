@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Brotli.Markers;
+using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.Huffman;
 using BrotliLib.IO;
 
@@ -85,17 +87,24 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Serialization
 
-        public static readonly IBitSerializer<HuffmanTree<T>, Context> Serializer = new BitSerializer<HuffmanTree<T>, Context>(
+        public static readonly IBitSerializer<HuffmanTree<T>, Context> Serializer = new MarkedBitSerializer<HuffmanTree<T>, Context>(
             fromBits: (reader, context) => {
-                int type = reader.NextChunk(2);
+                reader.MarkStart();
+
+                int type = reader.NextChunk(2, "HSKIP");
+                HuffmanTree<T> tree;
 
                 if (type == 1){
-                    return SimpleCodeSerializer.FromBits(reader, context);
+                    tree = SimpleCodeSerializer.FromBits(reader, context);
+                    reader.MarkEnd(new TitleMarker("Simple Huffman Tree"));
                 }
                 else{
                     context.SkippedComplexCodeLengths = type;
-                    return ComplexCodeSerializer.FromBits(reader, context);
+                    tree = ComplexCodeSerializer.FromBits(reader, context);
+                    reader.MarkEnd(new TitleMarker("Complex Huffman Tree"));
                 }
+
+                return tree;
             },
 
             toBits: (writer, obj, context) => {
