@@ -61,9 +61,11 @@ namespace BrotliLib.Brotli.Components.Contents{
                 return mode.DetermineContextID(recentOutput.Front, recentOutput.Back);
             }
 
-            public void WriteLiteral(byte literal){
-                State.Output(literal);
-                recentOutput.Push(literal);
+            public void WriteLiteral(Literal literal){
+                byte value = literal.Value;
+
+                State.Output(value);
+                recentOutput.Push(value);
                 ++bytesWritten;
             }
 

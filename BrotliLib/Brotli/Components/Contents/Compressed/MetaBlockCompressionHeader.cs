@@ -5,7 +5,7 @@ using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.IO;
-using LiteralTree    = BrotliLib.Brotli.Components.Header.HuffmanTree<byte>;
+using LiteralTree    = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.Literal>;
 using InsertCopyTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.InsertCopyLengthCode>;
 using DistanceTree   = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.DistanceCode>;
 
@@ -83,9 +83,6 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
             return Enumerable.Range(0, treeCount).Select(_ => HuffmanTree<T>.Serializer.FromBits(reader, context)).ToArray();
         }
 
-        private static readonly AlphabetSize LiteralAlphabetSize = new AlphabetSize(byte.MaxValue + 1);
-        private static readonly LiteralTree.Context LiteralTreeContext = new LiteralTree.Context(LiteralAlphabetSize, value => (byte)value, symbol => symbol);
-
         internal static readonly IBitSerializer<MetaBlockCompressionHeader, MetaBlock.Context> Serializer = new BitSerializer<MetaBlockCompressionHeader, MetaBlock.Context>(
             fromBits: (reader, context) => {
                 var blockTypes = new CategoryMap<BlockTypeInfo>(_ => BlockTypeInfo.Serializer.FromBits(reader, NoContext.Value));
@@ -95,7 +92,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                 var literalCtxMap   = ReadContextMap(reader, Category.Literal, blockTypes);
                 var distanceCtxMap  = ReadContextMap(reader, Category.Distance, blockTypes);
                 
-                var literalTrees    = ReadHuffmanTrees(reader, literalCtxMap.TreeCount, LiteralTreeContext);
+                var literalTrees    = ReadHuffmanTrees(reader, literalCtxMap.TreeCount, Literal.TreeContext);
                 var insertCopyTrees = ReadHuffmanTrees(reader, blockTypes[Category.InsertCopy].Count, InsertCopyLengthCode.TreeContext);
                 var distanceTrees   = ReadHuffmanTrees(reader, distanceCtxMap.TreeCount, DistanceCode.GenerateTreeContext(distanceParameters));
                 
@@ -117,7 +114,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                 ContextMap.Serializer.ToBits(writer, obj.DistanceCtxMap, obj.BlockTypes.Pick(Category.Distance));
                 
                 foreach(LiteralTree tree in obj.LiteralTrees){
-                    LiteralTree.Serializer.ToBits(writer, tree, LiteralTreeContext);
+                    LiteralTree.Serializer.ToBits(writer, tree, Literal.TreeContext);
                 }
 
                 foreach(InsertCopyTree tree in obj.InsertCopyTrees){

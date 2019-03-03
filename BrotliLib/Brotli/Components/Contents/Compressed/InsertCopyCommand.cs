@@ -9,16 +9,16 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
         public const int ImpliedDistanceCodeZero = int.MaxValue;
 
         public InsertCopyLengths Lengths { get; }
-        public IReadOnlyList<byte> Literals { get; }
+        public IReadOnlyList<Literal> Literals { get; }
         public int? CopyDistance { get; }
 
-        public InsertCopyCommand(IReadOnlyList<byte> literals, int copyLength){
+        public InsertCopyCommand(IReadOnlyList<Literal> literals, int copyLength){
             this.Lengths = new InsertCopyLengths(literals.Count, copyLength);
             this.Literals = literals;
             this.CopyDistance = null;
         }
 
-        public InsertCopyCommand(IReadOnlyList<byte> literals, int copyLength, int copyDistance){
+        public InsertCopyCommand(IReadOnlyList<Literal> literals, int copyLength, int copyDistance){
             this.Lengths = new InsertCopyLengths(literals.Count, copyLength);
             this.Literals = literals;
             this.CopyDistance = copyDistance;
@@ -29,7 +29,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
         public override bool Equals(object obj){
             return obj is InsertCopyCommand command &&
                    EqualityComparer<InsertCopyLengths>.Default.Equals(Lengths, command.Lengths) &&
-                   EqualityComparer<IReadOnlyList<byte>>.Default.Equals(Literals, command.Literals) &&
+                   EqualityComparer<IReadOnlyList<Literal>>.Default.Equals(Literals, command.Literals) &&
                    EqualityComparer<int?>.Default.Equals(CopyDistance, command.CopyDistance);
         }
 
@@ -37,7 +37,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
             unchecked{
                 var hashCode = -558486850;
                 hashCode = hashCode * -1521134295 + EqualityComparer<InsertCopyLengths>.Default.GetHashCode(Lengths);
-                hashCode = hashCode * -1521134295 + EqualityComparer<IReadOnlyList<byte>>.Default.GetHashCode(Literals);
+                hashCode = hashCode * -1521134295 + EqualityComparer<IReadOnlyList<Literal>>.Default.GetHashCode(Literals);
                 hashCode = hashCode * -1521134295 + EqualityComparer<int?>.Default.GetHashCode(CopyDistance);
                 return hashCode;
             }
@@ -61,14 +61,14 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                 
                 // Literals
 
-                byte[] literals = new byte[insertLength];
+                Literal[] literals = new Literal[insertLength];
                 
                 for(int insertIndex = 0; insertIndex < insertLength; insertIndex++){
                     int blockID = context.NextBlockID(Category.Literal);
                     int contextID = context.NextLiteralContextID(header.LiteralCtxModes[blockID]);
                     int treeID = header.LiteralCtxMap.DetermineTreeID(blockID, contextID);
 
-                    byte literal = header.LiteralTrees[treeID].Root.LookupValue(reader);
+                    Literal literal = header.LiteralTrees[treeID].Root.LookupValue(reader);
 
                     literals[insertIndex] = literal;
                     context.WriteLiteral(literal);
@@ -119,7 +119,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                 
                 // Literals
                 
-                foreach(byte literal in obj.Literals){
+                foreach(Literal literal in obj.Literals){
                     int blockID = context.NextBlockID(Category.Literal);
                     int contextID = context.NextLiteralContextID(header.LiteralCtxModes[blockID]);
                     int treeID = header.LiteralCtxMap.DetermineTreeID(blockID, contextID);
