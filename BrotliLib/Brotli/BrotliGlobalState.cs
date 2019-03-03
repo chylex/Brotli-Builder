@@ -4,6 +4,7 @@ using System.Text;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Dictionary;
 using BrotliLib.Collections;
+using BrotliLib.Markers;
 
 namespace BrotliLib.Brotli{
     /// <summary>
@@ -19,6 +20,8 @@ namespace BrotliLib.Brotli{
 
         public WindowSize WindowSize { get; }
         public RingBuffer<int> DistanceBuffer { get; }
+
+        public MarkerNode BitMarkerRoot { get; internal set; }
 
         private readonly MemoryStream decompressedStream = new MemoryStream();
 

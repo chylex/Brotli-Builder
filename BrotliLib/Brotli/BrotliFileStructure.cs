@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Encode;
+using BrotliLib.Brotli.Markers;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli{
@@ -16,7 +17,7 @@ namespace BrotliLib.Brotli{
         }
 
         public static BrotliFileStructure FromBytes(byte[] bytes){
-            return Serializer.FromBits(new BitStream(bytes).GetReader(), null);
+            return Serializer.FromBits(new MarkedBitReader(new BitStream(bytes).GetReader()), null);
         }
 
         public static BrotliFileStructure FromEncoder(WindowSize windowSize, IBrotliEncoder encoder, byte[] bytes){
@@ -56,7 +57,10 @@ namespace BrotliLib.Brotli{
 
         public BrotliGlobalState GetDecompressionState(BitStream bitStream){
             BrotliGlobalState state = CreateNewContext();
-            Serializer.FromBits(bitStream.GetReader(), state);
+            MarkedBitReader reader = new MarkedBitReader(bitStream.GetReader());
+
+            Serializer.FromBits(reader, state);
+            state.BitMarkerRoot = reader.MarkerRoot;
             return state;
         }
 
