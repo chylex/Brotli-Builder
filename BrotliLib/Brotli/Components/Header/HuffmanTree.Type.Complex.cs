@@ -105,6 +105,8 @@ namespace BrotliLib.Brotli.Components.Header{
                 int symbolCount = context.AlphabetSize.SymbolCount;
                 var symbolEntries = new List<HuffmanGenerator<T>.Entry>();
 
+                Queue<byte> extra = new Queue<byte>();
+                
                 for(int symbolIndex = 0, bitSpaceRemaining = SymbolBitSpace; bitSpaceRemaining > 0 && symbolIndex < symbolCount; symbolIndex++){
                     T symbol = getSymbol(symbolIndex);
                     BitStream path = obj.FindPathOrNull(symbol);
@@ -116,14 +118,64 @@ namespace BrotliLib.Brotli.Components.Header{
                         bitSpaceRemaining -= SymbolBitSpace >> length;
                     }
                 }
+
+                int ProcessRepetitions(int length, int multiplier){
+                    Stack<byte> newExtra = new Stack<byte>();
+
+                    int remaining = length - 3; // TODO official compressor special-cases 7 (mp = 2) and 11 (mp = 3), but not other values that are 1 above the boundary... potential point for improvement?
+
+                    do{
+                        newExtra.Push((byte)(remaining % multiplier));
+                        remaining /= multiplier;
+                    }while(--remaining >= 0);
+
+                    foreach(byte entry in newExtra){
+                        extra.Enqueue(entry);
+                    }
+
+                    return newExtra.Count;
+                }
+
+                int ReplaceSequence(int index, byte code, int removeLength, int insertLength){
+                    symbolEntries.RemoveRange(index, removeLength);
+                    symbolEntries.InsertRange(index, Enumerable.Repeat(new HuffmanGenerator<T>.Entry(default(T), code), insertLength));
+                    return index + insertLength;
+                }
+                
+                for(int entryIndex = 0, lastRepeatStartIndex = 0, lastRepeatCode = ComplexLengthCode.DefaultRepeatCode; entryIndex < symbolEntries.Count + 1; entryIndex++){
+                    int nextCode = entryIndex < symbolEntries.Count ? symbolEntries[entryIndex].Bits : -1;
+
+                    if (nextCode != lastRepeatCode){
+                        if (lastRepeatCode == 0){
+                            --lastRepeatStartIndex;
+                        }
+
+                        int skipLength = entryIndex - lastRepeatStartIndex;
+
+                        if (skipLength >= 3){
+                            entryIndex = lastRepeatCode == 0 ? ReplaceSequence(lastRepeatStartIndex, ComplexLengthCode.Skip, skipLength, ProcessRepetitions(skipLength, 8)) :
+                                                               ReplaceSequence(lastRepeatStartIndex, ComplexLengthCode.Repeat, skipLength, ProcessRepetitions(skipLength, 4));
+                        }
+                        
+                        lastRepeatCode = nextCode;
+                        lastRepeatStartIndex = entryIndex + 1;
+                    }
+                }
                 
                 var lengthEntries = symbolEntries.GroupBy(kvp => kvp.Bits).Select(HuffmanGenerator<byte>.MakeFreq).ToArray();
                 var lengthMap = HuffmanGenerator<byte>.FromFrequenciesCanonical(lengthEntries, ComplexLengthCode.LengthMaxDepth).GenerateValueMap();
                 
                 ComplexLengthCode.Write(writer, lengthMap);
                 
-                foreach(var entry in symbolEntries){
-                    writer.WriteBits(lengthMap[entry.Bits]);
+                foreach(byte code in symbolEntries.Select(entry => entry.Bits)){
+                    writer.WriteBits(lengthMap[code]);
+
+                    if (code == ComplexLengthCode.Skip){
+                        writer.WriteChunk(3, extra.Dequeue());
+                    }
+                    else if (code == ComplexLengthCode.Repeat){
+                        writer.WriteChunk(2, extra.Dequeue());
+                    }
                 }
             }
         );
@@ -220,7 +272,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
             writer.WriteChunk(2, skippedAmount);
             
-            for(int index = skippedAmount, bitSpaceRemaining = LengthBitSpace; bitSpaceRemaining > 0 && index < Order.Length; index++){ // TODO use repeat/skip codes
+            for(int index = skippedAmount, bitSpaceRemaining = LengthBitSpace; bitSpaceRemaining > 0 && index < Order.Length; index++){
                 byte code = Order[index];
                 byte length = (byte)(lengthMap.TryGetValue(code, out BitStream stream) ? stream.Length : 0);
 
