@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Markers;
@@ -12,6 +13,11 @@ namespace BrotliLib.Brotli.Components.Header{
     /// https://tools.ietf.org/html/rfc7932#section-7.3
     /// </summary>
     public sealed class ContextMap{
+        private const bool EncodeRLE = true;
+        private const bool EncodeIMTF = true;
+        
+        // Data
+
         public int TreeCount { get; }
         public int TreesPerBlockType { get; }
 
@@ -45,6 +51,61 @@ namespace BrotliLib.Brotli.Components.Header{
                 hashCode = hashCode * -1521134295 + EqualityComparer<byte[]>.Default.GetHashCode(contextMap);
                 return hashCode;
             }
+        }
+
+        // Helpers
+
+        /// <summary>
+        /// Returns how many zeroes there are in a sequence starting at <paramref name="startIndex"/> in the <paramref name="contextMap"/>.
+        /// Returns <code>-1</code> if <paramref name="startIndex"/> points beyond the end of the <paramref name="contextMap"/>.
+        /// </summary>
+        private static int FindRunLength(byte[] contextMap, int startIndex){
+            for(int index = startIndex; index < contextMap.Length + 1; index++){
+                if (index == contextMap.Length || contextMap[index] != 0){
+                    return index - startIndex;
+                }
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// Returns the RLE code required to encode the specified <paramref name="value"/>.
+        /// The codes follow the pattern:
+        /// <list type="bullet">
+        /// <item><description>code 1 ... values 1-2,</description></item>
+        /// <item><description>code 2 ... values 3-6,</description></item>
+        /// <item><description>code 3 ... values 7-14,</description></item>
+        /// <item><description>code 4 ... values 15-30,</description></item>
+        /// <item><description>(up to code 16)</description></item>
+        /// </list>
+        /// </summary>
+        private static byte CalculateRunLengthCodeFor(int value){
+            byte runLengthCode = 0;
+            int remaining = (value + 1) >> 1;
+
+            while(remaining > 0){
+                remaining >>= 1;
+                ++runLengthCode;
+            }
+
+            return runLengthCode;
+        }
+
+        /// <summary>
+        /// Returns the RLE code required to encode the longest sequence of zeroes in the <paramref name="contextMap"/>.
+        /// </summary>
+        private static byte CalculateLargestRunLengthCode(byte[] contextMap){
+            int longestZeroSequence = 0;
+            int lastStartIndex = 0;
+            int lastRunLength;
+
+            while((lastRunLength = FindRunLength(contextMap, lastStartIndex)) != -1){
+                longestZeroSequence = Math.Max(longestZeroSequence, lastRunLength);
+                lastStartIndex += lastRunLength + 1;
+            }
+
+            return longestZeroSequence > 1 ? CalculateRunLengthCodeFor(longestZeroSequence - 1) : (byte)0;
         }
 
         // Serialization
@@ -101,22 +162,70 @@ namespace BrotliLib.Brotli.Components.Header{
             toBits: (writer, obj, context) => {
                 VariableLength11Code.Serializer.ToBits(writer, new VariableLength11Code(obj.TreeCount), NoContext.Value);
 
-                if (obj.TreeCount > 1){ // TODO implement RLE and IMTF
-                    writer.WriteBit(false);
+                if (obj.TreeCount > 1){
+                    byte[] contextMap;
 
-                    var codeContext = GetCodeTreeContext(obj.TreeCount);
-                    var codeSymbols = obj.contextMap.GroupBy(value => (int)value).Select(HuffmanGenerator<int>.MakeFreq).ToArray();
+                    if (EncodeIMTF){
+                        contextMap = (byte[])obj.contextMap.Clone();
+                        MoveToFront.Encode(contextMap);
+                    }
+                    else{
+                        contextMap = obj.contextMap;
+                    }
+
+                    byte runLengthCodeCount = EncodeRLE ? CalculateLargestRunLengthCode(contextMap) : (byte)0;
+                    
+                    if (runLengthCodeCount > 0){
+                        writer.WriteBit(true);
+                        writer.WriteChunk(4, runLengthCodeCount - 1);
+                    }
+                    else{
+                        writer.WriteBit(false);
+                    }
+
+                    List<int> symbols = new List<int>();
+                    Queue<int> extra = new Queue<int>();
+
+                    for(int index = 0; index < contextMap.Length; index++){
+                        byte symbol = contextMap[index];
+
+                        if (symbol == 0){
+                            int runLength = runLengthCodeCount == 0 ? 0 : FindRunLength(contextMap, index) - 1;
+
+                            if (runLength > 0){
+                                byte code = CalculateRunLengthCodeFor(runLength);
+
+                                symbols.Add(code);
+                                extra.Enqueue(runLength - ((1 << code) - 1));
+
+                                index += runLength;
+                            }
+                            else{
+                                symbols.Add(0);
+                            }
+                        }
+                        else{
+                            symbols.Add(symbol + runLengthCodeCount);
+                        }
+                    }
+
+                    var codeContext = GetCodeTreeContext(obj.TreeCount + runLengthCodeCount);
+                    var codeSymbols = symbols.GroupBy(symbol => symbol).Select(HuffmanGenerator<int>.MakeFreq).ToArray();
 
                     var codeTree = HuffmanGenerator<int>.FromFrequenciesCanonical(codeSymbols, HuffmanTree<int>.DefaultMaxDepth);
                     var codeMap = codeTree.GenerateValueMap();
 
                     HuffmanTree<int>.Serializer.ToBits(writer, new HuffmanTree<int>(codeTree), codeContext);
 
-                    foreach(byte symbol in obj.contextMap){
+                    foreach(int symbol in symbols){
                         writer.WriteBits(codeMap[symbol]);
+
+                        if (symbol > 0 && symbol <= runLengthCodeCount){
+                            writer.WriteChunk(symbol, extra.Dequeue());
+                        }
                     }
 
-                    writer.WriteBit(false);
+                    writer.WriteBit(EncodeIMTF);
                 }
             }
         );
