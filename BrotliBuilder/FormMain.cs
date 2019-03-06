@@ -10,7 +10,6 @@ using BrotliLib.Brotli.Encode;
 
 namespace BrotliBuilder{
     partial class FormMain : Form{
-        private const int LimitOutputLength = 16384;
 
         #region Building block context
 
@@ -63,7 +62,6 @@ namespace BrotliBuilder{
         public FormMain(){
             InitializeComponent();
             
-            menuItemLimitOutput_Click(this, EventArgs.Empty);
             splitContainerOuter.Panel2Collapsed = true;
             OnNewBrotliFile();
         }
@@ -205,13 +203,6 @@ namespace BrotliBuilder{
             menuItemWrapOutput.Checked = enable;
 
             brotliFilePanelGenerated.WordWrapOutput = brotliFilePanelOriginal.WordWrapOutput = enable;
-        }
-
-        private void menuItemLimitOutput_Click(object sender, EventArgs e){
-            bool enable = !menuItemLimitOutput.Checked;
-            menuItemLimitOutput.Checked = enable;
-
-            brotliFilePanelGenerated.MaxLength = brotliFilePanelOriginal.MaxLength = enable ? LimitOutputLength : -1;
         }
 
         #endregion

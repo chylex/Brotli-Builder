@@ -27,13 +27,6 @@ namespace BrotliBuilder.Components{
         public bool WordWrapOutput{
             set => textBoxOutput.WordWrap = value;
         }
-        
-        public int MaxLength{
-            set{
-                textBoxBitStream.MaxDisplayedLength = value;
-                textBoxOutput.MaxDisplayedLength = value;
-            }
-        }
 
         private readonly AsyncWorker loadWorker = new AsyncWorker();
         

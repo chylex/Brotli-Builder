@@ -31,7 +31,6 @@
             this.menuItemExit = new System.Windows.Forms.MenuItem();
             this.menuItemView = new System.Windows.Forms.MenuItem();
             this.menuItemWrapOutput = new System.Windows.Forms.MenuItem();
-            this.menuItemLimitOutput = new System.Windows.Forms.MenuItem();
             this.menuItemTools = new System.Windows.Forms.MenuItem();
             this.menuItemStaticDictionary = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeFile = new System.Windows.Forms.MenuItem();
@@ -96,8 +95,7 @@
             // 
             this.menuItemView.Index = 1;
             this.menuItemView.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItemWrapOutput,
-            this.menuItemLimitOutput});
+            this.menuItemWrapOutput});
             this.menuItemView.Text = "&View";
             // 
             // menuItemWrapOutput
@@ -105,12 +103,6 @@
             this.menuItemWrapOutput.Index = 0;
             this.menuItemWrapOutput.Text = "Wrap Output";
             this.menuItemWrapOutput.Click += new System.EventHandler(this.menuItemWrapOutput_Click);
-            // 
-            // menuItemLimitOutput
-            // 
-            this.menuItemLimitOutput.Index = 1;
-            this.menuItemLimitOutput.Text = "Limit Output Length";
-            this.menuItemLimitOutput.Click += new System.EventHandler(this.menuItemLimitOutput_Click);
             // 
             // menuItemTools
             // 
@@ -280,7 +272,6 @@
         private System.Windows.Forms.MenuItem menuItemEncodeFile;
         private System.Windows.Forms.MenuItem menuItemEncodeUncompressedMBs;
         private System.Windows.Forms.MenuItem menuItemView;
-        private System.Windows.Forms.MenuItem menuItemLimitOutput;
         private System.Windows.Forms.MenuItem menuItemStaticDictionary;
         private System.Windows.Forms.SplitContainer splitContainerOuter;
         private System.Windows.Forms.MenuItem menuItemWrapOutput;
