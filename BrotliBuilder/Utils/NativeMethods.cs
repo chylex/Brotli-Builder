@@ -4,7 +4,6 @@ using System.Windows.Forms;
 
 namespace BrotliBuilder.Utils{
     static class NativeMethods{
-        public const int WM_SETREDRAW = 0x0B;
         public const int EM_SETTEXTMODE = 0x459;
         public const int TM_PLAINTEXT = 1;
 
@@ -13,15 +12,6 @@ namespace BrotliBuilder.Utils{
 
         public static void SetPlainTextMode(this RichTextBox tb){
             SendMessage(tb.Handle, EM_SETTEXTMODE, (IntPtr)TM_PLAINTEXT, IntPtr.Zero);
-        }
-
-        public static void BeginUpdate(this RichTextBox tb){
-            SendMessage(tb.Handle, WM_SETREDRAW, (IntPtr)0, IntPtr.Zero);
-        }
-
-        public static void EndUpdate(this RichTextBox tb){
-            SendMessage(tb.Handle, WM_SETREDRAW, (IntPtr)1, IntPtr.Zero); 
-            tb.Invalidate();
         }
     }
 }

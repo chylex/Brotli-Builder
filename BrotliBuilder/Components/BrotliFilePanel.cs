@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using BrotliBuilder.Utils;
 using BrotliLib.Brotli;
 using BrotliLib.IO;
+using FastColoredTextBoxNS;
 
 namespace BrotliBuilder.Components{
     public partial class BrotliFilePanel : UserControl{
@@ -34,7 +35,6 @@ namespace BrotliBuilder.Components{
 
         public BrotliFilePanel(){
             InitializeComponent();
-            textBoxOutput.SetPlainTextMode();
         }
 
         public void LoadBrotliFile(byte[] bytes, Action<BrotliFileStructure> callback){
@@ -126,17 +126,17 @@ namespace BrotliBuilder.Components{
             textBoxOutput.ForeColor = SystemColors.ControlDark;
         }
 
-        private void UpdateTextBox(RicherTextBox tb, string text, Color color){
+        private void UpdateTextBox(FastColoredTextBox tb, string text, Color color){
             tb.ForeColor = color;
             tb.Text = text;
-            tb.Select(0, 0);
+            tb.Navigate(0);
         }
         
-        private void UpdateTextBox(RicherTextBox tb, string text){
+        private void UpdateTextBox(FastColoredTextBox tb, string text){
             UpdateTextBox(tb, text, SystemColors.WindowText);
         }
 
-        private void UpdateTextBox(RicherTextBox tb, Exception ex){
+        private void UpdateTextBox(FastColoredTextBox tb, Exception ex){
             UpdateTextBox(tb, Regex.Replace(ex.ToString(), " in (.*):", " : "), Color.Red);
         }
     }

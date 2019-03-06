@@ -98,9 +98,6 @@
     <Compile Include="Components\BrotliFilePanel.Designer.cs">
       <DependentUpon>BrotliFilePanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="Components\RicherTextBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Dialogs\FormStaticDictionary.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -138,6 +135,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="FCTB">
+      <Version>2.16.24</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.Net.Compilers">
       <Version>2.9.0</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
