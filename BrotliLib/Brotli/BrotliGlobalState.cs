@@ -21,7 +21,7 @@ namespace BrotliLib.Brotli{
         public WindowSize WindowSize { get; }
         public RingBuffer<int> DistanceBuffer { get; }
 
-        public MarkerNode BitMarkerRoot { get; internal set; }
+        public MarkerRoot BitMarkerRoot { get; internal set; }
 
         private readonly MemoryStream decompressedStream = new MemoryStream();
 

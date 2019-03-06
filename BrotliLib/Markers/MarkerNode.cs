@@ -44,27 +44,14 @@ namespace BrotliLib.Markers{
             added.Parent?.children?.Add(added);
         }
 
-        public MarkerNode FindNodeAt(int index){
-            if (Marker.HasIndex(index)){
-                return children.FirstOrDefault()?.FindNodeAt(index) ?? this;
-            }
-            else{
-                return NextSibling?.FindNodeAt(index);
-            }
-        }
-
         public IEnumerator<MarkerNode> GetEnumerator(){
             yield return this;
 
             if (children.Count > 0){
-                foreach(MarkerNode node in children[0]){
-                    yield return node;
-                }
-            }
-
-            if (NextSibling != null){
-                foreach(MarkerNode node in NextSibling){
-                    yield return node;
+                foreach(MarkerNode child in children){
+                    foreach(MarkerNode node in child){
+                        yield return node;
+                    }
                 }
             }
         }

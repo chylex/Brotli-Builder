@@ -8,7 +8,7 @@ using BrotliLib.Markers;
 
 namespace BrotliLib.Brotli.Markers{
     class MarkedBitReader : BitReader.Wrapped{
-        public MarkerNode MarkerRoot { get; private set; }
+        public MarkerRoot MarkerRoot { get; } = new MarkerRoot();
         
         private readonly Stack<MarkerNode> nodes = new Stack<MarkerNode>();
         private readonly Stack<long> starts = new Stack<long>();
@@ -20,12 +20,11 @@ namespace BrotliLib.Brotli.Markers{
         public void MarkStart(){
             MarkerNode added = new MarkerNode{ Depth = nodes.Count };
 
-            if (MarkerRoot == null){
-                MarkerRoot = added;
+            if (nodes.Count == 0){
+                MarkerRoot.AddChild(added);
             }
             else{
-                MarkerNode prev = nodes.Count == 0 ? MarkerRoot : nodes.Peek();
-                prev.AddChildOrSibling(added);
+                nodes.Peek().AddChildOrSibling(added);
             }
 
             starts.Push(Index);
