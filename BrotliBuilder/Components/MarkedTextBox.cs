@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using BrotliBuilder.Dialogs;
 using BrotliBuilder.Utils;
 using BrotliLib.Markers;
 using FastColoredTextBoxNS;
@@ -113,6 +114,7 @@ namespace BrotliBuilder.Components{
             updatingMarkers = false;
             
             markerCaret = newMarkerCaret;
+            FormBitStreamContext.GetOrSpawn(this).Display(markerSequence, new HashSet<MarkerNode>(highlightedMarkers), markerCaret);
         }
 
         private void MarkedFastTextBox_SelectionChanged(object sender, EventArgs e){
