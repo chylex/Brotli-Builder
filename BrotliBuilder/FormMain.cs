@@ -62,14 +62,14 @@ namespace BrotliBuilder{
         public FormMain(){
             InitializeComponent();
             
-            splitContainerOuter.Panel2Collapsed = true;
+            splitContainerBottom.Panel2Collapsed = true;
             OnNewBrotliFile();
         }
 
         #region File state handling
 
         private void LoadExistingBrotliFile(byte[] bytes){
-            splitContainerOuter.Panel2Collapsed = false;
+            splitContainerBottom.Panel2Collapsed = false;
             statusBarPanelTimeBits.Text = "Decompressing...";
             statusBarPanelTimeOutput.Text = "Decompressing...";
 
@@ -148,6 +148,26 @@ namespace BrotliBuilder{
 
         #endregion
 
+        #region Control events
+
+        private void flowPanelBlocks_ControlAdded(object sender, ControlEventArgs e){
+            e.Control.Height = flowPanelBlocks.ClientSize.Height - 8;
+        }
+
+        private void flowPanelBlocks_SizeChanged(object sender, EventArgs e){
+            int childHeight = flowPanelBlocks.ClientSize.Height - 8;
+
+            flowPanelBlocks.SuspendLayout();
+            
+            foreach(Control child in flowPanelBlocks.Controls){
+                child.Height = childHeight;
+            }
+            
+            flowPanelBlocks.ResumeLayout(true);
+        }
+
+        #endregion
+
         #region Menu events (File)
 
         private void menuItemOpen_Click(object sender, EventArgs e){
@@ -198,6 +218,13 @@ namespace BrotliBuilder{
 
         #region Menu events (View)
 
+        private void menuItemFileStructure_Click(object sender, EventArgs e){
+            bool enable = !menuItemFileStructure.Checked;
+            menuItemFileStructure.Checked = enable;
+
+            splitContainerMain.Panel1Collapsed = !enable;
+        }
+
         private void menuItemWrapOutput_Click(object sender, EventArgs e){
             bool enable = !menuItemWrapOutput.Checked;
             menuItemWrapOutput.Checked = enable;
@@ -247,7 +274,7 @@ namespace BrotliBuilder{
                         return;
                     }
 
-                    splitContainerOuter.Panel2Collapsed = true;
+                    splitContainerBottom.Panel2Collapsed = true;
                     
                     try{
                         brotliFile = BrotliFileStructure.FromEncoder(windowSize, encoder, bytes);
