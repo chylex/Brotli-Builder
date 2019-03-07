@@ -19,9 +19,8 @@ namespace BrotliBuilder.Components{
 
             set{
                 labelPrefix = value;
-                labelBitStream.Text = $"{value} Bit Stream";
-                labelOutput.Text = $"{value} Output";
                 loadWorker.Name = $"BrotliFilePanel ({value})";
+                ResetLabels();
             }
         }
 
@@ -59,9 +58,12 @@ namespace BrotliBuilder.Components{
                 string outputStr = state.OutputAsUTF8;
                 MarkerNode[] markerSequence = state.BitMarkerRoot.ToArray();
 
+                int totalBits = (int)markerSequence.Last().Marker.IndexEnd; // use markers to account for padding
+
                 sync(() => {
                     textBoxBitStream.UpdateMarkers(markerSequence);
                     UpdateTextBox(textBoxOutput, outputStr);
+                    UpdateLabels(totalBits, state.OutputSize);
                     callback(file);
                 });
             });
@@ -118,6 +120,7 @@ namespace BrotliBuilder.Components{
                 sync(() => {
                     textBoxBitStream.UpdateMarkers(markerSequence);
                     UpdateTextBox(textBoxOutput, outputStr);
+                    UpdateLabels(bits.Length, state.OutputSize);
                     onDecompressed(stopwatchDecompression);
                 });
             });
@@ -130,6 +133,7 @@ namespace BrotliBuilder.Components{
             textBoxOutput.ForeColor = SystemColors.ControlDark;
 
             textBoxBitStream.RemoveMarkers();
+            ResetLabels();
         }
 
         private void UpdateTextBox(FastColoredTextBox tb, string text, Color color){
@@ -144,6 +148,16 @@ namespace BrotliBuilder.Components{
 
         private void UpdateTextBox(FastColoredTextBox tb, Exception ex){
             UpdateTextBox(tb, Regex.Replace(ex.ToString(), " in (.*):", " : "), Color.Red);
+        }
+
+        private void UpdateLabels(int bitStreamLength, int outputLength){
+            labelBitStream.Text = $"{labelPrefix} Bit Stream ({bitStreamLength} bits)";
+            labelOutput.Text = $"{labelPrefix} Output ({outputLength} bytes)";
+        }
+
+        private void ResetLabels(){
+            labelBitStream.Text = $"{labelPrefix} Bit Stream";
+            labelOutput.Text = $"{labelPrefix} Output";
         }
     }
 }
