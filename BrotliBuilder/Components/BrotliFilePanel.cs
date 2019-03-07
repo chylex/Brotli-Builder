@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using BrotliBuilder.Utils;
 using BrotliLib.Brotli;
 using BrotliLib.IO;
+using BrotliLib.Markers;
 using FastColoredTextBoxNS;
 
 namespace BrotliBuilder.Components{
@@ -57,8 +58,10 @@ namespace BrotliBuilder.Components{
                 }
 
                 string outputStr = state.OutputAsUTF8;
+                MarkerNode[] markerSequence = state.BitMarkerRoot.ToArray();
 
                 sync(() => {
+                    textBoxBitStream.UpdateMarkers(markerSequence);
                     UpdateTextBox(textBoxOutput, outputStr);
                     callback(file);
                 });
@@ -111,8 +114,10 @@ namespace BrotliBuilder.Components{
                 }
 
                 string outputStr = state.OutputAsUTF8;
+                MarkerNode[] markerSequence = state.BitMarkerRoot.ToArray();
 
                 sync(() => {
+                    textBoxBitStream.UpdateMarkers(markerSequence);
                     UpdateTextBox(textBoxOutput, outputStr);
                     onDecompressed(stopwatchDecompression);
                 });
@@ -124,6 +129,8 @@ namespace BrotliBuilder.Components{
 
             textBoxBitStream.ForeColor = SystemColors.ControlDark;
             textBoxOutput.ForeColor = SystemColors.ControlDark;
+
+            textBoxBitStream.RemoveMarkers();
         }
 
         private void UpdateTextBox(FastColoredTextBox tb, string text, Color color){

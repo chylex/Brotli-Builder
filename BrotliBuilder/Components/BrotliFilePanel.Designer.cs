@@ -26,16 +26,16 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BrotliFilePanel));
             this.splitContainer = new System.Windows.Forms.SplitContainer();
+            this.textBoxBitStream = new BrotliBuilder.Components.MarkedTextBox();
             this.labelBitStream = new System.Windows.Forms.Label();
             this.textBoxOutput = new FastColoredTextBoxNS.FastColoredTextBox();
             this.labelOutput = new System.Windows.Forms.Label();
-            this.textBoxBitStream = new FastColoredTextBoxNS.FastColoredTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
             this.splitContainer.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.textBoxOutput)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.textBoxBitStream)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.textBoxOutput)).BeginInit();
             this.SuspendLayout();
             // 
             // splitContainer
@@ -165,8 +165,8 @@
             this.splitContainer.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
             this.splitContainer.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.textBoxOutput)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.textBoxBitStream)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.textBoxOutput)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -176,7 +176,7 @@
         private System.Windows.Forms.SplitContainer splitContainer;
         private System.Windows.Forms.Label labelBitStream;
         private System.Windows.Forms.Label labelOutput;
-        private FastColoredTextBoxNS.FastColoredTextBox textBoxBitStream;
+        private BrotliBuilder.Components.MarkedTextBox textBoxBitStream;
         private FastColoredTextBoxNS.FastColoredTextBox textBoxOutput;
     }
 }
