@@ -37,7 +37,7 @@ namespace BrotliLib.Brotli.Components.Header{
                     symbolEntries.Add(entry);
                     reader.MarkOne(new TextMarker("entry", entry));
                 }
-
+                
                 while(bitSpaceRemaining > 0 && symbolIndex < symbolCount){
                     byte nextCode;
 
@@ -47,18 +47,18 @@ namespace BrotliLib.Brotli.Components.Header{
                         reader.MarkEnd(new TextMarker("code", nextCode));
                     }
                     else{
-                        reader.MarkOne(new TextMarker("code", nextForcedCode));
                         nextCode = nextForcedCode;
                         nextForcedCode = NoForcedCode;
                     }
-
+                    
                     if (nextCode == ComplexLengthCode.Skip){
                         reader.MarkStart();
 
-                        int skipCount = 3 + reader.NextChunk(3);
+                        int NextSkipData() => 3 + reader.NextChunk(3, "skip data");
+                        int skipCount = NextSkipData();
 
-                        while((nextForcedCode = lengthCodes.LookupValue(reader).Code) == ComplexLengthCode.Skip){
-                            skipCount = 8 * (skipCount - 2) + 3 + reader.NextChunk(3);
+                        while((nextForcedCode = reader.ReadValue(lengthCodes, "code", code => code.Code)) == ComplexLengthCode.Skip){
+                            skipCount = 8 * (skipCount - 2) + NextSkipData();
                         }
 
                         reader.MarkEnd(new TextMarker("skip count", skipCount));
@@ -68,13 +68,14 @@ namespace BrotliLib.Brotli.Components.Header{
                     else if (nextCode == ComplexLengthCode.Repeat){
                         byte repeatedCode = symbolEntries.DefaultIfEmpty(defaultRepeatCode).Select(entry => entry.Bits).Last(value => value > 0);
                         int sumPerRepeat = SymbolBitSpace >> repeatedCode;
-
+                        
                         reader.MarkStart();
+                        
+                        int NextRepeatData() => 3 + reader.NextChunk(2, "repeat data");
+                        int repeatCount = NextRepeatData();
 
-                        int repeatCount = 3 + reader.NextChunk(2);
-
-                        while(bitSpaceRemaining - sumPerRepeat * repeatCount > 0 && (nextForcedCode = lengthCodes.LookupValue(reader).Code) == ComplexLengthCode.Repeat){
-                            repeatCount = 4 * (repeatCount - 2) + 3 + reader.NextChunk(2);
+                        while(bitSpaceRemaining - sumPerRepeat * repeatCount > 0 && (nextForcedCode = reader.ReadValue(lengthCodes, "code", code => code.Code)) == ComplexLengthCode.Repeat){
+                            repeatCount = 4 * (repeatCount - 2) + NextRepeatData();
                         }
 
                         reader.MarkEnd(new TextMarker("repeat count", repeatCount));
