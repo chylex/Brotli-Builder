@@ -33,11 +33,6 @@ namespace BrotliLib.Brotli.Components.Utils{
                 default: throw new InvalidOperationException("Invalid category: " + category);
             }
         }
-
-        public static void Deconstruct<T>(this KeyValuePair<Category, T> kvp, out Category category, out T value){
-            category = kvp.Key;
-            value = kvp.Value;
-        }
     }
 
     /// <summary>
@@ -63,10 +58,6 @@ namespace BrotliLib.Brotli.Components.Utils{
             foreach(Category category in Categories.LID){
                 this[category] = mapper(category);
             }
-        }
-
-        public KeyValuePair<Category, T> Pick(Category category){
-            return new KeyValuePair<Category, T>(category, this[category]);
         }
 
         public CategoryMap<U> Select<U>(Func<Category, T, U> mapper){

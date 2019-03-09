@@ -8,9 +8,7 @@ namespace BrotliLib.Huffman{
     /// <typeparam name="T">Type of values contained inside the tree.</typeparam>
     public abstract partial class HuffmanNode<T>{
         public abstract int SymbolCount { get; }
-
-        protected HuffmanNode(){}
-
+        
         /// <summary>
         /// Traverses through the tree, consuming the <paramref name="bits"/> reader until it hits a <see cref="Leaf"/> node.
         /// Returns the found value, or <code>default(T)</code> if the <paramref name="bits"/> reader reaches the end.
