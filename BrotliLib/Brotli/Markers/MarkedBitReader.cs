@@ -93,8 +93,12 @@ namespace BrotliLib.Brotli.Markers{
             return ReadValue(serializer, context, name, result => result);
         }
 
+        public O ReadValue<T, O>(HuffmanNode<T> tree, string name, Func<T, O> mapper) where T : IComparable<T>{
+            return MarkCall(() => mapper(tree.LookupValue(this)), result => new TextMarker(name, result));
+        }
+
         public T ReadValue<T>(HuffmanNode<T> tree, string name) where T : IComparable<T>{
-            return MarkCall(() => tree.LookupValue(this), result => new TextMarker(name, result));
+            return ReadValue(tree, name, result => result);
         }
 
         public T ReadStructure<T, C>(IBitSerializer<T, C> serializer, C context, string title){
