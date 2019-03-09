@@ -246,6 +246,10 @@ module InsertCopyLengths =
         seq { yield! seq { 2118..2200 }; yield! seq { 16779000..16779333 } }
     |]
 
+    let icCodesObj : obj array seq = seq {
+        yield! icCodes |> Seq.chunkBySize 32 |> Seq.map(fun (icCode) -> [| box icCode |])
+    }
+
     let insertRangesObj : obj array seq = seq {
         yield! insertRanges |> Seq.indexed |> Seq.map(fun (index, seq) -> [| box index; box seq |])
     }
@@ -253,6 +257,18 @@ module InsertCopyLengths =
     let copyRangesObj : obj array seq = seq {
         yield! copyRanges |> Seq.indexed |> Seq.map(fun (index, seq) -> [| box index; box seq |])
     }
+
+    [<Theory>]
+    [<MemberData("icCodesObj")>]
+    let ``converting insert and copy codes to and from compacted codes is consistent`` (icCodeRange: InsertCopyLengthCode seq) =
+        for original in icCodeRange do
+            let dczStrategy =
+                match original.UseDistanceCodeZero with
+                | true  -> DistanceCodeZeroStrategy.ForceEnabled
+                | false -> DistanceCodeZeroStrategy.Disable
+            
+            let reconstructed = InsertCopyLengthCode(original.InsertCode, original.CopyCode, dczStrategy)
+            Assert.Equal(original.CompactedCode, reconstructed.CompactedCode)
     
     [<Theory>]
     [<MemberData("insertRangesObj")>]

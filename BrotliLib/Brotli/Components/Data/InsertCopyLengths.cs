@@ -1,5 +1,9 @@
-﻿using BrotliLib.Brotli.Markers;
+﻿using System;
+using System.Linq;
+using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Brotli.Markers;
 using BrotliLib.IO;
+using BrotliLib.Numbers;
 
 namespace BrotliLib.Brotli.Components.Data{
     /// <summary>
@@ -7,7 +11,8 @@ namespace BrotliLib.Brotli.Components.Data{
     /// https://tools.ietf.org/html/rfc7932#section-5
     /// </summary>
     public sealed class InsertCopyLengths{
-        
+        public static int MinimumCopyLength => CopyCodeValueOffsets[0];
+
         // Insert code tables
 
         private static readonly int[] InsertCodeExtraBits = {
@@ -22,6 +27,8 @@ namespace BrotliLib.Brotli.Components.Data{
             130, 194, 322, 578, 1090, 2114, 6210, 22594,
         };
 
+        private static readonly Range[] InsertCodeRanges = InsertCodeValueOffsets.Zip(InsertCodeExtraBits, Range.FromOffsetBitPair).ToArray();
+
         // Copy code tables
 
         private static readonly int[] CopyCodeExtraBits = {
@@ -35,6 +42,8 @@ namespace BrotliLib.Brotli.Components.Data{
             10,  12,  14,  18,  22,  30,   38,   54,
             70, 102, 134, 198, 326, 582, 1094, 2118,
         };
+
+        private static readonly Range[] CopyCodeRanges = CopyCodeValueOffsets.Zip(CopyCodeExtraBits, Range.FromOffsetBitPair).ToArray();
 
         // Data
 
@@ -57,18 +66,22 @@ namespace BrotliLib.Brotli.Components.Data{
         }
 
         /// <summary>
+        /// Constructs an <see cref="InsertCopyLengthCode"/> that can encode the stored lengths, and can therefore be used as context in the <see cref="Serializer"/>.
+        /// </summary>
+        public InsertCopyLengthCode MakeCode(DistanceCodeZeroStrategy dczStrategy){
+            int insertCode = Array.FindIndex(InsertCodeRanges, range => range.Contains(InsertLength));
+            int copyCode = Array.FindIndex(CopyCodeRanges, range => range.Contains(CopyLength));
+
+            return new InsertCopyLengthCode(insertCode, copyCode, dczStrategy);
+        }
+
+        /// <summary>
         /// Returns true if the provided <paramref name="code"/> can encode the stored lengths, and can therefore be used as context in the <see cref="Serializer"/>.
         /// </summary>
         public bool CanEncodeUsing(InsertCopyLengthCode code){
-            int insertCode = code.InsertCode;
-            int copyCode = code.CopyCode;
-
-            int insertNormalized = InsertLength - InsertCodeValueOffsets[insertCode];
-            int copyNormalized = CopyLength - CopyCodeValueOffsets[copyCode];
-
             return (
-                insertNormalized >= 0 && insertNormalized < (1 << InsertCodeExtraBits[insertCode]) &&
-                copyNormalized >= 0 && copyNormalized < (1 << CopyCodeExtraBits[copyCode])
+                InsertCodeRanges[code.InsertCode].Contains(InsertLength) &&
+                CopyCodeRanges[code.CopyCode].Contains(CopyLength)
             );
         }
 

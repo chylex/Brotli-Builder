@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Numbers;
 using InsertCopyTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.InsertCopyLengthCode>;
 
 namespace BrotliLib.Brotli.Components.Data{
@@ -11,7 +13,7 @@ namespace BrotliLib.Brotli.Components.Data{
     public sealed class InsertCopyLengthCode : IComparable<InsertCopyLengthCode>{
         public static readonly AlphabetSize AlphabetSize = new AlphabetSize(704);
         public static readonly InsertCopyTree.Context TreeContext = new InsertCopyTree.Context(AlphabetSize, value => new InsertCopyLengthCode(value), symbol => symbol.CompactedCode);
-
+        
         // Cell offsets
 
         private static readonly int[] InsertCellOffsets = {
@@ -21,6 +23,8 @@ namespace BrotliLib.Brotli.Components.Data{
         private static readonly int[] CopyCellOffsets = {
             0, 8, 0, 8, 0, 8, 16, 0, 16, 8, 16
         };
+
+        private static readonly (Range i, Range c)[] PairedCellOffsets = InsertCellOffsets.Zip(CopyCellOffsets, (i, c) => (new Range(i, i + 7), new Range(c, c + 7))).ToArray();
 
         // Data
 
@@ -51,13 +55,36 @@ namespace BrotliLib.Brotli.Components.Data{
             if (compactedCode < 0 || compactedCode >= AlphabetSize.SymbolCount){
                 throw new ArgumentOutOfRangeException(nameof(compactedCode), "Compacted insert&copy length code must be in range [0; " + AlphabetSize.SymbolCount + ").");
             }
-
+            
             int cell = compactedCode / 64;
 
             this.CompactedCode = compactedCode;
             this.InsertCode = InsertCellOffsets[cell] + ((compactedCode >> 3) & 0b111);
             this.CopyCode = CopyCellOffsets[cell] + (compactedCode & 0b111);
             this.UseDistanceCodeZero = cell < 2;
+        }
+
+        /// <summary>
+        /// Initializes the code with the concrete insert and copy codes, and the flag which determines whether to use an implied distance code zero.
+        /// </summary>
+        public InsertCopyLengthCode(int insertCode, int copyCode, DistanceCodeZeroStrategy dczStrategy){
+            if (insertCode < 0 || insertCode > 23){
+                throw new ArgumentOutOfRangeException(nameof(insertCode), "Insert code must be in range [0; 23].");
+            }
+
+            if (copyCode < 0 || copyCode > 23){
+                throw new ArgumentOutOfRangeException(nameof(copyCode), "Copy code must be in range [0; 23].");
+            }
+
+            bool useDistanceCodeZero = dczStrategy.Determine(insertCode, copyCode);
+
+            int startCellIndex = useDistanceCodeZero ? 0 : 2;
+            int cell = Array.FindIndex(PairedCellOffsets, startCellIndex, pair => pair.i.Contains(insertCode) && pair.c.Contains(copyCode));
+
+            this.CompactedCode = (64 * cell) + ((insertCode & 0b111) << 3) | (copyCode & 0b111);
+            this.InsertCode = insertCode;
+            this.CopyCode = CopyCode;
+            this.UseDistanceCodeZero = useDistanceCodeZero;
         }
 
         public int CompareTo(InsertCopyLengthCode other){
