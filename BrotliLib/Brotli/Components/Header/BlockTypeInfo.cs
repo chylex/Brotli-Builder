@@ -1,4 +1,5 @@
-﻿using BrotliLib.Brotli.Components.Utils;
+﻿using System;
+using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.IO;
 using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Data;
@@ -12,9 +13,11 @@ namespace BrotliLib.Brotli.Components.Header{
     /// https://tools.ietf.org/html/rfc7932#section-6
     /// </summary>
     public sealed class BlockTypeInfo{
-        public static readonly BlockTypeInfo Empty = new BlockTypeInfo();
+        public static readonly CategoryMap<BlockTypeInfo> Empty = new CategoryMap<BlockTypeInfo>(category => new BlockTypeInfo(category));
         
         // Data
+
+        public Category Category { get; }
 
         public int Count { get; }
         public int InitialLength { get; }
@@ -22,12 +25,14 @@ namespace BrotliLib.Brotli.Components.Header{
         public BlockTypeCodeTree TypeCodeTree { get; }
         public BlockLengthCodeTree LengthCodeTree { get; }
 
-        private BlockTypeInfo(){
+        private BlockTypeInfo(Category category){
+            this.Category = category;
             this.Count = 1;
             this.InitialLength = 16777216;
         }
 
-        public BlockTypeInfo(int count, int initialLength, BlockTypeCodeTree typeCodeTree, BlockLengthCodeTree lengthCodeTree){
+        public BlockTypeInfo(Category category, int count, int initialLength, BlockTypeCodeTree typeCodeTree, BlockLengthCodeTree lengthCodeTree){
+            this.Category = category;
             this.Count = count;
             this.InitialLength = initialLength;
             this.TypeCodeTree = typeCodeTree;
@@ -65,21 +70,22 @@ namespace BrotliLib.Brotli.Components.Header{
             markerTitle: context => "Block Type Info (" + context + ")",
 
             fromBits: (reader, context) => {
-                char cat = context.Value.Id();
+                Category category = context ?? throw new InvalidOperationException("Category must be provided when deserializing BlockTypeInfo.");
+                char cid = category.Id();
                 
-                int count = reader.ReadValue(VariableLength11Code.Serializer, NoContext.Value, "NBLTYPES" + cat, value => value.Value);
+                int count = reader.ReadValue(VariableLength11Code.Serializer, NoContext.Value, "NBLTYPES" + cid, value => value.Value);
                 
                 if (count == 1){
-                    return Empty;
+                    return Empty[category];
                 }
                 
-                var blockTypeCode = reader.ReadStructure(BlockTypeCodeTree.Serializer, GetBlockTypeCodeTreeContext(count), "HTREE_BTYPE_" + cat);
-                var blockLengthCode = reader.ReadStructure(BlockLengthCodeTree.Serializer, BlockLengthCode.TreeContext, "HTREE_BLEN_" + cat);
+                var blockTypeCode = reader.ReadStructure(BlockTypeCodeTree.Serializer, GetBlockTypeCodeTreeContext(count), "HTREE_BTYPE_" + cid);
+                var blockLengthCode = reader.ReadStructure(BlockLengthCodeTree.Serializer, BlockLengthCode.TreeContext, "HTREE_BLEN_" + cid);
                 
-                var initialLengthCode = reader.ReadValue(blockLengthCode.Root, "BLEN_" + cat + " (code)");
-                var initialLength = reader.ReadValue(BlockLengthCode.Serializer, initialLengthCode, "BLEN_" + cat + " (value)");
+                var initialLengthCode = reader.ReadValue(blockLengthCode.Root, "BLEN_" + cid + " (code)");
+                var initialLength = reader.ReadValue(BlockLengthCode.Serializer, initialLengthCode, "BLEN_" + cid + " (value)");
                 
-                return new BlockTypeInfo(count, initialLength, blockTypeCode, blockLengthCode);
+                return new BlockTypeInfo(category, count, initialLength, blockTypeCode, blockLengthCode);
             },
 
             toBits: (writer, obj, context) => {

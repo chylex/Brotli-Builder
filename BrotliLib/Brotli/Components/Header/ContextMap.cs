@@ -114,16 +114,14 @@ namespace BrotliLib.Brotli.Components.Header{
             return new HuffmanTree<int>.Context(new AlphabetSize(alphabetSize), bits => bits, symbol => symbol);
         }
 
-        public static readonly IBitSerializer<ContextMap, KeyValuePair<Category, BlockTypeInfo>> Serializer = new MarkedBitSerializer<ContextMap, KeyValuePair<Category, BlockTypeInfo>>(
-            markerTitle: context => "Context Map (" + context.Key + ")",
+        public static readonly IBitSerializer<ContextMap, BlockTypeInfo> Serializer = new MarkedBitSerializer<ContextMap, BlockTypeInfo>(
+            markerTitle: context => "Context Map (" + context.Category + ")",
 
             fromBits: (reader, context) => {
-                var (category, blockTypeInfo) = context;
-                
                 int treeCount = reader.ReadValue(VariableLength11Code.Serializer, NoContext.Value, "NTREES", value => value.Value);
-                int treesPerBlockType = category.HuffmanTreesPerBlockType();
+                int treesPerBlockType = context.Category.HuffmanTreesPerBlockType();
 
-                byte[] contextMap = new byte[treesPerBlockType * blockTypeInfo.Count];
+                byte[] contextMap = new byte[treesPerBlockType * context.Count];
 
                 if (treeCount > 1){
                     byte runLengthCodeCount = (byte)reader.MarkValue("RLEMAX", () => reader.NextBit() ? 1 + reader.NextChunk(4) : 0);
@@ -148,7 +146,7 @@ namespace BrotliLib.Brotli.Components.Header{
                             }
                         }
                         
-                        reader.MarkEnd(new TextMarker("CMAP" + category.Id() + "[" + index + "]", contextMap[index]));
+                        reader.MarkEnd(new TextMarker("CMAP" + context.Category.Id() + "[" + index + "]", contextMap[index]));
                     }
 
                     if (reader.NextBit("IMTF")){

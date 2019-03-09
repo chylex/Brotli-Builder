@@ -80,7 +80,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
         }
         
         private static ContextMap ReadContextMap(BitReader reader, Category category, CategoryMap<BlockTypeInfo> blockTypes){
-            return ContextMap.Serializer.FromBits(reader, blockTypes.Pick(category));
+            return ContextMap.Serializer.FromBits(reader, blockTypes[category]);
         }
 
         private static IReadOnlyList<HuffmanTree<T>> ReadHuffmanTrees<T>(MarkedBitReader reader, Category category, int treeCount, HuffmanTree<T>.Context context) where T : IComparable<T>{
@@ -114,8 +114,8 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                     LiteralContextModes.Serializer.ToBits(writer, literalCtxMode, NoContext.Value);
                 }
 
-                ContextMap.Serializer.ToBits(writer, obj.LiteralCtxMap, obj.BlockTypes.Pick(Category.Literal));
-                ContextMap.Serializer.ToBits(writer, obj.DistanceCtxMap, obj.BlockTypes.Pick(Category.Distance));
+                ContextMap.Serializer.ToBits(writer, obj.LiteralCtxMap, obj.BlockTypes[Category.Literal]);
+                ContextMap.Serializer.ToBits(writer, obj.DistanceCtxMap, obj.BlockTypes[Category.Distance]);
                 
                 foreach(LiteralTree tree in obj.LiteralTrees){
                     LiteralTree.Serializer.ToBits(writer, tree, Literal.TreeContext);
