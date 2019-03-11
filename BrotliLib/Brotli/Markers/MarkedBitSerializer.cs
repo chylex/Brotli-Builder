@@ -25,7 +25,7 @@ namespace BrotliLib.Brotli.Markers{
             toBits: toBits
         ){}
         
-        public T FromBits(BitReader reader, C context) => fromBits((reader as MarkedBitReader) ?? new MarkedBitReader(reader), context);
+        public T FromBits(BitReader reader, C context) => fromBits((reader as MarkedBitReader) ?? new MarkedBitReader.Dummy(reader), context);
         public void ToBits(BitWriter writer, T obj, C context) => toBits(writer, obj, context);
     }
 }

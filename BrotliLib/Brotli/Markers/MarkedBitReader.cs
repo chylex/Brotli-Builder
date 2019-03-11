@@ -17,7 +17,7 @@ namespace BrotliLib.Brotli.Markers{
 
         // General
 
-        public void MarkStart(){
+        public virtual void MarkStart(){
             MarkerNode added = new MarkerNode{ Depth = nodes.Count };
 
             if (nodes.Count == 0){
@@ -31,7 +31,7 @@ namespace BrotliLib.Brotli.Markers{
             nodes.Push(added);
         }
 
-        public void MarkEnd(IMarkerInfo info){
+        public virtual void MarkEnd(IMarkerInfo info){
             int start = starts.Pop();
             int end = Index;
             nodes.Pop().Marker = new Marker(start, end, info);
@@ -44,7 +44,7 @@ namespace BrotliLib.Brotli.Markers{
 
         // Marking helpers
 
-        private T MarkCall<T>(Func<T> supplier, Func<T, IMarkerInfo> marker){
+        protected virtual T MarkCall<T>(Func<T> supplier, Func<T, IMarkerInfo> marker){
             MarkStart();
             T result = supplier();
             MarkEnd(marker(result));
@@ -115,6 +115,19 @@ namespace BrotliLib.Brotli.Markers{
             return Enumerable.Range(0, length)
                              .Select(counter => MarkTitle(title + " " + (counter + 1) + "/" + length, () => serializer.FromBits(this, context)))
                              .ToArray();
+        }
+
+        // Dummy
+
+        public class Dummy : MarkedBitReader{
+            public Dummy(BitReader wrapped) : base(wrapped){}
+
+            public override void MarkStart(){}
+            public override void MarkEnd(IMarkerInfo info){}
+
+            protected override T MarkCall<T>(Func<T> supplier, Func<T, IMarkerInfo> marker){
+                return supplier();
+            }
         }
     }
 }

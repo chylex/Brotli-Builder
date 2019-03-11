@@ -17,7 +17,7 @@ namespace BrotliLib.Brotli{
         }
 
         public static BrotliFileStructure FromBytes(byte[] bytes){
-            return Serializer.FromBits(new MarkedBitReader(new BitStream(bytes).GetReader()), null);
+            return Serializer.FromBits(CreateReader(new BitStream(bytes), enableMarkers: false), null);
         }
 
         public static BrotliFileStructure FromEncoder(WindowSize windowSize, IBrotliEncoder encoder, byte[] bytes){
@@ -55,9 +55,9 @@ namespace BrotliLib.Brotli{
             return stream;
         }
 
-        public BrotliGlobalState GetDecompressionState(BitStream bitStream){
+        public BrotliGlobalState GetDecompressionState(BitStream bitStream, bool enableMarkers){
             BrotliGlobalState state = CreateNewContext();
-            MarkedBitReader reader = new MarkedBitReader(bitStream.GetReader());
+            MarkedBitReader reader = CreateReader(bitStream, enableMarkers);
 
             Serializer.FromBits(reader, state);
             state.BitMarkerRoot = reader.MarkerRoot;
@@ -69,6 +69,10 @@ namespace BrotliLib.Brotli{
         }
 
         // Serialization
+
+        private static MarkedBitReader CreateReader(BitStream bitStream, bool enableMarkers){
+            return enableMarkers ? new MarkedBitReader(bitStream.GetReader()) : new MarkedBitReader.Dummy(bitStream.GetReader());
+        }
 
         private static readonly IBitSerializer<BrotliFileStructure, BrotliGlobalState> Serializer = new BitSerializer<BrotliFileStructure, BrotliGlobalState>(
             fromBits: (reader, context) => {

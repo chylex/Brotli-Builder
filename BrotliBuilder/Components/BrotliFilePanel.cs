@@ -12,6 +12,8 @@ using FastColoredTextBoxNS;
 
 namespace BrotliBuilder.Components{
     public partial class BrotliFilePanel : UserControl{
+        private const bool EnableBitMarkers = true;
+
         public string LabelPrefix{
             get{
                 return labelPrefix;
@@ -49,7 +51,7 @@ namespace BrotliBuilder.Components{
                 BrotliGlobalState state;
 
                 try{
-                    state = file.GetDecompressionState(bits);
+                    state = file.GetDecompressionState(bits, EnableBitMarkers);
                 }catch(Exception ex){
                     sync(() => UpdateTextBox(textBoxOutput, ex));
                     return;
@@ -58,7 +60,7 @@ namespace BrotliBuilder.Components{
                 string outputStr = state.OutputAsUTF8;
                 MarkerNode[] markerSequence = state.BitMarkerRoot.ToArray();
 
-                int totalBits = (int)markerSequence.Last().Marker.IndexEnd; // use markers to account for padding
+                int totalBits = markerSequence.LastOrDefault()?.Marker?.IndexEnd ?? bits.Length; // use markers to account for padding
 
                 sync(() => {
                     textBoxBitStream.UpdateMarkers(markerSequence);
@@ -102,7 +104,7 @@ namespace BrotliBuilder.Components{
                 Stopwatch stopwatchDecompression = Stopwatch.StartNew();
                 
                 try{
-                    state = file.GetDecompressionState(bits);
+                    state = file.GetDecompressionState(bits, EnableBitMarkers);
                 }catch(Exception ex){
                     sync(() => {
                         UpdateTextBox(textBoxOutput, ex);
