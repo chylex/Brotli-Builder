@@ -68,7 +68,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                 
                 for(int insertIndex = 0; insertIndex < insertLength; insertIndex++){
                     int blockID = context.NextBlockID(Category.Literal);
-                    int contextID = context.NextLiteralContextID(header.LiteralCtxModes[blockID]);
+                    int contextID = state.NextLiteralContextID(header.LiteralCtxModes[blockID]);
                     int treeID = header.LiteralCtxMap.DetermineTreeID(blockID, contextID);
 
                     Literal literal = reader.ReadValue(header.LiteralTrees[treeID].Root, "literal");
@@ -124,7 +124,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                 
                 foreach(Literal literal in obj.Literals){
                     int blockID = context.NextBlockID(Category.Literal);
-                    int contextID = context.NextLiteralContextID(header.LiteralCtxModes[blockID]);
+                    int contextID = state.NextLiteralContextID(header.LiteralCtxModes[blockID]);
                     int treeID = header.LiteralCtxMap.DetermineTreeID(blockID, contextID);
 
                     writer.WriteBits(header.LiteralTrees[treeID].FindPath(literal));

@@ -48,26 +48,19 @@ namespace BrotliLib.Brotli.Components.Contents{
             public bool NeedsMoreData => bytesWritten < MetaBlock.DataLength.UncompressedBytes;
 
             protected readonly CategoryMap<BlockTypeTracker> blockTrackers;
-            private readonly RingBuffer<byte> recentOutput;
             private int bytesWritten;
 
             protected DataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header) : base(wrapped.MetaBlock, wrapped.State){
                 this.Header = header;
                 this.blockTrackers = Header.BlockTypes.Select((_, info) => new BlockTypeTracker(info));
-                this.recentOutput = new RingBuffer<byte>(0, 0);
             }
 
             public abstract int NextBlockID(Category category);
-
-            public int NextLiteralContextID(LiteralContextMode mode){
-                return mode.DetermineContextID(recentOutput.Front, recentOutput.Back);
-            }
 
             public void WriteLiteral(Literal literal){
                 byte value = literal.Value;
 
                 State.Output(value);
-                recentOutput.Push(value);
                 ++bytesWritten;
             }
 
@@ -95,9 +88,6 @@ namespace BrotliLib.Brotli.Components.Contents{
                     State.Output(word);
                     bytesWritten += word.Length;
                 }
-
-                recentOutput.Push(State.GetByteAt(State.OutputSize - 2));
-                recentOutput.Push(State.GetByteAt(State.OutputSize - 1));
             }
         }
 
