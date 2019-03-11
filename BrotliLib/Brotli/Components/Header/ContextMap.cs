@@ -136,7 +136,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
                         if (code > 0){
                             if (code <= runLengthCodeCount){
-                                index += (1 << code) + reader.NextChunk(code) - 1;
+                                index += (1 << code) - 1 + reader.NextChunk(code);
 
                                 reader.MarkEnd(new TextMarker("skip to index " + (index + 1)));
                                 continue;

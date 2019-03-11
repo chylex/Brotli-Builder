@@ -165,12 +165,14 @@ namespace BrotliBuilder.Blocks{
 
             public Func<IBuildingBlockContext, UserControl> CreateStructureBlock(){
                 switch(Value){
-                    // TODO
                     case MetaBlock.PaddedEmpty pe:
                         return ctx => new BuildEmptyMetaBlock(ctx, pe.Contents);
 
                     case MetaBlock.Uncompressed u:
                         return ctx => new BuildUncompressedMetaBlock(ctx, u.Contents);
+
+                    case MetaBlock.Compressed c:
+                        // TODO
 
                     default:
                         return null;

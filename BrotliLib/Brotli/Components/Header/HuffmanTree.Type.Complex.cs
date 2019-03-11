@@ -139,7 +139,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
                 int ReplaceSequence(int index, byte code, int removeLength, int insertLength){
                     symbolEntries.RemoveRange(index, removeLength);
-                    symbolEntries.InsertRange(index, Enumerable.Repeat(new HuffmanGenerator<T>.Entry(default(T), code), insertLength));
+                    symbolEntries.InsertRange(index, Enumerable.Repeat(new HuffmanGenerator<T>.Entry(default, code), insertLength));
                     return index + insertLength;
                 }
                 
