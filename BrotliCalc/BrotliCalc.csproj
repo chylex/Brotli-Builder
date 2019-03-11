@@ -14,5 +14,9 @@
   <ItemGroup>
     <ProjectReference Include="..\BrotliLib\BrotliLib.csproj" />
   </ItemGroup>
+  
+  <Target Name="CopyResources" AfterTargets="Build">
+    <Copy SourceFiles="Resources\brotli.exe;Resources\dict" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>
