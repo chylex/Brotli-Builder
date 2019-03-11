@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.IO;
 using DistanceTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.DistanceCode>;
@@ -145,10 +146,14 @@ namespace BrotliLib.Brotli.Components.Data{
         /// Represents a distance code which uses additional bits from the stream to calculate the distance value.
         /// </summary>
         private class ComplexDistance : DistanceCode{
-            private readonly int postfixBitCount;
+            private readonly byte postfixBitCount;
+            private readonly byte postfixBitValue;
+
             private readonly int extraBitCount;
             private readonly int topOffset;
             private readonly int bottomOffset;
+
+            private int PostfixBitMask => (1 << postfixBitCount) - 1;
 
             public ComplexDistance(DistanceParameters parameters, int code) : base(code){
                 int directCodeCount = parameters.DirectCodeCount;
@@ -157,14 +162,20 @@ namespace BrotliLib.Brotli.Components.Data{
                 int normalized = code - directCodeCount - BufferIndexes.Length;
                 
                 int hcode = normalized >> postfixBitCount;
-                int lcode = normalized & (1 << postfixBitCount) - 1;
+                int lcode = normalized & PostfixBitMask;
                 
+                this.postfixBitValue = (byte)lcode;
                 this.extraBitCount = 1 + (normalized >> (postfixBitCount + 1));
+
                 this.topOffset = ((2 + (hcode & 1)) << extraBitCount) - 4;
                 this.bottomOffset = 1 + lcode + directCodeCount;
             }
 
             public override bool CanEncodeValue(BrotliGlobalState state, int value){
+                if (((value - 1) & PostfixBitMask) != postfixBitValue){
+                    return false;
+                }
+
                 int extraBitValue = FindExtraBitValue(value);
                 return extraBitValue >= 0 && extraBitValue < (1 << extraBitCount);
             }
@@ -194,7 +205,18 @@ namespace BrotliLib.Brotli.Components.Data{
             }
 
             public override string ToString(){
-                return base.ToString() + " | Value in [" + CalculateValue(0) + "; " + CalculateValue((1 << extraBitCount) - 1) + "]";
+                StringBuilder build = new StringBuilder();
+                build.Append(base.ToString());
+                build.Append(" | Value in { ");
+
+                for(int extraBitValue = 0; extraBitValue < 3; extraBitValue++){
+                    build.Append(CalculateValue(extraBitValue)).Append("; ");
+                }
+
+                build.Append("...; ");
+                build.Append(CalculateValue((1 << extraBitCount) - 1));
+                build.Append(" }");
+                return build.ToString();
             }
         }
         
