@@ -9,7 +9,7 @@ namespace BrotliLib.IO{
         private const int ByteSize = 8;
         private const int MaxChunkSize = ByteSize * sizeof(int);
 
-        protected virtual long Index { get; private set; }
+        protected virtual int Index { get; private set; }
         
         private readonly IEnumerator<bool> enumerator;
 
@@ -70,10 +70,10 @@ namespace BrotliLib.IO{
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">Thrown when there are not enough bits left in the stream for the alignment.</exception>
         public virtual void AlignToByteBoundary(){
-            long relativeIndex = Index % ByteSize;
+            int relativeIndex = Index % ByteSize;
 
             if (relativeIndex > 0){
-                for(long bitsLeft = ByteSize - relativeIndex; bitsLeft > 0; bitsLeft--){
+                for(int bitsLeft = ByteSize - relativeIndex; bitsLeft > 0; bitsLeft--){
                     NextBit();
                 }
             }
@@ -93,7 +93,7 @@ namespace BrotliLib.IO{
         /// Allows decorating another <see cref="BitReader" /> with new functionality.
         /// </summary>
         internal abstract class Wrapped : BitReader{
-            protected override long Index => wrapped.Index;
+            protected override int Index => wrapped.Index;
 
             private readonly BitReader wrapped;
 

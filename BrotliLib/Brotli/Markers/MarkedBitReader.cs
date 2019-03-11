@@ -11,7 +11,7 @@ namespace BrotliLib.Brotli.Markers{
         public MarkerRoot MarkerRoot { get; } = new MarkerRoot();
         
         private readonly Stack<MarkerNode> nodes = new Stack<MarkerNode>();
-        private readonly Stack<long> starts = new Stack<long>();
+        private readonly Stack<int> starts = new Stack<int>();
         
         public MarkedBitReader(BitReader wrapped) : base(wrapped){}
 
@@ -32,8 +32,8 @@ namespace BrotliLib.Brotli.Markers{
         }
 
         public void MarkEnd(IMarkerInfo info){
-            long start = starts.Pop();
-            long end = Index;
+            int start = starts.Pop();
+            int end = Index;
             nodes.Pop().Marker = new Marker(start, end, info);
         }
 

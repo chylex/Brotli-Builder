@@ -2,13 +2,13 @@
 
 namespace BrotliLib.Markers{
     public class Marker : IComparable<Marker>{
-        public long IndexStart { get; }
-        public long IndexEnd { get; }
-        public long Length => IndexEnd - IndexStart;
+        public int IndexStart { get; }
+        public int IndexEnd { get; }
+        public int Length => IndexEnd - IndexStart;
         
         public IMarkerInfo Info { get; }
 
-        public Marker(long indexStart, long indexEnd, IMarkerInfo info){
+        public Marker(int indexStart, int indexEnd, IMarkerInfo info){
             this.IndexStart = indexStart;
             this.IndexEnd = indexEnd;
             this.Info = info;

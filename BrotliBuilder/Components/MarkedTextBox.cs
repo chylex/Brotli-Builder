@@ -83,8 +83,8 @@ namespace BrotliBuilder.Components{
                 foreach(MarkerNode node in markerSequence){
                     Marker marker = node.Marker;
 
-                    SelectionStart = (int)marker.IndexStart;
-                    SelectionLength = (int)marker.Length;
+                    SelectionStart = marker.IndexStart;
+                    SelectionLength = marker.Length;
 
                     Selection.ClearStyle(StyleIndex.All);
                     Selection.SetStyle(mainStyleIndex[colorIndex % mainStyleIndex.Length]);
@@ -99,8 +99,8 @@ namespace BrotliBuilder.Components{
                 MarkerNode deepestNode = highlightedMarkers.Last();
                 Marker deepestMarker = deepestNode.Marker;
                 
-                SelectionStart = (int)deepestMarker.IndexStart;
-                SelectionLength = (int)deepestMarker.Length;
+                SelectionStart = deepestMarker.IndexStart;
+                SelectionLength = deepestMarker.Length;
                 
                 Selection.SetStyle(highlightStyleIndex);
                 
@@ -136,7 +136,7 @@ namespace BrotliBuilder.Components{
                     while(--nodeIndex >= 0){
                         targetNode = markerSequence[nodeIndex];
 
-                        int newCaret = (int)targetNode.Marker.IndexStart;
+                        int newCaret = targetNode.Marker.IndexStart;
 
                         if (caret != newCaret){
                             caret = newCaret;
@@ -148,7 +148,7 @@ namespace BrotliBuilder.Components{
                     while(++nodeIndex < markerSequence.Length){
                         targetNode = markerSequence[nodeIndex];
 
-                        int newCaret = (int)targetNode.Marker.IndexStart;
+                        int newCaret = targetNode.Marker.IndexStart;
 
                         if (caret != newCaret){
                             caret = newCaret;
