@@ -57,7 +57,7 @@ namespace BrotliLib.Brotli.Components.Contents{
 
             public abstract int NextBlockID(Category category);
 
-            public void WriteLiteral(Literal literal){
+            public void WriteLiteral(in Literal literal){
                 byte value = literal.Value;
 
                 State.Output(value);
@@ -147,7 +147,7 @@ namespace BrotliLib.Brotli.Components.Contents{
 
                 reader.MarkEnd(new TitleMarker("Command List"));
                 
-                return new CompressedMetaBlockContents(header, icCommands, dataContext.BlockSwitchCommands);
+                return new CompressedMetaBlockContents(header, icCommands.ToArray(), dataContext.BlockSwitchCommands);
             },
 
             toBits: (writer, obj, context) => {

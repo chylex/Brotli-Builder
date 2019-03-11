@@ -8,7 +8,7 @@ namespace BrotliLib.Brotli.Components.Data{
     /// Describes a <see cref="HuffmanTree{T}"/> entry that represents a single byte.
     /// https://tools.ietf.org/html/rfc7932#section-5
     /// </summary>
-    public sealed class Literal : IComparable<Literal>{
+    public readonly struct Literal : IComparable<Literal>{
         public static readonly AlphabetSize AlphabetSize = new AlphabetSize(256);
         public static readonly LiteralTree.Context TreeContext = new LiteralTree.Context(AlphabetSize, value => new Literal((byte)value), symbol => symbol.Value);
 

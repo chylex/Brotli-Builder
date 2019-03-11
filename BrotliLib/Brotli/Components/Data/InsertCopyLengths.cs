@@ -10,7 +10,7 @@ namespace BrotliLib.Brotli.Components.Data{
     /// Represents the exact insert and copy length of a single insert&amp;copy command.
     /// https://tools.ietf.org/html/rfc7932#section-5
     /// </summary>
-    public sealed class InsertCopyLengths{
+    public readonly struct InsertCopyLengths{
         public static int MinimumCopyLength => CopyCodeValueOffsets[0];
 
         // Insert code tables
@@ -69,8 +69,11 @@ namespace BrotliLib.Brotli.Components.Data{
         /// Constructs an <see cref="InsertCopyLengthCode"/> that can encode the stored lengths, and can therefore be used as context in the <see cref="Serializer"/>.
         /// </summary>
         public InsertCopyLengthCode MakeCode(DistanceCodeZeroStrategy dczStrategy){
-            int insertCode = Array.FindIndex(InsertCodeRanges, range => range.Contains(InsertLength));
-            int copyCode = Array.FindIndex(CopyCodeRanges, range => range.Contains(CopyLength));
+            int insertLength = InsertLength;
+            int copyLength = CopyLength;
+
+            int insertCode = Array.FindIndex(InsertCodeRanges, range => range.Contains(insertLength));
+            int copyCode = Array.FindIndex(CopyCodeRanges, range => range.Contains(copyLength));
 
             return new InsertCopyLengthCode(insertCode, copyCode, dczStrategy);
         }
