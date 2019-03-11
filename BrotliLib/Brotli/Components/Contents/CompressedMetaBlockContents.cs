@@ -63,15 +63,12 @@ namespace BrotliLib.Brotli.Components.Contents{
                 ++bytesWritten;
             }
 
-            public void WriteCopy(int copyLength, int copyDistance, bool usedDistanceCodeZero){
-                if (copyDistance < 0){
-                    throw new InvalidOperationException("Distance cannot be negative.");
-                }
-
+            public void WriteCopy(int copyLength, DistanceInfo distanceInfo){
+                int copyDistance = distanceInfo.GetValue(State);
                 int maxDistance = State.MaxDistance;
 
                 if (copyDistance <= maxDistance){
-                    if (copyDistance != 0 && !usedDistanceCodeZero){
+                    if (distanceInfo.ShouldWriteToDistanceBuffer()){
                         State.DistanceBuffer.Push(copyDistance);
                     }
 

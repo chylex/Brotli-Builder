@@ -7,22 +7,14 @@ using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components.Contents.Compressed{
     public sealed class InsertCopyCommand{
-        public const int ImpliedDistanceCodeZero = int.MaxValue;
-        public const int MissingCopyDistance = int.MinValue;
-
         public IReadOnlyList<Literal> Literals { get; }
+
         public int CopyLength { get; }
-        public int CopyDistance { get; }
+        public DistanceInfo CopyDistance { get; }
 
         public InsertCopyLengths Lengths => new InsertCopyLengths(Literals.Count, CopyLength);
-
-        public InsertCopyCommand(IReadOnlyList<Literal> literals, int copyLength){
-            this.Literals = literals;
-            this.CopyLength = copyLength;
-            this.CopyDistance = MissingCopyDistance;
-        }
-
-        public InsertCopyCommand(IReadOnlyList<Literal> literals, int copyLength, int copyDistance){
+        
+        public InsertCopyCommand(IReadOnlyList<Literal> literals, int copyLength, DistanceInfo copyDistance = DistanceInfo.EndsAfterLiterals){
             this.Literals = literals;
             this.CopyLength = copyLength;
             this.CopyDistance = copyDistance;
@@ -34,15 +26,15 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
             return obj is InsertCopyCommand command &&
                    EqualityComparer<IReadOnlyList<Literal>>.Default.Equals(Literals, command.Literals) &&
                    CopyLength == command.CopyLength &&
-                   EqualityComparer<int?>.Default.Equals(CopyDistance, command.CopyDistance);
+                   CopyDistance == command.CopyDistance;
         }
 
-        public override int GetHashCode(){
+        public override int GetHashCode() {
             unchecked{
                 var hashCode = -1468049732;
                 hashCode = hashCode * -1521134295 + EqualityComparer<IReadOnlyList<Literal>>.Default.GetHashCode(Literals);
                 hashCode = hashCode * -1521134295 + CopyLength.GetHashCode();
-                hashCode = hashCode * -1521134295 + EqualityComparer<int?>.Default.GetHashCode(CopyDistance);
+                hashCode = hashCode * -1521134295 + CopyDistance.GetHashCode();
                 return hashCode;
             }
         }
@@ -86,11 +78,10 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
 
                 // Distance
                 
-                int distanceValue;
-                bool useDistanceCodeZero = icCode.UseDistanceCodeZero;
+                DistanceInfo distanceInfo;
 
-                if (useDistanceCodeZero){
-                    distanceValue = state.DistanceBuffer.Front;
+                if (icCode.UseDistanceCodeZero){
+                    distanceInfo = DistanceInfo.ImplicitCodeZero;
                 }
                 else{
                     int blockID = context.NextBlockID(Category.Distance);
@@ -98,26 +89,26 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                     int treeID = header.DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
                     DistanceCode distanceCode = reader.ReadValue(header.DistanceTrees[treeID].Root, "distance code");
-                    distanceValue = reader.ReadValue(DistanceCode.Serializer, distanceCode.MakeContext(state), "distance value");
+                    distanceInfo = reader.ReadValue(DistanceCode.Serializer, distanceCode.MakeContext(state), "distance value");
                 }
 
-                context.WriteCopy(copyLength, distanceValue, useDistanceCodeZero);
+                context.WriteCopy(copyLength, distanceInfo);
 
-                return new InsertCopyCommand(literals, copyLength, useDistanceCodeZero ? ImpliedDistanceCodeZero : distanceValue);
+                return new InsertCopyCommand(literals, copyLength, distanceInfo);
             },
 
             toBits: (writer, obj, context) => {
                 MetaBlockCompressionHeader header = context.Header;
                 BrotliGlobalState state = context.State;
                 
-                bool endsAfterLiterals = obj.CopyDistance == MissingCopyDistance;
-                bool useDistanceCodeZero = obj.CopyDistance == ImpliedDistanceCodeZero;
+                bool endsAfterLiterals = obj.CopyDistance == DistanceInfo.EndsAfterLiterals;
+                bool implicitDistanceCodeZero = obj.CopyDistance == DistanceInfo.ImplicitCodeZero;
 
                 // Insert&copy lengths
 
                 InsertCopyLengths icLengths = obj.Lengths;
                 int icBlockID = context.NextBlockID(Category.InsertCopy);
-                var icEntry = header.InsertCopyTrees[icBlockID].FindEntry(code => icLengths.CanEncodeUsing(code) && (useDistanceCodeZero == code.UseDistanceCodeZero || endsAfterLiterals));
+                var icEntry = header.InsertCopyTrees[icBlockID].FindEntry(code => icLengths.CanEncodeUsing(code) && (implicitDistanceCodeZero == code.UseDistanceCodeZero || endsAfterLiterals));
                 var icCode = icEntry.Key;
 
                 writer.WriteBits(icEntry.Value);
@@ -140,26 +131,21 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                     return;
                 }
 
-                int copyDistance;
-
-                if (useDistanceCodeZero){
-                    copyDistance = state.DistanceBuffer.Front;
-                }
-                else{
-                    copyDistance = obj.CopyDistance;
-
+                DistanceInfo distanceInfo = obj.CopyDistance;
+                
+                if (distanceInfo != DistanceInfo.ImplicitCodeZero){
                     int blockID = context.NextBlockID(Category.Distance);
                     int contextID = Math.Min(3, icLengths.CopyLength - 2);
                     int treeID = header.DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
-                    var distanceEntry = header.DistanceTrees[treeID].FindEntry(code => code.CanEncodeValue(state, copyDistance));
+                    var distanceEntry = header.DistanceTrees[treeID].FindEntry(code => distanceInfo.CanEncodeUsing(code, state));
                     var distanceCode = distanceEntry.Key;
 
                     writer.WriteBits(distanceEntry.Value);
-                    DistanceCode.Serializer.ToBits(writer, copyDistance, distanceCode.MakeContext(state));
+                    DistanceCode.Serializer.ToBits(writer, distanceInfo, distanceCode.MakeContext(state));
                 }
                 
-                context.WriteCopy(icLengths.CopyLength, copyDistance, useDistanceCodeZero);
+                context.WriteCopy(icLengths.CopyLength, distanceInfo);
             }
         );
     }

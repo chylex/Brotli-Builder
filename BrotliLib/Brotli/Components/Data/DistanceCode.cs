@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using BrotliLib.Brotli.Components.Header;
+using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.IO;
 using DistanceTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.DistanceCode>;
 
@@ -36,7 +37,7 @@ namespace BrotliLib.Brotli.Components.Data{
             this.Code = code;
         }
 
-        public DistanceContext MakeContext(BrotliGlobalState state){
+        internal DistanceContext MakeContext(BrotliGlobalState state){
             return new DistanceContext(this, state);
         }
 
@@ -222,21 +223,36 @@ namespace BrotliLib.Brotli.Components.Data{
         
         // Context
 
-        public class DistanceContext{
-            public DistanceCode Code { get; }
-            public BrotliGlobalState State { get; }
+        internal class DistanceContext{
+            private readonly DistanceCode code;
+            private readonly BrotliGlobalState state;
 
             public DistanceContext(DistanceCode code, BrotliGlobalState state){
-                this.Code = code;
-                this.State = state;
+                this.code = code;
+                this.state = state;
+            }
+
+            internal DistanceInfo Read(BitReader reader){
+                if (code.Code == 0){
+                    return DistanceInfo.ExplicitCodeZero;
+                }
+                else{
+                    return (DistanceInfo)code.ReadValue(state, reader);
+                }
+            }
+
+            internal void Write(BitWriter writer, DistanceInfo info){
+                if (info != DistanceInfo.ExplicitCodeZero){
+                    code.WriteValue(state, info.GetValue(state), writer);
+                }
             }
         }
 
         // Serialization
 
-        internal static readonly IBitSerializer<int, DistanceContext> Serializer = new BitSerializer<int, DistanceContext>(
-            fromBits: (reader, context) => context.Code.ReadValue(context.State, reader),
-            toBits: (writer, obj, context) => context.Code.WriteValue(context.State, obj, writer)
+        internal static readonly IBitSerializer<DistanceInfo, DistanceContext> Serializer = new BitSerializer<DistanceInfo, DistanceContext>(
+            fromBits: (reader, context) => context.Read(reader),
+            toBits: (writer, obj, context) => context.Write(writer, obj)
         );
     }
 }
