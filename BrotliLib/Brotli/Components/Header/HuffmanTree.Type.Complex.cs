@@ -9,9 +9,7 @@ using ComplexLengthNode = BrotliLib.Huffman.HuffmanNode<byte>;
 
 namespace BrotliLib.Brotli.Components.Header{
     partial class HuffmanTree<T>{
-        public const int DefaultMaxDepth = 15;
         private const int SymbolBitSpace = 1 << DefaultMaxDepth;
-
         private const byte NoForcedCode = byte.MaxValue;
 
         /// <summary>

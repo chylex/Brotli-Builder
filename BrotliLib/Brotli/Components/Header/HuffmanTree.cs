@@ -14,6 +14,28 @@ namespace BrotliLib.Brotli.Components.Header{
     /// https://tools.ietf.org/html/rfc7932#section-3.2
     /// </summary>
     public sealed partial class HuffmanTree<T> : IEnumerable<KeyValuePair<T, BitStream>> where T : IComparable<T>{
+        public const int DefaultMaxDepth = 15;
+
+        /// <summary>
+        /// Generates a canonical depth-limited Huffman tree using the frequencies of provided <paramref name="symbols"/>.
+        /// </summary>
+        public static HuffmanTree<T> FromSymbols(IReadOnlyList<T> symbols, byte maxDepth = DefaultMaxDepth){
+            if (symbols.Count == 0){
+                throw new ArgumentOutOfRangeException(nameof(symbols), "Cannot generate a tree with no symbols.");
+            }
+            else if (symbols.Count == 1){
+                return new HuffmanTree<T>(new HuffmanNode<T>.Leaf(symbols[0]));
+            }
+            else{
+                var frequencies = symbols.GroupBy(symbol => symbol).Select(group => new HuffmanGenerator<T>.SymbolFreq(group.Key, group.Count())).ToArray();
+                var root = HuffmanGenerator<T>.FromFrequenciesCanonical(frequencies, maxDepth);
+
+                return new HuffmanTree<T>(root);
+            }
+        }
+
+        // Data
+
         /// <summary>
         /// Root node of the tree.
         /// </summary>
