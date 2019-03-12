@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.IO;
+using BrotliLib.Numbers;
 using BlockLengthCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.BlockLengthCode>;
 
 namespace BrotliLib.Brotli.Components.Data{
@@ -27,6 +29,8 @@ namespace BrotliLib.Brotli.Components.Data{
             369, 497, 753, 1265, 2289, 4337, 8433, 16625,
         };
 
+        private static readonly Range[] BlockLengthRanges = BlockLengthOffsets.Zip(BlockLengthExtraBits, Range.FromOffsetBitPair).ToArray();
+
         // Data
 
         public int Code { get; }
@@ -36,8 +40,7 @@ namespace BrotliLib.Brotli.Components.Data{
         }
 
         public bool CanEncodeValue(int value){
-            int valueNormalized = value - BlockLengthOffsets[Code];
-            return valueNormalized >= 0 && valueNormalized < (1 << BlockLengthExtraBits[Code]);
+            return BlockLengthRanges[Code].Contains(value);
         }
 
         private int ReadValue(BitReader reader){

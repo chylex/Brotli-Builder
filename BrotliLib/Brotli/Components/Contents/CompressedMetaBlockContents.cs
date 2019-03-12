@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Contents.Compressed;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Utils;
@@ -19,6 +18,9 @@ namespace BrotliLib.Brotli.Components.Contents{
             this.InsertCopyCommands = insertCopyCommands;
             this.BlockSwitchCommands = blockSwitchCommands;
         }
+
+        public CompressedMetaBlockContents(MetaBlockCompressionHeader header, IReadOnlyList<InsertCopyCommand> insertCopyCommands) :
+            this(header, insertCopyCommands, new BlockSwitchCommandMap(_ => new BlockSwitchCommand[0])){}
 
         // Object
 

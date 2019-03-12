@@ -4,7 +4,7 @@ namespace BrotliLib.Brotli.Components.Utils{
     /// <summary>
     /// Defines properties of a symbol alphabet.
     /// </summary>
-    public struct AlphabetSize{
+    public readonly struct AlphabetSize{
         /// <summary>
         /// Returns the minimum amount of bits required to represent every symbol in the alphabet.
         /// </summary>

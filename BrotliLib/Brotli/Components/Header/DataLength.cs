@@ -13,7 +13,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
         public const int MaxUncompressedBytes = 1 << (4 * MaxNibbles);
 
-        public static DataLength Empty = new DataLength(0, 0);
+        public static readonly DataLength Empty = new DataLength(0, 0);
 
         private static int CalculateNibblesRequired(int uncompressedBytes){
             if (uncompressedBytes < 0){

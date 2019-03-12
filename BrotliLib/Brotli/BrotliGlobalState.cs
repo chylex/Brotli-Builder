@@ -15,6 +15,7 @@ namespace BrotliLib.Brotli{
         public int OutputSize => (int)decompressedStream.Length;
         public int MaxDistance => Math.Min(WindowSize.Bytes, OutputSize);
 
+        public byte[] OutputAsBytes => decompressedStream.ToArray();
         public string OutputAsUTF8 => Encoding.UTF8.GetString(decompressedStream.ToArray());
 
         public BrotliDictionary Dictionary { get; }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
 using LiteralTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.Literal>;
@@ -11,6 +12,10 @@ namespace BrotliLib.Brotli.Components.Data{
     public readonly struct Literal : IComparable<Literal>{
         public static readonly AlphabetSize AlphabetSize = new AlphabetSize(256);
         public static readonly LiteralTree.Context TreeContext = new LiteralTree.Context(AlphabetSize, value => new Literal((byte)value), symbol => symbol.Value);
+        
+        public static IReadOnlyList<Literal> FromBytes(byte[] bytes){
+            return Array.ConvertAll(bytes, b => new Literal(b));
+        }
 
         // Data
 
