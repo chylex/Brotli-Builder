@@ -29,5 +29,10 @@ namespace BrotliLib.Brotli.Dictionary.Format{
         /// Returns the starting byte position of a word of the specified length.
         /// </summary>
         int GetWordPosition(int length, int word);
+
+        /// <summary>
+        /// Returns the packed value, combining the word position and transform index into one value.
+        /// </summary>
+        int GetPackedValue(int length, int word, int transform);
     }
 }

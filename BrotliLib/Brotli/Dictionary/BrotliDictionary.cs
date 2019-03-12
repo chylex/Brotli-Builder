@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using BrotliLib.Brotli.Dictionary.Format;
 using BrotliLib.Brotli.Dictionary.Source;
 using BrotliLib.Brotli.Dictionary.Transform;
+using BrotliLib.Collections;
+using BrotliLib.Numbers;
 
 namespace BrotliLib.Brotli.Dictionary{
     /// <summary>
@@ -70,5 +72,31 @@ namespace BrotliLib.Brotli.Dictionary{
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Generates a lookup trie for all words in the dictionary, including transformations, matching the criteria specified by the parameters.
+        /// </summary>
+        public MultiTrie<byte, int> GenerateLookup(Range transformIndexRange, Range transformLengthRange){
+            var trie = new MultiTrie<byte, int>.Builder();
+
+            int minTransformIndex = Math.Max(transformIndexRange.First, 0);
+            int maxTransformIndex = Math.Min(transformIndexRange.Last, Transforms.Count - 1);
+
+            foreach(int length in Format.WordLengths){
+                for(int word = 0, count = Format.WordCount(length); word < count; word++){
+                    byte[] raw = source.ReadBytes(Format.GetWordPosition(length, word), length);
+
+                    for(int transform = minTransformIndex; transform <= maxTransformIndex; transform++){
+                        byte[] transformed = Transforms[transform].Process(raw);
+
+                        if (transformLengthRange.Contains(transformed.Length)){
+                            trie.Insert(transformed, Format.GetPackedValue(length, word, transform));
+                        }
+                    }
+                }
+            }
+
+            return trie.Build();
+        }
     }
 }

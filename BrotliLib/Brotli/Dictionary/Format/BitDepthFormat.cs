@@ -44,6 +44,11 @@ namespace BrotliLib.Brotli.Dictionary.Format{
             return wordOffsets[length] + length * word;
         }
 
+        public int GetPackedValue(int length, int word, int transform){
+            int position = GetWordPosition(length, word);
+            return (transform << wordLengthBits[length]) | position;
+        }
+
         private void CheckLengthBounds(int length){
             if (length < minLength || length > maxLength){
                 throw new ArgumentOutOfRangeException(nameof(length), "Dictionary word length must be between " + minLength + " and " + maxLength + ".");
