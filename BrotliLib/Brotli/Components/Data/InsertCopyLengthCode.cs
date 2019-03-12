@@ -83,7 +83,7 @@ namespace BrotliLib.Brotli.Components.Data{
 
             this.CompactedCode = (64 * cell) + ((insertCode & 0b111) << 3) | (copyCode & 0b111);
             this.InsertCode = insertCode;
-            this.CopyCode = CopyCode;
+            this.CopyCode = copyCode;
             this.UseDistanceCodeZero = useDistanceCodeZero;
         }
 
