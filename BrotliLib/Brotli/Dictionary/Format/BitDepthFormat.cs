@@ -45,8 +45,8 @@ namespace BrotliLib.Brotli.Dictionary.Format{
         }
 
         public int GetPackedValue(int length, int word, int transform){
-            int position = GetWordPosition(length, word);
-            return (transform << wordLengthBits[length]) | position;
+            CheckLengthBounds(length);
+            return (transform << wordLengthBits[length]) | word;
         }
 
         private void CheckLengthBounds(int length){
