@@ -59,33 +59,12 @@ namespace BrotliLib.Brotli.Components.Contents{
             public abstract int NextBlockID(Category category);
 
             public void WriteLiteral(in Literal literal){
-                byte value = literal.Value;
-
-                State.Output(value);
+                State.Output(literal.Value);
                 ++bytesWritten;
             }
 
-            public void WriteCopy(int copyLength, DistanceInfo distanceInfo){
-                int copyDistance = distanceInfo.GetValue(State);
-                int maxDistance = State.MaxDistance;
-
-                if (copyDistance <= maxDistance){
-                    if (distanceInfo.ShouldWriteToDistanceBuffer()){
-                        State.DistanceBuffer.Push(copyDistance);
-                    }
-
-                    for(int index = 0; index < copyLength; index++){
-                        State.Output(State.GetByteAt(State.OutputSize - copyDistance));
-                    }
-
-                    bytesWritten += copyLength;
-                }
-                else{
-                    byte[] word = State.Dictionary.ReadTransformed(copyLength, copyDistance - maxDistance - 1);
-
-                    State.Output(word);
-                    bytesWritten += word.Length;
-                }
+            public void WriteCopy(int length, DistanceInfo distance){
+                bytesWritten += State.OutputCopy(length, distance);
             }
         }
 

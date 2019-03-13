@@ -20,7 +20,7 @@ namespace BrotliLib.Brotli{
 
         public BrotliDictionary Dictionary { get; }
         public WindowSize WindowSize { get; }
-
+        
         public RingBuffer<byte> LiteralBuffer { get; }
         public RingBuffer<int> DistanceBuffer { get; }
 
@@ -41,7 +41,7 @@ namespace BrotliLib.Brotli{
 
         public byte GetByteAt(int position){
             long prevPos = decompressedStream.Position;
-
+            
             decompressedStream.Position = position;
             int readByte = decompressedStream.ReadByte();
             decompressedStream.Position = prevPos;
@@ -64,6 +64,29 @@ namespace BrotliLib.Brotli{
 
             if (length >= 1){
                 LiteralBuffer.Push(data[length - 1]);
+            }
+        }
+        
+        public int OutputCopy(int length, DistanceInfo distance){
+            int distanceValue = distance.GetValue(this);
+            int maxDistance = MaxDistance;
+
+            if (distanceValue <= maxDistance){
+                if (distance.ShouldWriteToDistanceBuffer()){
+                    DistanceBuffer.Push(distanceValue);
+                }
+
+                for(int index = 0; index < length; index++){
+                    Output(GetByteAt(OutputSize - distanceValue));
+                }
+
+                return length;
+            }
+            else{
+                byte[] word = Dictionary.ReadTransformed(length, distanceValue - maxDistance - 1);
+
+                Output(word);
+                return word.Length;
             }
         }
     }
