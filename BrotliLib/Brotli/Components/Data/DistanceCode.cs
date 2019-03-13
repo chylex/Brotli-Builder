@@ -238,12 +238,18 @@ namespace BrotliLib.Brotli.Components.Data{
                 build.Append(base.ToString());
                 build.Append(" | Value in { ");
 
-                for(int extraBitValue = 0; extraBitValue < 3; extraBitValue++){
+                int lastExtraBitValue = (1 << extraBitCount) - 1;
+                int printBeginningUpTo = Math.Min(3, lastExtraBitValue);
+
+                for(int extraBitValue = 0; extraBitValue < printBeginningUpTo; extraBitValue++){
                     build.Append(CalculateValue(extraBitValue)).Append("; ");
                 }
 
-                build.Append("...; ");
-                build.Append(CalculateValue((1 << extraBitCount) - 1));
+                if (printBeginningUpTo != lastExtraBitValue){
+                    build.Append("...; ");
+                }
+
+                build.Append(CalculateValue(lastExtraBitValue));
                 build.Append(" }");
                 return build.ToString();
             }
