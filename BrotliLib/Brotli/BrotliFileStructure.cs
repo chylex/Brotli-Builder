@@ -23,7 +23,7 @@ namespace BrotliLib.Brotli{
         public static BrotliFileStructure FromEncoder(WindowSize windowSize, IBrotliEncoder encoder, byte[] bytes){
             BrotliFileStructure bfs = new BrotliFileStructure(windowSize);
 
-            foreach(MetaBlock metaBlock in encoder.GenerateMetaBlocks(bytes)){
+            foreach(MetaBlock metaBlock in encoder.GenerateMetaBlocks(windowSize, bytes)){
                 bfs.MetaBlocks.Add(metaBlock);
             }
 
