@@ -29,6 +29,10 @@ namespace BrotliLib.Brotli.Components.Data{
             -1, 1, -2, 2, -3, 3
         };
 
+        public static DistanceCode[] LastDistances = Enumerable.Range(0, BufferIndexes.Length)
+                                                               .Select(code => new Last(code))
+                                                               .ToArray<DistanceCode>();
+
         // Data
 
         public int Code { get; }
@@ -70,17 +74,17 @@ namespace BrotliLib.Brotli.Components.Data{
         // Types
 
         private static DistanceCode Create(DistanceParameters parameters, int code){
-            if (code < BufferIndexes.Length){
-                return new LastDistance(code);
+            if (code < LastDistances.Length){
+                return LastDistances[code];
             }
             
-            int normalized = code - BufferIndexes.Length;
+            int normalized = code - LastDistances.Length;
 
             if (normalized < parameters.DirectCodeCount){
-                return new DirectDistance(code);
+                return new Direct(code);
             }
             else{
-                return new ComplexDistance(parameters, code);
+                return new Complex(parameters, code);
             }
         }
 
@@ -88,11 +92,11 @@ namespace BrotliLib.Brotli.Components.Data{
         /// <summary>
         /// Represents a distance code which uses the global ring buffer of last distances.
         /// </summary>
-        private class LastDistance : DistanceCode{
+        private sealed class Last : DistanceCode{
             private readonly byte index;
             private readonly sbyte offset;
 
-            public LastDistance(int code) : base(code){
+            public Last(int code) : base(code){
                 this.index = BufferIndexes[code];
                 this.offset = BufferValueOffsets[code];
             }
@@ -118,11 +122,15 @@ namespace BrotliLib.Brotli.Components.Data{
         /// <summary>
         /// Represents a direct distance code, which is converted to a distance value between 1 and <see cref="DistanceParameters.DirectCodeCount"/> (both inclusive).
         /// </summary>
-        private class DirectDistance : DistanceCode{
+        private sealed class Direct : DistanceCode{
             private readonly int encodedValue;
 
-            public DirectDistance(int code) : base(code){
-                this.encodedValue = 1 + code - BufferIndexes.Length;
+            public Direct(int code) : base(code){
+                this.encodedValue = 1 + code - LastDistances.Length;
+
+                if (this.encodedValue < 1 || this.encodedValue > DistanceParameters.MaxDirectCodeCount){
+                    throw new ArgumentOutOfRangeException(nameof(code), "Direct distance codes (normalized) must be within range [1; " + DistanceParameters.MaxDirectCodeCount + "].");
+                }
             }
 
             public override bool CanEncodeValue(BrotliGlobalState state, int value){
@@ -146,7 +154,7 @@ namespace BrotliLib.Brotli.Components.Data{
         /// <summary>
         /// Represents a distance code which uses additional bits from the stream to calculate the distance value.
         /// </summary>
-        private class ComplexDistance : DistanceCode{
+        private sealed class Complex : DistanceCode{
             private readonly byte postfixBitCount;
             private readonly byte postfixBitValue;
 
@@ -156,11 +164,31 @@ namespace BrotliLib.Brotli.Components.Data{
 
             private int PostfixBitMask => (1 << postfixBitCount) - 1;
 
-            public ComplexDistance(DistanceParameters parameters, int code) : base(code){
+            /// <summary>
+            /// Since the Brotli format documentation only specifies a bunch of magic formulas, here's an attempt at an explanation.
+            /// Note that the distance code we're talking about is after subtracting <see cref="DistanceCode.LastDistances"/> and <see cref="DistanceParameters.DirectCodeCount"/>.
+            /// <para/>
+            /// Distance code is constructed from the following groups of bits: MSB [extracount][x][postfix] LSB
+            /// Distance value is constructed from the following groups of bits: MSB [1x][extravalue][postfix] LSB + offset
+            /// <para/>
+            /// <list type="bullet">
+            /// <item><description>[postfix] is the bottom <see cref="DistanceParameters.PostfixBitCount"/> bits of the distance code,</description></item>
+            /// <item><description>[extracount] is one less than the amount of extra bits that need to be read from the stream,</description></item>
+            /// <item><description>[extravalue] is the value of those extra bits,</description></item>
+            /// <item><description>[x] is a single bit which is just shoved near the beginning of the distance value</description></item>
+            /// </list>
+            /// <para/>
+            /// Finally, the value is offset by (1 + direct code count), as all values below that can be represented using <see cref="DistanceCode.Direct"/> instead.
+            /// </summary>
+            public Complex(DistanceParameters parameters, int code) : base(code){
                 int directCodeCount = parameters.DirectCodeCount;
                 this.postfixBitCount = parameters.PostfixBitCount;
 
-                int normalized = code - directCodeCount - BufferIndexes.Length;
+                int normalized = code - directCodeCount - LastDistances.Length;
+
+                if (normalized < 0){
+                    throw new ArgumentOutOfRangeException(nameof(code), "Complex distance codes (normalized) must be at least 0.");
+                }
                 
                 int hcode = normalized >> postfixBitCount;
                 int lcode = normalized & PostfixBitMask;
