@@ -12,6 +12,8 @@ namespace BrotliLib.Brotli.Components.Header{
         private const int MaxPostfixBitCount = 3;
         private const int MaxDirectCodeBits = 15;
 
+        public static readonly int MaxDirectCodeCount = new DistanceParameters(MaxPostfixBitCount, MaxDirectCodeBits).DirectCodeCount;
+
         public static readonly DistanceParameters NoDirectCodes = new DistanceParameters(0, 0);
 
         // Data

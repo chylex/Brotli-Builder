@@ -1,5 +1,6 @@
 ﻿using System;
 using BrotliLib.Brotli.Components.Data;
+using BrotliLib.Brotli.Components.Header;
 
 namespace BrotliLib.Brotli.Components.Utils{
     /// <summary>
@@ -39,7 +40,7 @@ namespace BrotliLib.Brotli.Components.Utils{
                     return false;
                     
                 case DistanceInfo.ExplicitCodeZero:
-                    return code.Code == 0;
+                    return code.Equals(DistanceCode.Zero);
 
                 default:
                     return code.CanEncodeValue(state, (int)info);
@@ -51,12 +52,26 @@ namespace BrotliLib.Brotli.Components.Utils{
                 case DistanceInfo.EndsAfterLiterals:
                     throw new InvalidOperationException("The command is missing a copy distance.");
 
-                case DistanceInfo.ExplicitCodeZero:
                 case DistanceInfo.ImplicitCodeZero:
+                case DistanceInfo.ExplicitCodeZero:
                     return state.DistanceBuffer.Front;
 
                 default:
                     return info >= DistanceInfo.FirstExactValue ? (int)info : throw new InvalidOperationException("Copy distance must be >= " + (int)DistanceInfo.FirstExactValue + ".");
+            }
+        }
+
+        public static DistanceCode MakeCode(this DistanceInfo info, DistanceParameters parameters, BrotliGlobalState state){
+            switch(info){
+                case DistanceInfo.EndsAfterLiterals:
+                case DistanceInfo.ImplicitCodeZero:
+                    return null;
+                    
+                case DistanceInfo.ExplicitCodeZero:
+                    return DistanceCode.Zero;
+
+                default:
+                    return DistanceCode.ForValue(parameters, state, (int)info);
             }
         }
     }
