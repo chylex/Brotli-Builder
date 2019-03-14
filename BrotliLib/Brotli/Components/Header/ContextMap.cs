@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.Markers.Data;
-using BrotliLib.Huffman;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components.Header{
@@ -18,15 +16,16 @@ namespace BrotliLib.Brotli.Components.Header{
         
         // Data
 
+        public Category Category { get; }
         public int TreeCount { get; }
-        public int TreesPerBlockType { get; }
+
+        public int TreesPerBlockType => Category.HuffmanTreesPerBlockType();
 
         private readonly byte[] contextMap;
 
-        private ContextMap(int treeCount, int treesPerBlockType, byte[] contextMap){
+        private ContextMap(Category category, int treeCount, byte[] contextMap){
+            this.Category = category;
             this.TreeCount = treeCount;
-            this.TreesPerBlockType = treesPerBlockType;
-
             this.contextMap = contextMap;
         }
 
@@ -35,24 +34,77 @@ namespace BrotliLib.Brotli.Components.Header{
         }
 
         // Object
-
+        
         public override bool Equals(object obj){
             return obj is ContextMap map &&
+                   Category == map.Category &&
                    TreeCount == map.TreeCount &&
-                   TreesPerBlockType == map.TreesPerBlockType &&
                    EqualityComparer<byte[]>.Default.Equals(contextMap, map.contextMap);
         }
 
         public override int GetHashCode(){
             unchecked{
-                var hashCode = 1980284268;
+                var hashCode = -1436479929;
+                hashCode = hashCode * -1521134295 + Category.GetHashCode();
                 hashCode = hashCode * -1521134295 + TreeCount.GetHashCode();
-                hashCode = hashCode * -1521134295 + TreesPerBlockType.GetHashCode();
                 hashCode = hashCode * -1521134295 + EqualityComparer<byte[]>.Default.GetHashCode(contextMap);
                 return hashCode;
             }
         }
 
+        public override string ToString(){
+            return "TreeCount = " + TreeCount + ", Map = { " + string.Join(", ", contextMap) + " }";
+        }
+
+        // Types
+
+        public abstract class Builder{
+            private readonly Category category;
+            private readonly int treeCount;
+            private readonly byte[] contextMap;
+
+            public int Length => contextMap.Length;
+
+            public byte this[int index]{
+                get => contextMap[index];
+                set => contextMap[index] = value;
+            }
+
+            private protected Builder(Category category, int treeCount, int blockTypeCount){
+                this.category = category;
+                this.treeCount = treeCount;
+                this.contextMap = new byte[blockTypeCount * category.HuffmanTreesPerBlockType()];
+            }
+
+            internal void Apply(Action<byte[]> action){
+                action(contextMap);
+            }
+
+            public ContextMap Build(){
+                return new ContextMap(category, treeCount, contextMap);
+            }
+        }
+
+        public sealed class Literals : Builder{
+            public static readonly ContextMap Simple = new Literals(1).Build();
+
+            public Literals(int treeCount, int blockTypeCount = 1) : base(Category.Literal, treeCount, blockTypeCount){}
+        }
+
+        public sealed class Distances : Builder{
+            public static readonly ContextMap Simple = new Distances(1).Build();
+
+            public Distances(int treeCount, int blockTypeCount = 1) : base(Category.Distance, treeCount, blockTypeCount){}
+        }
+
+        public static Builder For(int treeCount, BlockTypeInfo blockTypeInfo){
+            switch(blockTypeInfo.Category){
+                case Category.Literal: return new Literals(treeCount, blockTypeInfo.Count);
+                case Category.Distance: return new Distances(treeCount, blockTypeInfo.Count);
+                default: throw new InvalidOperationException("Context maps can only be created for literals and distances.");
+            }
+        }
+        
         // Helpers
 
         /// <summary>
@@ -119,9 +171,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
             fromBits: (reader, context) => {
                 int treeCount = reader.ReadValue(VariableLength11Code.Serializer, NoContext.Value, "NTREES", value => value.Value);
-                int treesPerBlockType = context.Category.HuffmanTreesPerBlockType();
-
-                byte[] contextMap = new byte[treesPerBlockType * context.Count];
+                var contextMap = For(treeCount, context);
 
                 if (treeCount > 1){
                     byte runLengthCodeCount = (byte)reader.MarkValue("RLEMAX", () => reader.NextBit() ? 1 + reader.NextChunk(4) : 0);
@@ -150,11 +200,11 @@ namespace BrotliLib.Brotli.Components.Header{
                     }
 
                     if (reader.NextBit("IMTF")){
-                        MoveToFront.Decode(contextMap);
+                        contextMap.Apply(MoveToFront.Decode);
                     }
                 }
-                
-                return new ContextMap(treeCount, treesPerBlockType, contextMap);
+
+                return contextMap.Build();
             },
 
             toBits: (writer, obj, context) => {
@@ -208,15 +258,12 @@ namespace BrotliLib.Brotli.Components.Header{
                     }
 
                     var codeContext = GetCodeTreeContext(obj.TreeCount + runLengthCodeCount);
-                    var codeSymbols = symbols.GroupBy(symbol => symbol).Select(HuffmanGenerator<int>.MakeFreq).ToArray();
+                    var codeTree = HuffmanTree<int>.FromSymbols(symbols);
 
-                    var codeTree = HuffmanGenerator<int>.FromFrequenciesCanonical(codeSymbols, HuffmanTree<int>.DefaultMaxDepth);
-                    var codeMap = codeTree.GenerateValueMap();
-
-                    HuffmanTree<int>.Serializer.ToBits(writer, new HuffmanTree<int>(codeTree), codeContext);
+                    HuffmanTree<int>.Serializer.ToBits(writer, codeTree, codeContext);
 
                     foreach(int symbol in symbols){
-                        writer.WriteBits(codeMap[symbol]);
+                        writer.WriteBits(codeTree.FindPath(symbol));
 
                         if (symbol > 0 && symbol <= runLengthCodeCount){
                             writer.WriteChunk(symbol, extra.Dequeue());
