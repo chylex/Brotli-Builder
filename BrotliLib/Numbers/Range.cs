@@ -1,6 +1,9 @@
 ﻿using System;
 
 namespace BrotliLib.Numbers{
+    /// <summary>
+    /// Represents a range of integers. When not initialized (using <code>default</code> or <code>new Range()</code>), the range will contain all 32-bit integers.
+    /// </summary>
     public readonly struct Range{
         /// <summary>
         /// Range containing all signed 32-bit integers.
@@ -37,20 +40,19 @@ namespace BrotliLib.Numbers{
 
         // Data
 
-        /// <summary>
-        /// When not initialized (using <code>default</code> or <code>new Range()</code>), the range will contain all 32-bit integers.
-        /// </summary>
-        private bool Initialized { get; }
-
+        private readonly bool initialized;
+        private readonly int first;
+        private readonly int last;
+        
         /// <summary>
         /// Lower bound (inclusive).
         /// </summary>
-        public int First { get; }
+        public int First => initialized ? first : int.MinValue;
 
         /// <summary>
         /// Upper bound (inclusive).
         /// </summary>
-        public int Last { get; }
+        public int Last => initialized ? last : int.MaxValue;
 
         /// <summary>
         /// Initializes the range with the provided lower and upper bound (both inclusive).
@@ -60,36 +62,36 @@ namespace BrotliLib.Numbers{
                 throw new ArgumentOutOfRangeException(nameof(last), "last must be >= first");
             }
 
-            this.Initialized = true;
-            this.First = first;
-            this.Last = last;
+            this.initialized = true;
+            this.first = first;
+            this.last = last;
         }
         
         public bool Contains(int value){
-            return !Initialized || (value >= First && value <= Last);
+            return !initialized || (value >= first && value <= last);
         }
 
         // Object
 
         public override bool Equals(object obj){
             return obj is Range range &&
-                   Initialized == range.Initialized &&
-                   First == range.First &&
-                   Last == range.Last;
+                   initialized == range.initialized &&
+                   first == range.first &&
+                   last == range.last;
         }
 
         public override int GetHashCode(){
             unchecked{
                 var hashCode = -1176758481;
-                hashCode = hashCode * -1521134295 + Initialized.GetHashCode();
-                hashCode = hashCode * -1521134295 + First.GetHashCode();
-                hashCode = hashCode * -1521134295 + Last.GetHashCode();
+                hashCode = hashCode * -1521134295 + initialized.GetHashCode();
+                hashCode = hashCode * -1521134295 + first.GetHashCode();
+                hashCode = hashCode * -1521134295 + last.GetHashCode();
                 return hashCode;
             }
         }
 
         public override string ToString(){
-            return Initialized ? "First = " + First + ", Last = " + Last : "Any";
+            return initialized ? "First = " + first + ", Last = " + last : "Any";
         }
     }
 }
