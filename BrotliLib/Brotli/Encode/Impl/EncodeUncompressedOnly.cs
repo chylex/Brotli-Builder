@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Components.Header;
 
-namespace BrotliLib.Brotli.Encode{
+namespace BrotliLib.Brotli.Encode.Impl{
     /// <summary>
     /// Encodes bytes into a series of uncompressed meta-blocks, with an empty meta-block at the end.
     /// </summary>

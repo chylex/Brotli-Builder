@@ -7,6 +7,7 @@ using BrotliBuilder.Dialogs;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Encode;
+using BrotliLib.Brotli.Encode.Impl;
 
 namespace BrotliBuilder{
     partial class FormMain : Form{
