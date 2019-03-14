@@ -36,6 +36,7 @@
             this.menuItemStaticDictionary = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeFile = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeUncompressedMBs = new System.Windows.Forms.MenuItem();
+            this.menuItemEncodeLiterals = new System.Windows.Forms.MenuItem();
             this.flowPanelBlocks = new System.Windows.Forms.FlowLayoutPanel();
             this.statusBar = new System.Windows.Forms.StatusBar();
             this.statusBarPanelPadding1 = new System.Windows.Forms.StatusBarPanel();
@@ -137,7 +138,8 @@
             // 
             this.menuItemEncodeFile.Index = 1;
             this.menuItemEncodeFile.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItemEncodeUncompressedMBs});
+            this.menuItemEncodeUncompressedMBs,
+            this.menuItemEncodeLiterals});
             this.menuItemEncodeFile.Text = "&Encode File...";
             // 
             // menuItemEncodeUncompressedMBs
@@ -146,6 +148,13 @@
             this.menuItemEncodeUncompressedMBs.Shortcut = System.Windows.Forms.Shortcut.Ctrl0;
             this.menuItemEncodeUncompressedMBs.Text = "Into Uncompressed Meta-Blocks";
             this.menuItemEncodeUncompressedMBs.Click += new System.EventHandler(this.menuItemEncodeUncompressedMBs_Click);
+            // 
+            // menuItemEncodeLiterals
+            // 
+            this.menuItemEncodeLiterals.Index = 1;
+            this.menuItemEncodeLiterals.Shortcut = System.Windows.Forms.Shortcut.Ctrl1;
+            this.menuItemEncodeLiterals.Text = "Into Literals";
+            this.menuItemEncodeLiterals.Click += new System.EventHandler(this.menuItemEncodeLiterals_Click);
             // 
             // flowPanelBlocks
             // 
@@ -325,5 +334,6 @@
         private Components.BrotliFilePanel brotliFilePanelOriginal;
         private System.Windows.Forms.SplitContainer splitContainerMain;
         private System.Windows.Forms.MenuItem menuItemFileStructure;
+        private System.Windows.Forms.MenuItem menuItemEncodeLiterals;
     }
 }

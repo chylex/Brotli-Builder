@@ -251,6 +251,10 @@ namespace BrotliBuilder{
         private void menuItemEncodeUncompressedMBs_Click(object sender, EventArgs e){
             OpenFileWithEncoder(WindowSize.Default, new EncodeUncompressedOnly());
         }
+        
+        private void menuItemEncodeLiterals_Click(object sender, EventArgs e){
+            OpenFileWithEncoder(WindowSize.Default, new EncodeLiterals());
+        }
 
         private void OpenFileWithEncoder(WindowSize windowSize, IBrotliEncoder encoder){
             if (PromptUnsavedChanges("Would you like to save changes before opening a new file?")){
