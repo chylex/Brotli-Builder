@@ -76,7 +76,7 @@ namespace BrotliLib.Brotli.Dictionary{
         /// <summary>
         /// Generates a lookup trie for all words in the dictionary, including transformations, matching the criteria specified by the parameters.
         /// </summary>
-        public MultiTrie<byte, int> GenerateLookup(Range transformIndexRange, Range transformLengthRange){
+        public MultiTrie<byte, int> GenerateLookup(in Range transformIndexRange = default, in Range transformLengthRange = default){
             var trie = new MultiTrie<byte, int>.Builder();
 
             int minTransformIndex = Math.Max(transformIndexRange.First, 0);
