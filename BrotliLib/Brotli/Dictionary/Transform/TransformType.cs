@@ -45,19 +45,13 @@ namespace BrotliLib.Brotli.Dictionary.Transform{
             }
             else{
                 input = (byte[])input.Clone();
-
-                void Xor(int position, byte by){
-                    if (position < input.Length){
-                        input[position] ^= by;
-                    }
-                }
                 
                 int Ferment(int position){
                     byte value = input[position];
 
                     if (value >= 97 && value <= 122){
                         // uppercase ASCII characters (a-z)
-                        Xor(position, 32);
+                        input[position] ^= 32;
                         return 1;
                     }
                     else if (value < 192){
@@ -67,12 +61,12 @@ namespace BrotliLib.Brotli.Dictionary.Transform{
                     else if (value < 224){
                         // swap case on certain 2-byte UTF-8 characters
                         // probably intended for Latin-1 Supplement, Greek, and Cyrillic, but it will xor anything in the specified range
-                        Xor(position + 1, 32);
+                        Xor(input, position + 1, 32);
                         return 2;
                     }
                     else{
                         // literally a magic number that just worked well when the devs were testing 100 languages
-                        Xor(position + 2, 5);
+                        Xor(input, position + 2, 5);
                         return 3;
                     }
                 }
@@ -87,6 +81,12 @@ namespace BrotliLib.Brotli.Dictionary.Transform{
                 }
 
                 return input;
+            }
+        }
+
+        private static void Xor(byte[] output, int position, byte by){
+            if (position < output.Length){
+                output[position] ^= by;
             }
         }
 

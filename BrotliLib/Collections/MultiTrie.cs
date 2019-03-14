@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace BrotliLib.Collections{
     public sealed class MultiTrie<K, V> where K : IComparable<K>{
@@ -41,14 +40,14 @@ namespace BrotliLib.Collections{
                 MutableNode node = rootNode;
 
                 foreach(K ele in key){
-                    var children = node.children ?? (node.children = new SortedList<K, MutableNode>(1));
+                    var children = node.children ?? (node.children = new Dictionary<K, MutableNode>(1));
 
                     if (!children.TryGetValue(ele, out node)){
                         node = children[ele] = new MutableNode();
                     }
                 }
-
-                (node.values ?? (node.values = new List<V>(1))).Add(value);
+                
+                node.AddValue(value);
             }
 
             public MultiTrie<K, V> Build(){
@@ -56,14 +55,35 @@ namespace BrotliLib.Collections{
             }
 
             private sealed class MutableNode{
-                public SortedList<K, MutableNode> children;
-                public List<V> values;
+                public Dictionary<K, MutableNode> children;
+                private V[] values;
+
+                public void AddValue(V value){
+                    if (values == null){
+                        values = new V[]{ value };
+                    }
+                    else{
+                        Array.Resize(ref values, values.Length + 1);
+                        values[values.Length - 1] = value;
+                    }
+                }
 
                 public Node Build(){
-                    return new Node{
-                        children = this.children?.Select(kvp => new KeyValuePair<K, Node>(kvp.Key, kvp.Value.Build())).ToArray(),
-                        values = this.values?.ToArray()
-                    };
+                    var node = new Node{ values = this.values };
+                    
+                    if (children != null){
+                        var sorted = new KeyValuePair<K, Node>[children.Count];
+                        int index = 0;
+                        
+                        foreach(var kvp in children){
+                            sorted[index++] = new KeyValuePair<K, Node>(kvp.Key, kvp.Value.Build());
+                        }
+                        
+                        Array.Sort(sorted, KeyComparer);
+                        node.children = sorted;
+                    }
+
+                    return node;
                 }
             }
         }
