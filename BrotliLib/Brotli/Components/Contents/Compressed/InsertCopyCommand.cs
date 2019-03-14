@@ -19,6 +19,8 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
             this.CopyLength = copyLength;
             this.CopyDistance = copyDistance;
         }
+        
+        public InsertCopyCommand(IReadOnlyList<Literal> literals, int copyLength, int copyDistance) : this(literals, copyLength, (DistanceInfo)copyDistance){}
 
         // Object
 
@@ -51,11 +53,11 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                 // Insert&copy lengths
                 
                 int icBlockID = context.NextBlockID(Category.InsertCopy);
-                InsertCopyLengthCode icCode = reader.ReadValue(header.InsertCopyTrees[icBlockID].Root, "length code");
-                InsertCopyLengths icValues = reader.ReadStructure(InsertCopyLengths.Serializer, icCode, "length values");
+                InsertCopyLengthCode icLengthCode = reader.ReadValue(header.InsertCopyTrees[icBlockID].Root, "length code");
+                InsertCopyLengths icLengthValues = reader.ReadStructure(InsertCopyLengths.Serializer, icLengthCode, "length values");
 
-                int insertLength = icValues.InsertLength;
-                int copyLength = icValues.CopyLength;
+                int insertLength = icLengthValues.InsertLength;
+                int copyLength = icLengthValues.CopyLength;
                 
                 // Literals
 
@@ -80,12 +82,12 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                 
                 DistanceInfo distanceInfo;
 
-                if (icCode.UseDistanceCodeZero){
+                if (icLengthCode.UseDistanceCodeZero){
                     distanceInfo = DistanceInfo.ImplicitCodeZero;
                 }
                 else{
                     int blockID = context.NextBlockID(Category.Distance);
-                    int contextID = Math.Min(3, copyLength - 2);
+                    int contextID = icLengthValues.DistanceContextID;
                     int treeID = header.DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
                     DistanceCode distanceCode = reader.ReadValue(header.DistanceTrees[treeID].Root, "distance code");
@@ -106,13 +108,13 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
 
                 // Insert&copy lengths
 
-                InsertCopyLengths icLengths = obj.Lengths;
+                InsertCopyLengths icLengthValues = obj.Lengths;
                 int icBlockID = context.NextBlockID(Category.InsertCopy);
-                var icEntry = header.InsertCopyTrees[icBlockID].FindEntry(code => icLengths.CanEncodeUsing(code) && (implicitDistanceCodeZero == code.UseDistanceCodeZero || endsAfterLiterals));
-                var icCode = icEntry.Key;
+                var icLengthEntry = header.InsertCopyTrees[icBlockID].FindEntry(code => icLengthValues.CanEncodeUsing(code) && (implicitDistanceCodeZero == code.UseDistanceCodeZero || endsAfterLiterals));
+                var icLengthCode = icLengthEntry.Key;
 
-                writer.WriteBits(icEntry.Value);
-                InsertCopyLengths.Serializer.ToBits(writer, icLengths, icCode);
+                writer.WriteBits(icLengthEntry.Value);
+                InsertCopyLengths.Serializer.ToBits(writer, icLengthValues, icLengthCode);
                 
                 // Literals
                 
@@ -135,7 +137,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                 
                 if (distanceInfo != DistanceInfo.ImplicitCodeZero){
                     int blockID = context.NextBlockID(Category.Distance);
-                    int contextID = Math.Min(3, icLengths.CopyLength - 2);
+                    int contextID = icLengthValues.DistanceContextID;
                     int treeID = header.DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
                     var distanceEntry = header.DistanceTrees[treeID].FindEntry(code => distanceInfo.CanEncodeUsing(code, state));
@@ -145,7 +147,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                     DistanceCode.Serializer.ToBits(writer, distanceInfo, distanceCode.MakeContext(state));
                 }
                 
-                context.WriteCopy(icLengths.CopyLength, distanceInfo);
+                context.WriteCopy(icLengthValues.CopyLength, distanceInfo);
             }
         );
     }

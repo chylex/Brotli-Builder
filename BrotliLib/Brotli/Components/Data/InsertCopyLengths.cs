@@ -58,6 +58,11 @@ namespace BrotliLib.Brotli.Components.Data{
         public int CopyLength { get; }
 
         /// <summary>
+        /// Calculates the distance context ID used in the insert&amp;copy command.
+        /// </summary>
+        public int DistanceContextID => Math.Min(3, CopyLength - 2);
+
+        /// <summary>
         /// Initializes the lengths with the provided values.
         /// </summary>
         public InsertCopyLengths(int insertLength, int copyLength){
