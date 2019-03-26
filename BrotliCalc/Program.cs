@@ -9,6 +9,7 @@ using System.Threading;
 namespace BrotliCalc{
     public static class Program{
         private static readonly List<ICommand> Commands = new List<ICommand>{
+            new CmdCompress()
         };
 
         private static void Main(string[] args){
