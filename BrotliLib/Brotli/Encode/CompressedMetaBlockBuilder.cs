@@ -7,6 +7,7 @@ using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Dictionary;
+using BrotliLib.Brotli.State.Output;
 
 namespace BrotliLib.Brotli.Encode{
     public sealed class CompressedMetaBlockBuilder{
@@ -24,7 +25,7 @@ namespace BrotliLib.Brotli.Encode{
         
         public CompressedMetaBlockBuilder(WindowSize windowSize, BrotliDictionary dictionary){
             this.windowSize = windowSize;
-            this.State = new BrotliGlobalState(dictionary, windowSize); // TODO support multiple meta-blocks
+            this.State = new BrotliGlobalState(dictionary, windowSize, new BrotliOutputStored()); // TODO support multiple meta-blocks
         }
 
         public CompressedMetaBlockBuilder(WindowSize windowSize) : this(windowSize, BrotliDefaultDictionary.Embedded){}
@@ -35,7 +36,7 @@ namespace BrotliLib.Brotli.Encode{
             icCommands.Add(icCommand);
 
             foreach(Literal literal in icCommand.Literals){
-                State.Output(literal.Value);
+                State.OutputLiteral(literal);
             }
 
             if (icCommand.CopyDistance != DistanceInfo.EndsAfterLiterals){
@@ -48,7 +49,7 @@ namespace BrotliLib.Brotli.Encode{
         // Building
 
         public MetaBlock Build(bool isLast){
-            var state = new BrotliGlobalState(BrotliDefaultDictionary.Embedded, windowSize); // TODO support multiple meta-blocks
+            var state = new BrotliGlobalState(BrotliDefaultDictionary.Embedded, windowSize, new BrotliOutputStored()); // TODO support multiple meta-blocks
             
             var icLengthCodes = new List<InsertCopyLengthCode>();
             var literalLists = Enumerable.Range(0, LiteralCtxMap.TreeCount).Select(_ => new List<Literal>()).ToArray();
@@ -60,7 +61,7 @@ namespace BrotliLib.Brotli.Encode{
                     int treeID = LiteralCtxMap.DetermineTreeID(0, contextID);
 
                     literalLists[treeID].Add(literal);
-                    state.Output(literal.Value);
+                    state.OutputLiteral(literal);
                 }
                 
                 InsertCopyLengths icLengthValues = icCommand.Lengths;

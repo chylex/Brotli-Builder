@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using BrotliBuilder.Utils;
 using BrotliLib.Brotli;
+using BrotliLib.Brotli.State.Output;
 using BrotliLib.IO;
 using BrotliLib.Markers;
 using FastColoredTextBoxNS;
@@ -48,24 +49,24 @@ namespace BrotliBuilder.Components{
                 sync(() => UpdateTextBox(textBoxBitStream, bitsStr));
                 
                 BrotliFileStructure file = BrotliFileStructure.FromBytes(bytes);
-                BrotliGlobalState state;
+                BrotliOutputStored output;
 
                 try{
-                    state = file.GetDecompressionState(bits, EnableBitMarkers);
+                    output = file.GetDecompressionState(bits, EnableBitMarkers);
                 }catch(Exception ex){
                     sync(() => UpdateTextBox(textBoxOutput, ex));
                     return;
                 }
 
-                string outputStr = state.OutputAsUTF8;
-                MarkerNode[] markerSequence = state.BitMarkerRoot.ToArray();
+                string outputStr = output.AsUTF8;
+                MarkerNode[] markerSequence = output.BitMarkerRoot.ToArray();
 
                 int totalBits = markerSequence.LastOrDefault()?.Marker?.IndexEnd ?? bits.Length; // use markers to account for padding
 
                 sync(() => {
                     textBoxBitStream.UpdateMarkers(markerSequence);
                     UpdateTextBox(textBoxOutput, outputStr);
-                    UpdateLabels(totalBits, state.OutputSize);
+                    UpdateLabels(totalBits, output.OutputSize);
                     callback(file);
                 });
             });
@@ -76,7 +77,7 @@ namespace BrotliBuilder.Components{
 
             loadWorker.Start(sync => {
                 BitStream bits;
-                BrotliGlobalState state;
+                BrotliOutputStored output;
 
                 Stopwatch stopwatchSerialization = Stopwatch.StartNew();
 
@@ -104,7 +105,7 @@ namespace BrotliBuilder.Components{
                 Stopwatch stopwatchDecompression = Stopwatch.StartNew();
                 
                 try{
-                    state = file.GetDecompressionState(bits, EnableBitMarkers);
+                    output = file.GetDecompressionState(bits, EnableBitMarkers);
                 }catch(Exception ex){
                     sync(() => {
                         UpdateTextBox(textBoxOutput, ex);
@@ -116,13 +117,13 @@ namespace BrotliBuilder.Components{
                     stopwatchDecompression.Stop();
                 }
 
-                string outputStr = state.OutputAsUTF8;
-                MarkerNode[] markerSequence = state.BitMarkerRoot.ToArray();
+                string outputStr = output.AsUTF8;
+                MarkerNode[] markerSequence = output.BitMarkerRoot.ToArray();
 
                 sync(() => {
                     textBoxBitStream.UpdateMarkers(markerSequence);
                     UpdateTextBox(textBoxOutput, outputStr);
-                    UpdateLabels(bits.Length, state.OutputSize);
+                    UpdateLabels(bits.Length, output.OutputSize);
                     onDecompressed(stopwatchDecompression);
                 });
             });

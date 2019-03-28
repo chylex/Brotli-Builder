@@ -59,7 +59,7 @@ namespace BrotliLib.Brotli.Components.Contents{
             public abstract int NextBlockID(Category category);
 
             public void WriteLiteral(in Literal literal){
-                State.Output(literal.Value);
+                State.OutputLiteral(literal);
                 ++bytesWritten;
             }
 

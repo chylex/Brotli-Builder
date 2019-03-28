@@ -2,6 +2,7 @@
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Markers;
+using BrotliLib.Brotli.State.Output;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli{
@@ -40,7 +41,7 @@ namespace BrotliLib.Brotli{
         }
 
         private BrotliGlobalState CreateNewContext(){
-            return new BrotliGlobalState(BrotliDefaultDictionary.Embedded, WindowSize);
+            return new BrotliGlobalState(BrotliDefaultDictionary.Embedded, WindowSize, new BrotliOutputStored());
         }
 
         public void Fixup(){
@@ -55,13 +56,14 @@ namespace BrotliLib.Brotli{
             return stream;
         }
 
-        public BrotliGlobalState GetDecompressionState(BitStream bitStream, bool enableMarkers){
-            BrotliGlobalState state = CreateNewContext();
+        public BrotliOutputStored GetDecompressionState(BitStream bitStream, bool enableMarkers){
+            var outputState = new BrotliOutputStored();
+
             MarkedBitReader reader = CreateReader(bitStream, enableMarkers);
 
-            Serializer.FromBits(reader, state);
-            state.BitMarkerRoot = reader.MarkerRoot;
-            return state;
+            Serializer.FromBits(reader, new BrotliGlobalState(BrotliDefaultDictionary.Embedded, WindowSize, outputState));
+            outputState.BitMarkerRoot = reader.MarkerRoot;
+            return outputState;
         }
 
         public override string ToString(){

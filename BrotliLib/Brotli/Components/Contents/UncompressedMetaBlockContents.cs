@@ -52,7 +52,7 @@ namespace BrotliLib.Brotli.Components.Contents{
 
                 reader.MarkEnd(new TitleMarker("Uncompressed Bytes"));
 
-                context.State.Output(bytes);
+                context.State.OutputBytes(bytes);
                 return new UncompressedMetaBlockContents(bytes);
             },
 
@@ -69,7 +69,7 @@ namespace BrotliLib.Brotli.Components.Contents{
                 writer.AlignToByteBoundary();
                 writer.WriteAlignedBytes(bytes);
 
-                context.State.Output(bytes);
+                context.State.OutputBytes(bytes);
             }
         );
     }
