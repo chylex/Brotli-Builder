@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using BrotliLib.Brotli.Components;
+using BrotliLib.Brotli.Dictionary;
 using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.State;
@@ -13,13 +15,13 @@ namespace BrotliLib.Brotli{
     /// </summary>
     public sealed class BrotliFileStructure{
         public static BrotliFileStructure NewEmpty(){
-            BrotliFileStructure bfs = new BrotliFileStructure(WindowSize.Default);
+            BrotliFileStructure bfs = new BrotliFileStructure(new BrotliFileParameters());
             bfs.MetaBlocks.Add(new MetaBlock.LastEmpty());
             return bfs;
         }
 
         public static BrotliFileStructure FromBytes(byte[] bytes){
-            return Serializer.FromBits(CreateReader(new BitStream(bytes), enableMarkers: false), null);
+            return Serializer.FromBits(CreateReader(new BitStream(bytes), enableMarkers: false), new FileContext(BrotliDefaultDictionary.Embedded, windowSize => new BrotliOutputWindowed(windowSize)));
         }
 
         public static BrotliFileStructure FromEncoder(WindowSize windowSize, IBrotliEncoder encoder, byte[] bytes){
@@ -34,15 +36,12 @@ namespace BrotliLib.Brotli{
 
         // Data
 
-        public WindowSize WindowSize { get; set; }
-        public readonly IList<MetaBlock> MetaBlocks = new List<MetaBlock>();
+        public BrotliFileParameters Parameters { get; set; }
+        public IList<MetaBlock> MetaBlocks { get; }
         
-        private BrotliFileStructure(WindowSize windowSize){
-            this.WindowSize = windowSize;
-        }
-
-        private BrotliGlobalState CreateNewContext(){
-            return new BrotliGlobalState(BrotliDefaultDictionary.Embedded, WindowSize, new BrotliOutputStored());
+        private BrotliFileStructure(BrotliFileParameters parameters){
+            this.Parameters = parameters;
+            this.MetaBlocks = new List<MetaBlock>();
         }
 
         public void Fixup(){
@@ -53,7 +52,7 @@ namespace BrotliLib.Brotli{
 
         public BitStream Serialize(){
             BitStream stream = new BitStream();
-            Serializer.ToBits(stream.GetWriter(), this, null);
+            Serializer.ToBits(stream.GetWriter(), this, new FileContext(Parameters.Dictionary, new BrotliOutputWindowed(Parameters.WindowSize)));
             return stream;
         }
 
@@ -62,7 +61,7 @@ namespace BrotliLib.Brotli{
 
             MarkedBitReader reader = CreateReader(bitStream, enableMarkers);
 
-            Serializer.FromBits(reader, new BrotliGlobalState(BrotliDefaultDictionary.Embedded, WindowSize, outputState));
+            Serializer.FromBits(reader, new FileContext(Parameters.Dictionary, outputState));
             outputState.BitMarkerRoot = reader.MarkerRoot;
             return outputState;
         }
@@ -73,33 +72,50 @@ namespace BrotliLib.Brotli{
 
         // Serialization
 
+        private class FileContext{
+            public BrotliDictionary Dictionary { get; }
+            public Func<WindowSize, IBrotliOutputState> OutputState { get; }
+
+            public FileContext(BrotliDictionary dictionary, Func<WindowSize, IBrotliOutputState> outputState){
+                Dictionary = dictionary;
+                OutputState = outputState;
+            }
+
+            public FileContext(BrotliDictionary dictionary, IBrotliOutputState outputState) : this(dictionary, _ => outputState){}
+        }
+
         private static MarkedBitReader CreateReader(BitStream bitStream, bool enableMarkers){
             return enableMarkers ? new MarkedBitReader(bitStream.GetReader()) : new MarkedBitReader.Dummy(bitStream.GetReader());
         }
 
-        private static readonly IBitSerializer<BrotliFileStructure, BrotliGlobalState> Serializer = new BitSerializer<BrotliFileStructure, BrotliGlobalState>(
+        private static readonly IBitSerializer<BrotliFileStructure, FileContext> Serializer = new BitSerializer<BrotliFileStructure, FileContext>(
             fromBits: (reader, context) => {
                 WindowSize windowSize = WindowSize.Serializer.FromBits(reader, NoContext.Value);
 
-                BrotliFileStructure bfs = new BrotliFileStructure(windowSize);
-                BrotliGlobalState state = context ?? bfs.CreateNewContext();
+                var parameters = new BrotliFileParameters(windowSize, context.Dictionary);
+                var structure = new BrotliFileStructure(parameters);
+
+                var state = new BrotliGlobalState(parameters, context.OutputState(windowSize));
 
                 while(true){
                     MetaBlock metaBlock = MetaBlock.Serializer.FromBits(reader, state);
-                    bfs.MetaBlocks.Add(metaBlock);
+                    structure.MetaBlocks.Add(metaBlock);
 
                     if (metaBlock.IsLast){
                         break;
                     }
                 }
 
-                return bfs;
+                return structure;
             },
 
             toBits: (writer, obj, context) => {
-                WindowSize.Serializer.ToBits(writer, obj.WindowSize, NoContext.Value);
+                var parameters = obj.Parameters;
+                var windowSize = parameters.WindowSize;
+                
+                WindowSize.Serializer.ToBits(writer, windowSize, NoContext.Value);
 
-                BrotliGlobalState state = context ?? obj.CreateNewContext();
+                var state = new BrotliGlobalState(parameters, context.OutputState(windowSize));
 
                 foreach(MetaBlock metaBlock in obj.MetaBlocks){
                     MetaBlock.Serializer.ToBits(writer, metaBlock, state);

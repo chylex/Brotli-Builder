@@ -39,7 +39,7 @@ namespace BrotliBuilder.Blocks{
 
         private void context_Notified(object sender, EventArgs e){
             if (e is BuildWindowSize.WindowSizeNotifyArgs wsna){
-                brotliFile.WindowSize = wsna.NewWindowSize;
+                brotliFile.Parameters = new BrotliFileParameters(wsna.NewWindowSize, brotliFile.Parameters.Dictionary);
             }
             else if (listElements.SelectedItem is StructureMetaBlockItem smbi){
                 smbi.HandleNotification(e);
@@ -60,7 +60,7 @@ namespace BrotliBuilder.Blocks{
                 context.SetChildBlock(null);
             }
             else if (selected is StructureWindowSizeItem){
-                context.SetChildBlock(ctx => new BuildWindowSize(ctx, brotliFile.WindowSize));
+                context.SetChildBlock(ctx => new BuildWindowSize(ctx, brotliFile.Parameters.WindowSize));
             }
             else if (selected is StructureMetaBlockItem smbi){
                 context.SetChildBlock(smbi.CreateStructureBlock());
@@ -152,7 +152,7 @@ namespace BrotliBuilder.Blocks{
             }
 
             public override string ToString(){
-                return $"Window Size ({brotliFile.WindowSize.Bits} bits)";
+                return $"Window Size ({brotliFile.Parameters.WindowSize.Bits} bits)";
             }
         }
 
