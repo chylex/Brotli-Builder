@@ -10,7 +10,7 @@ namespace BrotliLib.Brotli.Encode.Impl{
     /// Encodes bytes into a series of compressed meta-blocks, where each contains a single insert&amp;copy command with each byte stored as a literal.
     /// </summary>
     public class EncodeLiterals : IBrotliEncoder{
-        public IEnumerable<MetaBlock> GenerateMetaBlocks(WindowSize windowSize, byte[] bytes){
+        public IEnumerable<MetaBlock> GenerateMetaBlocks(BrotliFileParameters parameters, byte[] bytes){ /* TODO
             int length = bytes.Length;
 
             for(int index = 0, nextIndex; index < length; index = nextIndex){
@@ -27,7 +27,8 @@ namespace BrotliLib.Brotli.Encode.Impl{
 
             if (length == 0){
                 yield return new MetaBlock.LastEmpty();
-            }
+            }*/
+            yield break;
         }
     }
 }

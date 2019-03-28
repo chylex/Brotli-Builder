@@ -24,10 +24,10 @@ namespace BrotliLib.Brotli{
             return Serializer.FromBits(CreateReader(new BitStream(bytes), enableMarkers: false), new FileContext(BrotliDefaultDictionary.Embedded, windowSize => new BrotliOutputWindowed(windowSize)));
         }
 
-        public static BrotliFileStructure FromEncoder(WindowSize windowSize, IBrotliEncoder encoder, byte[] bytes){
-            BrotliFileStructure bfs = new BrotliFileStructure(windowSize);
+        public static BrotliFileStructure FromEncoder(BrotliFileParameters parameters, IBrotliEncoder encoder, byte[] bytes){
+            BrotliFileStructure bfs = new BrotliFileStructure(parameters);
 
-            foreach(MetaBlock metaBlock in encoder.GenerateMetaBlocks(windowSize, bytes)){
+            foreach(MetaBlock metaBlock in encoder.GenerateMetaBlocks(parameters, bytes)){
                 bfs.MetaBlocks.Add(metaBlock);
             }
 
@@ -60,8 +60,8 @@ namespace BrotliLib.Brotli{
             var outputState = new BrotliOutputStored();
 
             MarkedBitReader reader = CreateReader(bitStream, enableMarkers);
-
             Serializer.FromBits(reader, new FileContext(Parameters.Dictionary, outputState));
+
             outputState.BitMarkerRoot = reader.MarkerRoot;
             return outputState;
         }

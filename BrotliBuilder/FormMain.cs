@@ -5,7 +5,6 @@ using System.Windows.Forms;
 using BrotliBuilder.Blocks;
 using BrotliBuilder.Dialogs;
 using BrotliLib.Brotli;
-using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Encode.Impl;
 
@@ -249,14 +248,14 @@ namespace BrotliBuilder{
         }
 
         private void menuItemEncodeUncompressedMBs_Click(object sender, EventArgs e){
-            OpenFileWithEncoder(WindowSize.Default, new EncodeUncompressedOnly());
+            OpenFileWithEncoder(new BrotliFileParameters(), new EncodeUncompressedOnly());
         }
         
         private void menuItemEncodeLiterals_Click(object sender, EventArgs e){
-            OpenFileWithEncoder(WindowSize.Default, new EncodeLiterals());
+            OpenFileWithEncoder(new BrotliFileParameters(), new EncodeLiterals());
         }
 
-        private void OpenFileWithEncoder(WindowSize windowSize, IBrotliEncoder encoder){
+        private void OpenFileWithEncoder(BrotliFileParameters parameters, IBrotliEncoder encoder){
             if (PromptUnsavedChanges("Would you like to save changes before opening a new file?")){
                 return;
             }
@@ -282,7 +281,7 @@ namespace BrotliBuilder{
                     splitContainerBottom.Panel2Collapsed = true;
                     
                     try{
-                        brotliFile = BrotliFileStructure.FromEncoder(windowSize, encoder, bytes);
+                        brotliFile = BrotliFileStructure.FromEncoder(parameters, encoder, bytes);
                         OnNewBrotliFile();
                     }catch(Exception ex){
                         Debug.WriteLine(ex.ToString());

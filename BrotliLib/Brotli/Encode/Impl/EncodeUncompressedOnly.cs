@@ -8,7 +8,7 @@ namespace BrotliLib.Brotli.Encode.Impl{
     /// Encodes bytes into a series of uncompressed meta-blocks, with an empty meta-block at the end.
     /// </summary>
     public class EncodeUncompressedOnly : IBrotliEncoder{
-        public IEnumerable<MetaBlock> GenerateMetaBlocks(WindowSize windowSize, byte[] bytes){
+        public IEnumerable<MetaBlock> GenerateMetaBlocks(BrotliFileParameters parameters, byte[] bytes){
             for(int index = 0; index < bytes.Length; index += DataLength.MaxUncompressedBytes){
                 int mbBytes = Math.Min(bytes.Length - index, DataLength.MaxUncompressedBytes);
 

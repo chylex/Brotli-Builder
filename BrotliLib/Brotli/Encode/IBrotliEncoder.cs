@@ -6,6 +6,6 @@ namespace BrotliLib.Brotli.Encode{
     /// Allows converting bytes into a series of <see cref="MetaBlock"/> objects.
     /// </summary>
     public interface IBrotliEncoder{
-        IEnumerable<MetaBlock> GenerateMetaBlocks(WindowSize windowSize, byte[] bytes);
+        IEnumerable<MetaBlock> GenerateMetaBlocks(BrotliFileParameters parameters, byte[] bytes);
     }
 }
