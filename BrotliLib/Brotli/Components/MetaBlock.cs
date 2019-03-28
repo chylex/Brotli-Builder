@@ -4,6 +4,7 @@ using BrotliLib.Brotli.Components.Contents;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.Markers.Data;
+using BrotliLib.Brotli.State;
 using BrotliLib.IO;
 
 #pragma warning disable CS0659

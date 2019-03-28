@@ -6,7 +6,7 @@ using BrotliLib.Brotli.Dictionary;
 using BrotliLib.Brotli.State.Output;
 using BrotliLib.Collections;
 
-namespace BrotliLib.Brotli{
+namespace BrotliLib.Brotli.State{
     /// <summary>
     /// Global state used during compression/decompression.
     /// </summary>

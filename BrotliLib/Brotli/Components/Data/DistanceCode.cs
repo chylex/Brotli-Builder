@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Brotli.State;
 using BrotliLib.IO;
 using DistanceTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.DistanceCode>;
 

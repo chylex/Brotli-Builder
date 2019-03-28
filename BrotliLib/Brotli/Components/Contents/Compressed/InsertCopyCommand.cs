@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Markers;
+using BrotliLib.Brotli.State;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components.Contents.Compressed{

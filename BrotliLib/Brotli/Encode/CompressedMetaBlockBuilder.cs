@@ -7,6 +7,7 @@ using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Dictionary;
+using BrotliLib.Brotli.State;
 using BrotliLib.Brotli.State.Output;
 
 namespace BrotliLib.Brotli.Encode{

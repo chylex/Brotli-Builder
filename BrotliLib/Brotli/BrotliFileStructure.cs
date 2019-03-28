@@ -2,6 +2,7 @@
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Markers;
+using BrotliLib.Brotli.State;
 using BrotliLib.Brotli.State.Output;
 using BrotliLib.IO;
 
