@@ -37,6 +37,8 @@ namespace BrotliLib.Brotli.Components.Data{
 
         public static DistanceCode Zero => LastDistances[0];
 
+        private static readonly int DirectCodeOffset = LastDistances.Length - 1;
+
         // Data
 
         public int Code { get; }
@@ -84,8 +86,8 @@ namespace BrotliLib.Brotli.Components.Data{
                 return lastDistance;
             }
             
-            if (value < parameters.DirectCodeCount){
-                return new Direct(value);
+            if (value <= parameters.DirectCodeCount){
+                return new Direct(value + DirectCodeOffset);
             }
             
             // TODO deuglify this later
@@ -99,9 +101,9 @@ namespace BrotliLib.Brotli.Components.Data{
                 return LastDistances[code];
             }
             
-            int normalized = code - LastDistances.Length;
+            int normalized = code - DirectCodeOffset;
 
-            if (normalized < parameters.DirectCodeCount){
+            if (normalized <= parameters.DirectCodeCount){
                 return new Direct(code);
             }
             else{
@@ -147,7 +149,7 @@ namespace BrotliLib.Brotli.Components.Data{
             private readonly int encodedValue;
 
             public Direct(int code) : base(code){
-                this.encodedValue = 1 + code - LastDistances.Length;
+                this.encodedValue = code - DirectCodeOffset;
 
                 if (this.encodedValue < 1 || this.encodedValue > DistanceParameters.MaxDirectCodeCount){
                     throw new ArgumentOutOfRangeException(nameof(code), "Direct distance codes (normalized) must be within range [1; " + DistanceParameters.MaxDirectCodeCount + "].");
