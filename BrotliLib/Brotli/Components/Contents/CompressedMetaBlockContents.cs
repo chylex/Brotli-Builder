@@ -19,9 +19,6 @@ namespace BrotliLib.Brotli.Components.Contents{
             this.BlockSwitchCommands = blockSwitchCommands;
         }
 
-        public CompressedMetaBlockContents(MetaBlockCompressionHeader header, IReadOnlyList<InsertCopyCommand> insertCopyCommands) :
-            this(header, insertCopyCommands, new BlockSwitchCommandMap(_ => new BlockSwitchCommand[0])){}
-
         // Object
 
         public override bool Equals(object obj){
