@@ -19,6 +19,7 @@ namespace BrotliLib.Brotli.State{
         
         private readonly IBrotliOutputState outputState;
         
+        // Construction
         
         public BrotliGlobalState(BrotliFileParameters parameters, IBrotliOutputState outputState){
             this.Parameters = parameters;
@@ -26,6 +27,18 @@ namespace BrotliLib.Brotli.State{
 
             this.LiteralBuffer = new RingBuffer<byte>(0, 0);
             this.DistanceBuffer = new RingBuffer<int>(16, 15, 11, 4);
+        }
+
+        private BrotliGlobalState(BrotliGlobalState original){
+            this.Parameters = original.Parameters;
+            this.outputState = original.outputState.Clone();
+
+            this.LiteralBuffer = new RingBuffer<byte>(original.LiteralBuffer);
+            this.DistanceBuffer = new RingBuffer<int>(original.DistanceBuffer);
+        }
+
+        public BrotliGlobalState Clone(){
+            return new BrotliGlobalState(this);
         }
 
         // State helpers
