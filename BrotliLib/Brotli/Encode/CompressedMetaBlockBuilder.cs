@@ -7,13 +7,14 @@ using BrotliLib.Brotli.Components.Contents.Compressed;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
-using BrotliLib.Brotli.Dictionary;
 using BrotliLib.Brotli.State;
 using BrotliLib.Brotli.State.Output;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Encode{
     public sealed class CompressedMetaBlockBuilder{
+        public int OutputSize => intermediateState.OutputSize - initialState.OutputSize;
+
         public CategoryMap<BlockTypeInfo> BlockTypes { get; set; } = BlockTypeInfo.Empty;
         public DistanceParameters DistanceParameters { get; set; } = DistanceParameters.NoDirectCodes;
 
@@ -21,18 +22,41 @@ namespace BrotliLib.Brotli.Encode{
         public ContextMap LiteralCtxMap { get; set; } = ContextMap.Literals.Simple;
         public ContextMap DistanceCtxMap { get; set; } = ContextMap.Distances.Simple;
 
-        public BrotliGlobalState State { get; } // TODO private?
-
-        private readonly WindowSize windowSize;
         private readonly List<InsertCopyCommand> icCommands = new List<InsertCopyCommand>();
         private readonly CategoryMap<List<BlockSwitchCommand>> bsCommands = new CategoryMap<List<BlockSwitchCommand>>(_ => new List<BlockSwitchCommand>());
         
-        public CompressedMetaBlockBuilder(WindowSize windowSize, BrotliDictionary dictionary){
-            this.windowSize = windowSize;
-            this.State = new BrotliGlobalState(dictionary, windowSize, new BrotliOutputStored()); // TODO support multiple meta-blocks
+        private readonly BrotliGlobalState initialState;
+        private readonly BrotliGlobalState intermediateState;
+
+        // Construction
+
+        private CompressedMetaBlockBuilder(BrotliGlobalState state){
+            this.initialState = state.Clone();
+            this.intermediateState = state.Clone();
         }
 
-        public CompressedMetaBlockBuilder(WindowSize windowSize) : this(windowSize, BrotliDefaultDictionary.Embedded){}
+        public CompressedMetaBlockBuilder(BrotliFileParameters parameters) : this(new BrotliGlobalState(parameters, new BrotliOutputWindowed(parameters.WindowSize))){}
+
+        public CompressedMetaBlockBuilder(MetaBlock.Compressed metaBlock, BrotliGlobalState state) : this(state){
+            var contents = metaBlock.Contents;
+            var header = contents.Header;
+            
+            this.BlockTypes = header.BlockTypes;
+            this.DistanceParameters = header.DistanceParameters;
+            this.LiteralContextModes = header.LiteralCtxModes.ToArray();
+            this.LiteralCtxMap = header.LiteralCtxMap;
+            this.DistanceCtxMap = header.DistanceCtxMap;
+
+            foreach(InsertCopyCommand command in contents.InsertCopyCommands){
+                AddInsertCopy(command);
+            }
+
+            foreach(Category category in Categories.LID){
+                foreach(BlockSwitchCommand command in contents.BlockSwitchCommands[category]){
+                    AddBlockSwitch(category, command);
+                }
+            }
+        }
 
         // Commands
 
@@ -40,11 +64,11 @@ namespace BrotliLib.Brotli.Encode{
             icCommands.Add(command);
 
             foreach(Literal literal in command.Literals){
-                State.OutputLiteral(literal);
+                intermediateState.OutputLiteral(literal);
             }
 
             if (command.CopyDistance != DistanceInfo.EndsAfterLiterals){
-                State.OutputCopy(command.CopyLength, command.CopyDistance);
+                intermediateState.OutputCopy(command.CopyLength, command.CopyDistance);
             }
 
             return this;
@@ -57,8 +81,8 @@ namespace BrotliLib.Brotli.Encode{
 
         // Building
 
-        public MetaBlock Build(bool isLast){
-            var state = new BrotliGlobalState(BrotliDefaultDictionary.Embedded, windowSize, new BrotliOutputStored()); // TODO support multiple meta-blocks
+        public (MetaBlock MetaBlock, Func<CompressedMetaBlockBuilder> Next) Build(){
+            var state = initialState.Clone();
 
             ///// TODO reorganize
 
@@ -137,9 +161,11 @@ namespace BrotliLib.Brotli.Encode{
                 ConstructHuffmanTrees(distanceCodeLists)
             );
 
-            var metaBlock = new MetaBlock.Compressed(isLast: false, new DataLength(state.OutputSize)){
+            var metaBlock = new MetaBlock.Compressed(isLast: false, new DataLength(OutputSize)){
                 Contents = new CompressedMetaBlockContents(header, icCommands, bsCommands.Select<IReadOnlyList<BlockSwitchCommand>>((_, list) => list.AsReadOnly()))
             };
+
+            return (metaBlock, () => new CompressedMetaBlockBuilder(state));
         }
 
         // Helpers
