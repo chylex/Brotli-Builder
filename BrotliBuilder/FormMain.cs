@@ -291,6 +291,10 @@ namespace BrotliBuilder{
             }
         }
 
+        private void menuItemTransformRebuild_Click(object sender, EventArgs e){
+            TransformCurrentFile(new TransformRebuild());
+        }
+
         private void TransformCurrentFile(IBrotliTransformer transformer){
             brotliFile = brotliFile.Transform(transformer);
             OnNewBrotliFile();

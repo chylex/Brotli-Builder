@@ -38,6 +38,7 @@
             this.menuItemEncodeUncompressedMBs = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeLiterals = new System.Windows.Forms.MenuItem();
             this.menuItemTransform = new System.Windows.Forms.MenuItem();
+            this.menuItemTransformRebuild = new System.Windows.Forms.MenuItem();
             this.flowPanelBlocks = new System.Windows.Forms.FlowLayoutPanel();
             this.statusBar = new System.Windows.Forms.StatusBar();
             this.statusBarPanelPadding1 = new System.Windows.Forms.StatusBarPanel();
@@ -161,7 +162,15 @@
             // menuItemTransform
             // 
             this.menuItemTransform.Index = 2;
+            this.menuItemTransform.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuItemTransformRebuild});
             this.menuItemTransform.Text = "Transform...";
+            // 
+            // menuItemTransformRebuild
+            // 
+            this.menuItemTransformRebuild.Index = 0;
+            this.menuItemTransformRebuild.Text = "Rebuild";
+            this.menuItemTransformRebuild.Click += new System.EventHandler(this.menuItemTransformRebuild_Click);
             // 
             // flowPanelBlocks
             // 
@@ -343,5 +352,6 @@
         private System.Windows.Forms.MenuItem menuItemFileStructure;
         private System.Windows.Forms.MenuItem menuItemEncodeLiterals;
         private System.Windows.Forms.MenuItem menuItemTransform;
+        private System.Windows.Forms.MenuItem menuItemTransformRebuild;
     }
 }
