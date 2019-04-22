@@ -37,6 +37,7 @@
             this.menuItemEncodeFile = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeUncompressedMBs = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeLiterals = new System.Windows.Forms.MenuItem();
+            this.menuItemTransform = new System.Windows.Forms.MenuItem();
             this.flowPanelBlocks = new System.Windows.Forms.FlowLayoutPanel();
             this.statusBar = new System.Windows.Forms.StatusBar();
             this.statusBarPanelPadding1 = new System.Windows.Forms.StatusBarPanel();
@@ -124,7 +125,8 @@
             this.menuItemTools.Index = 2;
             this.menuItemTools.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItemStaticDictionary,
-            this.menuItemEncodeFile});
+            this.menuItemEncodeFile,
+            this.menuItemTransform});
             this.menuItemTools.Text = "&Tools";
             // 
             // menuItemStaticDictionary
@@ -155,6 +157,11 @@
             this.menuItemEncodeLiterals.Shortcut = System.Windows.Forms.Shortcut.Ctrl1;
             this.menuItemEncodeLiterals.Text = "Into Literals";
             this.menuItemEncodeLiterals.Click += new System.EventHandler(this.menuItemEncodeLiterals_Click);
+            // 
+            // menuItemTransform
+            // 
+            this.menuItemTransform.Index = 2;
+            this.menuItemTransform.Text = "Transform...";
             // 
             // flowPanelBlocks
             // 
@@ -233,7 +240,7 @@
             // 
             this.splitContainerBottom.Panel2.BackColor = System.Drawing.SystemColors.ControlLight;
             this.splitContainerBottom.Panel2.Controls.Add(this.brotliFilePanelOriginal);
-            this.splitContainerBottom.Size = new System.Drawing.Size(1008, 404);
+            this.splitContainerBottom.Size = new System.Drawing.Size(1008, 412);
             this.splitContainerBottom.SplitterDistance = 502;
             this.splitContainerBottom.SplitterWidth = 2;
             this.splitContainerBottom.TabIndex = 0;
@@ -244,7 +251,7 @@
             this.brotliFilePanelGenerated.LabelPrefix = "Generated";
             this.brotliFilePanelGenerated.Location = new System.Drawing.Point(0, 0);
             this.brotliFilePanelGenerated.Name = "brotliFilePanelGenerated";
-            this.brotliFilePanelGenerated.Size = new System.Drawing.Size(502, 404);
+            this.brotliFilePanelGenerated.Size = new System.Drawing.Size(502, 412);
             this.brotliFilePanelGenerated.TabIndex = 0;
             // 
             // brotliFilePanelOriginal
@@ -253,7 +260,7 @@
             this.brotliFilePanelOriginal.LabelPrefix = "Original";
             this.brotliFilePanelOriginal.Location = new System.Drawing.Point(0, 0);
             this.brotliFilePanelOriginal.Name = "brotliFilePanelOriginal";
-            this.brotliFilePanelOriginal.Size = new System.Drawing.Size(504, 404);
+            this.brotliFilePanelOriginal.Size = new System.Drawing.Size(504, 412);
             this.brotliFilePanelOriginal.TabIndex = 0;
             // 
             // splitContainerMain
@@ -335,5 +342,6 @@
         private System.Windows.Forms.SplitContainer splitContainerMain;
         private System.Windows.Forms.MenuItem menuItemFileStructure;
         private System.Windows.Forms.MenuItem menuItemEncodeLiterals;
+        private System.Windows.Forms.MenuItem menuItemTransform;
     }
 }

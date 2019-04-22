@@ -291,6 +291,11 @@ namespace BrotliBuilder{
             }
         }
 
+        private void TransformCurrentFile(IBrotliTransformer transformer){
+            brotliFile = brotliFile.Transform(transformer);
+            OnNewBrotliFile();
+        }
+
         #endregion
         
     }
