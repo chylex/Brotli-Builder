@@ -45,6 +45,21 @@ namespace BrotliLib.Brotli{
             this.MetaBlocks = new List<MetaBlock>();
         }
 
+        public BrotliFileStructure Transform(IBrotliTransformer transformer){
+            var copy = new BrotliFileStructure(Parameters);
+            var state = new BrotliGlobalState(Parameters, new BrotliOutputWindowed(Parameters.WindowSize));
+
+            foreach(MetaBlock original in MetaBlocks){
+                foreach(MetaBlock transformed in transformer.Transform(original, state)){
+                    copy.MetaBlocks.Add(transformed);
+                    MetaBlock.Serializer.ToBits(new BitStream().GetWriter(), transformed, state); // TODO null writer
+                }
+            }
+
+            copy.Fixup();
+            return copy;
+        }
+
         public void Fixup(){
             for(int index = 0, last = MetaBlocks.Count - 1; index <= last; index++){
                 MetaBlocks[index].IsLast = index == last;
