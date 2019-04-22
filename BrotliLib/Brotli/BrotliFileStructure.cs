@@ -15,7 +15,7 @@ namespace BrotliLib.Brotli{
     /// </summary>
     public sealed class BrotliFileStructure{
         public static BrotliFileStructure NewEmpty(){
-            BrotliFileStructure bfs = new BrotliFileStructure(new BrotliFileParameters());
+            var bfs = new BrotliFileStructure(new BrotliFileParameters());
             bfs.MetaBlocks.Add(new MetaBlock.LastEmpty());
             return bfs;
         }
@@ -25,12 +25,13 @@ namespace BrotliLib.Brotli{
         }
 
         public static BrotliFileStructure FromEncoder(BrotliFileParameters parameters, IBrotliEncoder encoder, byte[] bytes){
-            BrotliFileStructure bfs = new BrotliFileStructure(parameters);
+            var bfs = new BrotliFileStructure(parameters);
 
             foreach(MetaBlock metaBlock in encoder.GenerateMetaBlocks(parameters, bytes)){
                 bfs.MetaBlocks.Add(metaBlock);
             }
 
+            bfs.Fixup();
             return bfs;
         }
 
