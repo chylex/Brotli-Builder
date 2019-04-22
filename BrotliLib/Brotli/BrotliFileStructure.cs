@@ -50,7 +50,7 @@ namespace BrotliLib.Brotli{
             var state = new BrotliGlobalState(Parameters, new BrotliOutputWindowed(Parameters.WindowSize));
 
             foreach(MetaBlock original in MetaBlocks){
-                foreach(MetaBlock transformed in transformer.Transform(original, state)){
+                foreach(MetaBlock transformed in transformer.Transform(original, state)){ // TODO figure out how to handle state
                     copy.MetaBlocks.Add(transformed);
                     MetaBlock.Serializer.ToBits(new BitStream().GetWriter(), transformed, state); // TODO null writer
                 }

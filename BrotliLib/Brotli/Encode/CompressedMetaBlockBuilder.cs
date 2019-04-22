@@ -15,7 +15,7 @@ namespace BrotliLib.Brotli.Encode{
     public sealed class CompressedMetaBlockBuilder{
         public int OutputSize => intermediateState.OutputSize - initialState.OutputSize;
 
-        public CategoryMap<BlockTypeInfo> BlockTypes { get; set; } = BlockTypeInfo.Empty;
+        public CategoryMap<BlockTypeInfo> BlockTypes { get; set; } = BlockTypeInfo.Empty; // TODO generate these based on commands
         public DistanceParameters DistanceParameters { get; set; } = DistanceParameters.NoDirectCodes;
 
         public LiteralContextMode[] LiteralContextModes { get; set; } = { LiteralContextMode.LSB6 };

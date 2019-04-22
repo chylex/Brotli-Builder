@@ -250,6 +250,7 @@ namespace BrotliLib.Huffman{
                 }
             }
 
+            // TODO can sometimes generate incomplete paths
             return FromBitCountsCanonical(symbolEntries);
         }
 
