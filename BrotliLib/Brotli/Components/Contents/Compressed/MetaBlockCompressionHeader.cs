@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
@@ -26,22 +27,22 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
             CategoryMap<BlockTypeInfo> blockTypes,
             DistanceParameters distanceParameters,
 
-            IReadOnlyList<LiteralContextMode> literalCtxModes,
+            IList<LiteralContextMode> literalCtxModes,
             ContextMap literalCtxMap,
             ContextMap distanceCtxMap,
 
-            IReadOnlyList<LiteralTree> literalTrees,
-            IReadOnlyList<InsertCopyTree> insertCopyTrees,
-            IReadOnlyList<DistanceTree> distanceTrees
+            IList<LiteralTree> literalTrees,
+            IList<InsertCopyTree> insertCopyTrees,
+            IList<DistanceTree> distanceTrees
         ){
             this.BlockTypes = blockTypes;
             this.DistanceParameters = distanceParameters;
-            this.LiteralCtxModes = literalCtxModes;
+            this.LiteralCtxModes = literalCtxModes.ToArray();
             this.LiteralCtxMap = literalCtxMap;
             this.DistanceCtxMap = distanceCtxMap;
-            this.LiteralTrees = literalTrees;
-            this.InsertCopyTrees = insertCopyTrees;
-            this.DistanceTrees = distanceTrees;
+            this.LiteralTrees = literalTrees.ToArray();
+            this.InsertCopyTrees = insertCopyTrees.ToArray();
+            this.DistanceTrees = distanceTrees.ToArray();
         }
 
         // Object
@@ -83,7 +84,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
             return ContextMap.Serializer.FromBits(reader, blockTypes[category]);
         }
 
-        private static IReadOnlyList<HuffmanTree<T>> ReadHuffmanTrees<T>(MarkedBitReader reader, Category category, int treeCount, HuffmanTree<T>.Context context) where T : IComparable<T>{
+        private static IList<HuffmanTree<T>> ReadHuffmanTrees<T>(MarkedBitReader reader, Category category, int treeCount, HuffmanTree<T>.Context context) where T : IComparable<T>{
             return reader.ReadStructureArray(treeCount, HuffmanTree<T>.Serializer, context, "HTREE" + category.Id());
         }
         

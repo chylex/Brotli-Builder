@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using BrotliLib.Brotli.Components.Contents.Compressed;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Utils;
@@ -6,6 +7,7 @@ using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.IO;
 using BlockSwitchCommandMap = BrotliLib.Brotli.Components.Utils.CategoryMap<System.Collections.Generic.IReadOnlyList<BrotliLib.Brotli.Components.Contents.Compressed.BlockSwitchCommand>>;
+using BlockSwitchCommandMutableMap = BrotliLib.Brotli.Components.Utils.CategoryMap<System.Collections.Generic.IList<BrotliLib.Brotli.Components.Contents.Compressed.BlockSwitchCommand>>;
 
 namespace BrotliLib.Brotli.Components.Contents{
     public sealed class CompressedMetaBlockContents{
@@ -13,10 +15,10 @@ namespace BrotliLib.Brotli.Components.Contents{
         public IReadOnlyList<InsertCopyCommand> InsertCopyCommands { get; }
         public BlockSwitchCommandMap BlockSwitchCommands { get; }
 
-        public CompressedMetaBlockContents(MetaBlockCompressionHeader header, IReadOnlyList<InsertCopyCommand> insertCopyCommands, BlockSwitchCommandMap blockSwitchCommands){
+        public CompressedMetaBlockContents(MetaBlockCompressionHeader header, IList<InsertCopyCommand> insertCopyCommands, BlockSwitchCommandMutableMap blockSwitchCommands){
             this.Header = header;
-            this.InsertCopyCommands = insertCopyCommands;
-            this.BlockSwitchCommands = blockSwitchCommands;
+            this.InsertCopyCommands = insertCopyCommands.ToArray();
+            this.BlockSwitchCommands = blockSwitchCommands.Select<IReadOnlyList<BlockSwitchCommand>>((_, list) => list.ToArray());
         }
 
         // Object
@@ -66,14 +68,13 @@ namespace BrotliLib.Brotli.Components.Contents{
         }
 
         private class ReaderDataContext : DataContext{
-            public BlockSwitchCommandMap BlockSwitchCommands => blockSwitchCommands.Select<IReadOnlyList<BlockSwitchCommand>>((_, list) => list.AsReadOnly());
+            public BlockSwitchCommandMutableMap BlockSwitchCommands { get; }
             
             private readonly MarkedBitReader reader;
-            private readonly CategoryMap<List<BlockSwitchCommand>> blockSwitchCommands;
 
             public ReaderDataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header, MarkedBitReader reader) : base(wrapped, header){
                 this.reader = reader;
-                this.blockSwitchCommands = new CategoryMap<List<BlockSwitchCommand>>(_ => new List<BlockSwitchCommand>());
+                this.BlockSwitchCommands = new CategoryMap<IList<BlockSwitchCommand>>(_ => new List<BlockSwitchCommand>());
             }
 
             public override int NextBlockID(Category category){
@@ -81,7 +82,7 @@ namespace BrotliLib.Brotli.Components.Contents{
                 BlockSwitchCommand nextCommand = tracker.ReadCommand(reader);
 
                 if (nextCommand != null){
-                    blockSwitchCommands[category].Add(nextCommand);
+                    BlockSwitchCommands[category].Add(nextCommand);
                 }
 
                 return tracker.CurrentID;
@@ -121,7 +122,7 @@ namespace BrotliLib.Brotli.Components.Contents{
 
                 reader.MarkEnd(new TitleMarker("Command List"));
                 
-                return new CompressedMetaBlockContents(header, icCommands.ToArray(), dataContext.BlockSwitchCommands);
+                return new CompressedMetaBlockContents(header, icCommands, dataContext.BlockSwitchCommands);
             },
 
             toBits: (writer, obj, context) => {

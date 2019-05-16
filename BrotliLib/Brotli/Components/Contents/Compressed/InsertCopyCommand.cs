@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Markers;
@@ -14,13 +15,15 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
 
         public InsertCopyLengths Lengths => new InsertCopyLengths(Literals.Count, CopyLength);
         
-        public InsertCopyCommand(IReadOnlyList<Literal> literals, int copyLength, DistanceInfo copyDistance = DistanceInfo.EndsAfterLiterals){
-            this.Literals = literals;
+        public InsertCopyCommand(IList<Literal> literals, int copyLength = InsertCopyLengths.MinCopyLength, DistanceInfo copyDistance = DistanceInfo.EndsAfterLiterals){
+            this.Literals = literals.ToArray();
             this.CopyLength = copyLength;
             this.CopyDistance = copyDistance;
+
+            var _ = Lengths; // performs bounds checking
         }
         
-        public InsertCopyCommand(IReadOnlyList<Literal> literals, int copyLength, int copyDistance) : this(literals, copyLength, (DistanceInfo)copyDistance){}
+        public InsertCopyCommand(IList<Literal> literals, int copyLength, int copyDistance) : this(literals, copyLength, (DistanceInfo)copyDistance){}
 
         // Object
 

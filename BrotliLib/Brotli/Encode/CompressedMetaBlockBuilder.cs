@@ -22,8 +22,8 @@ namespace BrotliLib.Brotli.Encode{
         public ContextMap LiteralCtxMap { get; set; } = ContextMap.Literals.Simple;
         public ContextMap DistanceCtxMap { get; set; } = ContextMap.Distances.Simple;
 
-        private readonly List<InsertCopyCommand> icCommands = new List<InsertCopyCommand>();
-        private readonly CategoryMap<List<BlockSwitchCommand>> bsCommands = new CategoryMap<List<BlockSwitchCommand>>(_ => new List<BlockSwitchCommand>());
+        private readonly IList<InsertCopyCommand> icCommands = new List<InsertCopyCommand>();
+        private readonly CategoryMap<IList<BlockSwitchCommand>> bsCommands = new CategoryMap<IList<BlockSwitchCommand>>(_ => new List<BlockSwitchCommand>());
         
         private readonly BrotliGlobalState initialState;
         private readonly BrotliGlobalState intermediateState;
@@ -162,7 +162,7 @@ namespace BrotliLib.Brotli.Encode{
             );
 
             var metaBlock = new MetaBlock.Compressed(isLast: false, new DataLength(OutputSize)){
-                Contents = new CompressedMetaBlockContents(header, icCommands, bsCommands.Select<IReadOnlyList<BlockSwitchCommand>>((_, list) => list.AsReadOnly()))
+                Contents = new CompressedMetaBlockContents(header, icCommands, bsCommands)
             };
 
             return (metaBlock, () => new CompressedMetaBlockBuilder(state));
