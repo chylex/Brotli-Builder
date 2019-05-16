@@ -17,27 +17,8 @@ namespace BrotliLib.Brotli.Components.Data{
             return new DistanceTree.Context(parameters.AlphabetSize, value => Create(parameters, value), symbol => symbol.Code);
         }
 
-        // Distance buffer reference tables
-
-        private static readonly byte[] BufferIndexes = {
-            3, 2, 1, 0,
-            3, 3, 3, 3, 3, 3,
-            2, 2, 2, 2, 2, 2
-        };
-        
-        private static readonly sbyte[] BufferValueOffsets = {
-            0, 0, 0, 0,
-            -1, 1, -2, 2, -3, 3,
-            -1, 1, -2, 2, -3, 3
-        };
-
-        public static DistanceCode[] LastDistances = Enumerable.Range(0, BufferIndexes.Length)
-                                                               .Select(code => new Last(code))
-                                                               .ToArray<DistanceCode>();
-
-        public static DistanceCode Zero => LastDistances[0];
-
-        private static readonly int DirectCodeOffset = LastDistances.Length - 1;
+        public static DistanceCode Zero => Last.Codes[0];
+        private static readonly int DirectCodeOffset = Last.Codes.Length - 1;
 
         // Data
 
@@ -91,14 +72,14 @@ namespace BrotliLib.Brotli.Components.Data{
             }
             
             // TODO deuglify this later
-            return Enumerable.Range(LastDistances.Length + parameters.DirectCodeCount, 100000 /* TODO random */)
+            return Enumerable.Range(Last.Codes.Length + parameters.DirectCodeCount, 100000 /* TODO random */)
                              .Select(code => new Complex(parameters, code))
                              .First(code => code.CanEncodeValue(state, value));
         }
 
         private static DistanceCode Create(DistanceParameters parameters, int code){
-            if (code < LastDistances.Length){
-                return LastDistances[code];
+            if (code < Last.Codes.Length){
+                return Last.Codes[code];
             }
             
             int normalized = code - DirectCodeOffset;
@@ -116,10 +97,26 @@ namespace BrotliLib.Brotli.Components.Data{
         /// Represents a distance code which uses the global ring buffer of last distances.
         /// </summary>
         private sealed class Last : DistanceCode{
+            private static readonly byte[] BufferIndexes = {
+                3, 2, 1, 0,
+                3, 3, 3, 3, 3, 3,
+                2, 2, 2, 2, 2, 2
+            };
+        
+            private static readonly sbyte[] BufferValueOffsets = {
+                0, 0, 0, 0,
+                -1, 1, -2, 2, -3, 3,
+                -1, 1, -2, 2, -3, 3
+            };
+
+            public static readonly DistanceCode[] Codes = Enumerable.Range(0, BufferIndexes.Length)
+                                                                    .Select(code => new Last(code))
+                                                                    .ToArray<DistanceCode>();
+
             private readonly byte index;
             private readonly sbyte offset;
 
-            public Last(int code) : base(code){
+            private Last(int code) : base(code){
                 this.index = BufferIndexes[code];
                 this.offset = BufferValueOffsets[code];
             }
@@ -189,7 +186,7 @@ namespace BrotliLib.Brotli.Components.Data{
 
             /// <summary>
             /// Since the Brotli format documentation only specifies a bunch of magic formulas, here's an attempt at an explanation.
-            /// Note that the distance code we're talking about is after subtracting <see cref="DistanceCode.LastDistances"/> and <see cref="DistanceParameters.DirectCodeCount"/>.
+            /// Note that the distance code we're talking about is after subtracting <see cref="DistanceCode.Last.Codes"/> and <see cref="DistanceParameters.DirectCodeCount"/>.
             /// <para/>
             /// Distance code is constructed from the following groups of bits: MSB [extracount][x][postfix] LSB
             /// Distance value is constructed from the following groups of bits: MSB [1x][extravalue][postfix] LSB + offset
@@ -207,7 +204,7 @@ namespace BrotliLib.Brotli.Components.Data{
                 int directCodeCount = parameters.DirectCodeCount;
                 this.postfixBitCount = parameters.PostfixBitCount;
 
-                int normalized = code - directCodeCount - LastDistances.Length;
+                int normalized = code - directCodeCount - Last.Codes.Length;
 
                 if (normalized < 0){
                     throw new ArgumentOutOfRangeException(nameof(code), "Complex distance codes (normalized) must be at least 0.");

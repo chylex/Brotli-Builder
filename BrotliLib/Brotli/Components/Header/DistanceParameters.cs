@@ -9,8 +9,8 @@ namespace BrotliLib.Brotli.Components.Header{
     /// https://tools.ietf.org/html/rfc7932#section-4
     /// </summary>
     public sealed class DistanceParameters{
-        private const int MaxPostfixBitCount = 3;
-        private const int MaxDirectCodeBits = 15;
+        public const int MaxPostfixBitCount = 3;
+        public const int MaxDirectCodeBits = 15;
 
         public static readonly int MaxDirectCodeCount = new DistanceParameters(MaxPostfixBitCount, MaxDirectCodeBits).DirectCodeCount;
 

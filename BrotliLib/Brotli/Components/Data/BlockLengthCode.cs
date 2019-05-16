@@ -12,6 +12,9 @@ namespace BrotliLib.Brotli.Components.Data{
     /// https://tools.ietf.org/html/rfc7932#section-6
     /// </summary>
     public sealed class BlockLengthCode : IComparable<BlockLengthCode>{
+        public const int MinLength = 1;
+        public const int MaxLength = 16625 + (1 << 24) - 1;
+
         public static readonly AlphabetSize AlphabetSize = new AlphabetSize(26);
         public static readonly BlockLengthCodeTree.Context TreeContext = new BlockLengthCodeTree.Context(AlphabetSize, value => new BlockLengthCode(value), symbol => symbol.Code);
 

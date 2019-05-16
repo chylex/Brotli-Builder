@@ -11,40 +11,40 @@ namespace BrotliLib.Brotli.Components.Header{
         private const int MinNibbles = 4;
         private const int MaxNibbles = 6;
 
+        public const int MinUncompressedBytes = 0;
         public const int MaxUncompressedBytes = 1 << (4 * MaxNibbles);
 
-        public static readonly DataLength Empty = new DataLength(0, 0);
-
-        private static int CalculateNibblesRequired(int uncompressedBytes){
-            if (uncompressedBytes < 0){
-                throw new ArgumentOutOfRangeException(nameof(uncompressedBytes), "The amount of bytes must be at least 0.");
-            }
-            else if (uncompressedBytes == 0){
-                return 0;
-            }
-
-            for(int nibbles = MinNibbles; nibbles <= MaxNibbles; nibbles++){
-                int maxValue = 1 << (4 * nibbles);
-
-                if (uncompressedBytes <= maxValue){
-                    return nibbles;
-                }
-            }
-
-            throw new ArgumentOutOfRangeException(nameof(uncompressedBytes), "The amount of bytes (" + uncompressedBytes + ") cannot be expressed with at most " + MaxNibbles + " nibbles.");
-        }
+        public static readonly DataLength Empty = new DataLength(0);
 
         // Data
 
-        public int ChunkNibbles { get; }
-        public int UncompressedBytes { get; }
+        public int ChunkNibbles{
+            get{
+                if (UncompressedBytes == 0){
+                    return 0;
+                }
 
-        private DataLength(int chunkNibbles, int uncompressedBytes){
-            this.ChunkNibbles = chunkNibbles;
-            this.UncompressedBytes = uncompressedBytes;
+                for(int nibbles = MinNibbles; nibbles <= MaxNibbles; nibbles++){
+                    int maxValue = 1 << (4 * nibbles);
+
+                    if (UncompressedBytes <= maxValue){
+                        return nibbles;
+                    }
+                }
+
+                throw new InvalidOperationException("The amount of bytes (" + UncompressedBytes + ") cannot be expressed with at most " + MaxNibbles + " nibbles.");
+            }
         }
 
-        public DataLength(int uncompressedBytes) : this(CalculateNibblesRequired(uncompressedBytes), uncompressedBytes){}
+        public int UncompressedBytes { get; }
+
+        public DataLength(int uncompressedBytes){
+            if (uncompressedBytes < MinUncompressedBytes || uncompressedBytes > MaxUncompressedBytes){
+                throw new ArgumentOutOfRangeException(nameof(uncompressedBytes), "The amount of uncompressed bytes must be in the range [" + MinUncompressedBytes + "; " + MaxUncompressedBytes + "].");
+            }
+
+            this.UncompressedBytes = uncompressedBytes;
+        }
         
         // Object
 
@@ -85,7 +85,7 @@ namespace BrotliLib.Brotli.Components.Header{
 		        
                 int uncompressedBytes = (chunkNibbles == 0) ? 0 : reader.NextChunk(4 * chunkNibbles, "MLEN", value => 1 + value);
 
-                return new DataLength(chunkNibbles, uncompressedBytes);
+                return new DataLength(uncompressedBytes);
             },
 
             toBits: (writer, obj, context) => {

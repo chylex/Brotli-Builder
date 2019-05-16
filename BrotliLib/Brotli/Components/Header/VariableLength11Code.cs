@@ -16,7 +16,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
         public VariableLength11Code(int value){
             if (value < MinValue || value > MaxValue){
-                throw new ArgumentOutOfRangeException(nameof(value), "The value must be in the range [1; 256].");
+                throw new ArgumentOutOfRangeException(nameof(value), "The value must be in the range [" + MinValue + "; " + MaxValue + "].");
             }
 
             this.Value = value;

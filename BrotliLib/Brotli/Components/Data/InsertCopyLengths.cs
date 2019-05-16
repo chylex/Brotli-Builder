@@ -11,7 +11,11 @@ namespace BrotliLib.Brotli.Components.Data{
     /// https://tools.ietf.org/html/rfc7932#section-5
     /// </summary>
     public readonly struct InsertCopyLengths{
-        public static int MinimumCopyLength => CopyCodeValueOffsets[0];
+        public const int MinInsertLength = 0;
+        public const int MaxInsertLength = 22594 + (1 << 24) - 1;
+
+        public const int MinCopyLength = 2;
+        public const int MaxCopyLength = 2118 + (1 << 24) - 1;
 
         // Insert code tables
 
@@ -66,6 +70,14 @@ namespace BrotliLib.Brotli.Components.Data{
         /// Initializes the lengths with the provided values.
         /// </summary>
         public InsertCopyLengths(int insertLength, int copyLength){
+            if (insertLength < MinInsertLength || insertLength > MaxInsertLength){
+                throw new ArgumentOutOfRangeException(nameof(insertLength), "Insert length must be in the range [" + MinInsertLength + "; " + MaxInsertLength + "].");
+            }
+
+            if (copyLength < MinCopyLength || copyLength > MaxCopyLength){
+                throw new ArgumentOutOfRangeException(nameof(copyLength), "Copy length must be in the range [" + MinCopyLength + "; " + MaxCopyLength + "].");
+            }
+
             this.InsertLength = insertLength;
             this.CopyLength = copyLength;
         }

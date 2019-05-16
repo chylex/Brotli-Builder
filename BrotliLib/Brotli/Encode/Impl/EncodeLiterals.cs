@@ -22,7 +22,7 @@ namespace BrotliLib.Brotli.Encode.Impl{
                 byte[] mbData = new byte[mbBytes];
                 Buffer.BlockCopy(bytes, index, mbData, 0, mbBytes);
                 
-                var (mb, next) = builder.AddInsertCopy(new InsertCopyCommand(Literal.FromBytes(mbData), InsertCopyLengths.MinimumCopyLength))
+                var (mb, next) = builder.AddInsertCopy(new InsertCopyCommand(Literal.FromBytes(mbData), InsertCopyLengths.MinCopyLength))
                                         .Build();
                 
                 if (nextIndex < length){
