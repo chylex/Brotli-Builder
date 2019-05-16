@@ -1,8 +1,12 @@
-﻿namespace BrotliCalc{
+﻿using BrotliLib.Numbers;
+
+namespace BrotliCalc{
     interface ICommand{
         string FullName { get; }
         string ShortName { get; }
-        string Arguments { get; }
+
+        string ArgumentDesc { get; }
+        Range ArgumentCount { get; }
 
         string Process(string[] args);
     }

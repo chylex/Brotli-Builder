@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using BrotliLib.Numbers;
 
 namespace BrotliCalc{
     public static class Program{
@@ -12,7 +13,7 @@ namespace BrotliCalc{
             new CmdCompress()
         };
 
-        private static void Main(string[] args){
+        private static void Main(){
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
@@ -24,7 +25,7 @@ namespace BrotliCalc{
                 Console.ForegroundColor = ConsoleColor.Gray;
                 Console.Write($" {command.ShortName} / {command.FullName} ");
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine(command.Arguments);
+                Console.WriteLine(command.ArgumentDesc);
             }
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -62,20 +63,36 @@ namespace BrotliCalc{
 
                 if (command == null){
                     Console.WriteLine("Command not found.");
+                    Console.WriteLine();
+                    continue;
                 }
-                else{
-                    lastInput = input;
 
-                    try{
-                        Console.ForegroundColor = ConsoleColor.White;
-                        Console.WriteLine(command.Process(ParseCommandArguments(input.ElementAtOrDefault(1) ?? string.Empty)));
-                    }catch(Exception e){
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("Error processing the command:");
-                        Console.ForegroundColor = ConsoleColor.Gray;
-                        Console.WriteLine(e.Message);
-                        Debug.Print(e.ToString());
+                Range range = command.ArgumentCount;
+                string[] args = ParseCommandArguments(input.ElementAtOrDefault(1) ?? string.Empty);
+
+                if (!range.Contains(args.Length)){
+                    if (range.First == range.Last){
+                        Console.WriteLine($"Command requires exactly {range.First} argument(s).");
                     }
+                    else{
+                        Console.WriteLine($"Command requires between {range.First} and {range.Last} argument(s).");
+                    }
+                    
+                    Console.WriteLine();
+                    continue;
+                }
+
+                lastInput = input;
+
+                try{
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine(command.Process(args));
+                }catch(Exception e){
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Error processing the command:");
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.WriteLine(e.Message);
+                    Debug.Print(e.ToString());
                 }
 
                 Console.WriteLine();
