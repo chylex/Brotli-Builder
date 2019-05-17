@@ -3,10 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using BrotliLib.Brotli.Dictionary.Format;
 
 namespace BrotliLib.Brotli.Dictionary.Index{
     internal static class DictionaryIndexHelper{
-        internal sealed class Writer : IDisposable{
+        public static int CalculateWordLengthBits(IDictionaryFormat format){
+            return (int)Math.Ceiling(Math.Log(format.WordLengths.Max(), 2.0));
+        }
+
+        public sealed class Writer : IDisposable{
             public int Position{
                 get{
                     writer.Flush();
@@ -54,7 +59,7 @@ namespace BrotliLib.Brotli.Dictionary.Index{
             }
         }
 
-        internal sealed class Reader : IDisposable{
+        public sealed class Reader : IDisposable{
             private readonly BinaryReader reader;
 
             public Reader(Stream stream, Encoding encoding, bool leaveOpen){

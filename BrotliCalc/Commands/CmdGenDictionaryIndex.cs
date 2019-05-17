@@ -31,7 +31,7 @@ namespace BrotliCalc.Commands{
             Debug.WriteLine("Serializing trie to file...");
 
             using(var stream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.Read)){
-                BrotliDictionaryIndex.Write(stream, trie);
+                BrotliDictionaryIndex.Write(dictionary.Format, stream, trie);
             }
 
             Debug.WriteLine("Cleaning up...");
