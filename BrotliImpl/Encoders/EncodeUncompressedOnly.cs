@@ -4,6 +4,7 @@ using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Encode;
+using BrotliLib.Collections;
 
 namespace BrotliImpl.Encoders{
     /// <summary>
@@ -13,9 +14,7 @@ namespace BrotliImpl.Encoders{
         public IEnumerable<MetaBlock> GenerateMetaBlocks(BrotliFileParameters parameters, byte[] bytes){
             for(int index = 0; index < bytes.Length; index += DataLength.MaxUncompressedBytes){
                 int mbBytes = Math.Min(bytes.Length - index, DataLength.MaxUncompressedBytes);
-
-                byte[] mbData = new byte[mbBytes];
-                Buffer.BlockCopy(bytes, index, mbData, 0, mbBytes);
+                byte[] mbData = CollectionHelper.Slice(bytes, index, mbBytes);
 
                 yield return new MetaBlock.Uncompressed(mbData);
             }

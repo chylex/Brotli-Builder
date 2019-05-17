@@ -6,6 +6,7 @@ using BrotliLib.Brotli.Components.Contents.Compressed;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Encode;
+using BrotliLib.Collections;
 
 namespace BrotliImpl.Encoders{
     /// <summary>
@@ -20,9 +21,7 @@ namespace BrotliImpl.Encoders{
                 nextIndex = index + DataLength.MaxUncompressedBytes;
 
                 int mbBytes = Math.Min(length - index, DataLength.MaxUncompressedBytes);
-
-                byte[] mbData = new byte[mbBytes];
-                Buffer.BlockCopy(bytes, index, mbData, 0, mbBytes);
+                byte[] mbData = CollectionHelper.Slice(bytes, index, mbBytes);
                 
                 var (mb, next) = builder.AddInsertCopy(new InsertCopyCommand(Literal.FromBytes(mbData), InsertCopyLengths.MinCopyLength))
                                         .Build();

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.Markers.Data;
+using BrotliLib.Collections;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components.Contents{
@@ -28,13 +29,7 @@ namespace BrotliLib.Brotli.Components.Contents{
             throw new ArgumentOutOfRangeException(nameof(hiddenBytes), "The amount of bytes (" + hiddenBytes + ") cannot be expressed with at most " + MaxLengthDescriptionBytes + " bytes.");
         }
 
-        public byte[] HiddenData{
-            get{
-                byte[] copy = new byte[hiddenData.Length];
-                Buffer.BlockCopy(hiddenData, 0, copy, 0, hiddenData.Length);
-                return copy;
-            }
-        }
+        public byte[] HiddenData => CollectionHelper.Clone(hiddenData);
 
         private readonly byte[] hiddenData;
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using BrotliLib.Collections;
 
 namespace BrotliLib.Brotli.Dictionary.Transform{
     /// <summary>
@@ -37,14 +38,14 @@ namespace BrotliLib.Brotli.Dictionary.Transform{
             }
             else if (type >= TransformType.OmitFirst1 && type <= TransformType.OmitFirst9){
                 int offset = Math.Min(input.Length, type - TransformType.OmitFirstN);
-                return Slice(input, offset, input.Length - offset);
+                return CollectionHelper.Slice(input, offset, input.Length - offset);
             }
             else if (type >= TransformType.OmitLast1 && type <= TransformType.OmitLast9){
                 int count = Math.Max(0, input.Length - (type - TransformType.OmitLastN));
-                return Slice(input, 0, count);
+                return CollectionHelper.Slice(input, 0, count);
             }
             else{
-                input = (byte[])input.Clone();
+                input = CollectionHelper.Clone(input);
                 
                 int Ferment(int position){
                     byte value = input[position];
@@ -88,12 +89,6 @@ namespace BrotliLib.Brotli.Dictionary.Transform{
             if (position < output.Length){
                 output[position] ^= by;
             }
-        }
-
-        private static byte[] Slice(byte[] input, int start, int count){
-            byte[] slice = new byte[count];
-            Buffer.BlockCopy(input, start, slice, 0, count);
-            return slice;
         }
     }
 }

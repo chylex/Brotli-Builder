@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.Markers.Data;
+using BrotliLib.Collections;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components.Header{
@@ -214,7 +215,7 @@ namespace BrotliLib.Brotli.Components.Header{
                     byte[] contextMap;
 
                     if (EncodeIMTF){
-                        contextMap = (byte[])obj.contextMap.Clone();
+                        contextMap = CollectionHelper.Clone(obj.contextMap);
                         MoveToFront.Encode(contextMap);
                     }
                     else{

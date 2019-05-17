@@ -2,17 +2,12 @@
 using System.Collections.Generic;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.Markers.Data;
+using BrotliLib.Collections;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components.Contents{
     public sealed class UncompressedMetaBlockContents{
-        public byte[] UncompressedData{
-            get{
-                byte[] copy = new byte[uncompressedData.Length];
-                Buffer.BlockCopy(uncompressedData, 0, copy, 0, uncompressedData.Length);
-                return copy;
-            }
-        }
+        public byte[] UncompressedData => CollectionHelper.Clone(uncompressedData);
 
         private readonly byte[] uncompressedData;
 
