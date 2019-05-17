@@ -8,7 +8,9 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnitTests", "UnitTests\Unit
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrotliLib", "BrotliLib\BrotliLib.csproj", "{09692EDC-DC35-46A9-83C6-746E447F3B86}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrotliCalc", "BrotliCalc\BrotliCalc.csproj", "{6541BA71-D176-48E9-891B-7062E27347E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrotliCalc", "BrotliCalc\BrotliCalc.csproj", "{6541BA71-D176-48E9-891B-7062E27347E5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrotliImpl", "BrotliImpl\BrotliImpl.csproj", "{8137DF6E-21F1-445F-B29D-80032DF1D711}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +34,10 @@ Global
 		{6541BA71-D176-48E9-891B-7062E27347E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6541BA71-D176-48E9-891B-7062E27347E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6541BA71-D176-48E9-891B-7062E27347E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8137DF6E-21F1-445F-B29D-80032DF1D711}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8137DF6E-21F1-445F-B29D-80032DF1D711}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8137DF6E-21F1-445F-B29D-80032DF1D711}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8137DF6E-21F1-445F-B29D-80032DF1D711}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
