@@ -121,14 +121,16 @@ namespace BrotliLib.Brotli.Encode{
                     icLengthCode = icLengthValues.MakeCode(DistanceCodeZeroStrategy.PreferEnabled); // TODO good strategy?
                 }
                 else{
-                    var distanceCode = icCommand.CopyDistance.MakeCode(DistanceParameters, state);
+                    var distanceCodes = icCommand.CopyDistance.MakeCode(DistanceParameters, state);
+                    DistanceCode distanceCode = null;
                     
-                    if (distanceCode != null){
+                    if (distanceCodes != null){
                         int blockID = NextBlockID(Category.Distance);
                         int contextID = icLengthValues.DistanceContextID;
                         int treeID = DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
-                        distanceCodeLists[treeID].Add(distanceCode);
+                        var codeList = distanceCodeLists[treeID];
+                        codeList.Add(distanceCode = distanceCodes.FirstOrDefault(codeList.Contains) ?? distanceCodes[0]); // TODO figure out a better strategy for picking the code
                     }
                     
                     icLengthCode = icLengthValues.MakeCode(distanceCode == null || distanceCode.Equals(DistanceCode.Zero) ? DistanceCodeZeroStrategy.PreferEnabled : DistanceCodeZeroStrategy.Disable);

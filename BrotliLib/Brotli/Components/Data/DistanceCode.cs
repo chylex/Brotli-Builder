@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
@@ -59,21 +60,26 @@ namespace BrotliLib.Brotli.Components.Data{
 
         // Types
 
-        internal static DistanceCode ForValue(DistanceParameters parameters, BrotliGlobalState state, int value){
-            var lastDistance = LastDistances.FirstOrDefault(code => code.CanEncodeValue(state, value));
+        internal static IReadOnlyList<DistanceCode> ForValue(DistanceParameters parameters, BrotliGlobalState state, int value){
+            List<DistanceCode> valid = new List<DistanceCode>();
 
-            if (lastDistance != null){
-                return lastDistance;
-            }
-            
+            valid.AddRange(Last.Codes.Where(code => code.CanEncodeValue(state, value)));
+
             if (value <= parameters.DirectCodeCount){
-                return new Direct(value + DirectCodeOffset);
+                valid.Add(new Direct(value + DirectCodeOffset));
             }
-            
-            // TODO deuglify this later
-            return Enumerable.Range(Last.Codes.Length + parameters.DirectCodeCount, 100000 /* TODO random */)
-                             .Select(code => new Complex(parameters, code))
-                             .First(code => code.CanEncodeValue(state, value));
+            else{
+                for(int complex = Last.Codes.Length + parameters.DirectCodeCount; /*true*/; complex++){
+                    var code = new Complex(parameters, complex);
+
+                    if (code.CanEncodeValue(state, value)){
+                        valid.Add(code);
+                        break;
+                    }
+                }
+            }
+
+            return valid;
         }
 
         private static DistanceCode Create(DistanceParameters parameters, int code){

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.State;
@@ -62,14 +63,14 @@ namespace BrotliLib.Brotli.Components.Utils{
             }
         }
 
-        public static DistanceCode MakeCode(this DistanceInfo info, DistanceParameters parameters, BrotliGlobalState state){
+        public static IReadOnlyList<DistanceCode> MakeCode(this DistanceInfo info, DistanceParameters parameters, BrotliGlobalState state){
             switch(info){
                 case DistanceInfo.EndsAfterLiterals:
                 case DistanceInfo.ImplicitCodeZero:
                     return null;
                     
                 case DistanceInfo.ExplicitCodeZero:
-                    return DistanceCode.Zero;
+                    return new DistanceCode[]{ DistanceCode.Zero };
 
                 default:
                     return DistanceCode.ForValue(parameters, state, (int)info);
