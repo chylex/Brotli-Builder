@@ -7,6 +7,7 @@ using BrotliLib.Brotli.Components.Contents.Compressed;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Brotli.Dictionary.Index;
 using BrotliLib.Brotli.State;
 using BrotliLib.Brotli.State.Output;
 using BrotliLib.IO;
@@ -72,6 +73,10 @@ namespace BrotliLib.Brotli.Encode{
             }
 
             return this;
+        }
+
+        public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, DictionaryIndexEntry dictionaryEntry){
+            return AddInsertCopy(new InsertCopyCommand(literals, dictionaryEntry.Length, 1 + OutputSize + literals.Count + dictionaryEntry.Packed));
         }
 
         public CompressedMetaBlockBuilder AddBlockSwitch(Category category, BlockSwitchCommand command){
