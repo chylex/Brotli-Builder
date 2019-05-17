@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Components.Header;
+using BrotliLib.Brotli.Encode;
 
-namespace BrotliLib.Brotli.Encode.Impl{
+namespace BrotliImpl.Encoders{
     /// <summary>
     /// Encodes bytes into a series of uncompressed meta-blocks, with an empty meta-block at the end.
     /// </summary>

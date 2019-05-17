@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Components.Contents.Compressed;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
+using BrotliLib.Brotli.Encode;
 
-namespace BrotliLib.Brotli.Encode.Impl{
+namespace BrotliImpl.Encoders{
     /// <summary>
     /// Encodes bytes into a series of compressed meta-blocks, where each contains a single insert&amp;copy command with each byte stored as a literal.
     /// </summary>

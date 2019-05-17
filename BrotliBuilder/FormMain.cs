@@ -4,9 +4,10 @@ using System.IO;
 using System.Windows.Forms;
 using BrotliBuilder.Blocks;
 using BrotliBuilder.Dialogs;
+using BrotliImpl.Encoders;
+using BrotliImpl.Transformers;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Encode;
-using BrotliLib.Brotli.Encode.Impl;
 
 namespace BrotliBuilder{
     partial class FormMain : Form{
