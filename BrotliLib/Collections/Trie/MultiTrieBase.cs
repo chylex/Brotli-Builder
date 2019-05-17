@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BrotliLib.Collections{
-    public abstract class MultiTrieBase<K, V, N> where K : IComparable<K>{
+namespace BrotliLib.Collections.Trie{
+    public abstract class MultiTrieBase<K, V, N> : IMultiTrie<K, V> where K : IComparable<K>{
         private protected static readonly KeyComparer<K, N> KeyComparer = new KeyComparer<K, N>();
 
         private protected abstract N RootNodeIdentifier { get; }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BrotliLib.Collections{
+namespace BrotliLib.Collections.Trie{
     public sealed class MultiTrie<K, V> : MultiTrieBase<K, V, MultiTrie<K, V>.NodeRef> where K : IComparable<K>{
         internal ReadOnlyNode Root => RootNodeIdentifier.AsReadOnly();
 
@@ -38,8 +38,8 @@ namespace BrotliLib.Collections{
             public IReadOnlyList<V> Values { get; }
 
             public ReadOnlyNode(IReadOnlyList<KeyValuePair<K, ReadOnlyNode>> children, IReadOnlyList<V> values){
-                Children = children;
-                Values = values;
+                this.Children = children;
+                this.Values = values;
             }
         }
 
@@ -79,7 +79,7 @@ namespace BrotliLib.Collections{
                 }
 
                 public NodeRef Build(){
-                    var node = new Node();
+                    var node = new Node{ values = this.values };
 
                     if (children != null){
                         var sorted = new KeyValuePair<K, NodeRef>[children.Count];
@@ -91,11 +91,6 @@ namespace BrotliLib.Collections{
                         
                         Array.Sort(sorted, KeyComparer);
                         node.children = sorted;
-                    }
-
-                    if (values != null){
-                        Array.Sort(values);
-                        node.values = values;
                     }
 
                     return new NodeRef(node);

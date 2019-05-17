@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using BrotliLib.Collections;
+using BrotliLib.Collections.Trie;
 using DictTrie = BrotliLib.Collections.MultiTrie<byte, int>;
 using DictTrieNode = BrotliLib.Collections.MultiTrie<byte, int>.ReadOnlyNode;
 

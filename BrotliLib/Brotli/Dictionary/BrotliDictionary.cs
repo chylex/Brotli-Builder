@@ -5,7 +5,7 @@ using System.Linq;
 using BrotliLib.Brotli.Dictionary.Format;
 using BrotliLib.Brotli.Dictionary.Source;
 using BrotliLib.Brotli.Dictionary.Transform;
-using BrotliLib.Collections;
+using BrotliLib.Collections.Trie;
 using BrotliLib.Numbers;
 
 namespace BrotliLib.Brotli.Dictionary{
