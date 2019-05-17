@@ -3,12 +3,19 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
     <ApplicationIcon />
     <StartupObject>BrotliCalc.Program</StartupObject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <LangVersion>latest</LangVersion>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
 
   <ItemGroup>

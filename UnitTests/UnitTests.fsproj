@@ -24,27 +24,6 @@
   <PropertyGroup Condition=" '$(FSharpTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets') ">
     <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <Tailcalls>false</Tailcalls>
-    <OutputPath>bin\$(Configuration)\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\$(Configuration)\$(AssemblyName).XML</DocumentationFile>
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <Tailcalls>true</Tailcalls>
-    <OutputPath>bin\$(Configuration)\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\$(Configuration)\$(AssemblyName).XML</DocumentationFile>
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
