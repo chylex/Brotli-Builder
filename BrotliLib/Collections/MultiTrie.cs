@@ -1,36 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BrotliLib.Collections{
-    public sealed class MultiTrie<K, V> where K : IComparable<K>{
-        private static readonly KeyComparer<K, Node> KeyComparer = new KeyComparer<K, Node>();
+    public sealed class MultiTrie<K, V> : MultiTrieBase<K, V, MultiTrie<K, V>.NodeRef> where K : IComparable<K>{
+        internal ReadOnlyNode Root => RootNodeIdentifier.AsReadOnly();
 
-        private readonly Node rootNode;
+        private protected override NodeRef RootNodeIdentifier { get; }
 
-        private MultiTrie(Node rootNode){
-            this.rootNode = rootNode;
+        private MultiTrie(NodeRef rootNode){
+            this.RootNodeIdentifier = rootNode;
         }
 
-        public IReadOnlyList<V> Find(IEnumerable<K> key){
-            Node node = rootNode;
+        private protected override Node ReachNode(NodeRef identifier){
+            return identifier.node;
+        }
 
-            foreach(K ele in key){
-                var children = node.children;
-                int index = children == null ? -1 : Array.BinarySearch(children, new KeyValuePair<K, Node>(ele, null), KeyComparer);
+        // TODO everything about this is utter hell
 
-                if (index < 0){
-                    return new V[0];
-                }
+        public sealed class NodeRef{
+            internal readonly Node node;
 
-                node = children[index].Value;
+            internal NodeRef(Node node){
+                this.node = node;
             }
 
-            return node.values;
+            internal ReadOnlyNode AsReadOnly(){
+                var clonedChildren = node.children?.Select(kvp => new KeyValuePair<K, ReadOnlyNode>(kvp.Key, kvp.Value.AsReadOnly())).ToArray();
+                var clonedValues = (V[])node.values?.Clone();
+
+                return new ReadOnlyNode(clonedChildren, clonedValues);
+            }
         }
 
-        private sealed class Node{
-            public KeyValuePair<K, Node>[] children;
-            public V[] values;
+        internal sealed class ReadOnlyNode{
+            public IReadOnlyList<KeyValuePair<K, ReadOnlyNode>> Children { get; }
+            public IReadOnlyList<V> Values { get; }
+
+            public ReadOnlyNode(IReadOnlyList<KeyValuePair<K, ReadOnlyNode>> children, IReadOnlyList<V> values){
+                Children = children;
+                Values = values;
+            }
         }
 
         public sealed class Builder{
@@ -68,22 +78,27 @@ namespace BrotliLib.Collections{
                     }
                 }
 
-                public Node Build(){
-                    var node = new Node{ values = this.values };
-                    
+                public NodeRef Build(){
+                    var node = new Node();
+
                     if (children != null){
-                        var sorted = new KeyValuePair<K, Node>[children.Count];
+                        var sorted = new KeyValuePair<K, NodeRef>[children.Count];
                         int index = 0;
                         
                         foreach(var kvp in children){
-                            sorted[index++] = new KeyValuePair<K, Node>(kvp.Key, kvp.Value.Build());
+                            sorted[index++] = new KeyValuePair<K, NodeRef>(kvp.Key, kvp.Value.Build());
                         }
                         
                         Array.Sort(sorted, KeyComparer);
                         node.children = sorted;
                     }
 
-                    return node;
+                    if (values != null){
+                        Array.Sort(values);
+                        node.values = values;
+                    }
+
+                    return new NodeRef(node);
                 }
             }
         }
