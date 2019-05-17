@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using BrotliLib.Brotli.Dictionary.Format;
 using BrotliLib.Brotli.Dictionary.Source;
 using BrotliLib.Brotli.Dictionary.Transform;
@@ -16,11 +17,14 @@ namespace BrotliLib.Brotli.Dictionary{
         public IReadOnlyList<WordTransform> Transforms { get; }
 
         private readonly IDictionarySource source;
+        private readonly int lengthBits;
         
         public BrotliDictionary(IDictionaryFormat format, IReadOnlyList<WordTransform> transforms, IDictionarySource source){
             this.Format = format;
             this.Transforms = transforms;
+
             this.source = source;
+            this.lengthBits = (int)Math.Ceiling(Math.Log(Format.WordLengths.Max(), 2.0));
         }
         
         public void Dispose(){
@@ -74,9 +78,9 @@ namespace BrotliLib.Brotli.Dictionary{
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
-        /// Generates a lookup trie for all words in the dictionary, including transformations, matching the criteria specified by the parameters.
+        /// Generates an index lookup trie for all words in the dictionary, including transformations, matching the criteria specified by the parameters.
         /// </summary>
-        public MultiTrie<byte, int> GenerateLookup(in Range transformIndexRange = default, in Range transformLengthRange = default){
+        public MultiTrie<byte, int> GenerateIndex(in Range transformIndexRange = default, in Range transformLengthRange = default){
             var trie = new MultiTrie<byte, int>.Builder();
 
             int minTransformIndex = Math.Max(transformIndexRange.First, 0);
@@ -90,13 +94,23 @@ namespace BrotliLib.Brotli.Dictionary{
                         byte[] transformed = Transforms[transform].Process(raw);
 
                         if (transformLengthRange.Contains(transformed.Length)){
-                            trie.Insert(transformed, Format.GetPackedValue(length, word, transform));
+                            var packed = Format.GetPackedValue(length, word, transform);
+                            var index = (packed * (1 << lengthBits)) | length; // use arithmetic to check for overflow
+
+                            trie.Insert(transformed, index);
                         }
                     }
                 }
             }
 
             return trie.Build();
+        }
+
+        /// <summary>
+        /// Takes an index from the lookup trie, and returns which word length and packed value it represents.
+        /// </summary>
+        public (int length, int packed) TranslateIndex(int index){
+            return (index & ((1 << lengthBits) - 1), index >> lengthBits);
         }
     }
 }
