@@ -83,22 +83,33 @@ namespace BrotliBuilder{
             });
         }
 
-        private void OnNewBrotliFile(){
+        private void RegenerateBuildingBlocks(){
             flowPanelBlocks.Controls.Clear();
             flowPanelBlocks.Controls.Add(new BuildFileStructure(new BuildingBlockContext(this, flowPanelBlocks), brotliFile));
+        }
 
+        private void OnNewBrotliFile(){
+            RegenerateBuildingBlocks();
             RegenerateBrotliStream(markAsDirty: false);
             isDirty = false;
         }
-        
-        private void timerRegenerationDelay_Tick(object sender, EventArgs e){
-            timerRegenerationDelay.Stop();
-            
+
+        private void UpdateBrotliFile(Func<BrotliFileStructure> mapper, bool regenerateBuildingBlocks = true){
             statusBarPanelTimeBits.Text = "Generating...";
             statusBarPanelTimeOutput.Text = "Generating...";
 
             brotliFilePanelGenerated.LoadBrotliFile(
-                brotliFile,
+                mapper,
+
+                newBrotliFile => {
+                    brotliFile = newBrotliFile;
+
+                    if (regenerateBuildingBlocks){
+                        RegenerateBuildingBlocks();
+                    }
+
+                    isDirty = false;
+                },
 
                 onSerializedStopwatch =>
                     statusBarPanelTimeBits.Text = onSerializedStopwatch == null ?
@@ -110,6 +121,11 @@ namespace BrotliBuilder{
                         "Error generating output." :
                         "Generated output in " + onDecompressedStopwatch.ElapsedMilliseconds + " ms."
             );
+        }
+        
+        private void timerRegenerationDelay_Tick(object sender, EventArgs e){
+            timerRegenerationDelay.Stop();
+            UpdateBrotliFile(() => brotliFile, regenerateBuildingBlocks: false);
         }
 
         private void RegenerateBrotliStream(bool markAsDirty){
@@ -280,14 +296,16 @@ namespace BrotliBuilder{
                     }
 
                     splitContainerBottom.Panel2Collapsed = true;
-                    
-                    try{
-                        brotliFile = BrotliFileStructure.FromEncoder(parameters, encoder, bytes);
-                        OnNewBrotliFile();
-                    }catch(Exception ex){
-                        Debug.WriteLine(ex.ToString());
-                        MessageBox.Show(ex.Message, "File Encode Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+
+                    UpdateBrotliFile(() => {
+                        try{
+                            return BrotliFileStructure.FromEncoder(parameters, encoder, bytes);
+                        }catch(Exception ex){
+                            Debug.WriteLine(ex.ToString());
+                            MessageBox.Show(ex.Message, "Encoder Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return null;
+                        }
+                    });
                 }
             }
         }
@@ -297,8 +315,15 @@ namespace BrotliBuilder{
         }
 
         private void TransformCurrentFile(IBrotliTransformer transformer){
-            brotliFile = brotliFile.Transform(transformer);
-            OnNewBrotliFile();
+            UpdateBrotliFile(() => {
+                try{
+                    return brotliFile.Transform(transformer);
+                }catch(Exception ex){
+                    Debug.WriteLine(ex.ToString());
+                    MessageBox.Show(ex.Message, "Transformer Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
+            });
         }
 
         #endregion

@@ -72,10 +72,23 @@ namespace BrotliBuilder.Components{
             });
         }
 
-        public void LoadBrotliFile(BrotliFileStructure file, Action<Stopwatch> onSerialized, Action<Stopwatch> onDecompressed){
+        public void LoadBrotliFile(Func<BrotliFileStructure> fileLoader, Action<BrotliFileStructure> onLoaded, Action<Stopwatch> onSerialized, Action<Stopwatch> onDecompressed){
             InvalidatePanel();
 
             loadWorker.Start(sync => {
+                BrotliFileStructure file = fileLoader();
+
+                if (file == null){
+                    sync(() => {
+                        onSerialized(null);
+                        onDecompressed(null);
+                    });
+
+                    return;
+                }
+
+                sync(() => onLoaded(file));
+
                 BitStream bits;
                 BrotliOutputStored output;
 
