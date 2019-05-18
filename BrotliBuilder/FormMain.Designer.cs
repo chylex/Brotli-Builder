@@ -39,6 +39,7 @@
             this.menuItemEncodeLiterals = new System.Windows.Forms.MenuItem();
             this.menuItemTransform = new System.Windows.Forms.MenuItem();
             this.menuItemTransformRebuild = new System.Windows.Forms.MenuItem();
+            this.menuItemTransformTestDistanceParams = new System.Windows.Forms.MenuItem();
             this.flowPanelBlocks = new System.Windows.Forms.FlowLayoutPanel();
             this.statusBar = new System.Windows.Forms.StatusBar();
             this.statusBarPanelPadding1 = new System.Windows.Forms.StatusBarPanel();
@@ -163,7 +164,8 @@
             // 
             this.menuItemTransform.Index = 2;
             this.menuItemTransform.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItemTransformRebuild});
+            this.menuItemTransformRebuild,
+            this.menuItemTransformTestDistanceParams});
             this.menuItemTransform.Text = "Transform...";
             // 
             // menuItemTransformRebuild
@@ -171,6 +173,12 @@
             this.menuItemTransformRebuild.Index = 0;
             this.menuItemTransformRebuild.Text = "Rebuild";
             this.menuItemTransformRebuild.Click += new System.EventHandler(this.menuItemTransformRebuild_Click);
+            // 
+            // menuItemTransformTestDistanceParams
+            // 
+            this.menuItemTransformTestDistanceParams.Index = 1;
+            this.menuItemTransformTestDistanceParams.Text = "Test Distance Parameters";
+            this.menuItemTransformTestDistanceParams.Click += new System.EventHandler(this.menuItemTransformTestDistanceParams_Click);
             // 
             // flowPanelBlocks
             // 
@@ -356,6 +364,7 @@
         private System.Windows.Forms.MenuItem menuItemFileStructure;
         private System.Windows.Forms.MenuItem menuItemEncodeLiterals;
         private System.Windows.Forms.MenuItem menuItemTransform;
+        private System.Windows.Forms.MenuItem menuItemTransformTestDistanceParams;
         private System.Windows.Forms.MenuItem menuItemTransformRebuild;
     }
 }

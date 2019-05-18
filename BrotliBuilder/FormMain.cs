@@ -314,6 +314,10 @@ namespace BrotliBuilder{
             TransformCurrentFile(new TransformRebuild());
         }
 
+        private void menuItemTransformTestDistanceParams_Click(object sender, EventArgs e){
+            TransformCurrentFile(new TransformTestDistanceParameters());
+        }
+        
         private void TransformCurrentFile(IBrotliTransformer transformer){
             UpdateBrotliFile(() => {
                 try{
