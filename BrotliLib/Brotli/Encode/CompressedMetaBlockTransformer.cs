@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.State;
-using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Encode{
     public abstract class CompressedMetaBlockTransformer : IBrotliTransformer{
@@ -19,17 +16,5 @@ namespace BrotliLib.Brotli.Encode{
         }
 
         protected abstract IEnumerable<MetaBlock> Transform(MetaBlock.Compressed original, CompressedMetaBlockBuilder builder, BrotliGlobalState initialState);
-
-        protected int CountBits(MetaBlock tested, BrotliGlobalState state){
-            var stream = new BitStream();
-
-            try{
-                MetaBlock.Serializer.ToBits(stream.GetWriter(), tested, state.Clone());
-                return stream.Length;
-            }catch(Exception ex){
-                Debug.WriteLine(ex.ToString());
-                return int.MaxValue;
-            }
-        }
     }
 }
