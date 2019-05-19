@@ -247,6 +247,13 @@ namespace BrotliBuilder{
             splitContainerRight.Panel1Collapsed = !enable;
         }
 
+        private void menuItemMarkerInfo_Click(object sender, EventArgs e){
+            bool enable = !menuItemMarkerInfo.Checked;
+            menuItemMarkerInfo.Checked = enable;
+
+            splitContainerMain.Panel1Collapsed = !enable;
+        }
+
         private void menuItemWrapOutput_Click(object sender, EventArgs e){
             bool enable = !menuItemWrapOutput.Checked;
             menuItemWrapOutput.Checked = enable;

@@ -31,6 +31,7 @@
             this.menuItemExit = new System.Windows.Forms.MenuItem();
             this.menuItemView = new System.Windows.Forms.MenuItem();
             this.menuItemFileStructure = new System.Windows.Forms.MenuItem();
+            this.menuItemMarkerInfo = new System.Windows.Forms.MenuItem();
             this.menuItemWrapOutput = new System.Windows.Forms.MenuItem();
             this.menuItemTools = new System.Windows.Forms.MenuItem();
             this.menuItemStaticDictionary = new System.Windows.Forms.MenuItem();
@@ -113,6 +114,7 @@
             this.menuItemView.Index = 1;
             this.menuItemView.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItemFileStructure,
+            this.menuItemMarkerInfo,
             this.menuItemWrapOutput});
             this.menuItemView.Text = "&View";
             // 
@@ -123,9 +125,16 @@
             this.menuItemFileStructure.Text = "File Structure";
             this.menuItemFileStructure.Click += new System.EventHandler(this.menuItemFileStructure_Click);
             // 
+            // menuItemMarkerInfo
+            // 
+            this.menuItemMarkerInfo.Checked = true;
+            this.menuItemMarkerInfo.Index = 1;
+            this.menuItemMarkerInfo.Text = "Marker Info";
+            this.menuItemMarkerInfo.Click += new System.EventHandler(this.menuItemMarkerInfo_Click);
+            // 
             // menuItemWrapOutput
             // 
-            this.menuItemWrapOutput.Index = 1;
+            this.menuItemWrapOutput.Index = 2;
             this.menuItemWrapOutput.Text = "Wrap Output";
             this.menuItemWrapOutput.Click += new System.EventHandler(this.menuItemWrapOutput_Click);
             // 
@@ -429,5 +438,6 @@
         private System.Windows.Forms.SplitContainer splitContainerMain;
         private Components.BrotliMarkerInfoPanel brotliMarkerInfoPanel;
         private System.Windows.Forms.Label labelFileStructure;
+        private System.Windows.Forms.MenuItem menuItemMarkerInfo;
     }
 }
