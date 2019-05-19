@@ -52,9 +52,9 @@
             this.brotliFilePanelGenerated = new BrotliBuilder.Components.BrotliFilePanel();
             this.brotliFilePanelOriginal = new BrotliBuilder.Components.BrotliFilePanel();
             this.splitContainerRight = new System.Windows.Forms.SplitContainer();
+            this.labelFileStructure = new System.Windows.Forms.Label();
             this.splitContainerMain = new System.Windows.Forms.SplitContainer();
             this.brotliMarkerInfoPanel = new BrotliBuilder.Components.BrotliMarkerInfoPanel();
-            this.labelFileStructure = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeBits)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding2)).BeginInit();
@@ -122,14 +122,14 @@
             // 
             this.menuItemFileStructure.Checked = true;
             this.menuItemFileStructure.Index = 0;
-            this.menuItemFileStructure.Text = "File Structure";
+            this.menuItemFileStructure.Text = "File Structure Panel";
             this.menuItemFileStructure.Click += new System.EventHandler(this.menuItemFileStructure_Click);
             // 
             // menuItemMarkerInfo
             // 
             this.menuItemMarkerInfo.Checked = true;
             this.menuItemMarkerInfo.Index = 1;
-            this.menuItemMarkerInfo.Text = "Marker Info";
+            this.menuItemMarkerInfo.Text = "Marker Info Panel";
             this.menuItemMarkerInfo.Click += new System.EventHandler(this.menuItemMarkerInfo_Click);
             // 
             // menuItemWrapOutput
@@ -207,7 +207,7 @@
             this.flowPanelBlocks.Margin = new System.Windows.Forms.Padding(14, 6, 6, 3);
             this.flowPanelBlocks.Name = "flowPanelBlocks";
             this.flowPanelBlocks.Size = new System.Drawing.Size(855, 177);
-            this.flowPanelBlocks.TabIndex = 0;
+            this.flowPanelBlocks.TabIndex = 1;
             this.flowPanelBlocks.WrapContents = false;
             this.flowPanelBlocks.SizeChanged += new System.EventHandler(this.flowPanelBlocks_SizeChanged);
             this.flowPanelBlocks.ControlAdded += new System.Windows.Forms.ControlEventHandler(this.flowPanelBlocks_ControlAdded);
@@ -330,6 +330,16 @@
             this.splitContainerRight.SplitterWidth = 2;
             this.splitContainerRight.TabIndex = 0;
             // 
+            // labelFileStructure
+            // 
+            this.labelFileStructure.AutoSize = true;
+            this.labelFileStructure.Location = new System.Drawing.Point(11, 7);
+            this.labelFileStructure.Margin = new System.Windows.Forms.Padding(11, 7, 3, 0);
+            this.labelFileStructure.Name = "labelFileStructure";
+            this.labelFileStructure.Size = new System.Drawing.Size(76, 15);
+            this.labelFileStructure.TabIndex = 0;
+            this.labelFileStructure.Text = "File Structure";
+            // 
             // splitContainerMain
             // 
             this.splitContainerMain.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -347,7 +357,7 @@
             this.splitContainerMain.Panel2MinSize = 250;
             this.splitContainerMain.Size = new System.Drawing.Size(1264, 580);
             this.splitContainerMain.SplitterDistance = 376;
-            this.splitContainerMain.TabIndex = 2;
+            this.splitContainerMain.TabIndex = 0;
             // 
             // brotliMarkerInfoPanel
             // 
@@ -358,17 +368,7 @@
             this.brotliMarkerInfoPanel.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
             this.brotliMarkerInfoPanel.Name = "brotliMarkerInfoPanel";
             this.brotliMarkerInfoPanel.Size = new System.Drawing.Size(377, 575);
-            this.brotliMarkerInfoPanel.TabIndex = 1;
-            // 
-            // labelFileStructure
-            // 
-            this.labelFileStructure.AutoSize = true;
-            this.labelFileStructure.Location = new System.Drawing.Point(11, 7);
-            this.labelFileStructure.Margin = new System.Windows.Forms.Padding(11, 7, 3, 0);
-            this.labelFileStructure.Name = "labelFileStructure";
-            this.labelFileStructure.Size = new System.Drawing.Size(76, 15);
-            this.labelFileStructure.TabIndex = 1;
-            this.labelFileStructure.Text = "File Structure";
+            this.brotliMarkerInfoPanel.TabIndex = 0;
             // 
             // FormMain
             // 
