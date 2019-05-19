@@ -284,6 +284,10 @@ namespace BrotliBuilder{
             OpenFileWithEncoder(new BrotliFileParameters(), new EncodeLiterals());
         }
 
+        private void menuItemEncodeGreedyCopySearch_Click(object sender, EventArgs e){
+            OpenFileWithEncoder(new BrotliFileParameters(), new EncodeGreedyCopySearch());
+        }
+
         private void OpenFileWithEncoder(BrotliFileParameters parameters, IBrotliEncoder encoder){
             if (PromptUnsavedChanges("Would you like to save changes before opening a new file?")){
                 return;

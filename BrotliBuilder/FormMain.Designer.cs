@@ -38,6 +38,7 @@
             this.menuItemEncodeFile = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeUncompressedMBs = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeLiterals = new System.Windows.Forms.MenuItem();
+            this.menuItemEncodeGreedyCopySearch = new System.Windows.Forms.MenuItem();
             this.menuItemTransform = new System.Windows.Forms.MenuItem();
             this.menuItemTransformRebuild = new System.Windows.Forms.MenuItem();
             this.menuItemTransformTestDistanceParams = new System.Windows.Forms.MenuItem();
@@ -159,7 +160,8 @@
             this.menuItemEncodeFile.Index = 1;
             this.menuItemEncodeFile.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItemEncodeUncompressedMBs,
-            this.menuItemEncodeLiterals});
+            this.menuItemEncodeLiterals,
+            this.menuItemEncodeGreedyCopySearch});
             this.menuItemEncodeFile.Text = "&Encode File...";
             // 
             // menuItemEncodeUncompressedMBs
@@ -175,6 +177,13 @@
             this.menuItemEncodeLiterals.Shortcut = System.Windows.Forms.Shortcut.Ctrl1;
             this.menuItemEncodeLiterals.Text = "Into Literals";
             this.menuItemEncodeLiterals.Click += new System.EventHandler(this.menuItemEncodeLiterals_Click);
+            // 
+            // menuItemEncodeGreedyCopySearch
+            // 
+            this.menuItemEncodeGreedyCopySearch.Index = 2;
+            this.menuItemEncodeGreedyCopySearch.Shortcut = System.Windows.Forms.Shortcut.Ctrl2;
+            this.menuItemEncodeGreedyCopySearch.Text = "Simple Greedy Copy Search";
+            this.menuItemEncodeGreedyCopySearch.Click += new System.EventHandler(this.menuItemEncodeGreedyCopySearch_Click);
             // 
             // menuItemTransform
             // 
@@ -435,6 +444,7 @@
         private System.Windows.Forms.MenuItem menuItemTransform;
         private System.Windows.Forms.MenuItem menuItemTransformTestDistanceParams;
         private System.Windows.Forms.MenuItem menuItemTransformRebuild;
+        private System.Windows.Forms.MenuItem menuItemEncodeGreedyCopySearch;
         private System.Windows.Forms.SplitContainer splitContainerMain;
         private Components.BrotliMarkerInfoPanel brotliMarkerInfoPanel;
         private System.Windows.Forms.Label labelFileStructure;
