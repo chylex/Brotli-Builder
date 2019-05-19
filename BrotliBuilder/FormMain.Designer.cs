@@ -79,7 +79,9 @@
             this.mainMenu.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItemFile,
             this.menuItemView,
-            this.menuItemTools});
+            this.menuItemTools,
+            this.menuItemEncodeFile,
+            this.menuItemTransform});
             // 
             // menuItemFile
             // 
@@ -143,9 +145,7 @@
             // 
             this.menuItemTools.Index = 2;
             this.menuItemTools.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItemStaticDictionary,
-            this.menuItemEncodeFile,
-            this.menuItemTransform});
+            this.menuItemStaticDictionary});
             this.menuItemTools.Text = "&Tools";
             // 
             // menuItemStaticDictionary
@@ -157,12 +157,12 @@
             // 
             // menuItemEncodeFile
             // 
-            this.menuItemEncodeFile.Index = 1;
+            this.menuItemEncodeFile.Index = 3;
             this.menuItemEncodeFile.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItemEncodeUncompressedMBs,
             this.menuItemEncodeLiterals,
             this.menuItemEncodeGreedyCopySearch});
-            this.menuItemEncodeFile.Text = "&Encode File...";
+            this.menuItemEncodeFile.Text = "&Encode";
             // 
             // menuItemEncodeUncompressedMBs
             // 
@@ -187,11 +187,11 @@
             // 
             // menuItemTransform
             // 
-            this.menuItemTransform.Index = 2;
+            this.menuItemTransform.Index = 4;
             this.menuItemTransform.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItemTransformRebuild,
             this.menuItemTransformTestDistanceParams});
-            this.menuItemTransform.Text = "Transform...";
+            this.menuItemTransform.Text = "Transfor&m";
             // 
             // menuItemTransformRebuild
             // 

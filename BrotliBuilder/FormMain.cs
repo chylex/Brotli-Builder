@@ -262,7 +262,7 @@ namespace BrotliBuilder{
         }
 
         #endregion
-
+        
         #region Menu events (Tools)
 
         private void menuItemStaticDictionary_Click(object sender, EventArgs e){
@@ -275,6 +275,10 @@ namespace BrotliBuilder{
                 MessageBox.Show(ex.Message, "Static Dictionary Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        #endregion
+
+        #region Menu events (Encode)
 
         private void menuItemEncodeUncompressedMBs_Click(object sender, EventArgs e){
             OpenFileWithEncoder(new BrotliFileParameters(), new EncodeUncompressedOnly());
@@ -326,6 +330,10 @@ namespace BrotliBuilder{
             }
         }
 
+        #endregion
+
+        #region Menu events (Transform)
+
         private void menuItemTransformRebuild_Click(object sender, EventArgs e){
             TransformCurrentFile(new TransformRebuild());
         }
@@ -347,6 +355,6 @@ namespace BrotliBuilder{
         }
 
         #endregion
-        
+
     }
 }
