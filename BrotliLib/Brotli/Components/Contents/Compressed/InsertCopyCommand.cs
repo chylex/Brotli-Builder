@@ -25,6 +25,18 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
         
         public InsertCopyCommand(IList<Literal> literals, int copyLength, int copyDistance) : this(literals, copyLength, (DistanceInfo)copyDistance){}
 
+        // Cloning
+
+        private InsertCopyCommand(InsertCopyCommand original, DistanceInfo newDistanceInfo){
+            this.Literals = original.Literals;
+            this.CopyLength = original.CopyLength;
+            this.CopyDistance = newDistanceInfo;
+        }
+
+        public InsertCopyCommand WithImplicitDistanceCodeZero(){
+            return CopyDistance == DistanceInfo.ImplicitCodeZero ? this : new InsertCopyCommand(this, DistanceInfo.ImplicitCodeZero);
+        }
+
         // Object
 
         public override bool Equals(object obj){

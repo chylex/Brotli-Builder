@@ -76,7 +76,7 @@ namespace BrotliLib.Brotli.Encode{
         }
 
         public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, DictionaryIndexEntry dictionaryEntry){
-            return AddInsertCopy(new InsertCopyCommand(literals, dictionaryEntry.Length, 1 + OutputSize + literals.Count + dictionaryEntry.Packed));
+            return AddInsertCopy(new InsertCopyCommand(literals, dictionaryEntry.Length, 1 + intermediateState.MaxDistance + literals.Count + dictionaryEntry.Packed));
         }
 
         public CompressedMetaBlockBuilder AddBlockSwitch(Category category, BlockSwitchCommand command){
@@ -107,7 +107,11 @@ namespace BrotliLib.Brotli.Encode{
             var icLengthCodeLists = NewListArray<InsertCopyLengthCode>(BlockTypes[Category.InsertCopy].Count);
             var distanceCodeLists = NewListArray<DistanceCode>(DistanceCtxMap.TreeCount);
 
-            foreach(InsertCopyCommand icCommand in icCommands){
+            var icCommandCount = icCommands.Count;
+            var icCommandsFinal = new List<InsertCopyCommand>(icCommandCount);
+
+            for(int index = 0; index < icCommandCount; index++){
+                var icCommand = icCommands[index];
                 int icBlockID = NextBlockID(Category.InsertCopy);
 
                 foreach(Literal literal in icCommand.Literals){
@@ -139,10 +143,16 @@ namespace BrotliLib.Brotli.Encode{
                     }
                     
                     icLengthCode = icLengthValues.MakeCode(distanceCode == null || distanceCode.Equals(DistanceCode.Zero) ? DistanceCodeZeroStrategy.PreferEnabled : DistanceCodeZeroStrategy.Disable);
-                    state.OutputCopy(icCommand.CopyLength, icLengthCode.UseDistanceCodeZero ? DistanceInfo.ImplicitCodeZero : icCommand.CopyDistance);
+
+                    if (icLengthCode.UseDistanceCodeZero){
+                        icCommand = icCommand.WithImplicitDistanceCodeZero();
+                    }
+
+                    state.OutputCopy(icCommand.CopyLength, icCommand.CopyDistance);
                 }
 
                 icLengthCodeLists[icBlockID].Add(icLengthCode);
+                icCommandsFinal.Add(icCommand);
             }
 
             foreach(var literalList in literalLists){
@@ -169,7 +179,7 @@ namespace BrotliLib.Brotli.Encode{
             );
 
             var metaBlock = new MetaBlock.Compressed(isLast: false, new DataLength(OutputSize)){
-                Contents = new CompressedMetaBlockContents(header, icCommands, bsCommands)
+                Contents = new CompressedMetaBlockContents(header, icCommandsFinal, bsCommands)
             };
 
             return (metaBlock, () => new CompressedMetaBlockBuilder(state));
