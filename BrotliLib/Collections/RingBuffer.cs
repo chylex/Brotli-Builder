@@ -54,6 +54,7 @@ namespace BrotliLib.Collections{
         /// </summary>
         public RingBuffer(RingBuffer<T> original){
             this.values = (T[])original.values.Clone();
+            this.accessOffset = original.accessOffset;
         }
 
         /// <summary>
