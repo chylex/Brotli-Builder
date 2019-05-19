@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 using BrotliBuilder.Blocks;
+using BrotliBuilder.Components;
 using BrotliBuilder.Dialogs;
 using BrotliImpl.Encoders;
 using BrotliImpl.Transformers;
@@ -63,14 +64,14 @@ namespace BrotliBuilder{
         public FormMain(){
             InitializeComponent();
             
-            splitContainerBottom.Panel2Collapsed = true;
+            splitContainerRightBottom.Panel2Collapsed = true;
             OnNewBrotliFile();
         }
 
         #region File state handling
 
         private void LoadExistingBrotliFile(byte[] bytes){
-            splitContainerBottom.Panel2Collapsed = false;
+            splitContainerRightBottom.Panel2Collapsed = false;
             statusBarPanelTimeBits.Text = "Decompressing...";
             statusBarPanelTimeOutput.Text = "Decompressing...";
 
@@ -182,6 +183,10 @@ namespace BrotliBuilder{
             
             flowPanelBlocks.ResumeLayout(true);
         }
+        
+        private void brotliFilePanel_MarkersUpdated(object sender, MarkedTextBox.MarkerUpdateEventArgs e){
+            brotliMarkerInfoPanel.UpdateMarkers(e.MarkerSequence, e.HighlightedNodes, e.CaretNode);
+        }
 
         #endregion
 
@@ -239,7 +244,7 @@ namespace BrotliBuilder{
             bool enable = !menuItemFileStructure.Checked;
             menuItemFileStructure.Checked = enable;
 
-            splitContainerMain.Panel1Collapsed = !enable;
+            splitContainerRight.Panel1Collapsed = !enable;
         }
 
         private void menuItemWrapOutput_Click(object sender, EventArgs e){
@@ -295,7 +300,7 @@ namespace BrotliBuilder{
                         return;
                     }
 
-                    splitContainerBottom.Panel2Collapsed = true;
+                    splitContainerRightBottom.Panel2Collapsed = true;
 
                     UpdateBrotliFile(() => {
                         try{

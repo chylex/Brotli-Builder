@@ -80,14 +80,14 @@
     <Compile Include="Components\BrotliFilePanel.Designer.cs">
       <DependentUpon>BrotliFilePanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="Components\MarkedTextBox.cs">
+    <Compile Include="Components\BrotliMarkerInfoPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Dialogs\FormBitStreamContext.cs">
-      <SubType>Form</SubType>
+    <Compile Include="Components\BrotliMarkerInfoPanel.Designer.cs">
+      <DependentUpon>BrotliMarkerInfoPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\FormBitStreamContext.Designer.cs">
-      <DependentUpon>FormBitStreamContext.cs</DependentUpon>
+    <Compile Include="Components\MarkedTextBox.cs">
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Dialogs\FormStaticDictionary.cs">
       <SubType>Form</SubType>
@@ -157,9 +157,8 @@
       <DependentUpon>BrotliFilePanel.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\FormBitStreamContext.resx">
-      <DependentUpon>FormBitStreamContext.cs</DependentUpon>
-      <SubType>Designer</SubType>
+    <EmbeddedResource Include="Components\BrotliMarkerInfoPanel.resx">
+      <DependentUpon>BrotliMarkerInfoPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\FormStaticDictionary.resx">
       <DependentUpon>FormStaticDictionary.cs</DependentUpon>

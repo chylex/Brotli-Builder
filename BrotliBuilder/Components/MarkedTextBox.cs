@@ -3,19 +3,32 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using BrotliBuilder.Dialogs;
 using BrotliBuilder.Utils;
 using BrotliLib.Markers;
 using FastColoredTextBoxNS;
 
 namespace BrotliBuilder.Components{
-    class MarkedTextBox : FastColoredTextBox{
+    public class MarkedTextBox : FastColoredTextBox{
         private static readonly TextStyle[] MainStyles = Colors.List
                                                                .Select(color => Colors.Mix(SystemColors.Control, color, 0.725))
                                                                .Select(color => new TextStyle(new SolidBrush(Color.Black), new SolidBrush(color), FontStyle.Regular))
                                                                .ToArray();
 
         private static readonly TextStyle HighlightStyle = new TextStyle(new SolidBrush(Color.White), new SolidBrush(Color.FromArgb(48, 48, 48)), FontStyle.Regular);
+
+        public class MarkerUpdateEventArgs : EventArgs{
+            public IList<MarkerNode> MarkerSequence { get; }
+            public HashSet<MarkerNode> HighlightedNodes { get; }
+            public MarkerNode CaretNode { get; }
+
+            public MarkerUpdateEventArgs(IList<MarkerNode> markerSequence, HashSet<MarkerNode> highlightedNodes, MarkerNode caretNode){
+                this.MarkerSequence = markerSequence;
+                this.HighlightedNodes = highlightedNodes;
+                this.CaretNode = caretNode;
+            }
+        }
+
+        public event EventHandler<MarkerUpdateEventArgs> MarkersUpdated;
 
         private readonly StyleIndex[] mainStyleIndex;
         private readonly StyleIndex highlightStyleIndex;
@@ -114,7 +127,7 @@ namespace BrotliBuilder.Components{
             updatingMarkers = false;
             
             markerCaret = newMarkerCaret;
-            FormBitStreamContext.GetOrSpawn(this).Display(markerSequence, new HashSet<MarkerNode>(highlightedMarkers), markerCaret);
+            MarkersUpdated?.Invoke(this, new MarkerUpdateEventArgs(markerSequence, new HashSet<MarkerNode>(highlightedMarkers), markerCaret));
         }
 
         private void MarkedFastTextBox_SelectionChanged(object sender, EventArgs e){

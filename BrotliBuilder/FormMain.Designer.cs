@@ -47,18 +47,25 @@
             this.statusBarPanelPadding2 = new System.Windows.Forms.StatusBarPanel();
             this.statusBarPanelTimeOutput = new System.Windows.Forms.StatusBarPanel();
             this.timerRegenerationDelay = new System.Windows.Forms.Timer(this.components);
-            this.splitContainerBottom = new System.Windows.Forms.SplitContainer();
+            this.splitContainerRightBottom = new System.Windows.Forms.SplitContainer();
             this.brotliFilePanelGenerated = new BrotliBuilder.Components.BrotliFilePanel();
             this.brotliFilePanelOriginal = new BrotliBuilder.Components.BrotliFilePanel();
+            this.splitContainerRight = new System.Windows.Forms.SplitContainer();
             this.splitContainerMain = new System.Windows.Forms.SplitContainer();
+            this.brotliMarkerInfoPanel = new BrotliBuilder.Components.BrotliMarkerInfoPanel();
+            this.labelFileStructure = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeBits)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeOutput)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainerBottom)).BeginInit();
-            this.splitContainerBottom.Panel1.SuspendLayout();
-            this.splitContainerBottom.Panel2.SuspendLayout();
-            this.splitContainerBottom.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerRightBottom)).BeginInit();
+            this.splitContainerRightBottom.Panel1.SuspendLayout();
+            this.splitContainerRightBottom.Panel2.SuspendLayout();
+            this.splitContainerRightBottom.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerRight)).BeginInit();
+            this.splitContainerRight.Panel1.SuspendLayout();
+            this.splitContainerRight.Panel2.SuspendLayout();
+            this.splitContainerRight.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).BeginInit();
             this.splitContainerMain.Panel1.SuspendLayout();
             this.splitContainerMain.Panel2.SuspendLayout();
@@ -186,10 +193,11 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.flowPanelBlocks.BackColor = System.Drawing.SystemColors.Control;
-            this.flowPanelBlocks.Location = new System.Drawing.Point(0, 0);
-            this.flowPanelBlocks.Margin = new System.Windows.Forms.Padding(0);
+            this.flowPanelBlocks.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.flowPanelBlocks.Location = new System.Drawing.Point(14, 28);
+            this.flowPanelBlocks.Margin = new System.Windows.Forms.Padding(14, 6, 6, 3);
             this.flowPanelBlocks.Name = "flowPanelBlocks";
-            this.flowPanelBlocks.Size = new System.Drawing.Size(1008, 230);
+            this.flowPanelBlocks.Size = new System.Drawing.Size(855, 177);
             this.flowPanelBlocks.TabIndex = 0;
             this.flowPanelBlocks.WrapContents = false;
             this.flowPanelBlocks.SizeChanged += new System.EventHandler(this.flowPanelBlocks_SizeChanged);
@@ -197,7 +205,7 @@
             // 
             // statusBar
             // 
-            this.statusBar.Location = new System.Drawing.Point(0, 639);
+            this.statusBar.Location = new System.Drawing.Point(0, 580);
             this.statusBar.Name = "statusBar";
             this.statusBar.Panels.AddRange(new System.Windows.Forms.StatusBarPanel[] {
             this.statusBarPanelPadding1,
@@ -205,7 +213,7 @@
             this.statusBarPanelPadding2,
             this.statusBarPanelTimeOutput});
             this.statusBar.ShowPanels = true;
-            this.statusBar.Size = new System.Drawing.Size(1008, 22);
+            this.statusBar.Size = new System.Drawing.Size(1264, 22);
             this.statusBar.SizingGrip = false;
             this.statusBar.TabIndex = 1;
             // 
@@ -238,29 +246,29 @@
             this.timerRegenerationDelay.Interval = 300;
             this.timerRegenerationDelay.Tick += new System.EventHandler(this.timerRegenerationDelay_Tick);
             // 
-            // splitContainerBottom
+            // splitContainerRightBottom
             // 
-            this.splitContainerBottom.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.splitContainerRightBottom.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.splitContainerBottom.BackColor = System.Drawing.SystemColors.ActiveBorder;
-            this.splitContainerBottom.Location = new System.Drawing.Point(0, 0);
-            this.splitContainerBottom.Margin = new System.Windows.Forms.Padding(0, 0, 0, 3);
-            this.splitContainerBottom.Name = "splitContainerBottom";
+            this.splitContainerRightBottom.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.splitContainerRightBottom.Location = new System.Drawing.Point(0, 0);
+            this.splitContainerRightBottom.Margin = new System.Windows.Forms.Padding(0, 0, 0, 3);
+            this.splitContainerRightBottom.Name = "splitContainerRightBottom";
             // 
-            // splitContainerBottom.Panel1
+            // splitContainerRightBottom.Panel1
             // 
-            this.splitContainerBottom.Panel1.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.splitContainerBottom.Panel1.Controls.Add(this.brotliFilePanelGenerated);
+            this.splitContainerRightBottom.Panel1.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.splitContainerRightBottom.Panel1.Controls.Add(this.brotliFilePanelGenerated);
             // 
-            // splitContainerBottom.Panel2
+            // splitContainerRightBottom.Panel2
             // 
-            this.splitContainerBottom.Panel2.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.splitContainerBottom.Panel2.Controls.Add(this.brotliFilePanelOriginal);
-            this.splitContainerBottom.Size = new System.Drawing.Size(1008, 404);
-            this.splitContainerBottom.SplitterDistance = 503;
-            this.splitContainerBottom.SplitterWidth = 2;
-            this.splitContainerBottom.TabIndex = 0;
+            this.splitContainerRightBottom.Panel2.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.splitContainerRightBottom.Panel2.Controls.Add(this.brotliFilePanelOriginal);
+            this.splitContainerRightBottom.Size = new System.Drawing.Size(884, 375);
+            this.splitContainerRightBottom.SplitterDistance = 441;
+            this.splitContainerRightBottom.SplitterWidth = 2;
+            this.splitContainerRightBottom.TabIndex = 0;
             // 
             // brotliFilePanelGenerated
             // 
@@ -271,8 +279,9 @@
             this.brotliFilePanelGenerated.Location = new System.Drawing.Point(0, 5);
             this.brotliFilePanelGenerated.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
             this.brotliFilePanelGenerated.Name = "brotliFilePanelGenerated";
-            this.brotliFilePanelGenerated.Size = new System.Drawing.Size(503, 399);
+            this.brotliFilePanelGenerated.Size = new System.Drawing.Size(440, 365);
             this.brotliFilePanelGenerated.TabIndex = 0;
+            this.brotliFilePanelGenerated.MarkersUpdated += new System.EventHandler<BrotliBuilder.Components.MarkedTextBox.MarkerUpdateEventArgs>(this.brotliFilePanel_MarkersUpdated);
             // 
             // brotliFilePanelOriginal
             // 
@@ -283,37 +292,81 @@
             this.brotliFilePanelOriginal.Location = new System.Drawing.Point(0, 5);
             this.brotliFilePanelOriginal.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
             this.brotliFilePanelOriginal.Name = "brotliFilePanelOriginal";
-            this.brotliFilePanelOriginal.Size = new System.Drawing.Size(503, 399);
+            this.brotliFilePanelOriginal.Size = new System.Drawing.Size(439, 365);
             this.brotliFilePanelOriginal.TabIndex = 0;
+            this.brotliFilePanelOriginal.MarkersUpdated += new System.EventHandler<BrotliBuilder.Components.MarkedTextBox.MarkerUpdateEventArgs>(this.brotliFilePanel_MarkersUpdated);
+            // 
+            // splitContainerRight
+            // 
+            this.splitContainerRight.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.splitContainerRight.Location = new System.Drawing.Point(0, 0);
+            this.splitContainerRight.Margin = new System.Windows.Forms.Padding(0);
+            this.splitContainerRight.Name = "splitContainerRight";
+            this.splitContainerRight.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainerRight.Panel1
+            // 
+            this.splitContainerRight.Panel1.Controls.Add(this.labelFileStructure);
+            this.splitContainerRight.Panel1.Controls.Add(this.flowPanelBlocks);
+            this.splitContainerRight.Panel1MinSize = 200;
+            // 
+            // splitContainerRight.Panel2
+            // 
+            this.splitContainerRight.Panel2.Controls.Add(this.splitContainerRightBottom);
+            this.splitContainerRight.Panel2MinSize = 200;
+            this.splitContainerRight.Size = new System.Drawing.Size(884, 580);
+            this.splitContainerRight.SplitterDistance = 208;
+            this.splitContainerRight.SplitterWidth = 2;
+            this.splitContainerRight.TabIndex = 0;
             // 
             // splitContainerMain
             // 
             this.splitContainerMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainerMain.Location = new System.Drawing.Point(0, 0);
-            this.splitContainerMain.Margin = new System.Windows.Forms.Padding(0);
             this.splitContainerMain.Name = "splitContainerMain";
-            this.splitContainerMain.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
             // splitContainerMain.Panel1
             // 
-            this.splitContainerMain.Panel1.Controls.Add(this.flowPanelBlocks);
-            this.splitContainerMain.Panel1MinSize = 200;
+            this.splitContainerMain.Panel1.Controls.Add(this.brotliMarkerInfoPanel);
+            this.splitContainerMain.Panel1MinSize = 150;
             // 
             // splitContainerMain.Panel2
             // 
-            this.splitContainerMain.Panel2.Controls.Add(this.splitContainerBottom);
-            this.splitContainerMain.Panel2MinSize = 200;
-            this.splitContainerMain.Size = new System.Drawing.Size(1008, 639);
-            this.splitContainerMain.SplitterDistance = 230;
-            this.splitContainerMain.SplitterWidth = 2;
-            this.splitContainerMain.TabIndex = 0;
+            this.splitContainerMain.Panel2.Controls.Add(this.splitContainerRight);
+            this.splitContainerMain.Panel2MinSize = 250;
+            this.splitContainerMain.Size = new System.Drawing.Size(1264, 580);
+            this.splitContainerMain.SplitterDistance = 376;
+            this.splitContainerMain.TabIndex = 2;
+            // 
+            // brotliMarkerInfoPanel
+            // 
+            this.brotliMarkerInfoPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.brotliMarkerInfoPanel.Location = new System.Drawing.Point(0, 5);
+            this.brotliMarkerInfoPanel.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
+            this.brotliMarkerInfoPanel.Name = "brotliMarkerInfoPanel";
+            this.brotliMarkerInfoPanel.Size = new System.Drawing.Size(377, 575);
+            this.brotliMarkerInfoPanel.TabIndex = 1;
+            // 
+            // labelFileStructure
+            // 
+            this.labelFileStructure.AutoSize = true;
+            this.labelFileStructure.Location = new System.Drawing.Point(11, 7);
+            this.labelFileStructure.Margin = new System.Windows.Forms.Padding(11, 7, 3, 0);
+            this.labelFileStructure.Name = "labelFileStructure";
+            this.labelFileStructure.Size = new System.Drawing.Size(76, 15);
+            this.labelFileStructure.TabIndex = 1;
+            this.labelFileStructure.Text = "File Structure";
             // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.ClientSize = new System.Drawing.Size(1008, 661);
+            this.ClientSize = new System.Drawing.Size(1264, 602);
             this.Controls.Add(this.splitContainerMain);
             this.Controls.Add(this.statusBar);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -327,10 +380,15 @@
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeBits)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeOutput)).EndInit();
-            this.splitContainerBottom.Panel1.ResumeLayout(false);
-            this.splitContainerBottom.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainerBottom)).EndInit();
-            this.splitContainerBottom.ResumeLayout(false);
+            this.splitContainerRightBottom.Panel1.ResumeLayout(false);
+            this.splitContainerRightBottom.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerRightBottom)).EndInit();
+            this.splitContainerRightBottom.ResumeLayout(false);
+            this.splitContainerRight.Panel1.ResumeLayout(false);
+            this.splitContainerRight.Panel1.PerformLayout();
+            this.splitContainerRight.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerRight)).EndInit();
+            this.splitContainerRight.ResumeLayout(false);
             this.splitContainerMain.Panel1.ResumeLayout(false);
             this.splitContainerMain.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).EndInit();
@@ -358,15 +416,18 @@
         private System.Windows.Forms.MenuItem menuItemEncodeUncompressedMBs;
         private System.Windows.Forms.MenuItem menuItemView;
         private System.Windows.Forms.MenuItem menuItemStaticDictionary;
-        private System.Windows.Forms.SplitContainer splitContainerBottom;
+        private System.Windows.Forms.SplitContainer splitContainerRightBottom;
         private System.Windows.Forms.MenuItem menuItemWrapOutput;
         private Components.BrotliFilePanel brotliFilePanelGenerated;
         private Components.BrotliFilePanel brotliFilePanelOriginal;
-        private System.Windows.Forms.SplitContainer splitContainerMain;
+        private System.Windows.Forms.SplitContainer splitContainerRight;
         private System.Windows.Forms.MenuItem menuItemFileStructure;
         private System.Windows.Forms.MenuItem menuItemEncodeLiterals;
         private System.Windows.Forms.MenuItem menuItemTransform;
         private System.Windows.Forms.MenuItem menuItemTransformTestDistanceParams;
         private System.Windows.Forms.MenuItem menuItemTransformRebuild;
+        private System.Windows.Forms.SplitContainer splitContainerMain;
+        private Components.BrotliMarkerInfoPanel brotliMarkerInfoPanel;
+        private System.Windows.Forms.Label labelFileStructure;
     }
 }

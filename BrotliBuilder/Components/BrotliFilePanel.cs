@@ -31,6 +31,11 @@ namespace BrotliBuilder.Components{
             set => textBoxOutput.WordWrap = value;
         }
 
+        public event EventHandler<MarkedTextBox.MarkerUpdateEventArgs> MarkersUpdated{
+            add => textBoxBitStream.MarkersUpdated += value;
+            remove => textBoxBitStream.MarkersUpdated -= value;
+        }
+
         private readonly AsyncWorker loadWorker = new AsyncWorker();
         
         private string labelPrefix = null;

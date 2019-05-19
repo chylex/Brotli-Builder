@@ -1,53 +1,32 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using BrotliLib.Markers;
 using FastColoredTextBoxNS;
 
-namespace BrotliBuilder.Dialogs{
-    public partial class FormBitStreamContext : Form{
+namespace BrotliBuilder.Components{
+    public partial class BrotliMarkerInfoPanel : UserControl{
         private static readonly TextStyle StyleNormalBlack = new TextStyle(new SolidBrush(Color.Black), null, FontStyle.Regular);
-        private static readonly TextStyle StyleNormalGray = new TextStyle(new SolidBrush(Color.DarkGray), null, FontStyle.Regular);
+        private static readonly TextStyle StyleNormalGray = new TextStyle(new SolidBrush(Color.FromArgb(140, 140, 150)), null, FontStyle.Regular);
 
         private static readonly TextStyle StyleBoldBlack = new TextStyle(new SolidBrush(Color.Black), null, FontStyle.Bold);
-        private static readonly TextStyle StyleBoldGray = new TextStyle(new SolidBrush(Color.DarkGray), null, FontStyle.Bold);
+        private static readonly TextStyle StyleBoldGray = new TextStyle(new SolidBrush(Color.FromArgb(140, 140, 150)), null, FontStyle.Bold);
 
         private static readonly TextStyle[,] Styles = {
             { null /*default*/, StyleBoldGray },
             { StyleNormalBlack, StyleBoldBlack }
         };
 
-        public static FormBitStreamContext GetOrSpawn(IWin32Window owner){
-            var mainForm = Application.OpenForms.OfType<FormMain>().FirstOrDefault();
-            var dialogForm = Application.OpenForms.OfType<FormBitStreamContext>().FirstOrDefault();
-
-            if (dialogForm == null){
-                dialogForm = new FormBitStreamContext();
-                dialogForm.Show(owner);
-            }
-
-            if (mainForm != null){
-                Point loc = mainForm.Location;
-                loc.Offset(-dialogForm.Width, 0);
-                
-                dialogForm.Location = loc;
-                dialogForm.Height = mainForm.Height;
-            }
-
-            return dialogForm;
+        public BrotliMarkerInfoPanel(){
+            InitializeComponent();
+            textBoxContext.DefaultStyle = StyleNormalGray;
         }
 
         private IList<MarkerNode> prevMarkerNodes = null;
         private MarkerNode prevCaretNode = null;
 
-        public FormBitStreamContext(){
-            InitializeComponent();
-            textBoxContext.DefaultStyle = StyleNormalGray;
-        }
-
-        public void Display(IList<MarkerNode> markerNodes, HashSet<MarkerNode> highlightedNodes, MarkerNode caretNode){
+        public void UpdateMarkers(IList<MarkerNode> markerSequence, HashSet<MarkerNode> highlightedNodes, MarkerNode caretNode){
             if (ReferenceEquals(prevCaretNode, caretNode)){
                 return;
             }
@@ -57,12 +36,12 @@ namespace BrotliBuilder.Dialogs{
             textBoxContext.Selection.BeginUpdate();
             textBoxContext.ClearStyle(StyleIndex.All);
             
-            if (!ReferenceEquals(prevMarkerNodes, markerNodes)){
-                prevMarkerNodes = markerNodes;
+            if (!ReferenceEquals(prevMarkerNodes, markerSequence)){
+                prevMarkerNodes = markerSequence;
 
                 StringBuilder build = new StringBuilder(512);
 
-                foreach(MarkerNode node in markerNodes){
+                foreach(MarkerNode node in markerSequence){
                     build.Append('\t', node.Depth);
                     build.Append(node.Marker.Info);
                     build.Append('\n');
@@ -71,8 +50,8 @@ namespace BrotliBuilder.Dialogs{
                 textBoxContext.Text = build.ToString();
             }
 
-            for(int line = 0; line < markerNodes.Count; line++){
-                MarkerNode node = markerNodes[line];
+            for(int line = 0; line < markerSequence.Count; line++){
+                MarkerNode node = markerSequence[line];
                 IMarkerInfo info = node.Marker.Info;
 
                 int indexColor = highlightedNodes.Contains(node) ? 1 : 0;
@@ -85,7 +64,7 @@ namespace BrotliBuilder.Dialogs{
                 }
             }
             
-            int caretLine = markerNodes.IndexOf(caretNode);
+            int caretLine = markerSequence.IndexOf(caretNode);
             textBoxContext.Navigate(caretLine);
             
             textBoxContext.Selection.EndUpdate();
