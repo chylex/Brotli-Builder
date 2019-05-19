@@ -195,8 +195,6 @@ namespace BrotliBuilder.Blocks{
                         }
 
                         break;
-
-                    // TODO
                 }
             }
 

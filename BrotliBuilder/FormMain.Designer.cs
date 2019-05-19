@@ -187,9 +187,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.flowPanelBlocks.BackColor = System.Drawing.SystemColors.Control;
             this.flowPanelBlocks.Location = new System.Drawing.Point(0, 0);
-            this.flowPanelBlocks.Margin = new System.Windows.Forms.Padding(0, 0, 0, 4);
+            this.flowPanelBlocks.Margin = new System.Windows.Forms.Padding(0);
             this.flowPanelBlocks.Name = "flowPanelBlocks";
-            this.flowPanelBlocks.Size = new System.Drawing.Size(1008, 229);
+            this.flowPanelBlocks.Size = new System.Drawing.Size(1008, 230);
             this.flowPanelBlocks.TabIndex = 0;
             this.flowPanelBlocks.WrapContents = false;
             this.flowPanelBlocks.SizeChanged += new System.EventHandler(this.flowPanelBlocks_SizeChanged);
@@ -244,8 +244,8 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainerBottom.BackColor = System.Drawing.SystemColors.ActiveBorder;
-            this.splitContainerBottom.Location = new System.Drawing.Point(0, 5);
-            this.splitContainerBottom.Margin = new System.Windows.Forms.Padding(0, 5, 0, 0);
+            this.splitContainerBottom.Location = new System.Drawing.Point(0, 0);
+            this.splitContainerBottom.Margin = new System.Windows.Forms.Padding(0, 0, 0, 3);
             this.splitContainerBottom.Name = "splitContainerBottom";
             // 
             // splitContainerBottom.Panel1
@@ -257,7 +257,7 @@
             // 
             this.splitContainerBottom.Panel2.BackColor = System.Drawing.SystemColors.ControlLight;
             this.splitContainerBottom.Panel2.Controls.Add(this.brotliFilePanelOriginal);
-            this.splitContainerBottom.Size = new System.Drawing.Size(1008, 402);
+            this.splitContainerBottom.Size = new System.Drawing.Size(1008, 404);
             this.splitContainerBottom.SplitterDistance = 503;
             this.splitContainerBottom.SplitterWidth = 2;
             this.splitContainerBottom.TabIndex = 0;
@@ -268,9 +268,10 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.brotliFilePanelGenerated.LabelPrefix = "Generated";
-            this.brotliFilePanelGenerated.Location = new System.Drawing.Point(0, 0);
+            this.brotliFilePanelGenerated.Location = new System.Drawing.Point(0, 5);
+            this.brotliFilePanelGenerated.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
             this.brotliFilePanelGenerated.Name = "brotliFilePanelGenerated";
-            this.brotliFilePanelGenerated.Size = new System.Drawing.Size(503, 402);
+            this.brotliFilePanelGenerated.Size = new System.Drawing.Size(503, 399);
             this.brotliFilePanelGenerated.TabIndex = 0;
             // 
             // brotliFilePanelOriginal
@@ -279,9 +280,10 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.brotliFilePanelOriginal.LabelPrefix = "Original";
-            this.brotliFilePanelOriginal.Location = new System.Drawing.Point(0, 0);
+            this.brotliFilePanelOriginal.Location = new System.Drawing.Point(0, 5);
+            this.brotliFilePanelOriginal.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
             this.brotliFilePanelOriginal.Name = "brotliFilePanelOriginal";
-            this.brotliFilePanelOriginal.Size = new System.Drawing.Size(503, 402);
+            this.brotliFilePanelOriginal.Size = new System.Drawing.Size(503, 399);
             this.brotliFilePanelOriginal.TabIndex = 0;
             // 
             // splitContainerMain

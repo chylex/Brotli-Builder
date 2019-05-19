@@ -62,6 +62,7 @@
             // 
             this.buttonAddMetaBlockCompressed.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonAddMetaBlockCompressed.Enabled = false;
             this.buttonAddMetaBlockCompressed.Location = new System.Drawing.Point(3, 316);
             this.buttonAddMetaBlockCompressed.Name = "buttonAddMetaBlockCompressed";
             this.buttonAddMetaBlockCompressed.Size = new System.Drawing.Size(199, 23);
