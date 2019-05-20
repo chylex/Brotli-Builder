@@ -82,7 +82,7 @@ namespace BrotliLib.Brotli.Components.Header{
             }
 
             public ContextMap Build(){
-                return new ContextMap(category, treeCount, contextMap);
+                return new ContextMap(category, treeCount, CollectionHelper.Clone(contextMap));
             }
         }
 
