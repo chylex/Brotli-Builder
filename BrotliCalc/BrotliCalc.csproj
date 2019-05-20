@@ -6,6 +6,9 @@
     <LangVersion>latest</LangVersion>
     <ApplicationIcon />
     <StartupObject>BrotliCalc.Program</StartupObject>
+    <Authors>Daniel Chýlek</Authors>
+    <Copyright>Daniel Chýlek</Copyright>
+    <RepositoryUrl>https://github.com/chylex/Brotli-Builder</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

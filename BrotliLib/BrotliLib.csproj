@@ -4,6 +4,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Platforms>AnyCPU</Platforms>
     <LangVersion>latest</LangVersion>
+    <Authors>Daniel Chýlek</Authors>
+    <Copyright>Daniel Chýlek</Copyright>
+    <RepositoryUrl>https://github.com/chylex/Brotli-Builder</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

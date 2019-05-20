@@ -4,12 +4,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Brotli Builder")]
+[assembly: AssemblyTitle("BrotliBuilder")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Brotli Builder")]
-[assembly: AssemblyCopyright("")]
+[assembly: AssemblyProduct("BrotliBuilder")]
+[assembly: AssemblyCopyright("Daniel Chýlek")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
