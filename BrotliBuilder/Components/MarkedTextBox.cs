@@ -38,6 +38,7 @@ namespace BrotliBuilder.Components{
 
         private MarkerNode markerCaret = null;
         private bool updatingMarkers = false;
+        private bool mouseSelecting = false;
 
         public MarkedTextBox(){
             AllowSeveralTextStyleDrawing = true;
@@ -47,6 +48,8 @@ namespace BrotliBuilder.Components{
 
             SelectionChanged += MarkedFastTextBox_SelectionChanged;
             CustomAction += MarkedFastTextBox_CustomAction;
+            MouseDown += MarkedTextBox_MouseDown;
+            MouseUp += MarkedTextBox_MouseUp;
         }
 
         public void UpdateMarkers(MarkerNode[] newMarkerSequence){
@@ -132,7 +135,7 @@ namespace BrotliBuilder.Components{
         }
 
         private void MarkedFastTextBox_SelectionChanged(object sender, EventArgs e){
-            if (!updatingMarkers){
+            if (!updatingMarkers && !mouseSelecting && !ModifierKeys.HasFlag(Keys.Shift)){
                 RefreshMarkers();
             }
         }
@@ -178,6 +181,22 @@ namespace BrotliBuilder.Components{
                     Selection.EndUpdate();
 
                     markerCaret = targetNode;
+                }
+            }
+        }
+
+        private void MarkedTextBox_MouseDown(object sender, MouseEventArgs e){
+            if (e.Button == MouseButtons.Left){
+                mouseSelecting = true;
+            }
+        }
+
+        private void MarkedTextBox_MouseUp(object sender, MouseEventArgs e){
+            if (e.Button == MouseButtons.Left){
+                mouseSelecting = false;
+
+                if (Selection.Length == 0){
+                    RefreshMarkers();
                 }
             }
         }
