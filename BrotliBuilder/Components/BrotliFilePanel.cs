@@ -13,8 +13,6 @@ using FastColoredTextBoxNS;
 
 namespace BrotliBuilder.Components{
     public partial class BrotliFilePanel : UserControl{
-        private const bool EnableBitMarkers = true;
-
         public string LabelPrefix{
             get{
                 return labelPrefix;
@@ -30,6 +28,8 @@ namespace BrotliBuilder.Components{
         public bool WordWrapOutput{
             set => textBoxOutput.WordWrap = value;
         }
+
+        public bool EnableBitMarkers { get; set; } = true;
 
         public event EventHandler<MarkedTextBox.MarkerUpdateEventArgs> MarkersUpdated{
             add => textBoxBitStream.MarkersUpdated += value;
@@ -47,6 +47,8 @@ namespace BrotliBuilder.Components{
         public void LoadBrotliFile(byte[] bytes, Action<BrotliFileStructure> callback){
             InvalidatePanel();
 
+            bool enableBitMarkers = EnableBitMarkers;
+
             loadWorker.Start(sync => {
                 BitStream bits = new BitStream(bytes);
                 string bitsStr = bits.ToString();
@@ -57,7 +59,7 @@ namespace BrotliBuilder.Components{
                 BrotliOutputStored output;
 
                 try{
-                    output = file.GetDecompressionState(bits, EnableBitMarkers);
+                    output = file.GetDecompressionState(bits, enableBitMarkers);
                 }catch(Exception ex){
                     sync(() => UpdateTextBox(textBoxOutput, ex));
                     return;
@@ -79,6 +81,8 @@ namespace BrotliBuilder.Components{
 
         public void LoadBrotliFile(Func<BrotliFileStructure> fileLoader, Action<BrotliFileStructure> onLoaded, Action<Stopwatch> onSerialized, Action<Stopwatch> onDecompressed){
             InvalidatePanel();
+
+            bool enableBitMarkers = EnableBitMarkers;
 
             loadWorker.Start(sync => {
                 BrotliFileStructure file = fileLoader();
@@ -123,7 +127,7 @@ namespace BrotliBuilder.Components{
                 Stopwatch stopwatchDecompression = Stopwatch.StartNew();
                 
                 try{
-                    output = file.GetDecompressionState(bits, EnableBitMarkers);
+                    output = file.GetDecompressionState(bits, enableBitMarkers);
                 }catch(Exception ex){
                     sync(() => {
                         UpdateTextBox(textBoxOutput, ex);

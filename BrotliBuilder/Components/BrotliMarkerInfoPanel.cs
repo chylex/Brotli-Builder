@@ -64,10 +64,16 @@ namespace BrotliBuilder.Components{
                 }
             }
             
-            int caretLine = markerSequence.IndexOf(caretNode);
-            textBoxContext.Navigate(caretLine);
+            if (caretNode != null){
+                int caretLine = markerSequence.IndexOf(caretNode);
+                textBoxContext.Navigate(caretLine);
+            }
             
             textBoxContext.Selection.EndUpdate();
+        }
+
+        public void ResetMarkers(){
+            UpdateMarkers(new MarkerNode[0], null, null);
         }
     }
 }

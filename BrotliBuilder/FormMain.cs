@@ -252,6 +252,12 @@ namespace BrotliBuilder{
             menuItemMarkerInfo.Checked = enable;
 
             splitContainerMain.Panel1Collapsed = !enable;
+            brotliFilePanelGenerated.EnableBitMarkers = enable;
+            brotliFilePanelOriginal.EnableBitMarkers = enable;
+
+            if (!enable){
+                brotliMarkerInfoPanel.ResetMarkers();
+            }
         }
 
         private void menuItemWrapOutput_Click(object sender, EventArgs e){
