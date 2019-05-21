@@ -24,9 +24,9 @@
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dataGridViewWords = new System.Windows.Forms.DataGridView();
             this.columnLength = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnIndex = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -42,7 +42,9 @@
             this.labelDuplicateCount = new System.Windows.Forms.Label();
             this.labelDuplicateCountValue = new System.Windows.Forms.Label();
             this.timerFilterUpdate = new System.Windows.Forms.Timer(this.components);
+            this.panelFilters = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewWords)).BeginInit();
+            this.panelFilters.SuspendLayout();
             this.SuspendLayout();
             // 
             // dataGridViewWords
@@ -69,13 +71,13 @@
             this.dataGridViewWords.ReadOnly = true;
             this.dataGridViewWords.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.dataGridViewWords.Size = new System.Drawing.Size(784, 496);
-            this.dataGridViewWords.TabIndex = 8;
+            this.dataGridViewWords.TabIndex = 6;
             // 
             // columnLength
             // 
             this.columnLength.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.columnLength.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.columnLength.DefaultCellStyle = dataGridViewCellStyle1;
             this.columnLength.HeaderText = "Length";
             this.columnLength.Name = "columnLength";
             this.columnLength.ReadOnly = true;
@@ -84,8 +86,8 @@
             // columnIndex
             // 
             this.columnIndex.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.columnIndex.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.columnIndex.DefaultCellStyle = dataGridViewCellStyle2;
             this.columnIndex.HeaderText = "Index";
             this.columnIndex.Name = "columnIndex";
             this.columnIndex.ReadOnly = true;
@@ -94,8 +96,8 @@
             // columnTransform
             // 
             this.columnTransform.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.columnTransform.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.columnTransform.DefaultCellStyle = dataGridViewCellStyle3;
             this.columnTransform.HeaderText = "Transform";
             this.columnTransform.Name = "columnTransform";
             this.columnTransform.ReadOnly = true;
@@ -129,12 +131,14 @@
             // 
             // textBoxFilter
             // 
+            this.textBoxFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxFilter.Enabled = false;
             this.textBoxFilter.Location = new System.Drawing.Point(15, 27);
             this.textBoxFilter.Margin = new System.Windows.Forms.Padding(3, 3, 12, 3);
             this.textBoxFilter.Name = "textBoxFilter";
-            this.textBoxFilter.Size = new System.Drawing.Size(253, 23);
-            this.textBoxFilter.TabIndex = 2;
+            this.textBoxFilter.Size = new System.Drawing.Size(282, 23);
+            this.textBoxFilter.TabIndex = 1;
             this.textBoxFilter.TextChanged += new System.EventHandler(this.textBoxFilter_TextChanged);
             // 
             // labelFilter
@@ -143,42 +147,44 @@
             this.labelFilter.Location = new System.Drawing.Point(12, 9);
             this.labelFilter.Name = "labelFilter";
             this.labelFilter.Size = new System.Drawing.Size(33, 15);
-            this.labelFilter.TabIndex = 1;
+            this.labelFilter.TabIndex = 0;
             this.labelFilter.Text = "Filter";
             // 
             // labelWordCount
             // 
             this.labelWordCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelWordCount.AutoSize = true;
-            this.labelWordCount.Location = new System.Drawing.Point(619, 12);
+            this.labelWordCount.Location = new System.Drawing.Point(629, 12);
             this.labelWordCount.Margin = new System.Windows.Forms.Padding(3);
             this.labelWordCount.Name = "labelWordCount";
             this.labelWordCount.Size = new System.Drawing.Size(80, 15);
-            this.labelWordCount.TabIndex = 4;
+            this.labelWordCount.TabIndex = 2;
             this.labelWordCount.Text = "Shown Words";
             // 
             // labelWordCountValue
             // 
             this.labelWordCountValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelWordCountValue.Location = new System.Drawing.Point(702, 12);
-            this.labelWordCountValue.Margin = new System.Windows.Forms.Padding(3);
+            this.labelWordCountValue.AutoEllipsis = true;
+            this.labelWordCountValue.Location = new System.Drawing.Point(712, 12);
+            this.labelWordCountValue.Margin = new System.Windows.Forms.Padding(0, 3, 3, 3);
             this.labelWordCountValue.Name = "labelWordCountValue";
-            this.labelWordCountValue.Size = new System.Drawing.Size(70, 15);
-            this.labelWordCountValue.TabIndex = 5;
+            this.labelWordCountValue.Size = new System.Drawing.Size(60, 15);
+            this.labelWordCountValue.TabIndex = 3;
             this.labelWordCountValue.Text = "0";
             this.labelWordCountValue.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // checkBoxShowTransforms
             // 
+            this.checkBoxShowTransforms.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.checkBoxShowTransforms.AutoSize = true;
             this.checkBoxShowTransforms.Checked = true;
             this.checkBoxShowTransforms.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBoxShowTransforms.Enabled = false;
-            this.checkBoxShowTransforms.Location = new System.Drawing.Point(283, 29);
+            this.checkBoxShowTransforms.Location = new System.Drawing.Point(312, 29);
             this.checkBoxShowTransforms.Name = "checkBoxShowTransforms";
-            this.checkBoxShowTransforms.Size = new System.Drawing.Size(117, 19);
-            this.checkBoxShowTransforms.TabIndex = 3;
-            this.checkBoxShowTransforms.Text = "Show Transforms";
+            this.checkBoxShowTransforms.Size = new System.Drawing.Size(85, 19);
+            this.checkBoxShowTransforms.TabIndex = 2;
+            this.checkBoxShowTransforms.Text = "Transforms";
             this.checkBoxShowTransforms.UseVisualStyleBackColor = true;
             this.checkBoxShowTransforms.CheckedChanged += new System.EventHandler(this.checkBoxShowTransforms_CheckedChanged);
             // 
@@ -186,21 +192,22 @@
             // 
             this.labelDuplicateCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelDuplicateCount.AutoSize = true;
-            this.labelDuplicateCount.Location = new System.Drawing.Point(598, 33);
+            this.labelDuplicateCount.Location = new System.Drawing.Point(608, 33);
             this.labelDuplicateCount.Margin = new System.Windows.Forms.Padding(3);
             this.labelDuplicateCount.Name = "labelDuplicateCount";
             this.labelDuplicateCount.Size = new System.Drawing.Size(101, 15);
-            this.labelDuplicateCount.TabIndex = 6;
+            this.labelDuplicateCount.TabIndex = 4;
             this.labelDuplicateCount.Text = "Shown Duplicates";
             // 
             // labelDuplicateCountValue
             // 
             this.labelDuplicateCountValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelDuplicateCountValue.Location = new System.Drawing.Point(705, 33);
-            this.labelDuplicateCountValue.Margin = new System.Windows.Forms.Padding(3);
+            this.labelDuplicateCountValue.AutoEllipsis = true;
+            this.labelDuplicateCountValue.Location = new System.Drawing.Point(712, 33);
+            this.labelDuplicateCountValue.Margin = new System.Windows.Forms.Padding(0, 3, 3, 3);
             this.labelDuplicateCountValue.Name = "labelDuplicateCountValue";
-            this.labelDuplicateCountValue.Size = new System.Drawing.Size(67, 15);
-            this.labelDuplicateCountValue.TabIndex = 7;
+            this.labelDuplicateCountValue.Size = new System.Drawing.Size(60, 15);
+            this.labelDuplicateCountValue.TabIndex = 5;
             this.labelDuplicateCountValue.Text = "(...)";
             this.labelDuplicateCountValue.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
@@ -209,27 +216,42 @@
             this.timerFilterUpdate.Interval = 750;
             this.timerFilterUpdate.Tick += new System.EventHandler(this.timerFilterUpdate_Tick);
             // 
+            // panelFilters
+            // 
+            this.panelFilters.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelFilters.Controls.Add(this.textBoxFilter);
+            this.panelFilters.Controls.Add(this.labelFilter);
+            this.panelFilters.Controls.Add(this.checkBoxShowTransforms);
+            this.panelFilters.Location = new System.Drawing.Point(0, 0);
+            this.panelFilters.Margin = new System.Windows.Forms.Padding(0);
+            this.panelFilters.MinimumSize = new System.Drawing.Size(180, 0);
+            this.panelFilters.Name = "panelFilters";
+            this.panelFilters.Padding = new System.Windows.Forms.Padding(12, 9, 0, 0);
+            this.panelFilters.Size = new System.Drawing.Size(400, 60);
+            this.panelFilters.TabIndex = 1;
+            // 
             // FormStaticDictionary
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 561);
+            this.Controls.Add(this.panelFilters);
             this.Controls.Add(this.labelDuplicateCountValue);
             this.Controls.Add(this.labelDuplicateCount);
-            this.Controls.Add(this.checkBoxShowTransforms);
             this.Controls.Add(this.labelWordCountValue);
             this.Controls.Add(this.labelWordCount);
-            this.Controls.Add(this.labelFilter);
-            this.Controls.Add(this.textBoxFilter);
             this.Controls.Add(this.progressBarLoading);
             this.Controls.Add(this.dataGridViewWords);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.MinimumSize = new System.Drawing.Size(640, 400);
+            this.MinimumSize = new System.Drawing.Size(380, 240);
             this.Name = "FormStaticDictionary";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Static Dictionary";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormStaticDictionary_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewWords)).EndInit();
+            this.panelFilters.ResumeLayout(false);
+            this.panelFilters.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -252,5 +274,6 @@
         private System.Windows.Forms.Label labelDuplicateCount;
         private System.Windows.Forms.Label labelDuplicateCountValue;
         private System.Windows.Forms.Timer timerFilterUpdate;
+        private System.Windows.Forms.Panel panelFilters;
     }
 }

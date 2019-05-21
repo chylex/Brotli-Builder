@@ -389,7 +389,7 @@
             this.Controls.Add(this.statusBar);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.Menu = this.mainMenu;
-            this.MinimumSize = new System.Drawing.Size(520, 640);
+            this.MinimumSize = new System.Drawing.Size(640, 320);
             this.Name = "FormMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Brotli Builder";
