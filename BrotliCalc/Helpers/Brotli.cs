@@ -4,24 +4,51 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
+using BrotliLib.Numbers;
 
 namespace BrotliCalc.Helpers{
     static class Brotli{
         private const int CompressionFileLimit = 2000;
         private const string CompressedFileExtension = ".br";
 
-        public static IEnumerable<(string name, BrotliFileStructure bfs)> DecompressPath(string path, string pattern = "*" + CompressedFileExtension){
+        private static readonly Regex RegexFileQuality = new Regex(@"\.(\d{1,2})\.br$");
+        private static readonly Range QualityRange = new Range(0, 11);
+
+        private static string GetSortKey(string path){
+            return RegexFileQuality.Replace(path, match => match.Success ? ".br." + match.Groups[1].Value.PadLeft(2, '0') : ".br");
+        }
+
+        private static int? TryDeduceQuality(string name){
+            var match = RegexFileQuality.Match(name);
+            return match.Success && int.TryParse(match.Groups[1].Value, out int quality) && QualityRange.Contains(quality) ? quality : (int?)null;
+        }
+
+        public static IEnumerable<BrotliFile> DecompressPath(string path, string pattern = "*" + CompressedFileExtension){
             int fullPathLength = Path.GetFullPath(path).Length;
 
-            (string, BrotliFileStructure) ReadFile(string file){
+            BrotliFile ReadFile(string file){
                 Debug.WriteLine($"Decompressing file {file}...");
-                return (file.Substring(fullPathLength), BrotliFileStructure.FromBytes(File.ReadAllBytes(file)));
+
+                string name = file.Substring(fullPathLength).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                int? quality = TryDeduceQuality(name);
+
+                if (quality != null){
+                    name = RegexFileQuality.Replace(name, ".br");
+                }
+
+                return new BrotliFile{
+                    Path = file,
+                    Name = name,
+                    Quality = quality,
+                    Structure = BrotliFileStructure.FromBytes(File.ReadAllBytes(file))
+                };
             }
 
             if (File.GetAttributes(path).HasFlag(FileAttributes.Directory)){
-                return Directory.EnumerateFiles(path, pattern, SearchOption.AllDirectories).Select(ReadFile);
+                return Directory.EnumerateFiles(path, pattern, SearchOption.AllDirectories).OrderBy(GetSortKey).Select(ReadFile);
             }
             else{
                 return new []{ ReadFile(path) };
@@ -33,8 +60,8 @@ namespace BrotliCalc.Helpers{
                 throw new FileNotFoundException("Dictionary file must be named 'dict' and placed into the working directory.", "dict");
             }
 
-            if (quality < 0 || quality > 11){
-                throw new ArgumentOutOfRangeException(nameof(quality), "Compression quality must be in range [0; 11].");
+            if (!QualityRange.Contains(quality)){
+                throw new ArgumentOutOfRangeException(nameof(quality), $"Compression quality must be in range {QualityRange}.");
             }
 
             IList<string> filePaths;
