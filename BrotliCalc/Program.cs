@@ -11,6 +11,7 @@ namespace BrotliCalc{
     public static class Program{
         private static readonly List<ICommand> Commands = new List<ICommand>{
             new CmdCompress(),
+            new CmdTestReserializeRebuild(),
             new CmdGenDictionaryIndex()
         };
 
