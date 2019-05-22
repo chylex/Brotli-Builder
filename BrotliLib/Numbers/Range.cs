@@ -91,7 +91,7 @@ namespace BrotliLib.Numbers{
         }
 
         public override string ToString(){
-            return initialized ? "First = " + first + ", Last = " + last : "Any";
+            return initialized ? "[" + first + "; " + last + "]" : "[Any]";
         }
     }
 }
