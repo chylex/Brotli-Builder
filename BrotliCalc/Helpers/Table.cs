@@ -4,31 +4,42 @@ using System.IO;
 using System.Linq;
 
 namespace BrotliCalc.Helpers{
-    sealed class Table{
-        private readonly string[] columns;
-        private readonly List<string[]> rows = new List<string[]>();
+    abstract class Table{
+        protected readonly IList<string> columns;
 
-        public Table(string[] columns){
+        protected Table(string[] columns){
             this.columns = columns;
         }
 
-        public void AddRow(params object[] values){
-            if (values.Length != columns.Length){
-                throw new ArgumentException("Amount of entries must match the amount of columns (" + values.Length + " != " + columns.Length + ").", nameof(values));
+        protected IEnumerable<string> ReadRowAsString(object[] values){
+            if (values.Length != columns.Count){
+                throw new ArgumentException("Amount of entries must match the amount of columns (" + values.Length + " != " + columns.Count + ").", nameof(values));
             }
 
-            rows.Add(values.Select(value => value.ToString()).ToArray());
+            return values.Select(value => value == null ? "?" : value.ToString());
         }
 
-        public void WriteCSV(string path){
-            using(StreamWriter writer = new StreamWriter(path)){
-                writer.WriteLine(string.Join(',', columns));
+        public abstract void AddRow(params object[] values);
 
-                foreach(string[] row in rows){
-                    writer.Write('"');
-                    writer.WriteLine(string.Join("\",\"", row));
-                    writer.Write('"');
-                }
+        internal class CSV : Table, IDisposable{
+            private readonly StreamWriter writer;
+
+            public CSV(string path, string[] columns) : base(columns){
+                this.writer = new StreamWriter(path);
+                this.writer.WriteLine(string.Join(',', this.columns));
+                this.writer.Flush();
+            }
+
+            public override void AddRow(params object[] values){
+                writer.Write('"');
+                writer.Write(string.Join("\",\"", ReadRowAsString(values)));
+                writer.Write('"');
+                writer.WriteLine();
+                writer.Flush();
+            }
+
+            public void Dispose(){
+                writer.Dispose();
             }
         }
     }
