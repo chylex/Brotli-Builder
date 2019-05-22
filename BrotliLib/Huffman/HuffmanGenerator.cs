@@ -91,16 +91,15 @@ namespace BrotliLib.Huffman{
             int totalLeaves = 0;
 
             HuffmanNode<T> GenerateNodeBranch(BitStream prefix, bool nextBit){
-                if (prefix.Length >= longestBranch){
-                    throw new ArgumentException("Incomplete symbol paths, leaking branch at: " + prefix, nameof(paths));
-                }
-
                 BitStream branch = prefix.Clone();
                 branch.Add(nextBit);
                 
                 if (paths.TryGetValue(branch, out T symbol)){
                     ++totalLeaves;
                     return new HuffmanNode<T>.Leaf(symbol);
+                }
+                else if (branch.Length >= longestBranch){
+                    return new HuffmanNode<T>.Dummy(); // TODO hack to "support" Huffman trees with missing branches
                 }
                 else{
                     return GenerateNode(branch);
@@ -250,7 +249,7 @@ namespace BrotliLib.Huffman{
                 }
             }
 
-            // TODO can sometimes generate incomplete paths
+            // TODO can sometimes generate incomplete paths, look into https://shodhganga.inflibnet.ac.in/bitstream/10603/187253/9/09_chapter%204.pdf
             return FromBitCountsCanonical(symbolEntries);
         }
 
