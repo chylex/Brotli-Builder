@@ -34,6 +34,10 @@ namespace BrotliLib.Brotli.Components.Data{
 
         private static readonly Range[] BlockLengthRanges = BlockLengthOffsets.Zip(BlockLengthExtraBits, Range.FromOffsetBitPair).ToArray();
 
+        public static BlockLengthCode MakeCode(int length){
+            return new BlockLengthCode(Array.FindIndex(BlockLengthRanges, range => range.Contains(length)));
+        }
+
         // Data
 
         public int Code { get; }

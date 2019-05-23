@@ -10,22 +10,22 @@ using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Dictionary.Index;
 using BrotliLib.Brotli.State;
 using BrotliLib.Brotli.State.Output;
-using BrotliLib.IO;
 using BrotliLib.Collections;
 
 namespace BrotliLib.Brotli.Encode{
     public sealed class CompressedMetaBlockBuilder{
         public int OutputSize => intermediateState.OutputSize - initialState.OutputSize;
 
-        public CategoryMap<BlockTypeInfo> BlockTypes { get; set; } = BlockTypeInfo.Empty; // TODO generate these based on commands
+        public CategoryMap<BlockSwitchBuilder> BlockTypes { get; } = BlockTypeInfo.Empty.Select(info => new BlockSwitchBuilder(info));
         public DistanceParameters DistanceParameters { get; set; } = DistanceParameters.NoDirectCodes;
 
         public LiteralContextMode[] LiteralContextModes { get; set; } = { LiteralContextMode.LSB6 };
         public ContextMap LiteralCtxMap { get; set; } = ContextMap.Literals.Simple;
         public ContextMap DistanceCtxMap { get; set; } = ContextMap.Distances.Simple;
 
+        public IEnumerable<InsertCopyCommand> InsertCopyCommands => icCommands;
+
         private readonly IList<InsertCopyCommand> icCommands = new List<InsertCopyCommand>();
-        private readonly CategoryMap<IList<BlockSwitchCommand>> bsCommands = new CategoryMap<IList<BlockSwitchCommand>>(_ => new List<BlockSwitchCommand>());
         
         private readonly BrotliGlobalState initialState;
         private readonly BrotliGlobalState intermediateState;
@@ -43,7 +43,7 @@ namespace BrotliLib.Brotli.Encode{
             var contents = metaBlock.Contents;
             var header = contents.Header;
             
-            this.BlockTypes = header.BlockTypes;
+            this.BlockTypes = header.BlockTypes.Select(info => new BlockSwitchBuilder(info));
             this.DistanceParameters = header.DistanceParameters;
             this.LiteralContextModes = header.LiteralCtxModes.ToArray();
             this.LiteralCtxMap = header.LiteralCtxMap;
@@ -54,8 +54,10 @@ namespace BrotliLib.Brotli.Encode{
             }
 
             foreach(Category category in Categories.LID){
+                var bsBuilder = BlockTypes[category];
+
                 foreach(BlockSwitchCommand command in contents.BlockSwitchCommands[category]){
-                    AddBlockSwitch(category, command);
+                    bsBuilder.AddBlockSwitch(command);
                 }
             }
         }
@@ -80,32 +82,27 @@ namespace BrotliLib.Brotli.Encode{
             return AddInsertCopy(new InsertCopyCommand(literals, dictionaryEntry.Length, 1 + intermediateState.MaxDistance + literals.Count + dictionaryEntry.Packed));
         }
 
-        public CompressedMetaBlockBuilder AddBlockSwitch(Category category, BlockSwitchCommand command){
-            bsCommands[category].Add(command);
-            return this;
-        }
-
         // Building
 
         public (MetaBlock MetaBlock, Func<CompressedMetaBlockBuilder> Next) Build(){
             var state = initialState.Clone();
 
-            ///// TODO reorganize
+            // Block type setup
+            
+            var blockTypeInfo = BlockTypes.Select(builder => builder.Build());
+            var bsCommands = BlockTypes.Select<IList<BlockSwitchCommand>>(builder => new List<BlockSwitchCommand>(builder.Commands));
 
-            var blockTrackers = BlockTypes.Select(info => new BlockSwitchTracker(info));
-            var blockSwitchQueues = bsCommands.Select(list => new Queue<BlockSwitchCommand>(list));
-            var nullWriter = new BitStream().GetWriter();
+            var blockTrackers = blockTypeInfo.Select(info => new BlockSwitchTracker(info));
+            var blockSwitchQueues = bsCommands.Select(commands => new Queue<BlockSwitchCommand>(commands));
 
             int NextBlockID(Category category){
-                BlockSwitchTracker tracker = blockTrackers[category];
-                tracker.WriteCommand(nullWriter, blockSwitchQueues[category]);
-                return tracker.CurrentID;
+                return blockTrackers[category].SimulateCommand(blockSwitchQueues);
             }
 
-            /////
+            // Command processing
             
             var literalFreq = NewFreqArray<Literal>(LiteralCtxMap.TreeCount);
-            var icLengthCodeFreq = NewFreqArray<InsertCopyLengthCode>(BlockTypes[Category.InsertCopy].Count);
+            var icLengthCodeFreq = NewFreqArray<InsertCopyLengthCode>(blockTypeInfo[Category.InsertCopy].Count);
             var distanceCodeFreq = NewFreqArray<DistanceCode>(DistanceCtxMap.TreeCount);
 
             var icCommandCount = icCommands.Count;
@@ -156,6 +153,8 @@ namespace BrotliLib.Brotli.Encode{
                 icCommandsFinal.Add(icCommand);
             }
 
+            // Finalize
+
             foreach(var literalList in literalFreq){
                 if (literalList.Count == 0){
                     literalList.Add(new Literal(0));
@@ -169,7 +168,7 @@ namespace BrotliLib.Brotli.Encode{
             }
 
             var header = new MetaBlockCompressionHeader(
-                BlockTypes,
+                blockTypeInfo,
                 DistanceParameters,
                 LiteralContextModes,
                 LiteralCtxMap,

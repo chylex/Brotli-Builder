@@ -42,14 +42,26 @@ namespace BrotliLib.Brotli.Components.Data{
         /// <summary>
         /// Writes a block-switch command if there are no more symbols in the current block type, then decreases the amount of remaining symbols.
         /// </summary>
-        public void WriteCommand(BitWriter writer, Queue<BlockSwitchCommand> commands){
+        public void WriteCommand(BitWriter writer, CategoryMap<Queue<BlockSwitchCommand>> commands){
             if (remaining == 0){
-                BlockSwitchCommand nextCommand = commands.Dequeue();
+                BlockSwitchCommand nextCommand = commands[context.Info.Category].Dequeue();
                 BlockSwitchCommand.Serializer.ToBits(writer, nextCommand, context);
                 UpdateState(nextCommand);
             }
 
             --remaining;
+        }
+
+        /// <summary>
+        /// Simulates processing a block-switch command if there are no more symbols in the current block type, then decreases the amount of remaining symbols. Returns <see cref="CurrentID"/>.
+        /// </summary>
+        public int SimulateCommand(CategoryMap<Queue<BlockSwitchCommand>> commands){
+            if (remaining == 0){
+                UpdateState(commands[context.Info.Category].Dequeue());
+            }
+
+            --remaining;
+            return CurrentID;
         }
     }
 }

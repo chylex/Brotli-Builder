@@ -100,7 +100,7 @@ namespace BrotliLib.Brotli.Components.Contents{
 
             public override int NextBlockID(Category category){
                 BlockSwitchTracker tracker = blockTrackers[category];
-                tracker.WriteCommand(writer, blockSwitchQueues[category]);
+                tracker.WriteCommand(writer, blockSwitchQueues);
                 return tracker.CurrentID;
             }
         }
