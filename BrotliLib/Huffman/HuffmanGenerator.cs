@@ -156,10 +156,6 @@ namespace BrotliLib.Huffman{
             }
         }
 
-        public static SymbolFreq MakeFreq<U>(IGrouping<T, U> grouping){
-            return new SymbolFreq(grouping.Key, grouping.Count());
-        }
-
         /// <summary>
         /// Generates a Huffman tree from a list of symbols with their frequencies. There must be at least 1 symbol in the <paramref name="symbols"/> list.
         /// If the list contains a single node with any frequency, that node will be returned.

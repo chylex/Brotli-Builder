@@ -11,6 +11,7 @@ using BrotliLib.Brotli.Dictionary.Index;
 using BrotliLib.Brotli.State;
 using BrotliLib.Brotli.State.Output;
 using BrotliLib.IO;
+using BrotliLib.Collections;
 
 namespace BrotliLib.Brotli.Encode{
     public sealed class CompressedMetaBlockBuilder{
@@ -192,7 +193,7 @@ namespace BrotliLib.Brotli.Encode{
         }
 
         private static HuffmanTree<T>[] ConstructHuffmanTrees<T>(List<T>[] source) where T : IComparable<T>{
-            return source.Select(list => HuffmanTree<T>.FromSymbols(list)).ToArray();
+            return source.Select(list => HuffmanTree<T>.FromSymbols(new FrequencyList<T>(list))).ToArray();
         }
     }
 }

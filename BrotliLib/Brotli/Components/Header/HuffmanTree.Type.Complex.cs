@@ -161,7 +161,7 @@ namespace BrotliLib.Brotli.Components.Header{
                     }
                 }
                 
-                var lengthEntries = symbolEntries.GroupBy(kvp => kvp.Bits).Select(HuffmanGenerator<byte>.MakeFreq).ToArray();
+                var lengthEntries = symbolEntries.GroupBy(kvp => kvp.Bits).Select(group => new HuffmanGenerator<byte>.SymbolFreq(group.Key, group.Count())).ToArray();
                 var lengthMap = HuffmanGenerator<byte>.FromFrequenciesCanonical(lengthEntries, ComplexLengthCode.LengthMaxDepth).GenerateValueMap();
                 
                 ComplexLengthCode.Write(writer, lengthMap);

@@ -5,6 +5,7 @@ using System.Linq;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.Markers.Data;
+using BrotliLib.Collections;
 using BrotliLib.Huffman;
 using BrotliLib.IO;
 
@@ -17,20 +18,17 @@ namespace BrotliLib.Brotli.Components.Header{
         public const int DefaultMaxDepth = 15;
 
         /// <summary>
-        /// Generates a canonical depth-limited Huffman tree using the frequencies of provided <paramref name="symbols"/>.
+        /// Generates a canonical depth-limited Huffman tree using the provided <paramref name="symbolFrequencies"/>.
         /// </summary>
-        public static HuffmanTree<T> FromSymbols(IReadOnlyList<T> symbols, byte maxDepth = DefaultMaxDepth){
-            if (symbols.Count == 0){
-                throw new ArgumentOutOfRangeException(nameof(symbols), "Cannot generate a tree with no symbols.");
+        public static HuffmanTree<T> FromSymbols(FrequencyList<T> symbolFrequencies, byte maxDepth = DefaultMaxDepth){
+            if (symbolFrequencies.Count == 0){
+                throw new ArgumentOutOfRangeException(nameof(symbolFrequencies), "Cannot generate a tree with no symbols.");
             }
-            else if (symbols.Count == 1){
-                return new HuffmanTree<T>(new HuffmanNode<T>.Leaf(symbols[0]));
+            else if (symbolFrequencies.Count == 1){
+                return new HuffmanTree<T>(new HuffmanNode<T>.Leaf(symbolFrequencies.First()));
             }
             else{
-                var frequencies = symbols.GroupBy(symbol => symbol).Select(group => new HuffmanGenerator<T>.SymbolFreq(group.Key, group.Count())).ToArray();
-                var root = HuffmanGenerator<T>.FromFrequenciesCanonical(frequencies, maxDepth);
-
-                return new HuffmanTree<T>(root);
+                return new HuffmanTree<T>(HuffmanGenerator<T>.FromFrequenciesCanonical(symbolFrequencies.HuffmanFreq, maxDepth));
             }
         }
 
