@@ -60,7 +60,7 @@ namespace BrotliLib.Brotli.Components.Data{
 
         // Types
 
-        internal static IReadOnlyList<DistanceCode> ForValue(DistanceParameters parameters, BrotliGlobalState state, int value){
+        internal static IReadOnlyList<DistanceCode> ForValue(in DistanceParameters parameters, BrotliGlobalState state, int value){
             List<DistanceCode> valid = new List<DistanceCode>();
 
             valid.AddRange(Last.Codes.Where(code => code.CanEncodeValue(state, value)));
@@ -82,7 +82,7 @@ namespace BrotliLib.Brotli.Components.Data{
             return valid;
         }
 
-        private static DistanceCode Create(DistanceParameters parameters, int code){
+        private static DistanceCode Create(in DistanceParameters parameters, int code){
             if (code < Last.Codes.Length){
                 return Last.Codes[code];
             }

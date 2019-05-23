@@ -8,7 +8,7 @@ namespace BrotliLib.Brotli.Components.Header{
     /// Describes two parameters that modify the calculation of distances.
     /// https://tools.ietf.org/html/rfc7932#section-4
     /// </summary>
-    public sealed class DistanceParameters{
+    public readonly struct DistanceParameters{
         public const int MaxPostfixBitCount = 3;
         public const int MaxDirectCodeBits = 15;
 

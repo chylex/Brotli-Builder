@@ -63,7 +63,7 @@ namespace BrotliLib.Brotli.Components.Utils{
             }
         }
 
-        public static IReadOnlyList<DistanceCode> MakeCode(this DistanceInfo info, DistanceParameters parameters, BrotliGlobalState state){
+        public static IReadOnlyList<DistanceCode> MakeCode(this DistanceInfo info, in DistanceParameters parameters, BrotliGlobalState state){
             switch(info){
                 case DistanceInfo.EndsAfterLiterals:
                 case DistanceInfo.ImplicitCodeZero:

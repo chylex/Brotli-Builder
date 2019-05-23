@@ -36,7 +36,7 @@ namespace BrotliLib.Brotli.Components.Data{
             /// <para/>
             /// Finally, the value is offset by (1 + direct code count), as all values below that can be represented using <see cref="DistanceCode.Direct"/> instead.
             /// </summary>
-            public Complex(DistanceParameters parameters, int code) : base(code){
+            public Complex(in DistanceParameters parameters, int code) : base(code){
                 int directCodeCount = parameters.DirectCodeCount;
                 this.postfixBitCount = parameters.PostfixBitCount;
 
