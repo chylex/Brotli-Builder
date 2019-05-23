@@ -1,38 +1,26 @@
 ﻿using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Contents.Compressed;
 using BrotliLib.Brotli.Components.Header;
-using BrotliLib.Collections;
+using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components.Data{
     /// <summary>
     /// Tracks the current block type, and allows reading and writing block-switch commands.
     /// </summary>
-    public sealed class BlockTypeTracker{
-        public int CurrentID { get; private set; }
+    public sealed class BlockSwitchTracker{
+        public int CurrentID { get; private set; } = 0;
 
-        private readonly BlockTypeInfo info;
-        private readonly RingBuffer<int> last;
+        private readonly BlockSwitchCommand.Context context;
         private int remaining;
         
-        public BlockTypeTracker(BlockTypeInfo info){
-            this.info = info;
-            this.last = info.Count == 1 ? null : new RingBuffer<int>(1, 0);
-
-            this.CurrentID = 0;
+        public BlockSwitchTracker(BlockTypeInfo info){
+            this.context = info.Count == 1 ? null : new BlockSwitchCommand.Context(info, new BlockTypeTracker(info.Count));
             this.remaining = info.InitialLength;
         }
         
         private void UpdateState(BlockSwitchCommand command){
-            int newTypeCode = command.TypeCode;
-
-            switch(newTypeCode){
-                case 0: CurrentID = last.Back; break;
-                case 1: CurrentID = (1 + last.Front) % info.Count; break;
-                default: CurrentID = newTypeCode - 2; break;
-            }
-
-            last.Push(CurrentID);
+            CurrentID = command.Type;
             remaining = command.Length;
         }
 
@@ -43,7 +31,7 @@ namespace BrotliLib.Brotli.Components.Data{
             BlockSwitchCommand nextCommand = null;
 
             if (remaining == 0){
-                nextCommand = BlockSwitchCommand.Serializer.FromBits(reader, info);
+                nextCommand = BlockSwitchCommand.Serializer.FromBits(reader, context);
                 UpdateState(nextCommand);
             }
 
@@ -57,7 +45,7 @@ namespace BrotliLib.Brotli.Components.Data{
         public void WriteCommand(BitWriter writer, Queue<BlockSwitchCommand> commands){
             if (remaining == 0){
                 BlockSwitchCommand nextCommand = commands.Dequeue();
-                BlockSwitchCommand.Serializer.ToBits(writer, nextCommand, info);
+                BlockSwitchCommand.Serializer.ToBits(writer, nextCommand, context);
                 UpdateState(nextCommand);
             }
 

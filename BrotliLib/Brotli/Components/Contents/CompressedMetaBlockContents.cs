@@ -47,12 +47,12 @@ namespace BrotliLib.Brotli.Components.Contents{
 
             public bool NeedsMoreData => bytesWritten < MetaBlock.DataLength.UncompressedBytes;
 
-            protected readonly CategoryMap<BlockTypeTracker> blockTrackers;
+            protected readonly CategoryMap<BlockSwitchTracker> blockTrackers;
             private int bytesWritten;
 
             protected DataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header) : base(wrapped.MetaBlock, wrapped.State){
                 this.Header = header;
-                this.blockTrackers = Header.BlockTypes.Select((_, info) => new BlockTypeTracker(info));
+                this.blockTrackers = Header.BlockTypes.Select((_, info) => new BlockSwitchTracker(info));
             }
 
             public abstract int NextBlockID(Category category);
@@ -78,7 +78,7 @@ namespace BrotliLib.Brotli.Components.Contents{
             }
 
             public override int NextBlockID(Category category){
-                BlockTypeTracker tracker = blockTrackers[category];
+                BlockSwitchTracker tracker = blockTrackers[category];
                 BlockSwitchCommand nextCommand = tracker.ReadCommand(reader);
 
                 if (nextCommand != null){
@@ -99,7 +99,7 @@ namespace BrotliLib.Brotli.Components.Contents{
             }
 
             public override int NextBlockID(Category category){
-                BlockTypeTracker tracker = blockTrackers[category];
+                BlockSwitchTracker tracker = blockTrackers[category];
                 tracker.WriteCommand(writer, blockSwitchQueues[category]);
                 return tracker.CurrentID;
             }
