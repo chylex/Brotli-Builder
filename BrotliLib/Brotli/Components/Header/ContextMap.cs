@@ -5,6 +5,7 @@ using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.Collections;
 using BrotliLib.IO;
+using BrotliLib.Numbers;
 
 namespace BrotliLib.Brotli.Components.Header{
     /// <summary>
@@ -75,6 +76,19 @@ namespace BrotliLib.Brotli.Components.Header{
                 this.category = category;
                 this.treeCount = treeCount;
                 this.contextMap = new byte[blockTypeCount * category.HuffmanTreesPerBlockType()];
+            }
+
+            public Builder Set(int index, byte value){
+                contextMap[index] = value;
+                return this;
+            }
+
+            public Builder Set(Range range, byte value){
+                for(int index = range.First; index <= range.Last; index++){
+                    contextMap[index] = value;
+                }
+
+                return this;
             }
 
             internal void Apply(Action<byte[]> action){
