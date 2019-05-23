@@ -104,9 +104,9 @@ namespace BrotliLib.Brotli.Encode{
 
             /////
             
-            var literalLists = NewListArray<Literal>(LiteralCtxMap.TreeCount);
-            var icLengthCodeLists = NewListArray<InsertCopyLengthCode>(BlockTypes[Category.InsertCopy].Count);
-            var distanceCodeLists = NewListArray<DistanceCode>(DistanceCtxMap.TreeCount);
+            var literalFreq = NewFreqArray<Literal>(LiteralCtxMap.TreeCount);
+            var icLengthCodeFreq = NewFreqArray<InsertCopyLengthCode>(BlockTypes[Category.InsertCopy].Count);
+            var distanceCodeFreq = NewFreqArray<DistanceCode>(DistanceCtxMap.TreeCount);
 
             var icCommandCount = icCommands.Count;
             var icCommandsFinal = new List<InsertCopyCommand>(icCommandCount);
@@ -120,7 +120,7 @@ namespace BrotliLib.Brotli.Encode{
                     int contextID = state.NextLiteralContextID(LiteralContextModes[blockID]);
                     int treeID = LiteralCtxMap.DetermineTreeID(blockID, contextID);
 
-                    literalLists[treeID].Add(literal);
+                    literalFreq[treeID].Add(literal);
                     state.OutputLiteral(literal);
                 }
                 
@@ -139,7 +139,7 @@ namespace BrotliLib.Brotli.Encode{
                         int contextID = icLengthValues.DistanceContextID;
                         int treeID = DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
-                        var codeList = distanceCodeLists[treeID];
+                        var codeList = distanceCodeFreq[treeID];
                         codeList.Add(distanceCode = distanceCodes.FirstOrDefault(codeList.Contains) ?? distanceCodes[0]); // TODO figure out a better strategy for picking the code
                     }
                     
@@ -152,17 +152,17 @@ namespace BrotliLib.Brotli.Encode{
                     state.OutputCopy(icCommand.CopyLength, icCommand.CopyDistance);
                 }
 
-                icLengthCodeLists[icBlockID].Add(icLengthCode);
+                icLengthCodeFreq[icBlockID].Add(icLengthCode);
                 icCommandsFinal.Add(icCommand);
             }
 
-            foreach(var literalList in literalLists){
+            foreach(var literalList in literalFreq){
                 if (literalList.Count == 0){
                     literalList.Add(new Literal(0));
                 }
             }
 
-            foreach(var distanceCodeList in distanceCodeLists){
+            foreach(var distanceCodeList in distanceCodeFreq){
                 if (distanceCodeList.Count == 0){
                     distanceCodeList.Add(DistanceCode.Zero);
                 }
@@ -174,9 +174,9 @@ namespace BrotliLib.Brotli.Encode{
                 LiteralContextModes,
                 LiteralCtxMap,
                 DistanceCtxMap,
-                ConstructHuffmanTrees(literalLists),
-                ConstructHuffmanTrees(icLengthCodeLists),
-                ConstructHuffmanTrees(distanceCodeLists)
+                ConstructHuffmanTrees(literalFreq),
+                ConstructHuffmanTrees(icLengthCodeFreq),
+                ConstructHuffmanTrees(distanceCodeFreq)
             );
 
             var metaBlock = new MetaBlock.Compressed(isLast: false, new DataLength(OutputSize)){
@@ -188,12 +188,12 @@ namespace BrotliLib.Brotli.Encode{
 
         // Helpers
 
-        private static List<T>[] NewListArray<T>(int arraySize){
-            return Enumerable.Range(0, arraySize).Select(_ => new List<T>()).ToArray();
+        private static FrequencyList<T>[] NewFreqArray<T>(int arraySize) where T : IComparable<T>{
+            return Enumerable.Range(0, arraySize).Select(_ => new FrequencyList<T>()).ToArray();
         }
 
-        private static HuffmanTree<T>[] ConstructHuffmanTrees<T>(List<T>[] source) where T : IComparable<T>{
-            return source.Select(list => HuffmanTree<T>.FromSymbols(new FrequencyList<T>(list))).ToArray();
+        private static HuffmanTree<T>[] ConstructHuffmanTrees<T>(FrequencyList<T>[] source) where T : IComparable<T>{
+            return source.Select(list => HuffmanTree<T>.FromSymbols(list)).ToArray();
         }
     }
 }
