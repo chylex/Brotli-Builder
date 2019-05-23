@@ -20,7 +20,7 @@ namespace BrotliCalc.Commands{
             int failedFiles = 0;
 
             using(var table = new Table.CSV(args[1], new []{
-                "File", "Quality", "Original Bytes", "Reserialize Bytes", "Rebuild Bytes"
+                "File", "Quality", "Original Bytes", "Reserialize Bytes", "Rebuild Bytes", "Reserialize-Original", "Rebuild-Original"
             })){
                 long sumOriginal = 0;
                 long sumReserialize = 0;
@@ -29,7 +29,7 @@ namespace BrotliCalc.Commands{
                 foreach(var file in Brotli.DecompressPath(args[0])){
                     var bfs = file.Structure;
 
-                    long? originalBytes = file.SizeBytes;
+                    int? originalBytes = (int?)file.SizeBytes;
                     int? reserializeBytes = null;
                     int? rebuildBytes = null;
 
@@ -44,7 +44,7 @@ namespace BrotliCalc.Commands{
                     }
                     
                     ++totalFiles;
-                    table.AddRow(file.Name, file.Quality, originalBytes, reserializeBytes, rebuildBytes);
+                    table.AddRow(file.Name, file.Quality, originalBytes, reserializeBytes, rebuildBytes, reserializeBytes - originalBytes, rebuildBytes - originalBytes); // subtraction propagates null
 
                     if (originalBytes.HasValue && reserializeBytes.HasValue && rebuildBytes.HasValue){
                         sumOriginal += originalBytes.Value;
@@ -53,7 +53,7 @@ namespace BrotliCalc.Commands{
                     }
                 }
                 
-                table.AddRow("(Successes)", "-", sumOriginal, sumReserialize, sumRebuild);
+                table.AddRow("(Successes)", "-", sumOriginal, sumReserialize, sumRebuild, sumReserialize - sumOriginal, sumRebuild - sumOriginal);
             }
 
             return "Processed " + totalFiles + " file(s) with " + failedFiles + " error(s).";
