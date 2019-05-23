@@ -52,7 +52,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                 var info = context.Info;
 
                 int typeCode = reader.ReadValue(info.TypeCodeTree.Root, "BTYPE (code)");
-                int typeValue = context.Tracker.FindValue(typeCode);
+                int typeValue = reader.MarkValue("BTYPE (value)", () => context.Tracker.FindValue(typeCode));
                 
                 var lengthCode = reader.ReadValue(info.LengthCodeTree.Root, "BLEN (code)");
                 int lengthValue = reader.ReadValue(BlockLengthCode.Serializer, lengthCode, "BLEN (value)");
