@@ -18,7 +18,7 @@ namespace BrotliLib.Brotli.Components.Contents{
         public CompressedMetaBlockContents(MetaBlockCompressionHeader header, IList<InsertCopyCommand> insertCopyCommands, BlockSwitchCommandMutableMap blockSwitchCommands){
             this.Header = header;
             this.InsertCopyCommands = insertCopyCommands.ToArray();
-            this.BlockSwitchCommands = blockSwitchCommands.Select<IReadOnlyList<BlockSwitchCommand>>((_, list) => list.ToArray());
+            this.BlockSwitchCommands = blockSwitchCommands.Select<IReadOnlyList<BlockSwitchCommand>>(list => list.ToArray());
         }
 
         // Object
@@ -52,7 +52,7 @@ namespace BrotliLib.Brotli.Components.Contents{
 
             protected DataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header) : base(wrapped.MetaBlock, wrapped.State){
                 this.Header = header;
-                this.blockTrackers = Header.BlockTypes.Select((_, info) => new BlockSwitchTracker(info));
+                this.blockTrackers = Header.BlockTypes.Select(info => new BlockSwitchTracker(info));
             }
 
             public abstract int NextBlockID(Category category);
@@ -95,7 +95,7 @@ namespace BrotliLib.Brotli.Components.Contents{
 
             public WriterDataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header, BlockSwitchCommandMap blockSwitchCommands, BitWriter writer) : base(wrapped, header){
                 this.writer = writer;
-                this.blockSwitchQueues = blockSwitchCommands.Select((_, list) => new Queue<BlockSwitchCommand>(list));
+                this.blockSwitchQueues = blockSwitchCommands.Select(list => new Queue<BlockSwitchCommand>(list));
             }
 
             public override int NextBlockID(Category category){

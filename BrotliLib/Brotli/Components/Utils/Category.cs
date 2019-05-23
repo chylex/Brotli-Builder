@@ -60,8 +60,8 @@ namespace BrotliLib.Brotli.Components.Utils{
             }
         }
 
-        public CategoryMap<U> Select<U>(Func<Category, T, U> mapper){
-            return new CategoryMap<U>(category => mapper(category, this[category]));
+        public CategoryMap<U> Select<U>(Func<T, U> mapper){
+            return new CategoryMap<U>(category => mapper(this[category]));
         }
     }
 }

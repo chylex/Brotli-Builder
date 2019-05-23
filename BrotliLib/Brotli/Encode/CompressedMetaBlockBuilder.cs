@@ -91,8 +91,8 @@ namespace BrotliLib.Brotli.Encode{
 
             ///// TODO reorganize
 
-            var blockTrackers = BlockTypes.Select((_, info) => new BlockSwitchTracker(info));
-            var blockSwitchQueues = bsCommands.Select((_, list) => new Queue<BlockSwitchCommand>(list));
+            var blockTrackers = BlockTypes.Select(info => new BlockSwitchTracker(info));
+            var blockSwitchQueues = bsCommands.Select(list => new Queue<BlockSwitchCommand>(list));
             var nullWriter = new BitStream().GetWriter();
 
             int NextBlockID(Category category){
