@@ -111,11 +111,16 @@ namespace BrotliLib.Brotli.Components.Header{
                     BitStream path = obj.FindPathOrNull(symbol);
 
                     byte length = (byte)(path?.Length ?? 0);
-                    symbolEntries.Add(new HuffmanGenerator<T>.Entry(symbol, length));
                     
                     if (length > 0){
                         bitSpaceRemaining -= SymbolBitSpace >> length;
                     }
+                    else if (symbolIndex == symbolCount - 1){
+                        length = 15; // if the tree is incomplete, a zero lengh last symbol would generate an ending length code 0 or 17, which Brotli spec forbids
+                                     // if the tree is complete and the final symbol was supposed to be a 0, the writer will run out of bit space before it writes the final symbol
+                    }
+
+                    symbolEntries.Add(new HuffmanGenerator<T>.Entry(symbol, length));
                 }
 
                 int ProcessRepetitions(int length, int multiplier){
