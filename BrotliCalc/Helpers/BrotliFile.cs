@@ -1,34 +1,58 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using BrotliLib.Brotli;
-using IOPath = System.IO.Path;
 
 namespace BrotliCalc.Helpers{
-    class BrotliFile{
-        public string Path { get; set; }
-        public string Name { get; set; }
-        public int? Quality { get; set; }
-        public BrotliFileStructure Structure { get; set; }
+    abstract class BrotliFile{
+        public string Path { get; }
+        public string Name { get; }
 
-        public string EstimatedUncompressedPath{
-            get{
-                return IOPath.Combine(IOPath.GetDirectoryName(Path), IOPath.GetFileNameWithoutExtension(Name));
-            }
-        }
-
-        public byte[] CompressedBytes{
-            get{
-                return File.ReadAllBytes(Path);
-            }
-        }
-
-        public long? SizeBytes{
+        public byte[] Contents{
             get{
                 try{
-                    return new FileInfo(Path).Length;
-                }catch(Exception){
+                    return File.ReadAllBytes(Path);
+                }catch(Exception ex){
+                    Debug.WriteLine(ex);
                     return null;
                 }
+            }
+        }
+
+        public int? SizeBytes{
+            get{
+                try{
+                    return (int)new FileInfo(Path).Length;
+                }catch(Exception ex){
+                    Debug.WriteLine(ex);
+                    return null;
+                }
+            }
+        }
+
+        protected BrotliFile(string path, string name){
+            this.Path = path;
+            this.Name = name;
+        }
+
+        // Types
+
+        internal class Uncompressed : BrotliFile{
+            public Uncompressed(string path, string name) : base(path, name){}
+        }
+
+        internal class Compressed : BrotliFile{
+            public string Identifier { get; }
+
+            public BrotliFileStructure Structure{
+                get{
+                    Debug.WriteLine($"Decompressing file {Name}.{Identifier}...");
+                    return BrotliFileStructure.FromBytes(Contents);
+                }
+            }
+
+            public Compressed(string path, string name, string identifier) : base(path, name){
+                this.Identifier = identifier;
             }
         }
     }

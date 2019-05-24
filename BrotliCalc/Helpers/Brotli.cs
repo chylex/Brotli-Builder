@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Numbers;
 
@@ -13,46 +12,47 @@ namespace BrotliCalc.Helpers{
     static class Brotli{
         private const int CompressionFileLimit = 2000;
         private const string CompressedFileExtension = ".br";
-
-        private static readonly Regex RegexFileQuality = new Regex(@"\.(\d{1,2})\.br$");
+        
+        private static readonly Regex RegexCompressionIdentifier = new Regex(@"\.([^.]+)\.br$");
         private static readonly Range QualityRange = new Range(0, 11);
 
-        private static string GetSortKey(string path){
-            return RegexFileQuality.Replace(path, match => match.Success ? ".br." + match.Groups[1].Value.PadLeft(2, '0') : ".br");
+        private static string GetUncompressedName(string path){
+            return Path.GetExtension(path) == CompressedFileExtension ? RegexCompressionIdentifier.Replace(path, "") : path;
         }
 
-        private static int? TryDeduceQuality(string name){
-            var match = RegexFileQuality.Match(name);
-            return match.Success && int.TryParse(match.Groups[1].Value, out int quality) && QualityRange.Contains(quality) ? quality : (int?)null;
+        private static bool IsUncompressed(string path){
+            return Path.GetExtension(path) != CompressedFileExtension;
         }
 
-        public static IEnumerable<BrotliFile> DecompressPath(string path, string pattern = "*" + CompressedFileExtension){
+        private static string GetSortKey(BrotliFile.Compressed file){
+            return file.Identifier.PadLeft(2, '0');
+        }
+
+        public static IEnumerable<BrotliFileGroup> ListPath(string path){
             int fullPathLength = Path.GetFullPath(path).Length;
 
-            BrotliFile ReadFile(string file){
-                Debug.WriteLine($"Decompressing file {file}...");
-
-                string name = file.Substring(fullPathLength).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-                int? quality = TryDeduceQuality(name);
-
-                if (quality != null){
-                    name = RegexFileQuality.Replace(name, ".br");
-                }
-
-                return new BrotliFile{
-                    Path = file,
-                    Name = name,
-                    Quality = quality,
-                    Structure = BrotliFileStructure.FromBytes(File.ReadAllBytes(file))
-                };
+            string GetRelativePath(string file){
+                return file.Substring(fullPathLength).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             }
 
-            if (File.GetAttributes(path).HasFlag(FileAttributes.Directory)){
-                return Directory.EnumerateFiles(path, pattern, SearchOption.AllDirectories).OrderBy(GetSortKey).Select(ReadFile);
+            BrotliFile.Compressed ConstructCompressed(string file){
+                var match = RegexCompressionIdentifier.Match(file);
+                var identifier = match.Success ? match.Groups[1].Value : "?";
+
+                return new BrotliFile.Compressed(file, GetUncompressedName(GetRelativePath(file)), identifier);
             }
-            else{
-                return new []{ ReadFile(path) };
+
+            BrotliFileGroup ProcessGroup(IGrouping<string, string> group){
+                var uncompressed = group.FirstOrDefault(IsUncompressed);
+                var compressed = group.Except(new string[]{ uncompressed });
+                
+                return new BrotliFileGroup(
+                    new BrotliFile.Uncompressed(uncompressed, GetRelativePath(uncompressed)),
+                    compressed.Select(ConstructCompressed).OrderBy(GetSortKey).ToArray()
+                );
             }
+
+            return Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories).GroupBy(GetUncompressedName).Select(ProcessGroup);
         }
 
         public static int CompressPath(string path, int quality, WindowSize windowSize){
@@ -67,7 +67,7 @@ namespace BrotliCalc.Helpers{
             IList<string> filePaths;
             
             if (File.GetAttributes(path).HasFlag(FileAttributes.Directory)){
-                filePaths = Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories).Where(file => Path.GetExtension(file) != CompressedFileExtension).ToList();
+                filePaths = ListPath(path).Select(group => group.Uncompressed.Path).ToArray();
             }
             else{
                 filePaths = new []{ path };
@@ -81,7 +81,7 @@ namespace BrotliCalc.Helpers{
 
             try{
                 foreach(string file in filePaths){
-                    Debug.WriteLine($"Compressing file {file}...");
+                    Debug.WriteLine($"Compressing file {file} (quality {quality})...");
 
                     using(Process process = Process.Start("brotli", argPrefix + '"' + file + '"')){
                         process.Start();
