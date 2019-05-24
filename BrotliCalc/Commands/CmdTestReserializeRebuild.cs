@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using BrotliCalc.Helpers;
 using BrotliImpl.Transformers;
@@ -26,30 +25,32 @@ namespace BrotliCalc.Commands{
                 long sumReserialize = 0;
                 long sumRebuild = 0;
 
-                foreach(var file in Brotli.DecompressPath(args[0])){
-                    var bfs = file.Structure;
+                foreach(var group in Brotli.ListPath(args[0])){
+                    var originalContents = group.Uncompressed.Contents;
 
-                    int? originalBytes = (int?)file.SizeBytes;
-                    int? reserializeBytes = null;
-                    int? rebuildBytes = null;
+                    foreach(var file in group.Compressed){
+                        var bfs = file.Structure;
 
-                    try{
-                        var originalContents = File.ReadAllBytes(file.EstimatedUncompressedPath);
+                        int? originalBytes = file.SizeBytes;
+                        int? reserializeBytes = null;
+                        int? rebuildBytes = null;
 
-                        reserializeBytes = GetBytesAndValidate(bfs, originalContents);
-                        rebuildBytes = GetBytesAndValidate(bfs.Transform(new TransformRebuild()), originalContents);
-                    }catch(Exception e){
-                        Debug.WriteLine(e.ToString());
-                        ++failedFiles;
-                    }
-                    
-                    ++totalFiles;
-                    table.AddRow(file.Name, file.Quality, originalBytes, reserializeBytes, rebuildBytes, reserializeBytes - originalBytes, rebuildBytes - originalBytes); // subtraction propagates null
+                        try{
+                            reserializeBytes = GetBytesAndValidate(bfs, originalContents);
+                            rebuildBytes = GetBytesAndValidate(bfs.Transform(new TransformRebuild()), originalContents);
+                        }catch(Exception e){
+                            Debug.WriteLine(e.ToString());
+                            ++failedFiles;
+                        }
+                        
+                        ++totalFiles;
+                        table.AddRow(file.Name, file.Identifier, originalBytes, reserializeBytes, rebuildBytes, reserializeBytes - originalBytes, rebuildBytes - originalBytes); // subtraction propagates null
 
-                    if (originalBytes.HasValue && reserializeBytes.HasValue && rebuildBytes.HasValue){
-                        sumOriginal += originalBytes.Value;
-                        sumReserialize += reserializeBytes.Value;
-                        sumRebuild += rebuildBytes.Value;
+                        if (originalBytes.HasValue && reserializeBytes.HasValue && rebuildBytes.HasValue){
+                            sumOriginal += originalBytes.Value;
+                            sumReserialize += reserializeBytes.Value;
+                            sumRebuild += rebuildBytes.Value;
+                        }
                     }
                 }
                 
