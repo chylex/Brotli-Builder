@@ -8,31 +8,33 @@ namespace BrotliCalc.Helpers{
         public string Path { get; }
         public string Name { get; }
 
-        public byte[] Contents{
-            get{
+        public byte[] Contents => contentsLazy.Value;
+        public int? SizeBytes => sizeBytesLazy.Value;
+
+        private readonly Lazy<byte[]> contentsLazy;
+        private readonly Lazy<int?> sizeBytesLazy;
+
+        protected BrotliFile(string path, string name){
+            this.Path = path;
+            this.Name = name;
+
+            this.contentsLazy = new Lazy<byte[]>(() => {
                 try{
                     return File.ReadAllBytes(Path);
                 }catch(Exception ex){
                     Debug.WriteLine(ex);
                     return null;
                 }
-            }
-        }
+            }, isThreadSafe: true);
 
-        public int? SizeBytes{
-            get{
+            this.sizeBytesLazy = new Lazy<int?>(() => {
                 try{
                     return (int)new FileInfo(Path).Length;
                 }catch(Exception ex){
                     Debug.WriteLine(ex);
                     return null;
                 }
-            }
-        }
-
-        protected BrotliFile(string path, string name){
-            this.Path = path;
-            this.Name = name;
+            }, isThreadSafe: false);
         }
 
         // Types

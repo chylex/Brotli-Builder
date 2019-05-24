@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using BrotliCalc.Helpers;
 using BrotliImpl.Transformers;
-using BrotliLib.Brotli;
 using BrotliLib.Numbers;
 
 namespace BrotliCalc.Commands{
@@ -26,8 +24,6 @@ namespace BrotliCalc.Commands{
                 long sumRebuild = 0;
 
                 foreach(var group in Brotli.ListPath(args[0])){
-                    var originalContents = group.Uncompressed.Contents;
-
                     foreach(var file in group.Compressed){
                         var bfs = file.Structure;
 
@@ -36,8 +32,8 @@ namespace BrotliCalc.Commands{
                         int? rebuildBytes = null;
 
                         try{
-                            reserializeBytes = GetBytesAndValidate(bfs, originalContents);
-                            rebuildBytes = GetBytesAndValidate(bfs.Transform(new TransformRebuild()), originalContents);
+                            reserializeBytes = group.CountBytesAndValidate(bfs);
+                            rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild()));
                         }catch(Exception e){
                             Debug.WriteLine(e.ToString());
                             ++failedFiles;
@@ -58,17 +54,6 @@ namespace BrotliCalc.Commands{
             }
 
             return "Processed " + totalFiles + " file(s) with " + failedFiles + " error(s).";
-        }
-
-        private static int GetBytesAndValidate(BrotliFileStructure bfs, byte[] originalContents){
-            var serialized = bfs.Serialize();
-            var output = bfs.GetDecompressionState(serialized, enableMarkers: false);
-
-            if (!output.AsBytes.SequenceEqual(originalContents)){
-                throw new InvalidOperationException("Mismatched output bytes.");
-            }
-
-            return (7 + serialized.Length) / 8;
         }
     }
 }
