@@ -66,6 +66,7 @@
             this.textBoxContext.Size = new System.Drawing.Size(588, 372);
             this.textBoxContext.TabIndex = 1;
             this.textBoxContext.TabLength = 3;
+            this.textBoxContext.WordWrapIndent = 1;
             this.textBoxContext.Zoom = 100;
             // 
             // labelMarkerInfo

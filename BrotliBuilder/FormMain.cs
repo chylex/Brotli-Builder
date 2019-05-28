@@ -267,6 +267,13 @@ namespace BrotliBuilder{
             brotliFilePanelGenerated.WordWrapOutput = brotliFilePanelOriginal.WordWrapOutput = enable;
         }
 
+        private void menuItemWrapMarkerInfo_Click(object sender, EventArgs e){
+            bool enable = !menuItemWrapMarkerInfo.Checked;
+            menuItemWrapMarkerInfo.Checked = enable;
+
+            brotliMarkerInfoPanel.WordWrap = enable;
+        }
+
         #endregion
         
         #region Menu events (Tools)

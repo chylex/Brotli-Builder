@@ -18,6 +18,10 @@ namespace BrotliBuilder.Components{
             { StyleNormalBlack, StyleBoldBlack }
         };
 
+        public bool WordWrap{
+            set => textBoxContext.WordWrap = value;
+        }
+
         public BrotliMarkerInfoPanel(){
             InitializeComponent();
             textBoxContext.DefaultStyle = StyleNormalGray;
