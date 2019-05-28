@@ -43,6 +43,7 @@
             this.menuItemTransform = new System.Windows.Forms.MenuItem();
             this.menuItemTransformRebuild = new System.Windows.Forms.MenuItem();
             this.menuItemTransformTestDistanceParams = new System.Windows.Forms.MenuItem();
+            this.menuItemTransformSplitInsertCopyLengths = new System.Windows.Forms.MenuItem();
             this.flowPanelBlocks = new System.Windows.Forms.FlowLayoutPanel();
             this.statusBar = new System.Windows.Forms.StatusBar();
             this.statusBarPanelPadding1 = new System.Windows.Forms.StatusBarPanel();
@@ -198,7 +199,8 @@
             this.menuItemTransform.Index = 4;
             this.menuItemTransform.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItemTransformRebuild,
-            this.menuItemTransformTestDistanceParams});
+            this.menuItemTransformTestDistanceParams,
+            this.menuItemTransformSplitInsertCopyLengths});
             this.menuItemTransform.Text = "Transfor&m";
             // 
             // menuItemTransformRebuild
@@ -212,6 +214,12 @@
             this.menuItemTransformTestDistanceParams.Index = 1;
             this.menuItemTransformTestDistanceParams.Text = "Test Distance Parameters";
             this.menuItemTransformTestDistanceParams.Click += new System.EventHandler(this.menuItemTransformTestDistanceParams_Click);
+            // 
+            // menuItemTransformSplitInsertCopyLengths
+            // 
+            this.menuItemTransformSplitInsertCopyLengths.Index = 2;
+            this.menuItemTransformSplitInsertCopyLengths.Text = "Split Insert Copy Lengths";
+            this.menuItemTransformSplitInsertCopyLengths.Click += new System.EventHandler(this.menuItemTransformSplitInsertCopyLengths_Click);
             // 
             // flowPanelBlocks
             // 
@@ -457,6 +465,7 @@
         private Components.BrotliMarkerInfoPanel brotliMarkerInfoPanel;
         private System.Windows.Forms.Label labelFileStructure;
         private System.Windows.Forms.MenuItem menuItemMarkerInfo;
+        private System.Windows.Forms.MenuItem menuItemTransformSplitInsertCopyLengths;
         private System.Windows.Forms.MenuItem menuItemWrapMarkerInfo;
     }
 }
