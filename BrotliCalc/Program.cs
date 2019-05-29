@@ -89,8 +89,14 @@ namespace BrotliCalc{
                 lastInput = input;
 
                 try{
+                    var stopwatch = Stopwatch.StartNew();
+                    var result = command.Process(args);
+                    stopwatch.Stop();
+
                     Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine(command.Process(args));
+                    Console.WriteLine(result);
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.WriteLine($"Command finished in {stopwatch.ElapsedMilliseconds} ms.");
                 }catch(Exception e){
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Error processing the command:");
@@ -98,7 +104,7 @@ namespace BrotliCalc{
                     Console.WriteLine(e.Message);
                     Debug.Print(e.ToString());
                 }
-
+                
                 Console.WriteLine();
             }
         }
