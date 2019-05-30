@@ -21,4 +21,10 @@
     <EmbeddedResource Include="Resources\dict" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="LICENSE-BROTLI.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -27,7 +27,7 @@
   </ItemGroup>
   
   <Target Name="CopyResources" AfterTargets="Build">
-    <Copy SourceFiles="Resources\brotli.exe;Resources\dict" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="Resources\brotli.exe;Resources\dict;Resources\LICENSE-BROTLI.txt" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>

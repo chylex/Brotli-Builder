@@ -167,5 +167,12 @@
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\LICENSE-BROTLI.txt" />
+    <Content Include="Resources\LICENSE-FCTB.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /Y "$(ProjectDir)Resources\*" "$(TargetDir)"</PostBuildEvent>
+  </PropertyGroup>
 </Project>
