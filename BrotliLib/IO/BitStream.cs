@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using BrotliLib.IO.Reader;
+using BrotliLib.IO.Writer;
 
 namespace BrotliLib.IO{
     public class BitStream : IEnumerable<bool>{
@@ -123,7 +125,7 @@ namespace BrotliLib.IO{
         }
 
         /// <summary>
-        /// Appends a byte to the end of the stream. Intended to use in <see cref="BitWriter"/> only after the stream is byte-aligned, otherwise the behavior is undefined.
+        /// Appends a byte to the end of the stream. Intended to use in <see cref="IBitWriter"/> only after the stream is byte-aligned, otherwise the behavior is undefined.
         /// </summary>
         /// <param name="value">Input byte.</param>
         internal void AddByte(byte value){
@@ -134,7 +136,7 @@ namespace BrotliLib.IO{
         }
         
         /// <summary>
-        /// Appends 8 bytes to the end of the stream. Intended to use in <see cref="BitWriter"/> only after the stream is long-aligned, otherwise the behavior is undefined.
+        /// Appends 8 bytes to the end of the stream. Intended to use in <see cref="IBitWriter"/> only after the stream is long-aligned, otherwise the behavior is undefined.
         /// </summary>
         /// <param name="value">Input bytes combined into an <see cref="ulong"/>.</param>
         internal void AddLong(ulong value){
@@ -145,9 +147,9 @@ namespace BrotliLib.IO{
         }
 
         /// <summary>
-        /// Returns a <see cref="BitWriter"/> instance that appends to the end of the stream.
+        /// Returns an <see cref="IBitWriter"/> instance that appends to the end of the stream.
         /// </summary>
-        public BitWriter GetWriter(){
+        public IBitWriter GetWriter(){
             return new BitWriter(this);
         }
 
@@ -175,9 +177,9 @@ namespace BrotliLib.IO{
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
-        /// Returns a <see cref="BitReader"/> instance that traverses the stream.
+        /// Returns an <see cref="IBitReader"/> instance that traverses the stream.
         /// </summary>
-        public BitReader GetReader(){
+        public IBitReader GetReader(){
             return new BitReader(this);
         }
 

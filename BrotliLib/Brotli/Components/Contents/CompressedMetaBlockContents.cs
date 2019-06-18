@@ -5,7 +5,9 @@ using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.Markers.Data;
+using BrotliLib.Brotli.Markers.Reader;
 using BrotliLib.IO;
+using BrotliLib.IO.Writer;
 using BlockSwitchCommandMap = BrotliLib.Brotli.Components.Utils.CategoryMap<System.Collections.Generic.IReadOnlyList<BrotliLib.Brotli.Components.Contents.Compressed.BlockSwitchCommand>>;
 using BlockSwitchCommandMutableMap = BrotliLib.Brotli.Components.Utils.CategoryMap<System.Collections.Generic.IList<BrotliLib.Brotli.Components.Contents.Compressed.BlockSwitchCommand>>;
 
@@ -70,9 +72,9 @@ namespace BrotliLib.Brotli.Components.Contents{
         private class ReaderDataContext : DataContext{
             public BlockSwitchCommandMutableMap BlockSwitchCommands { get; }
             
-            private readonly MarkedBitReader reader;
+            private readonly IMarkedBitReader reader;
 
-            public ReaderDataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header, MarkedBitReader reader) : base(wrapped, header){
+            public ReaderDataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header, IMarkedBitReader reader) : base(wrapped, header){
                 this.reader = reader;
                 this.BlockSwitchCommands = new CategoryMap<IList<BlockSwitchCommand>>(_ => new List<BlockSwitchCommand>());
             }
@@ -90,10 +92,10 @@ namespace BrotliLib.Brotli.Components.Contents{
         }
 
         private class WriterDataContext : DataContext{
-            private readonly BitWriter writer;
+            private readonly IBitWriter writer;
             private readonly CategoryMap<Queue<BlockSwitchCommand>> blockSwitchQueues;
 
-            public WriterDataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header, BlockSwitchCommandMap blockSwitchCommands, BitWriter writer) : base(wrapped, header){
+            public WriterDataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header, BlockSwitchCommandMap blockSwitchCommands, IBitWriter writer) : base(wrapped, header){
                 this.writer = writer;
                 this.blockSwitchQueues = blockSwitchCommands.Select(list => new Queue<BlockSwitchCommand>(list));
             }

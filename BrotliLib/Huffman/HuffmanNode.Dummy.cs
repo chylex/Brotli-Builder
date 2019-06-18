@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using BrotliLib.IO;
+using BrotliLib.IO.Reader;
 
 namespace BrotliLib.Huffman{
     partial class HuffmanNode<T>{
@@ -9,7 +10,7 @@ namespace BrotliLib.Huffman{
         public sealed class Dummy : HuffmanNode<T>{
             public override int SymbolCount => 0;
 
-            public override T LookupValue(BitReader bits){
+            public override T LookupValue(IBitReader bits){
                 return default;
             }
 

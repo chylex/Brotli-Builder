@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BrotliLib.IO;
+using BrotliLib.IO.Reader;
 
 namespace BrotliLib.Huffman{
     partial class HuffmanNode<T>{
@@ -19,7 +20,7 @@ namespace BrotliLib.Huffman{
                 this.symbolCount = left.SymbolCount + right.SymbolCount;
             }
 
-            public override T LookupValue(BitReader bits){
+            public override T LookupValue(IBitReader bits){
                 try{
                     return (bits.NextBit() ? right : left).LookupValue(bits);
                 }catch(IndexOutOfRangeException){

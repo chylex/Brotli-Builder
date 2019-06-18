@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.Markers.Data;
+using BrotliLib.Brotli.Markers.Reader;
 using BrotliLib.Huffman;
 using BrotliLib.IO;
+using BrotliLib.IO.Writer;
 using ComplexLengthNode = BrotliLib.Huffman.HuffmanNode<byte>;
 
 namespace BrotliLib.Brotli.Components.Header{
@@ -263,7 +265,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Serialization
 
-        public static void Write(BitWriter writer, IDictionary<byte, BitStream> lengthMap){
+        public static void Write(IBitWriter writer, IDictionary<byte, BitStream> lengthMap){
             int skippedAmount;
 
             if (!lengthMap.ContainsKey(Order[0]) && !lengthMap.ContainsKey(Order[1])){
@@ -287,7 +289,7 @@ namespace BrotliLib.Brotli.Components.Header{
             }
         }
 
-        public static HuffmanNode<ComplexLengthCode> Read(MarkedBitReader reader, int skippedAmount) => reader.MarkTitle("Bit Lengths", () => {
+        public static HuffmanNode<ComplexLengthCode> Read(IMarkedBitReader reader, int skippedAmount) => reader.MarkTitle("Bit Lengths", () => {
             byte[] bitCounts = new byte[Codes.Length];
 
             for(int index = skippedAmount, bitSpaceRemaining = LengthBitSpace; bitSpaceRemaining > 0 && index < Order.Length; index++){

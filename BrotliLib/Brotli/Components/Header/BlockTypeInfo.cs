@@ -1,5 +1,4 @@
-﻿using System;
-using BrotliLib.Brotli.Components.Utils;
+﻿using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.IO;
 using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Data;

@@ -5,6 +5,8 @@ using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.State;
 using BrotliLib.IO;
+using BrotliLib.IO.Reader;
+using BrotliLib.IO.Writer;
 using DistanceTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.DistanceCode>;
 
 namespace BrotliLib.Brotli.Components.Data{
@@ -34,8 +36,8 @@ namespace BrotliLib.Brotli.Components.Data{
 
         public abstract bool CanEncodeValue(BrotliGlobalState state, int value);
         
-        protected abstract int ReadValue(BrotliGlobalState state, BitReader reader);
-        protected abstract void WriteValue(BrotliGlobalState state, int value, BitWriter writer);
+        protected abstract int ReadValue(BrotliGlobalState state, IBitReader reader);
+        protected abstract void WriteValue(BrotliGlobalState state, int value, IBitWriter writer);
 
         public int CompareTo(DistanceCode other){
             return Code.CompareTo(other.Code);
@@ -108,7 +110,7 @@ namespace BrotliLib.Brotli.Components.Data{
                 this.state = state;
             }
 
-            internal DistanceInfo Read(BitReader reader){
+            internal DistanceInfo Read(IBitReader reader){
                 if (code.Code == 0){
                     return DistanceInfo.ExplicitCodeZero;
                 }
@@ -117,7 +119,7 @@ namespace BrotliLib.Brotli.Components.Data{
                 }
             }
 
-            internal void Write(BitWriter writer, DistanceInfo info){
+            internal void Write(IBitWriter writer, DistanceInfo info){
                 if (info != DistanceInfo.ExplicitCodeZero){
                     code.WriteValue(state, info.GetValue(state), writer);
                 }

@@ -2,7 +2,8 @@
 using BrotliLib.Brotli.Components.Contents.Compressed;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
-using BrotliLib.IO;
+using BrotliLib.IO.Reader;
+using BrotliLib.IO.Writer;
 
 namespace BrotliLib.Brotli.Components.Data{
     /// <summary>
@@ -27,7 +28,7 @@ namespace BrotliLib.Brotli.Components.Data{
         /// <summary>
         /// Reads a block-switch command if there are no more symbols in the current block type, then decreases the amount of remaining symbols.
         /// </summary>
-        public BlockSwitchCommand ReadCommand(BitReader reader){
+        public BlockSwitchCommand ReadCommand(IBitReader reader){
             BlockSwitchCommand nextCommand = null;
 
             if (remaining == 0){
@@ -42,7 +43,7 @@ namespace BrotliLib.Brotli.Components.Data{
         /// <summary>
         /// Writes a block-switch command if there are no more symbols in the current block type, then decreases the amount of remaining symbols.
         /// </summary>
-        public void WriteCommand(BitWriter writer, CategoryMap<Queue<BlockSwitchCommand>> commands){
+        public void WriteCommand(IBitWriter writer, CategoryMap<Queue<BlockSwitchCommand>> commands){
             if (remaining == 0){
                 BlockSwitchCommand nextCommand = commands[context.Info.Category].Dequeue();
                 BlockSwitchCommand.Serialize(writer, nextCommand, context);

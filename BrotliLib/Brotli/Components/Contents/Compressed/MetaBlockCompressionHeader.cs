@@ -5,7 +5,9 @@ using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Markers;
+using BrotliLib.Brotli.Markers.Reader;
 using BrotliLib.IO;
+using BrotliLib.IO.Reader;
 using LiteralTree    = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.Literal>;
 using InsertCopyTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.InsertCopyLengthCode>;
 using DistanceTree   = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.DistanceCode>;
@@ -76,15 +78,15 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
         
         // Serialization
 
-        private static LiteralContextMode[] ReadLiteralContextModes(MarkedBitReader reader, int modeCount){
+        private static LiteralContextMode[] ReadLiteralContextModes(IMarkedBitReader reader, int modeCount){
             return reader.MarkTitle("Literal Context Modes", () => reader.ReadValueArray(modeCount, "CMODE", () => LiteralContextModes.Deserialize(reader, NoContext.Value)));
         }
         
-        private static ContextMap ReadContextMap(BitReader reader, Category category, CategoryMap<BlockTypeInfo> blockTypes){
+        private static ContextMap ReadContextMap(IBitReader reader, Category category, CategoryMap<BlockTypeInfo> blockTypes){
             return ContextMap.Deserialize(reader, blockTypes[category]);
         }
 
-        private static IList<HuffmanTree<T>> ReadHuffmanTrees<T>(MarkedBitReader reader, Category category, int treeCount, HuffmanTree<T>.Context context) where T : IComparable<T>{
+        private static IList<HuffmanTree<T>> ReadHuffmanTrees<T>(IMarkedBitReader reader, Category category, int treeCount, HuffmanTree<T>.Context context) where T : IComparable<T>{
             return reader.ReadStructureArray(treeCount, HuffmanTree<T>.Deserialize, context, "HTREE" + category.Id());
         }
         

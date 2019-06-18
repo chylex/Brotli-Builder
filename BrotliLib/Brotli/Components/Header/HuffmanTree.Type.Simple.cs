@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using BrotliLib.Brotli.Markers;
+using BrotliLib.Brotli.Markers.Reader;
 using BrotliLib.Huffman;
 using BrotliLib.IO;
 
@@ -40,7 +41,7 @@ namespace BrotliLib.Brotli.Components.Header{
         /// Returns lengths of paths that are needed to encode exactly <paramref name="symbolCount"/> symbols.
         /// If <paramref name="symbolCount"/> equals 4, another bit is consumed from the <paramref name="reader"/> to determine the correct lengths.
         /// </summary>
-        private static byte[] DetermineSimpleCodeLengths(MarkedBitReader reader, int symbolCount){
+        private static byte[] DetermineSimpleCodeLengths(IMarkedBitReader reader, int symbolCount){
             switch(symbolCount){
                 case 1: return new byte[]{ 0 };
                 case 2: return new byte[]{ 1, 1 };

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using BrotliLib.IO;
+using BrotliLib.IO.Reader;
 
 namespace BrotliLib.Huffman{
     /// <summary>
@@ -14,7 +15,7 @@ namespace BrotliLib.Huffman{
         /// Returns the found value, or <code>default(T)</code> if the <paramref name="bits"/> reader reaches the end.
         /// </summary>
         /// <param name="bits">Bit reader used to determine the <see cref="Path"/> to traverse to retrieve a value.</param>
-        public abstract T LookupValue(BitReader bits);
+        public abstract T LookupValue(IBitReader bits);
 
         /// <summary>
         /// Recursively searches through all child nodes, and returns all values mapped to their respective bit sequences.

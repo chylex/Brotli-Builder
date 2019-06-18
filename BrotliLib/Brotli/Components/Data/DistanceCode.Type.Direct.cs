@@ -1,7 +1,8 @@
 ﻿using System;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.State;
-using BrotliLib.IO;
+using BrotliLib.IO.Reader;
+using BrotliLib.IO.Writer;
 
 namespace BrotliLib.Brotli.Components.Data{
     public abstract partial class DistanceCode{
@@ -24,11 +25,11 @@ namespace BrotliLib.Brotli.Components.Data{
                 return value == encodedValue;
             }
 
-            protected override int ReadValue(BrotliGlobalState state, BitReader reader){
+            protected override int ReadValue(BrotliGlobalState state, IBitReader reader){
                 return encodedValue;
             }
 
-            protected override void WriteValue(BrotliGlobalState state, int value, BitWriter writer){
+            protected override void WriteValue(BrotliGlobalState state, int value, IBitWriter writer){
                 // no extra bits
             }
 

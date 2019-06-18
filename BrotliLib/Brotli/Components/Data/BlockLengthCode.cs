@@ -3,6 +3,8 @@ using System.Linq;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.IO;
+using BrotliLib.IO.Reader;
+using BrotliLib.IO.Writer;
 using BrotliLib.Numbers;
 using BlockLengthCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.BlockLengthCode>;
 
@@ -50,11 +52,11 @@ namespace BrotliLib.Brotli.Components.Data{
             return BlockLengthRanges[Code].Contains(value);
         }
 
-        private int ReadValue(BitReader reader){
+        private int ReadValue(IBitReader reader){
             return BlockLengthOffsets[Code] + reader.NextChunk(BlockLengthExtraBits[Code]);
         }
 
-        private void WriteValue(BitWriter writer, int value){
+        private void WriteValue(IBitWriter writer, int value){
             writer.WriteChunk(BlockLengthExtraBits[Code], value - BlockLengthOffsets[Code]);
         }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Dictionary;
 using BrotliLib.Brotli.Encode;
-using BrotliLib.Brotli.Markers;
+using BrotliLib.Brotli.Markers.Reader;
 using BrotliLib.Brotli.State;
 using BrotliLib.Brotli.State.Output;
 using BrotliLib.IO;
@@ -75,7 +75,7 @@ namespace BrotliLib.Brotli{
         public BrotliOutputStored GetDecompressionState(BitStream bitStream, bool enableMarkers){
             var outputState = new BrotliOutputStored();
 
-            MarkedBitReader reader = CreateReader(bitStream, enableMarkers);
+            IMarkedBitReader reader = CreateReader(bitStream, enableMarkers);
             DoDeserialize(reader, new FileContext(Parameters.Dictionary, outputState));
 
             outputState.BitMarkerRoot = reader.MarkerRoot;
@@ -100,8 +100,8 @@ namespace BrotliLib.Brotli{
             public FileContext(BrotliDictionary dictionary, IBrotliOutputState outputState) : this(dictionary, _ => outputState){}
         }
 
-        private static MarkedBitReader CreateReader(BitStream bitStream, bool enableMarkers){
-            return enableMarkers ? new MarkedBitReader(bitStream.GetReader()) : new MarkedBitReader.Dummy(bitStream.GetReader());
+        private static IMarkedBitReader CreateReader(BitStream bitStream, bool enableMarkers){
+            return enableMarkers ? new MarkedBitReader(bitStream.GetReader()) : (IMarkedBitReader)new MarkedBitReaderDummy(bitStream.GetReader());
         }
 
         private static readonly BitDeserializer<BrotliFileStructure, FileContext> DoDeserialize = (reader, context) => {

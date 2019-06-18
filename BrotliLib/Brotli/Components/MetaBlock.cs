@@ -6,6 +6,8 @@ using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.Brotli.State;
 using BrotliLib.IO;
+using BrotliLib.IO.Reader;
+using BrotliLib.IO.Writer;
 
 #pragma warning disable CS0659
 
@@ -36,8 +38,8 @@ namespace BrotliLib.Brotli.Components{
             this.DataLength = dataLength;
         }
 
-        internal abstract void SerializeContents(BitWriter writer, BrotliGlobalState state);
-        internal abstract void DeserializeContents(BitReader reader, BrotliGlobalState state);
+        internal abstract void SerializeContents(IBitWriter writer, BrotliGlobalState state);
+        internal abstract void DeserializeContents(IBitReader reader, BrotliGlobalState state);
         
         protected bool Equals(MetaBlock other){
             return IsLast == other.IsLast &&
@@ -57,8 +59,8 @@ namespace BrotliLib.Brotli.Components{
                 return obj is LastEmpty;
             }
 
-            internal override void SerializeContents(BitWriter writer, BrotliGlobalState state){}
-            internal override void DeserializeContents(BitReader reader, BrotliGlobalState state){}
+            internal override void SerializeContents(IBitWriter writer, BrotliGlobalState state){}
+            internal override void DeserializeContents(IBitReader reader, BrotliGlobalState state){}
         }
         
         /// <inheritdoc />
@@ -79,8 +81,8 @@ namespace BrotliLib.Brotli.Components{
                        Contents.Equals(other.Contents);
             }
 
-            internal override void SerializeContents(BitWriter writer, BrotliGlobalState state) => PaddedEmptyMetaBlockContents.Serialize(writer, Contents, NoContext.Value);
-            internal override void DeserializeContents(BitReader reader, BrotliGlobalState state) => Contents = PaddedEmptyMetaBlockContents.Deserialize(reader, NoContext.Value);
+            internal override void SerializeContents(IBitWriter writer, BrotliGlobalState state) => PaddedEmptyMetaBlockContents.Serialize(writer, Contents, NoContext.Value);
+            internal override void DeserializeContents(IBitReader reader, BrotliGlobalState state) => Contents = PaddedEmptyMetaBlockContents.Deserialize(reader, NoContext.Value);
         }
         
         /// <inheritdoc />
@@ -102,8 +104,8 @@ namespace BrotliLib.Brotli.Components{
                        Contents.Equals(other.Contents);
             }
 
-            internal override void SerializeContents(BitWriter writer, BrotliGlobalState state) => UncompressedMetaBlockContents.Serialize(writer, Contents, new Context(this, state));
-            internal override void DeserializeContents(BitReader reader, BrotliGlobalState state) => Contents = UncompressedMetaBlockContents.Deserialize(reader, new Context(this, state));
+            internal override void SerializeContents(IBitWriter writer, BrotliGlobalState state) => UncompressedMetaBlockContents.Serialize(writer, Contents, new Context(this, state));
+            internal override void DeserializeContents(IBitReader reader, BrotliGlobalState state) => Contents = UncompressedMetaBlockContents.Deserialize(reader, new Context(this, state));
         }
         
         /// <inheritdoc />
@@ -121,8 +123,8 @@ namespace BrotliLib.Brotli.Components{
                        Contents.Equals(other.Contents);
             }
 
-            internal override void SerializeContents(BitWriter writer, BrotliGlobalState state) => CompressedMetaBlockContents.Serialize(writer, Contents, new Context(this, state));
-            internal override void DeserializeContents(BitReader reader, BrotliGlobalState state) => Contents = CompressedMetaBlockContents.Deserialize(reader, new Context(this, state));
+            internal override void SerializeContents(IBitWriter writer, BrotliGlobalState state) => CompressedMetaBlockContents.Serialize(writer, Contents, new Context(this, state));
+            internal override void DeserializeContents(IBitReader reader, BrotliGlobalState state) => Contents = CompressedMetaBlockContents.Deserialize(reader, new Context(this, state));
         }
 
         // Serialization
