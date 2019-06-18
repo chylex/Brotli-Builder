@@ -24,10 +24,8 @@ namespace BrotliLib.Brotli.Components.Utils{
             }
         }
 
-        public static readonly IBitSerializer<LiteralContextMode, NoContext> Serializer = new BitSerializer<LiteralContextMode, NoContext>(
-            fromBits: (reader, context) => (LiteralContextMode)reader.NextChunk(2),
-            toBits: (writer, obj, context) => writer.WriteChunk(2, (int)obj)
-        );
+        public static readonly BitDeserializer<LiteralContextMode, NoContext> Deserialize = (reader, context) => (LiteralContextMode)reader.NextChunk(2);
+        public static readonly BitSerializer<LiteralContextMode, NoContext> Serialize = (writer, obj, context) => writer.WriteChunk(2, (int)obj);
 
         // Magic
         

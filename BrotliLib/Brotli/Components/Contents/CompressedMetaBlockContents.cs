@@ -107,9 +107,9 @@ namespace BrotliLib.Brotli.Components.Contents{
 
         // Serialization
 
-        internal static readonly IBitSerializer<CompressedMetaBlockContents, MetaBlock.Context> Serializer = new MarkedBitSerializer<CompressedMetaBlockContents, MetaBlock.Context>(
-            fromBits: (reader, context) => {
-                MetaBlockCompressionHeader header = MetaBlockCompressionHeader.Serializer.FromBits(reader, context);
+        internal static readonly BitDeserializer<CompressedMetaBlockContents, MetaBlock.Context> Deserialize = MarkedBitDeserializer.Wrap<CompressedMetaBlockContents, MetaBlock.Context>(
+            (reader, context) => {
+                MetaBlockCompressionHeader header = MetaBlockCompressionHeader.Deserialize(reader, NoContext.Value);
 
                 ReaderDataContext dataContext = new ReaderDataContext(context, header, reader);
                 List<InsertCopyCommand> icCommands = new List<InsertCopyCommand>();
@@ -117,23 +117,23 @@ namespace BrotliLib.Brotli.Components.Contents{
                 reader.MarkStart();
                 
                 do{
-                    icCommands.Add(InsertCopyCommand.Serializer.FromBits(reader, dataContext));
+                    icCommands.Add(InsertCopyCommand.Deserialize(reader, dataContext));
                 }while(dataContext.NeedsMoreData);
 
                 reader.MarkEnd(new TitleMarker("Command List"));
                 
                 return new CompressedMetaBlockContents(header, icCommands, dataContext.BlockSwitchCommands);
-            },
-
-            toBits: (writer, obj, context) => {
-                MetaBlockCompressionHeader.Serializer.ToBits(writer, obj.Header, context);
-                
-                DataContext dataContext = new WriterDataContext(context, obj.Header, obj.BlockSwitchCommands, writer);
-
-                foreach(InsertCopyCommand icCommand in obj.InsertCopyCommands){
-                    InsertCopyCommand.Serializer.ToBits(writer, icCommand, dataContext);
-                }
             }
         );
+
+        internal static readonly BitSerializer<CompressedMetaBlockContents, MetaBlock.Context> Serialize = (writer, obj, context) => {
+            MetaBlockCompressionHeader.Serialize(writer, obj.Header, NoContext.Value);
+            
+            DataContext dataContext = new WriterDataContext(context, obj.Header, obj.BlockSwitchCommands, writer);
+
+            foreach(InsertCopyCommand icCommand in obj.InsertCopyCommands){
+                InsertCopyCommand.Serialize(writer, icCommand, dataContext);
+            }
+        };
     }
 }

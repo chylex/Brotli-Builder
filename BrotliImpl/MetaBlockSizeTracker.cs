@@ -45,7 +45,7 @@ namespace BrotliImpl{
             var stream = new BitStream();
 
             try{
-                MetaBlock.Serializer.ToBits(stream.GetWriter(), tested, state.Clone());
+                MetaBlock.Serialize(stream.GetWriter(), tested, state.Clone());
                 return stream.Length;
             }catch(Exception ex){
                 Debug.WriteLine(ex.ToString());

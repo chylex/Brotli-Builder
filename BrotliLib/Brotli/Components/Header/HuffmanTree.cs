@@ -107,36 +107,36 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Serialization
 
-        public static readonly IBitSerializer<HuffmanTree<T>, Context> Serializer = new MarkedBitSerializer<HuffmanTree<T>, Context>(
-            fromBits: (reader, context) => {
+        public static readonly BitDeserializer<HuffmanTree<T>, Context> Deserialize = MarkedBitDeserializer.Wrap<HuffmanTree<T>, Context>(
+            (reader, context) => {
                 reader.MarkStart();
 
                 int type = reader.NextChunk(2, "HSKIP");
                 HuffmanTree<T> tree;
 
                 if (type == 1){
-                    tree = SimpleCodeSerializer.FromBits(reader, context);
+                    tree = SimpleCodeDeserialize(reader, context);
                     reader.MarkEnd(new TitleMarker("Simple Huffman Tree"));
                 }
                 else{
                     context.SkippedComplexCodeLengths = type;
-                    tree = ComplexCodeSerializer.FromBits(reader, context);
+                    tree = ComplexCodeDeserialize(reader, context);
                     reader.MarkEnd(new TitleMarker("Complex Huffman Tree"));
                 }
 
                 return tree;
-            },
-
-            toBits: (writer, obj, context) => {
-                if (obj.Root.SymbolCount <= 4){
-                    writer.WriteChunk(2, 0b01);
-                    SimpleCodeSerializer.ToBits(writer, obj, context);
-                }
-                else{
-                    // type identifier is written by the serializer
-                    ComplexCodeSerializer.ToBits(writer, obj, context);
-                }
             }
         );
+
+        public static readonly BitSerializer<HuffmanTree<T>, Context> Serialize = (writer, obj, context) => {
+            if (obj.Root.SymbolCount <= 4){
+                writer.WriteChunk(2, 0b01);
+                SimpleCodeSerialize(writer, obj, context);
+            }
+            else{
+                // type identifier is written by the serializer
+                ComplexCodeSerialize(writer, obj, context);
+            }
+        };
     }
 }

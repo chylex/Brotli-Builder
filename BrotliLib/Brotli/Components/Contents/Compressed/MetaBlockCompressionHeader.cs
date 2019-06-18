@@ -77,21 +77,21 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
         // Serialization
 
         private static LiteralContextMode[] ReadLiteralContextModes(MarkedBitReader reader, int modeCount){
-            return reader.MarkTitle("Literal Context Modes", () => reader.ReadValueArray(modeCount, "CMODE", () => LiteralContextModes.Serializer.FromBits(reader, NoContext.Value)));
+            return reader.MarkTitle("Literal Context Modes", () => reader.ReadValueArray(modeCount, "CMODE", () => LiteralContextModes.Deserialize(reader, NoContext.Value)));
         }
         
         private static ContextMap ReadContextMap(BitReader reader, Category category, CategoryMap<BlockTypeInfo> blockTypes){
-            return ContextMap.Serializer.FromBits(reader, blockTypes[category]);
+            return ContextMap.Deserialize(reader, blockTypes[category]);
         }
 
         private static IList<HuffmanTree<T>> ReadHuffmanTrees<T>(MarkedBitReader reader, Category category, int treeCount, HuffmanTree<T>.Context context) where T : IComparable<T>{
-            return reader.ReadStructureArray(treeCount, HuffmanTree<T>.Serializer, context, "HTREE" + category.Id());
+            return reader.ReadStructureArray(treeCount, HuffmanTree<T>.Deserialize, context, "HTREE" + category.Id());
         }
         
-        internal static readonly IBitSerializer<MetaBlockCompressionHeader, MetaBlock.Context> Serializer = new MarkedBitSerializer<MetaBlockCompressionHeader, MetaBlock.Context>(
-            fromBits: (reader, context) => {
-                var blockTypes = new CategoryMap<BlockTypeInfo>(category => BlockTypeInfo.Serializer.FromBits(reader, category));
-                var distanceParameters = DistanceParameters.Serializer.FromBits(reader, NoContext.Value);
+        internal static readonly BitDeserializer<MetaBlockCompressionHeader, NoContext> Deserialize = MarkedBitDeserializer.Wrap<MetaBlockCompressionHeader, NoContext>(
+            (reader, context) => {
+                var blockTypes = new CategoryMap<BlockTypeInfo>(category => BlockTypeInfo.Deserialize(reader, category));
+                var distanceParameters = DistanceParameters.Deserialize(reader, NoContext.Value);
                 
                 var literalCtxModes = ReadLiteralContextModes(reader, blockTypes[Category.Literal].Count);
                 var literalCtxMap   = ReadContextMap(reader, Category.Literal, blockTypes);
@@ -102,34 +102,36 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                 var distanceTrees   = ReadHuffmanTrees(reader, Category.Distance, distanceCtxMap.TreeCount, DistanceCode.GenerateTreeContext(distanceParameters));
                 
                 return new MetaBlockCompressionHeader(blockTypes, distanceParameters, literalCtxModes, literalCtxMap, distanceCtxMap, literalTrees, insertCopyTrees, distanceTrees);
-            },
-
-            toBits: (writer, obj, context) => {
-                foreach(BlockTypeInfo blockTypeInfo in obj.BlockTypes.Values){
-                    BlockTypeInfo.Serializer.ToBits(writer, blockTypeInfo, null);
-                }
-
-                DistanceParameters.Serializer.ToBits(writer, obj.DistanceParameters, NoContext.Value);
-
-                foreach(LiteralContextMode literalCtxMode in obj.LiteralCtxModes){
-                    LiteralContextModes.Serializer.ToBits(writer, literalCtxMode, NoContext.Value);
-                }
-
-                ContextMap.Serializer.ToBits(writer, obj.LiteralCtxMap, obj.BlockTypes[Category.Literal]);
-                ContextMap.Serializer.ToBits(writer, obj.DistanceCtxMap, obj.BlockTypes[Category.Distance]);
-                
-                foreach(LiteralTree tree in obj.LiteralTrees){
-                    LiteralTree.Serializer.ToBits(writer, tree, Literal.TreeContext);
-                }
-
-                foreach(InsertCopyTree tree in obj.InsertCopyTrees){
-                    InsertCopyTree.Serializer.ToBits(writer, tree, InsertCopyLengthCode.TreeContext);
-                }
-
-                foreach(DistanceTree tree in obj.DistanceTrees){
-                    DistanceTree.Serializer.ToBits(writer, tree, DistanceCode.GenerateTreeContext(obj.DistanceParameters));
-                }
             }
         );
+
+        internal static readonly BitSerializer<MetaBlockCompressionHeader, NoContext> Serialize = (writer, obj, context) => {
+            foreach(BlockTypeInfo blockTypeInfo in obj.BlockTypes.Values){
+                BlockTypeInfo.Serialize(writer, blockTypeInfo, NoContext.Value);
+            }
+
+            DistanceParameters.Serialize(writer, obj.DistanceParameters, NoContext.Value);
+
+            foreach(LiteralContextMode literalCtxMode in obj.LiteralCtxModes){
+                LiteralContextModes.Serialize(writer, literalCtxMode, NoContext.Value);
+            }
+
+            var contextMapSerialize = ContextMap.MakeSerializer(imtf: true, rle: true);
+
+            contextMapSerialize(writer, obj.LiteralCtxMap, obj.BlockTypes[Category.Literal]);
+            contextMapSerialize(writer, obj.DistanceCtxMap, obj.BlockTypes[Category.Distance]);
+            
+            foreach(LiteralTree tree in obj.LiteralTrees){
+                LiteralTree.Serialize(writer, tree, Literal.TreeContext);
+            }
+
+            foreach(InsertCopyTree tree in obj.InsertCopyTrees){
+                InsertCopyTree.Serialize(writer, tree, InsertCopyLengthCode.TreeContext);
+            }
+
+            foreach(DistanceTree tree in obj.DistanceTrees){
+                DistanceTree.Serialize(writer, tree, DistanceCode.GenerateTreeContext(obj.DistanceParameters));
+            }
+        };
     }
 }

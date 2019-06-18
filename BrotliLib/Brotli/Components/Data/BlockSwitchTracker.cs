@@ -31,7 +31,7 @@ namespace BrotliLib.Brotli.Components.Data{
             BlockSwitchCommand nextCommand = null;
 
             if (remaining == 0){
-                nextCommand = BlockSwitchCommand.Serializer.FromBits(reader, context);
+                nextCommand = BlockSwitchCommand.Deserialize(reader, context);
                 UpdateState(nextCommand);
             }
 
@@ -45,7 +45,7 @@ namespace BrotliLib.Brotli.Components.Data{
         public void WriteCommand(BitWriter writer, CategoryMap<Queue<BlockSwitchCommand>> commands){
             if (remaining == 0){
                 BlockSwitchCommand nextCommand = commands[context.Info.Category].Dequeue();
-                BlockSwitchCommand.Serializer.ToBits(writer, nextCommand, context);
+                BlockSwitchCommand.Serialize(writer, nextCommand, context);
                 UpdateState(nextCommand);
             }
 

@@ -126,9 +126,7 @@ namespace BrotliLib.Brotli.Components.Data{
 
         // Serialization
 
-        internal static readonly IBitSerializer<DistanceInfo, DistanceContext> Serializer = new BitSerializer<DistanceInfo, DistanceContext>(
-            fromBits: (reader, context) => context.Read(reader),
-            toBits: (writer, obj, context) => context.Write(writer, obj)
-        );
+        internal static readonly BitDeserializer<DistanceInfo, DistanceContext> Deserialize = (reader, context) => context.Read(reader);
+        internal static readonly BitSerializer<DistanceInfo, DistanceContext> Serialize = (writer, obj, context) => context.Write(writer, obj);
     }
 }

@@ -66,44 +66,42 @@ namespace BrotliLib.Brotli.Components.Header{
             return new BlockTypeCodeTree.Context(new AlphabetSize(count + 2), value => value, symbol => symbol);
         }
 
-        public static readonly IBitSerializer<BlockTypeInfo, Category?> Serializer = new MarkedBitSerializer<BlockTypeInfo, Category?>(
-            markerTitle: context => "Block Type Info (" + context + ")",
+        public static readonly BitDeserializer<BlockTypeInfo, Category> Deserialize = MarkedBitDeserializer.Title<BlockTypeInfo, Category>(
+            context => "Block Type Info (" + context + ")",
 
-            fromBits: (reader, context) => {
-                Category category = context ?? throw new InvalidOperationException("Category must be provided when deserializing BlockTypeInfo.");
-                char cid = category.Id();
-                
-                int count = reader.ReadValue(VariableLength11Code.Serializer, NoContext.Value, "NBLTYPES" + cid, value => value.Value);
+            (reader, context) => {
+                char cid = context.Id();
+                int count = reader.ReadValue(VariableLength11Code.Deserialize, NoContext.Value, "NBLTYPES" + cid, value => value.Value);
                 
                 if (count == 1){
-                    return Empty[category];
+                    return Empty[context];
                 }
                 
-                var blockTypeCode = reader.ReadStructure(BlockTypeCodeTree.Serializer, GetBlockTypeCodeTreeContext(count), "HTREE_BTYPE_" + cid);
-                var blockLengthCode = reader.ReadStructure(BlockLengthCodeTree.Serializer, BlockLengthCode.TreeContext, "HTREE_BLEN_" + cid);
+                var blockTypeCode = reader.ReadStructure(BlockTypeCodeTree.Deserialize, GetBlockTypeCodeTreeContext(count), "HTREE_BTYPE_" + cid);
+                var blockLengthCode = reader.ReadStructure(BlockLengthCodeTree.Deserialize, BlockLengthCode.TreeContext, "HTREE_BLEN_" + cid);
                 
                 var initialLengthCode = reader.ReadValue(blockLengthCode.Root, "BLEN_" + cid + " (code)");
-                var initialLength = reader.ReadValue(BlockLengthCode.Serializer, initialLengthCode, "BLEN_" + cid + " (value)");
+                var initialLength = reader.ReadValue(BlockLengthCode.Deserialize, initialLengthCode, "BLEN_" + cid + " (value)");
                 
-                return new BlockTypeInfo(category, count, initialLength, blockTypeCode, blockLengthCode);
-            },
-
-            toBits: (writer, obj, context) => {
-                VariableLength11Code.Serializer.ToBits(writer, new VariableLength11Code(obj.Count), NoContext.Value);
-
-                if (obj.Count == 1){
-                    return;
-                }
-
-                BlockTypeCodeTree.Serializer.ToBits(writer, obj.TypeCodeTree, GetBlockTypeCodeTreeContext(obj.Count));
-                BlockLengthCodeTree.Serializer.ToBits(writer, obj.LengthCodeTree, BlockLengthCode.TreeContext);
-
-                var initialLength = obj.InitialLength;
-                var initialLengthCode = obj.LengthCodeTree.FindEntry(code => code.CanEncodeValue(initialLength));
-
-                writer.WriteBits(initialLengthCode.Value);
-                BlockLengthCode.Serializer.ToBits(writer, initialLength, initialLengthCode.Key);
+                return new BlockTypeInfo(context, count, initialLength, blockTypeCode, blockLengthCode);
             }
         );
+
+        public static readonly BitSerializer<BlockTypeInfo, NoContext> Serialize = (writer, obj, context) => {
+            VariableLength11Code.Serialize(writer, new VariableLength11Code(obj.Count), NoContext.Value);
+
+            if (obj.Count == 1){
+                return;
+            }
+
+            BlockTypeCodeTree.Serialize(writer, obj.TypeCodeTree, GetBlockTypeCodeTreeContext(obj.Count));
+            BlockLengthCodeTree.Serialize(writer, obj.LengthCodeTree, BlockLengthCode.TreeContext);
+
+            var initialLength = obj.InitialLength;
+            var initialLengthCode = obj.LengthCodeTree.FindEntry(code => code.CanEncodeValue(initialLength));
+
+            writer.WriteBits(initialLengthCode.Value);
+            BlockLengthCode.Serialize(writer, initialLength, initialLengthCode.Key);
+        };
     }
 }

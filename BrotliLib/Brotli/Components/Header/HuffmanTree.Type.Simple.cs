@@ -6,11 +6,11 @@ using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components.Header{
     partial class HuffmanTree<T>{
-        /// <summary>
-        /// https://tools.ietf.org/html/rfc7932#section-3.4
-        /// </summary>
-        private static readonly IBitSerializer<HuffmanTree<T>, Context> SimpleCodeSerializer = new MarkedBitSerializer<HuffmanTree<T>, Context>(
-            fromBits: (reader, context) => {
+
+        // https://tools.ietf.org/html/rfc7932#section-3.4
+
+        private static readonly BitDeserializer<HuffmanTree<T>, Context> SimpleCodeDeserialize = MarkedBitDeserializer.Wrap<HuffmanTree<T>, Context>(
+            (reader, context) => {
                 byte bitsPerSymbol = context.AlphabetSize.BitsPerSymbol;
                 int symbolCount = reader.NextChunk(2, "NSYM", value => 1 + value);
 
@@ -19,22 +19,22 @@ namespace BrotliLib.Brotli.Components.Header{
 
                 var symbolEntries = symbols.Zip(lengths, HuffmanGenerator<T>.MakeEntry).ToArray();
                 return new HuffmanTree<T>(HuffmanGenerator<T>.FromBitCountsCanonical(symbolEntries));
-            },
-
-            toBits: (writer, obj, context) => {
-                byte bitsPerSymbol = context.AlphabetSize.BitsPerSymbol;
-
-                writer.WriteChunk(2, obj.Root.SymbolCount - 1);
-
-                foreach(T symbol in obj.OrderBy(kvp => kvp.Value.Length).Select(kvp => kvp.Key)){
-                    writer.WriteChunk(bitsPerSymbol, context.SymbolToBits(symbol));
-                }
-
-                if (obj.Root.SymbolCount == 4){
-                    writer.WriteBit(obj.MaxDepth > 2);
-                }
             }
         );
+
+        private static readonly BitSerializer<HuffmanTree<T>, Context> SimpleCodeSerialize = (writer, obj, context) => {
+            byte bitsPerSymbol = context.AlphabetSize.BitsPerSymbol;
+
+            writer.WriteChunk(2, obj.Root.SymbolCount - 1);
+
+            foreach(T symbol in obj.OrderBy(kvp => kvp.Value.Length).Select(kvp => kvp.Key)){
+                writer.WriteChunk(bitsPerSymbol, context.SymbolToBits(symbol));
+            }
+
+            if (obj.Root.SymbolCount == 4){
+                writer.WriteBit(obj.MaxDepth > 2);
+            }
+        };
 
         /// <summary>
         /// Returns lengths of paths that are needed to encode exactly <paramref name="symbolCount"/> symbols.

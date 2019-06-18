@@ -13,11 +13,6 @@ namespace BrotliLib.Brotli.Components.Header{
     /// https://tools.ietf.org/html/rfc7932#section-7.3
     /// </summary>
     public sealed class ContextMap{
-        private const bool EncodeRLE = true;
-        private const bool EncodeIMTF = true;
-        
-        // Data
-
         public Category Category { get; }
         public int TreeCount { get; }
 
@@ -181,18 +176,18 @@ namespace BrotliLib.Brotli.Components.Header{
             return new HuffmanTree<int>.Context(new AlphabetSize(alphabetSize), bits => bits, symbol => symbol);
         }
 
-        public static readonly IBitSerializer<ContextMap, BlockTypeInfo> Serializer = new MarkedBitSerializer<ContextMap, BlockTypeInfo>(
-            markerTitle: context => "Context Map (" + context.Category + ")",
+        public static readonly BitDeserializer<ContextMap, BlockTypeInfo> Deserialize = MarkedBitDeserializer.Title<ContextMap, BlockTypeInfo>(
+            context => "Context Map (" + context.Category + ")",
 
-            fromBits: (reader, context) => {
-                int treeCount = reader.ReadValue(VariableLength11Code.Serializer, NoContext.Value, "NTREES", value => value.Value);
+            (reader, context) => {
+                int treeCount = reader.ReadValue(VariableLength11Code.Deserialize, NoContext.Value, "NTREES", value => value.Value);
                 var contextMap = For(treeCount, context);
 
                 if (treeCount > 1){
                     byte runLengthCodeCount = (byte)reader.MarkValue("RLEMAX", () => reader.NextBit() ? 1 + reader.NextChunk(4) : 0);
                     
                     var codeContext = GetCodeTreeContext(treeCount + runLengthCodeCount);
-                    var codeLookup = reader.ReadStructure(HuffmanTree<int>.Serializer, codeContext, "code tree").Root;
+                    var codeLookup = reader.ReadStructure(HuffmanTree<int>.Deserialize, codeContext, "code tree").Root;
                     
                     for(int index = 0; index < contextMap.Length; index++){
                         reader.MarkStart();
@@ -220,15 +215,17 @@ namespace BrotliLib.Brotli.Components.Header{
                 }
 
                 return contextMap.Build();
-            },
+            }
+        );
 
-            toBits: (writer, obj, context) => {
-                VariableLength11Code.Serializer.ToBits(writer, new VariableLength11Code(obj.TreeCount), NoContext.Value);
+        public static BitSerializer<ContextMap, BlockTypeInfo> MakeSerializer(bool imtf, bool rle){
+            return (writer, obj, context) => {
+                VariableLength11Code.Serialize(writer, new VariableLength11Code(obj.TreeCount), NoContext.Value);
 
                 if (obj.TreeCount > 1){
                     byte[] contextMap;
 
-                    if (EncodeIMTF){
+                    if (imtf){
                         contextMap = CollectionHelper.Clone(obj.contextMap);
                         MoveToFront.Encode(contextMap);
                     }
@@ -236,7 +233,7 @@ namespace BrotliLib.Brotli.Components.Header{
                         contextMap = obj.contextMap;
                     }
 
-                    byte runLengthCodeCount = EncodeRLE ? CalculateLargestRunLengthCode(contextMap) : (byte)0;
+                    byte runLengthCodeCount = rle ? CalculateLargestRunLengthCode(contextMap) : (byte)0;
                     
                     if (runLengthCodeCount > 0){
                         writer.WriteBit(true);
@@ -275,7 +272,7 @@ namespace BrotliLib.Brotli.Components.Header{
                     var codeContext = GetCodeTreeContext(obj.TreeCount + runLengthCodeCount);
                     var codeTree = HuffmanTree<int>.FromSymbols(new FrequencyList<int>(symbols));
 
-                    HuffmanTree<int>.Serializer.ToBits(writer, codeTree, codeContext);
+                    HuffmanTree<int>.Serialize(writer, codeTree, codeContext);
 
                     foreach(int symbol in symbols){
                         writer.WriteBits(codeTree.FindPath(symbol));
@@ -285,9 +282,9 @@ namespace BrotliLib.Brotli.Components.Header{
                         }
                     }
 
-                    writer.WriteBit(EncodeIMTF);
+                    writer.WriteBit(imtf);
                 }
-            }
-        );
+            };
+        }
     }
 }

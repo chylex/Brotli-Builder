@@ -60,20 +60,20 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Serialization
 
-        public static readonly IBitSerializer<DistanceParameters, NoContext> Serializer = new MarkedBitSerializer<DistanceParameters, NoContext>(
-            markerTitle: "Distance Parameters",
+        public static readonly BitDeserializer<DistanceParameters, NoContext> Deserialize = MarkedBitDeserializer.Title<DistanceParameters, NoContext>(
+            "Distance Parameters",
 
-            fromBits: (reader, context) => {
+            (reader, context) => {
                 int postfixBitCount = reader.NextChunk(2, "NPOSTFIX");
                 int directCodeBits = reader.NextChunk(4, "NDIRECT >> 4");
 
                 return new DistanceParameters((byte)postfixBitCount, (byte)directCodeBits);
-            },
-
-            toBits: (writer, obj, context) => {
-                writer.WriteChunk(2, obj.PostfixBitCount);
-                writer.WriteChunk(4, obj.DirectCodeBits);
             }
         );
+
+        public static readonly BitSerializer<DistanceParameters, NoContext> Serialize = (writer, obj, context) => {
+            writer.WriteChunk(2, obj.PostfixBitCount);
+            writer.WriteChunk(4, obj.DirectCodeBits);
+        };
     }
 }

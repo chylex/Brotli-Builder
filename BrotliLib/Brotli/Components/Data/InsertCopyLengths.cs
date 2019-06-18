@@ -128,8 +128,8 @@ namespace BrotliLib.Brotli.Components.Data{
 
         // Serialization
 
-        public static readonly IBitSerializer<InsertCopyLengths, InsertCopyLengthCode> Serializer = new MarkedBitSerializer<InsertCopyLengths, InsertCopyLengthCode>(
-            fromBits: (reader, context) => {
+        public static readonly BitDeserializer<InsertCopyLengths, InsertCopyLengthCode> Deserialize = MarkedBitDeserializer.Wrap<InsertCopyLengths, InsertCopyLengthCode>(
+            (reader, context) => {
                 int insertCode = context.InsertCode;
                 int copyCode = context.CopyCode;
 
@@ -137,18 +137,18 @@ namespace BrotliLib.Brotli.Components.Data{
                 int copyLength = reader.NextChunk(CopyCodeExtraBits[copyCode], "CLEN", value => CopyCodeValueOffsets[copyCode] + value);
 
                 return new InsertCopyLengths(insertLength, copyLength);
-            },
-
-            toBits: (writer, obj, context) => {
-                int insertCode = context.InsertCode;
-                int copyCode = context.CopyCode;
-                
-                int insertNormalized = obj.InsertLength - InsertCodeValueOffsets[insertCode];
-                int copyNormalized = obj.CopyLength - CopyCodeValueOffsets[copyCode];
-
-                writer.WriteChunk(InsertCodeExtraBits[insertCode], insertNormalized);
-                writer.WriteChunk(CopyCodeExtraBits[copyCode], copyNormalized);
             }
         );
+
+        public static readonly BitSerializer<InsertCopyLengths, InsertCopyLengthCode> Serialize = (writer, obj, context) => {
+            int insertCode = context.InsertCode;
+            int copyCode = context.CopyCode;
+            
+            int insertNormalized = obj.InsertLength - InsertCodeValueOffsets[insertCode];
+            int copyNormalized = obj.CopyLength - CopyCodeValueOffsets[copyCode];
+
+            writer.WriteChunk(InsertCodeExtraBits[insertCode], insertNormalized);
+            writer.WriteChunk(CopyCodeExtraBits[copyCode], copyNormalized);
+        };
     }
 }

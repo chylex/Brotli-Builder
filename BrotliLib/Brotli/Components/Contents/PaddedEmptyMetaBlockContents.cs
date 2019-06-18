@@ -56,8 +56,8 @@ namespace BrotliLib.Brotli.Components.Contents{
         
         // Serialization
 
-        internal static readonly IBitSerializer<PaddedEmptyMetaBlockContents, MetaBlock.Context> Serializer = new MarkedBitSerializer<PaddedEmptyMetaBlockContents, MetaBlock.Context>(
-            fromBits: (reader, context) => {
+        internal static readonly BitDeserializer<PaddedEmptyMetaBlockContents, NoContext> Deserialize = MarkedBitDeserializer.Wrap<PaddedEmptyMetaBlockContents, NoContext>(
+            (reader, context) => {
                 if (reader.NextBit("reserved")){
                     throw new InvalidOperationException("Reserved bit in empty meta-block must be 0.");
                 }
@@ -77,18 +77,18 @@ namespace BrotliLib.Brotli.Components.Contents{
                 reader.MarkEnd(new TitleMarker("Skipped Bytes"));
 
                 return new PaddedEmptyMetaBlockContents(bytes);
-            },
-
-            toBits: (writer, obj, context) => {
-                writer.WriteBit(false);
-
-                byte[] bytes = obj.hiddenData;
-                int lengthDescriptionBytes = CalculateBytesRequired(bytes.Length);
-
-                writer.WriteChunk(2, lengthDescriptionBytes);
-                writer.WriteChunk(8 * lengthDescriptionBytes, bytes.Length - 1);
-                writer.WriteAlignedBytes(bytes);
             }
         );
+
+        internal static readonly BitSerializer<PaddedEmptyMetaBlockContents, NoContext> Serialize = (writer, obj, context) => {
+            writer.WriteBit(false);
+
+            byte[] bytes = obj.hiddenData;
+            int lengthDescriptionBytes = CalculateBytesRequired(bytes.Length);
+
+            writer.WriteChunk(2, lengthDescriptionBytes);
+            writer.WriteChunk(8 * lengthDescriptionBytes, bytes.Length - 1);
+            writer.WriteAlignedBytes(bytes);
+        };
     }
 }

@@ -58,10 +58,10 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
 
         // Serialization
 
-        internal static readonly IBitSerializer<InsertCopyCommand, CompressedMetaBlockContents.DataContext> Serializer = new MarkedBitSerializer<InsertCopyCommand, CompressedMetaBlockContents.DataContext>(
-            markerTitle: "Insert & Copy Command",
+        internal static readonly BitDeserializer<InsertCopyCommand, CompressedMetaBlockContents.DataContext> Deserialize = MarkedBitDeserializer.Title<InsertCopyCommand, CompressedMetaBlockContents.DataContext>(
+            "Insert & Copy Command",
 
-            fromBits: (reader, context) => {
+            (reader, context) => {
                 MetaBlockCompressionHeader header = context.Header;
                 BrotliGlobalState state = context.State;
                 
@@ -69,7 +69,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                 
                 int icBlockID = context.NextBlockID(Category.InsertCopy);
                 InsertCopyLengthCode icLengthCode = reader.ReadValue(header.InsertCopyTrees[icBlockID].Root, "length code");
-                InsertCopyLengths icLengthValues = reader.ReadStructure(InsertCopyLengths.Serializer, icLengthCode, "length values");
+                InsertCopyLengths icLengthValues = reader.ReadStructure(InsertCopyLengths.Deserialize, icLengthCode, "length values");
 
                 int insertLength = icLengthValues.InsertLength;
                 int copyLength = icLengthValues.CopyLength;
@@ -106,64 +106,64 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                     int treeID = header.DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
                     DistanceCode distanceCode = reader.ReadValue(header.DistanceTrees[treeID].Root, "distance code");
-                    distanceInfo = reader.ReadValue(DistanceCode.Serializer, distanceCode.MakeContext(state), "distance value");
+                    distanceInfo = reader.ReadValue(DistanceCode.Deserialize, distanceCode.MakeContext(state), "distance value");
                 }
 
                 context.WriteCopy(copyLength, distanceInfo);
 
                 return new InsertCopyCommand(literals, copyLength, distanceInfo);
-            },
-
-            toBits: (writer, obj, context) => {
-                MetaBlockCompressionHeader header = context.Header;
-                BrotliGlobalState state = context.State;
-                
-                bool endsAfterLiterals = obj.CopyDistance == DistanceInfo.EndsAfterLiterals;
-                bool implicitDistanceCodeZero = obj.CopyDistance == DistanceInfo.ImplicitCodeZero;
-
-                // Insert&copy lengths
-
-                InsertCopyLengths icLengthValues = obj.Lengths;
-                int icBlockID = context.NextBlockID(Category.InsertCopy);
-                var icLengthEntry = header.InsertCopyTrees[icBlockID].FindEntry(code => icLengthValues.CanEncodeUsing(code) && (implicitDistanceCodeZero == code.UseDistanceCodeZero || endsAfterLiterals));
-                var icLengthCode = icLengthEntry.Key;
-
-                writer.WriteBits(icLengthEntry.Value);
-                InsertCopyLengths.Serializer.ToBits(writer, icLengthValues, icLengthCode);
-                
-                // Literals
-                
-                foreach(Literal literal in obj.Literals){
-                    int blockID = context.NextBlockID(Category.Literal);
-                    int contextID = state.NextLiteralContextID(header.LiteralCtxModes[blockID]);
-                    int treeID = header.LiteralCtxMap.DetermineTreeID(blockID, contextID);
-
-                    writer.WriteBits(header.LiteralTrees[treeID].FindPath(literal));
-                    context.WriteLiteral(in literal);
-                }
-
-                // Distance
-
-                if (endsAfterLiterals){
-                    return;
-                }
-
-                DistanceInfo distanceInfo = obj.CopyDistance;
-                
-                if (distanceInfo != DistanceInfo.ImplicitCodeZero){
-                    int blockID = context.NextBlockID(Category.Distance);
-                    int contextID = icLengthValues.DistanceContextID;
-                    int treeID = header.DistanceCtxMap.DetermineTreeID(blockID, contextID);
-
-                    var distanceEntry = header.DistanceTrees[treeID].FindEntry(code => distanceInfo.CanEncodeUsing(code, state));
-                    var distanceCode = distanceEntry.Key;
-
-                    writer.WriteBits(distanceEntry.Value);
-                    DistanceCode.Serializer.ToBits(writer, distanceInfo, distanceCode.MakeContext(state));
-                }
-                
-                context.WriteCopy(icLengthValues.CopyLength, distanceInfo);
             }
         );
+
+        internal static readonly BitSerializer<InsertCopyCommand, CompressedMetaBlockContents.DataContext> Serialize = (writer, obj, context) => {
+            MetaBlockCompressionHeader header = context.Header;
+            BrotliGlobalState state = context.State;
+            
+            bool endsAfterLiterals = obj.CopyDistance == DistanceInfo.EndsAfterLiterals;
+            bool implicitDistanceCodeZero = obj.CopyDistance == DistanceInfo.ImplicitCodeZero;
+
+            // Insert&copy lengths
+
+            InsertCopyLengths icLengthValues = obj.Lengths;
+            int icBlockID = context.NextBlockID(Category.InsertCopy);
+            var icLengthEntry = header.InsertCopyTrees[icBlockID].FindEntry(code => icLengthValues.CanEncodeUsing(code) && (implicitDistanceCodeZero == code.UseDistanceCodeZero || endsAfterLiterals));
+            var icLengthCode = icLengthEntry.Key;
+
+            writer.WriteBits(icLengthEntry.Value);
+            InsertCopyLengths.Serialize(writer, icLengthValues, icLengthCode);
+            
+            // Literals
+            
+            foreach(Literal literal in obj.Literals){
+                int blockID = context.NextBlockID(Category.Literal);
+                int contextID = state.NextLiteralContextID(header.LiteralCtxModes[blockID]);
+                int treeID = header.LiteralCtxMap.DetermineTreeID(blockID, contextID);
+
+                writer.WriteBits(header.LiteralTrees[treeID].FindPath(literal));
+                context.WriteLiteral(in literal);
+            }
+
+            // Distance
+
+            if (endsAfterLiterals){
+                return;
+            }
+
+            DistanceInfo distanceInfo = obj.CopyDistance;
+            
+            if (distanceInfo != DistanceInfo.ImplicitCodeZero){
+                int blockID = context.NextBlockID(Category.Distance);
+                int contextID = icLengthValues.DistanceContextID;
+                int treeID = header.DistanceCtxMap.DetermineTreeID(blockID, contextID);
+
+                var distanceEntry = header.DistanceTrees[treeID].FindEntry(code => distanceInfo.CanEncodeUsing(code, state));
+                var distanceCode = distanceEntry.Key;
+
+                writer.WriteBits(distanceEntry.Value);
+                DistanceCode.Serialize(writer, distanceInfo, distanceCode.MakeContext(state));
+            }
+            
+            context.WriteCopy(icLengthValues.CopyLength, distanceInfo);
+        };
     }
 }

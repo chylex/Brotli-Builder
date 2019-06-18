@@ -48,10 +48,10 @@ namespace BrotliLib.Brotli.Components{
 
         // Serialization
 
-        public static readonly IBitSerializer<WindowSize, NoContext> Serializer = new MarkedBitSerializer<WindowSize, NoContext>(
-            markerTitle: "Window Size",
+        public static readonly BitDeserializer<WindowSize, NoContext> Deserialize = MarkedBitDeserializer.Title<WindowSize, NoContext>(
+            "Window Size",
 
-            fromBits: (reader, context) => {
+            (reader, context) => {
                 int wbits = reader.MarkValue("WBITS", () => {
                     if (!reader.NextBit()){ // [0]
                         return 16;
@@ -75,33 +75,33 @@ namespace BrotliLib.Brotli.Components{
                 });
                 
                 return new WindowSize(wbits);
-            },
-
-            toBits: (writer, obj, context) => {
-                int value;
-                int count;
-
-                switch(obj.Bits){
-                    case 10: value = 0b010_000_1; count = 7; break;
-                    case 11: value = 0b011_000_1; count = 7; break;
-                    case 12: value = 0b100_000_1; count = 7; break;
-                    case 13: value = 0b101_000_1; count = 7; break;
-                    case 14: value = 0b110_000_1; count = 7; break;
-                    case 15: value = 0b111_000_1; count = 7; break;
-                    case 16: value = 0b0; count = 1; break;
-                    case 17: value = 0b000_000_1; count = 7; break;
-                    case 18: value = 0b001_1; count = 4; break;
-                    case 19: value = 0b010_1; count = 4; break;
-                    case 20: value = 0b011_1; count = 4; break;
-                    case 21: value = 0b100_1; count = 4; break;
-                    case 22: value = 0b101_1; count = 4; break;
-                    case 23: value = 0b110_1; count = 4; break;
-                    case 24: value = 0b111_1; count = 4; break;
-                    default: throw new InvalidOperationException("Window size object has an invalid window size parameter (WBITS): " + obj.Bits);
-                }
-
-                writer.WriteChunk(count, value);
             }
         );
+
+        public static readonly BitSerializer<WindowSize, NoContext> Serialize = (writer, obj, context) => {
+            int value;
+            int count;
+
+            switch(obj.Bits){
+                case 10: value = 0b010_000_1; count = 7; break;
+                case 11: value = 0b011_000_1; count = 7; break;
+                case 12: value = 0b100_000_1; count = 7; break;
+                case 13: value = 0b101_000_1; count = 7; break;
+                case 14: value = 0b110_000_1; count = 7; break;
+                case 15: value = 0b111_000_1; count = 7; break;
+                case 16: value = 0b0; count = 1; break;
+                case 17: value = 0b000_000_1; count = 7; break;
+                case 18: value = 0b001_1; count = 4; break;
+                case 19: value = 0b010_1; count = 4; break;
+                case 20: value = 0b011_1; count = 4; break;
+                case 21: value = 0b100_1; count = 4; break;
+                case 22: value = 0b101_1; count = 4; break;
+                case 23: value = 0b110_1; count = 4; break;
+                case 24: value = 0b111_1; count = 4; break;
+                default: throw new InvalidOperationException("Window size object has an invalid window size parameter (WBITS): " + obj.Bits);
+            }
+
+            writer.WriteChunk(count, value);
+        };
     }
 }

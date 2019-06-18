@@ -11,10 +11,10 @@ open BrotliLib.Huffman
 
 
 module Helper =
-    let convert (obj: 'a) (context: 'b) (serializer: IBitSerializer<'a, 'b>) =
+    let convert (obj: 'a) (context: 'b) (serializer: BitSerializer<'a, 'b>) (deserializer: BitDeserializer<'a, 'b>) =
         let stream = BitStream()
-        serializer.ToBits(stream.GetWriter(), obj, context)
-        serializer.FromBits(stream.GetReader(), context)
+        serializer.Invoke(stream.GetWriter(), obj, context)
+        deserializer.Invoke(stream.GetReader(), context)
 
 
 module WindowSize =
@@ -23,7 +23,7 @@ module WindowSize =
     [<Theory>]
     [<MemberData("values")>]
     let ``converting to and from bits yields same object`` (ws: WindowSize) =
-        Assert.Equal(ws, Helper.convert ws NoContext.Value WindowSize.Serializer)
+        Assert.Equal(ws, Helper.convert ws NoContext.Value WindowSize.Serialize WindowSize.Deserialize)
 
     [<Theory>]
     [<InlineData(-1)>]
@@ -46,7 +46,7 @@ module DataLength =
     let ``converting to and from bits yields same object`` () =
         for bytes in values do // ReSharper doesn't play nice with enumeration disabled
             let dl = DataLength(bytes)
-            Assert.Equal(dl, Helper.convert dl NoContext.Value DataLength.Serializer)
+            Assert.Equal(dl, Helper.convert dl NoContext.Value DataLength.Serialize DataLength.Deserialize)
 
     [<Theory>]
     [<InlineData(0, 0)>]
@@ -76,7 +76,7 @@ module VariableLength11Code =
     let ``converting to and from bits yields same object`` () =
         for value in values do
             let code = VariableLength11Code(value)
-            Assert.Equal(code, Helper.convert code NoContext.Value VariableLength11Code.Serializer)
+            Assert.Equal(code, Helper.convert code NoContext.Value VariableLength11Code.Serialize VariableLength11Code.Deserialize)
         
     [<Theory>]
     [<InlineData(-1)>]
@@ -96,7 +96,7 @@ module DistanceParameters =
     let ``converting to and from bits yields same object`` () =
         for (pb, db) in cartesian postfix directbits do
             let parameters = DistanceParameters(pb, db)
-            Assert.Equal(parameters, Helper.convert parameters NoContext.Value DistanceParameters.Serializer)
+            Assert.Equal(parameters, Helper.convert parameters NoContext.Value DistanceParameters.Serialize DistanceParameters.Deserialize)
         
     [<Theory>]
     [<InlineData(4, 0)>]
@@ -172,12 +172,12 @@ module HuffmanTree =
     [<Theory>]
     [<MemberData("simple")>]
     let ``converting to and from bits yields same object (simple)`` (tree: HuffmanTree<char>) =
-        Assert.Equal<HuffmanTree<_>>(tree, Helper.convert tree context HuffmanTree<_>.Serializer)
+        Assert.Equal<HuffmanTree<_>>(tree, Helper.convert tree context HuffmanTree<_>.Serialize HuffmanTree<_>.Deserialize)
 
     [<Theory>]
     [<MemberData("complex")>]
     let ``converting to and from bits yields same object (complex)`` (tree: HuffmanTree<char>) =
-        Assert.Equal<HuffmanTree<_>>(tree, Helper.convert tree context HuffmanTree<_>.Serializer)
+        Assert.Equal<HuffmanTree<_>>(tree, Helper.convert tree context HuffmanTree<_>.Serialize HuffmanTree<_>.Deserialize)
 
 
 module LiteralContextMode =
@@ -186,7 +186,7 @@ module LiteralContextMode =
     [<Theory>]
     [<MemberData("values")>]
     let ``converting to and from bits yields same object`` (mode: LiteralContextMode) =
-        Assert.Equal(mode, Helper.convert mode NoContext.Value LiteralContextModes.Serializer)
+        Assert.Equal(mode, Helper.convert mode NoContext.Value LiteralContextModes.Serialize LiteralContextModes.Deserialize)
 
 
 module InsertCopyLengths =
@@ -281,7 +281,7 @@ module InsertCopyLengths =
                 let lengths = InsertCopyLengths(insertLength, copyRanges.[icCode.CopyCode] |> Seq.head)
 
                 Assert.True(lengths.CanEncodeUsing(icCode))
-                Assert.Equal(lengths, Helper.convert lengths icCode InsertCopyLengths.Serializer)
+                Assert.Equal(lengths, Helper.convert lengths icCode InsertCopyLengths.Serialize InsertCopyLengths.Deserialize)
     
     [<Theory>]
     [<MemberData("copyRangesObj")>]
@@ -294,4 +294,4 @@ module InsertCopyLengths =
                 let lengths = InsertCopyLengths(insertRanges.[icCode.InsertCode] |> Seq.head, copyLength)
 
                 Assert.True(lengths.CanEncodeUsing(icCode))
-                Assert.Equal(lengths, Helper.convert lengths icCode InsertCopyLengths.Serializer)
+                Assert.Equal(lengths, Helper.convert lengths icCode InsertCopyLengths.Serialize InsertCopyLengths.Deserialize)

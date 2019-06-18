@@ -12,11 +12,10 @@ namespace BrotliLib.Brotli.Components.Header{
         private const int SymbolBitSpace = 1 << DefaultMaxDepth;
         private const byte NoForcedCode = byte.MaxValue;
 
-        /// <summary>
-        /// https://tools.ietf.org/html/rfc7932#section-3.5
-        /// </summary>
-        private static readonly IBitSerializer<HuffmanTree<T>, Context> ComplexCodeSerializer = new MarkedBitSerializer<HuffmanTree<T>, Context>(
-            fromBits: (reader, context) => {
+        // https://tools.ietf.org/html/rfc7932#section-3.5
+
+        private static readonly BitDeserializer<HuffmanTree<T>, Context> ComplexCodeDeserialize = MarkedBitDeserializer.Wrap<HuffmanTree<T>, Context>(
+            (reader, context) => {
                 Func<int, T> getSymbol = context.BitsToSymbol;
 
                 var defaultRepeatCode = new HuffmanGenerator<T>.Entry(getSymbol(0), ComplexLengthCode.DefaultRepeatCode);
@@ -96,93 +95,93 @@ namespace BrotliLib.Brotli.Components.Header{
                 reader.MarkEnd(new TitleMarker("Symbols"));
 
                 return new HuffmanTree<T>(HuffmanGenerator<T>.FromBitCountsCanonical(symbolEntries));
-            },
-
-            toBits: (writer, obj, context) => {
-                Func<int, T> getSymbol = context.BitsToSymbol;
-                
-                int symbolCount = context.AlphabetSize.SymbolCount;
-                var symbolEntries = new List<HuffmanGenerator<T>.Entry>();
-
-                Queue<byte> extra = new Queue<byte>();
-                
-                for(int symbolIndex = 0, bitSpaceRemaining = SymbolBitSpace; bitSpaceRemaining > 0 && symbolIndex < symbolCount; symbolIndex++){
-                    T symbol = getSymbol(symbolIndex);
-                    BitStream path = obj.FindPathOrNull(symbol);
-
-                    byte length = (byte)(path?.Length ?? 0);
-                    
-                    if (length > 0){
-                        bitSpaceRemaining -= SymbolBitSpace >> length;
-                    }
-                    else if (symbolIndex == symbolCount - 1){
-                        length = 15; // if the tree is incomplete, a zero lengh last symbol would generate an ending length code 0 or 17, which Brotli spec forbids
-                                     // if the tree is complete and the final symbol was supposed to be a 0, the writer will run out of bit space before it writes the final symbol
-                    }
-
-                    symbolEntries.Add(new HuffmanGenerator<T>.Entry(symbol, length));
-                }
-
-                int ProcessRepetitions(int length, int multiplier){
-                    Stack<byte> newExtra = new Stack<byte>();
-
-                    int remaining = length - 3; // TODO official compressor special-cases 7 (mp = 2) and 11 (mp = 3), but not other values that are 1 above the boundary... potential point for improvement?
-
-                    do{
-                        newExtra.Push((byte)(remaining % multiplier));
-                        remaining /= multiplier;
-                    }while(--remaining >= 0);
-
-                    foreach(byte entry in newExtra){
-                        extra.Enqueue(entry);
-                    }
-
-                    return newExtra.Count;
-                }
-
-                int ReplaceSequence(int index, byte code, int removeLength, int insertLength){
-                    symbolEntries.RemoveRange(index, removeLength);
-                    symbolEntries.InsertRange(index, Enumerable.Repeat(new HuffmanGenerator<T>.Entry(default, code), insertLength));
-                    return index + insertLength;
-                }
-                
-                for(int entryIndex = 0, lastRepeatStartIndex = 0, lastRepeatCode = ComplexLengthCode.DefaultRepeatCode; entryIndex < symbolEntries.Count + 1; entryIndex++){
-                    int nextCode = entryIndex < symbolEntries.Count ? symbolEntries[entryIndex].Bits : -1;
-
-                    if (nextCode != lastRepeatCode){
-                        if (lastRepeatCode == 0){
-                            --lastRepeatStartIndex;
-                        }
-
-                        int skipLength = entryIndex - lastRepeatStartIndex;
-
-                        if (skipLength >= 3){
-                            entryIndex = lastRepeatCode == 0 ? ReplaceSequence(lastRepeatStartIndex, ComplexLengthCode.Skip, skipLength, ProcessRepetitions(skipLength, 8)) :
-                                                               ReplaceSequence(lastRepeatStartIndex, ComplexLengthCode.Repeat, skipLength, ProcessRepetitions(skipLength, 4));
-                        }
-                        
-                        lastRepeatCode = nextCode;
-                        lastRepeatStartIndex = entryIndex + 1;
-                    }
-                }
-                
-                var lengthEntries = symbolEntries.GroupBy(kvp => kvp.Bits).Select(group => new HuffmanGenerator<byte>.SymbolFreq(group.Key, group.Count())).ToArray();
-                var lengthMap = HuffmanGenerator<byte>.FromFrequenciesCanonical(lengthEntries, ComplexLengthCode.LengthMaxDepth).GenerateValueMap();
-                
-                ComplexLengthCode.Write(writer, lengthMap);
-                
-                foreach(byte code in symbolEntries.Select(entry => entry.Bits)){
-                    writer.WriteBits(lengthMap[code]);
-
-                    if (code == ComplexLengthCode.Skip){
-                        writer.WriteChunk(3, extra.Dequeue());
-                    }
-                    else if (code == ComplexLengthCode.Repeat){
-                        writer.WriteChunk(2, extra.Dequeue());
-                    }
-                }
             }
         );
+
+        private static readonly BitSerializer<HuffmanTree<T>, Context> ComplexCodeSerialize = (writer, obj, context) => {
+            Func<int, T> getSymbol = context.BitsToSymbol;
+            
+            int symbolCount = context.AlphabetSize.SymbolCount;
+            var symbolEntries = new List<HuffmanGenerator<T>.Entry>();
+
+            Queue<byte> extra = new Queue<byte>();
+            
+            for(int symbolIndex = 0, bitSpaceRemaining = SymbolBitSpace; bitSpaceRemaining > 0 && symbolIndex < symbolCount; symbolIndex++){
+                T symbol = getSymbol(symbolIndex);
+                BitStream path = obj.FindPathOrNull(symbol);
+
+                byte length = (byte)(path?.Length ?? 0);
+                
+                if (length > 0){
+                    bitSpaceRemaining -= SymbolBitSpace >> length;
+                }
+                else if (symbolIndex == symbolCount - 1){
+                    length = 15; // if the tree is incomplete, a zero lengh last symbol would generate an ending length code 0 or 17, which Brotli spec forbids
+                                 // if the tree is complete and the final symbol was supposed to be a 0, the writer will run out of bit space before it writes the final symbol
+                }
+
+                symbolEntries.Add(new HuffmanGenerator<T>.Entry(symbol, length));
+            }
+
+            int ProcessRepetitions(int length, int multiplier){
+                Stack<byte> newExtra = new Stack<byte>();
+
+                int remaining = length - 3; // TODO official compressor special-cases 7 (mp = 2) and 11 (mp = 3), but not other values that are 1 above the boundary... potential point for improvement?
+
+                do{
+                    newExtra.Push((byte)(remaining % multiplier));
+                    remaining /= multiplier;
+                }while(--remaining >= 0);
+
+                foreach(byte entry in newExtra){
+                    extra.Enqueue(entry);
+                }
+
+                return newExtra.Count;
+            }
+
+            int ReplaceSequence(int index, byte code, int removeLength, int insertLength){
+                symbolEntries.RemoveRange(index, removeLength);
+                symbolEntries.InsertRange(index, Enumerable.Repeat(new HuffmanGenerator<T>.Entry(default, code), insertLength));
+                return index + insertLength;
+            }
+            
+            for(int entryIndex = 0, lastRepeatStartIndex = 0, lastRepeatCode = ComplexLengthCode.DefaultRepeatCode; entryIndex < symbolEntries.Count + 1; entryIndex++){
+                int nextCode = entryIndex < symbolEntries.Count ? symbolEntries[entryIndex].Bits : -1;
+
+                if (nextCode != lastRepeatCode){
+                    if (lastRepeatCode == 0){
+                        --lastRepeatStartIndex;
+                    }
+
+                    int skipLength = entryIndex - lastRepeatStartIndex;
+
+                    if (skipLength >= 3){
+                        entryIndex = lastRepeatCode == 0 ? ReplaceSequence(lastRepeatStartIndex, ComplexLengthCode.Skip, skipLength, ProcessRepetitions(skipLength, 8)) :
+                                                           ReplaceSequence(lastRepeatStartIndex, ComplexLengthCode.Repeat, skipLength, ProcessRepetitions(skipLength, 4));
+                    }
+                    
+                    lastRepeatCode = nextCode;
+                    lastRepeatStartIndex = entryIndex + 1;
+                }
+            }
+            
+            var lengthEntries = symbolEntries.GroupBy(kvp => kvp.Bits).Select(group => new HuffmanGenerator<byte>.SymbolFreq(group.Key, group.Count())).ToArray();
+            var lengthMap = HuffmanGenerator<byte>.FromFrequenciesCanonical(lengthEntries, ComplexLengthCode.LengthMaxDepth).GenerateValueMap();
+            
+            ComplexLengthCode.Write(writer, lengthMap);
+            
+            foreach(byte code in symbolEntries.Select(entry => entry.Bits)){
+                writer.WriteBits(lengthMap[code]);
+
+                if (code == ComplexLengthCode.Skip){
+                    writer.WriteChunk(3, extra.Dequeue());
+                }
+                else if (code == ComplexLengthCode.Repeat){
+                    writer.WriteChunk(2, extra.Dequeue());
+                }
+            }
+        };
     }
     
     internal sealed class ComplexLengthCode : IComparable<ComplexLengthCode>{

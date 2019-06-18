@@ -85,12 +85,12 @@ namespace BrotliLib.Brotli.Markers{
 
         // Utilities
 
-        public O ReadValue<T, C, O>(IBitSerializer<T, C> serializer, C context, string name, Func<T, O> mapper){
-            return MarkCall(() => mapper(serializer.FromBits(this, context)), result => new TextMarker(name, result));
+        public O ReadValue<T, C, O>(BitDeserializer<T, C> deserialize, C context, string name, Func<T, O> mapper){
+            return MarkCall(() => mapper(deserialize(this, context)), result => new TextMarker(name, result));
         }
 
-        public T ReadValue<T, C>(IBitSerializer<T, C> serializer, C context, string name){
-            return ReadValue(serializer, context, name, result => result);
+        public T ReadValue<T, C>(BitDeserializer<T, C> deserialize, C context, string name){
+            return ReadValue(deserialize, context, name, result => result);
         }
 
         public O ReadValue<T, O>(HuffmanNode<T> tree, string name, Func<T, O> mapper) where T : IComparable<T>{
@@ -101,8 +101,8 @@ namespace BrotliLib.Brotli.Markers{
             return ReadValue(tree, name, result => result);
         }
 
-        public T ReadStructure<T, C>(IBitSerializer<T, C> serializer, C context, string title){
-            return MarkCall(() => serializer.FromBits(this, context), _ => new TitleMarker(title));
+        public T ReadStructure<T, C>(BitDeserializer<T, C> deserialize, C context, string title){
+            return MarkCall(() => deserialize(this, context), _ => new TitleMarker(title));
         }
 
         public T[] ReadValueArray<T>(int length, string name, Func<T> supplier){
@@ -111,9 +111,9 @@ namespace BrotliLib.Brotli.Markers{
                              .ToArray();
         }
 
-        public T[] ReadStructureArray<T, C>(int length, IBitSerializer<T, C> serializer, C context, string title){
+        public T[] ReadStructureArray<T, C>(int length, BitDeserializer<T, C> deserialize, C context, string title){
             return Enumerable.Range(0, length)
-                             .Select(counter => MarkTitle(title + " " + (counter + 1) + "/" + length, () => serializer.FromBits(this, context)))
+                             .Select(counter => MarkTitle(title + " " + (counter + 1) + "/" + length, () => deserialize(this, context)))
                              .ToArray();
         }
 

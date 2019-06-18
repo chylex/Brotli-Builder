@@ -41,31 +41,29 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Serialization
 
-        public static readonly IBitSerializer<VariableLength11Code, NoContext> Serializer = new BitSerializer<VariableLength11Code, NoContext>(
-            fromBits: (reader, context) => {
-                if (!reader.NextBit()){
-                    return new VariableLength11Code(MinValue);
-                }
-                else{
-                    int chunkBits = reader.NextChunk(3);
-                    return new VariableLength11Code(MinValue + (1 << chunkBits) + reader.NextChunk(chunkBits));
-                }
-            },
-
-            toBits: (writer, obj, context) => {
-                if (obj.Value == MinValue){
-                    writer.WriteBit(false);
-                }
-                else{
-                    writer.WriteBit(true);
-
-                    int offsetValue = obj.Value - MinValue;
-                    int chunkBits = offsetValue == 0 ? 0 : (int)Math.Floor(Math.Log(offsetValue, 2));
-
-                    writer.WriteChunk(3, chunkBits);
-                    writer.WriteChunk(chunkBits, offsetValue - (1 << chunkBits));
-                }
+        public static readonly BitDeserializer<VariableLength11Code, NoContext> Deserialize = (reader, context) => {
+            if (!reader.NextBit()){
+                return new VariableLength11Code(MinValue);
             }
-        );
+            else{
+                int chunkBits = reader.NextChunk(3);
+                return new VariableLength11Code(MinValue + (1 << chunkBits) + reader.NextChunk(chunkBits));
+            }
+        };
+
+        public static readonly BitSerializer<VariableLength11Code, NoContext> Serialize = (writer, obj, context) => {
+            if (obj.Value == MinValue){
+                writer.WriteBit(false);
+            }
+            else{
+                writer.WriteBit(true);
+
+                int offsetValue = obj.Value - MinValue;
+                int chunkBits = offsetValue == 0 ? 0 : (int)Math.Floor(Math.Log(offsetValue, 2));
+
+                writer.WriteChunk(3, chunkBits);
+                writer.WriteChunk(chunkBits, offsetValue - (1 << chunkBits));
+            }
+        };
     }
 }

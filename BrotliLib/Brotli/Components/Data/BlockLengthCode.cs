@@ -81,9 +81,7 @@ namespace BrotliLib.Brotli.Components.Data{
 
         // Serialization
 
-        internal static readonly IBitSerializer<int, BlockLengthCode> Serializer = new BitSerializer<int, BlockLengthCode>(
-            fromBits: (reader, context) => context.ReadValue(reader),
-            toBits: (writer, obj, context) => context.WriteValue(writer, obj)
-        ); 
+        internal static readonly BitDeserializer<int, BlockLengthCode> Deserialize = (reader, context) => context.ReadValue(reader);
+        internal static readonly BitSerializer<int, BlockLengthCode> Serialize = (writer, obj, context) => context.WriteValue(writer, obj);
     }
 }

@@ -69,10 +69,10 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Serialization
 
-        public static readonly IBitSerializer<DataLength, NoContext> Serializer = new MarkedBitSerializer<DataLength, NoContext>(
-            markerTitle: "Data Length",
+        public static readonly BitDeserializer<DataLength, NoContext> Deserialize = MarkedBitDeserializer.Title<DataLength, NoContext>(
+            "Data Length",
 
-            fromBits: (reader, context) => {
+            (reader, context) => {
                 int chunkNibbles = reader.NextChunk(2, "MNIBBLES", value => {
                     switch(value){
                         case 0b00: return 4;
@@ -86,19 +86,19 @@ namespace BrotliLib.Brotli.Components.Header{
                 int uncompressedBytes = (chunkNibbles == 0) ? 0 : reader.NextChunk(4 * chunkNibbles, "MLEN", value => 1 + value);
 
                 return new DataLength(uncompressedBytes);
-            },
-
-            toBits: (writer, obj, context) => {
-                switch(obj.ChunkNibbles){
-                    case 4: writer.WriteChunk(2, 0b00); break;
-                    case 5: writer.WriteChunk(2, 0b01); break;
-                    case 6: writer.WriteChunk(2, 0b10); break;
-                    case 0: writer.WriteChunk(2, 0b11); break;
-                    default: throw new InvalidOperationException("Data length object has an invalid amount of nibbles: " + obj.ChunkNibbles);
-                }
-
-                writer.WriteChunk(4 * obj.ChunkNibbles, obj.UncompressedBytes - 1);
             }
         );
+
+        public static readonly BitSerializer<DataLength, NoContext> Serialize = (writer, obj, context) => {
+            switch(obj.ChunkNibbles){
+                case 4: writer.WriteChunk(2, 0b00); break;
+                case 5: writer.WriteChunk(2, 0b01); break;
+                case 6: writer.WriteChunk(2, 0b10); break;
+                case 0: writer.WriteChunk(2, 0b11); break;
+                default: throw new InvalidOperationException("Data length object has an invalid amount of nibbles: " + obj.ChunkNibbles);
+            }
+
+            writer.WriteChunk(4 * obj.ChunkNibbles, obj.UncompressedBytes - 1);
+        };
     }
 }
