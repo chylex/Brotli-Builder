@@ -3,7 +3,7 @@ using System.Diagnostics;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.State;
-using BrotliLib.IO;
+using BrotliLib.IO.Writer;
 
 namespace BrotliImpl{
     class MetaBlockSizeTracker{
@@ -42,11 +42,11 @@ namespace BrotliImpl{
         }
 
         public static int CountBits(MetaBlock tested, BrotliGlobalState state){
-            var stream = new BitStream();
+            var writer = new BitWriterNull();
 
             try{
-                MetaBlock.Serialize(stream.GetWriter(), tested, state.Clone());
-                return stream.Length;
+                MetaBlock.Serialize(writer, tested, state.Clone());
+                return writer.Length;
             }catch(Exception ex){
                 Debug.WriteLine(ex.ToString());
                 return int.MaxValue;

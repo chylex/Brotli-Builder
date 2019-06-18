@@ -7,6 +7,7 @@ using BrotliLib.Brotli.Markers.Reader;
 using BrotliLib.Brotli.State;
 using BrotliLib.Brotli.State.Output;
 using BrotliLib.IO;
+using BrotliLib.IO.Writer;
 
 namespace BrotliLib.Brotli{
     /// <summary>
@@ -48,11 +49,12 @@ namespace BrotliLib.Brotli{
         public BrotliFileStructure Transform(IBrotliTransformer transformer){
             var copy = new BrotliFileStructure(Parameters);
             var state = new BrotliGlobalState(Parameters, new BrotliOutputWindowed(Parameters.WindowSize));
+            var writer = new BitWriterNull();
 
             foreach(MetaBlock original in MetaBlocks){
                 foreach(MetaBlock transformed in transformer.Transform(original, state)){ // TODO figure out how to handle state
                     copy.MetaBlocks.Add(transformed);
-                    MetaBlock.Serialize(new BitStream().GetWriter(), transformed, state); // TODO null writer
+                    MetaBlock.Serialize(writer, transformed, state);
                 }
             }
 
