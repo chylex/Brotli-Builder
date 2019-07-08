@@ -34,16 +34,15 @@ namespace BrotliLib.Brotli.Components.Header{
 
                 void AddMarkedSymbol(HuffmanGenerator<T>.Entry entry){
                     symbolEntries.Add(entry);
-                    reader.MarkOne(new ValueMarker("entry", entry));
+                    reader.MarkStart();
+                    reader.MarkEnd(new ValueMarker("entry", entry));
                 }
                 
                 while(bitSpaceRemaining > 0 && symbolIndex < symbolCount){
                     byte nextCode;
 
                     if (nextForcedCode == NoForcedCode){
-                        reader.MarkStart();
-                        nextCode = lengthCodes.LookupValue(reader).Code;
-                        reader.MarkEnd(new ValueMarker("code", nextCode));
+                        nextCode = reader.ReadValue(lengthCodes, "code", code => code.Code);
                     }
                     else{
                         nextCode = nextForcedCode;

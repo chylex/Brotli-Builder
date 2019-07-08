@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.IO.Reader;
 using BrotliLib.Markers;
@@ -36,6 +37,13 @@ namespace BrotliLib.Brotli.Markers.Reader{
             int start = starts.Pop();
             int end = Index;
             nodes.Pop().Marker = new Marker(start, end, info);
+        }
+
+        public T MarkCall<T>(Func<T> supplier, Func<T, IMarkerInfo> marker){
+            MarkStart();
+            T result = supplier();
+            MarkEnd(marker(result));
+            return result;
         }
 
         // Wrapper

@@ -4,22 +4,9 @@ using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.Brotli.Markers.Reader;
 using BrotliLib.Huffman;
 using BrotliLib.IO;
-using BrotliLib.Markers;
 
 namespace BrotliLib.Brotli.Markers{
     static class MarkedBitExtensions{
-        public static void MarkOne(this IMarkedBitReader reader, IMarkerInfo info){
-            reader.MarkStart();
-            reader.MarkEnd(info);
-        }
-
-        public static T MarkCall<T>(this IMarkedBitReader reader, Func<T> supplier, Func<T, IMarkerInfo> marker){
-            reader.MarkStart();
-            T result = supplier();
-            reader.MarkEnd(marker(result));
-            return result;
-        }
-
         public static T MarkTitle<T>(this IMarkedBitReader reader, string title, Func<T> action){
             return reader.MarkCall(action, _ => new TitleMarker(title));
         }

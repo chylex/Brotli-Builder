@@ -1,4 +1,5 @@
-﻿using BrotliLib.IO.Reader;
+﻿using System;
+using BrotliLib.IO.Reader;
 using BrotliLib.Markers;
 
 namespace BrotliLib.Brotli.Markers.Reader{
@@ -13,6 +14,7 @@ namespace BrotliLib.Brotli.Markers.Reader{
 
         public void MarkStart(){}
         public void MarkEnd(IMarkerInfo info){}
+        public T MarkCall<T>(Func<T> supplier, Func<T, IMarkerInfo> marker) => supplier();
 
         public int Index => wrapped.Index;
 
