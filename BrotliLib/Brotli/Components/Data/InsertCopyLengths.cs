@@ -17,6 +17,16 @@ namespace BrotliLib.Brotli.Components.Data{
         public const int MinCopyLength = 2;
         public const int MaxCopyLength = 2118 + (1 << 24) - 1;
 
+        internal static void CheckBounds(int insertLength, int copyLength){
+            if (insertLength < MinInsertLength || insertLength > MaxInsertLength){
+                throw new ArgumentOutOfRangeException(nameof(insertLength), "Insert length must be in the range [" + MinInsertLength + "; " + MaxInsertLength + "].");
+            }
+
+            if (copyLength < MinCopyLength || copyLength > MaxCopyLength){
+                throw new ArgumentOutOfRangeException(nameof(copyLength), "Copy length must be in the range [" + MinCopyLength + "; " + MaxCopyLength + "].");
+            }
+        }
+
         // Insert code tables
 
         private static readonly int[] InsertCodeExtraBits = {
@@ -70,13 +80,7 @@ namespace BrotliLib.Brotli.Components.Data{
         /// Initializes the lengths with the provided values.
         /// </summary>
         public InsertCopyLengths(int insertLength, int copyLength){
-            if (insertLength < MinInsertLength || insertLength > MaxInsertLength){
-                throw new ArgumentOutOfRangeException(nameof(insertLength), "Insert length must be in the range [" + MinInsertLength + "; " + MaxInsertLength + "].");
-            }
-
-            if (copyLength < MinCopyLength || copyLength > MaxCopyLength){
-                throw new ArgumentOutOfRangeException(nameof(copyLength), "Copy length must be in the range [" + MinCopyLength + "; " + MaxCopyLength + "].");
-            }
+            CheckBounds(insertLength, copyLength);
 
             this.InsertLength = insertLength;
             this.CopyLength = copyLength;

@@ -107,9 +107,6 @@ namespace BrotliLib.IO{
             if (bit){
                 entryCollection[LastEntryIndex] |= 1UL << offset;
             }
-            else{
-                entryCollection[LastEntryIndex] &= entryCollection[LastEntryIndex] & ~(1UL << offset);
-            }
 
             ++Length;
         }

@@ -8,12 +8,12 @@ namespace BrotliLib.Collections{
         /// <summary>
         /// Amount of elements in the buffer.
         /// </summary>
-        public int Length => values.Length;
+        public int Length { get; }
 
         /// <summary>
         /// Element at index [<see cref="Length"/> - 1].
         /// </summary>
-        public T Front => this[values.Length - 1];
+        public T Front => this[Length - 1];
 
         /// <summary>
         /// Element at index [0].
@@ -30,7 +30,7 @@ namespace BrotliLib.Collections{
                     throw new IndexOutOfRangeException("Ring buffer index cannot be negative.");
                 }
 
-                return values[(index + accessOffset) % values.Length];
+                return values[(index + accessOffset) % Length];
             }
         }
 
@@ -47,6 +47,7 @@ namespace BrotliLib.Collections{
             }
 
             this.values = values;
+            this.Length = values.Length;
         }
 
         /// <summary>
@@ -55,13 +56,14 @@ namespace BrotliLib.Collections{
         public RingBuffer(RingBuffer<T> original){
             this.values = (T[])original.values.Clone();
             this.accessOffset = original.accessOffset;
+            this.Length = original.Length;
         }
 
         /// <summary>
         /// Pushes a new value to the front of the queue, removing the value at the back.
         /// </summary>
         public void Push(T value){
-            values[accessOffset++ % values.Length] = value;
+            values[accessOffset++ % Length] = value;
         }
     }
 }

@@ -16,11 +16,11 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
         public InsertCopyLengths Lengths => new InsertCopyLengths(Literals.Count, CopyLength);
         
         public InsertCopyCommand(IList<Literal> literals, int copyLength = InsertCopyLengths.MinCopyLength, DistanceInfo copyDistance = DistanceInfo.EndsAfterLiterals){
+            InsertCopyLengths.CheckBounds(literals.Count, copyLength);
+
             this.Literals = literals.ToArray();
             this.CopyLength = copyLength;
             this.CopyDistance = copyDistance;
-
-            var _ = Lengths; // performs bounds checking
         }
         
         public InsertCopyCommand(IList<Literal> literals, int copyLength, int copyDistance) : this(literals, copyLength, (DistanceInfo)copyDistance){}
