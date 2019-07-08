@@ -25,7 +25,7 @@ namespace BrotliLib.Brotli.Markers{
         }
 
         public static T MarkValue<T>(this IMarkedBitReader reader, string title, Func<T> action){
-            return reader.MarkCall(action, result => new TextMarker(title, result));
+            return reader.MarkCall(action, result => new ValueMarker(title, result));
         }
 
         // Marking overloads
@@ -49,7 +49,7 @@ namespace BrotliLib.Brotli.Markers{
         // Complex structures
 
         public static O ReadValue<T, C, O>(this IMarkedBitReader reader, BitDeserializer<T, C> deserialize, C context, string name, Func<T, O> mapper){
-            return reader.MarkCall(() => mapper(deserialize(reader, context)), result => new TextMarker(name, result));
+            return reader.MarkCall(() => mapper(deserialize(reader, context)), result => new ValueMarker(name, result));
         }
 
         public static T ReadValue<T, C>(this IMarkedBitReader reader, BitDeserializer<T, C> deserialize, C context, string name){
@@ -57,7 +57,7 @@ namespace BrotliLib.Brotli.Markers{
         }
 
         public static O ReadValue<T, O>(this IMarkedBitReader reader, HuffmanNode<T> tree, string name, Func<T, O> mapper) where T : IComparable<T>{
-            return reader.MarkCall(() => mapper(tree.LookupValue(reader)), result => new TextMarker(name, result));
+            return reader.MarkCall(() => mapper(tree.LookupValue(reader)), result => new ValueMarker(name, result));
         }
 
         public static T ReadValue<T>(this IMarkedBitReader reader, HuffmanNode<T> tree, string name) where T : IComparable<T>{

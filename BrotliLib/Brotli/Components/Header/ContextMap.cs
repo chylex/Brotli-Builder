@@ -206,7 +206,7 @@ namespace BrotliLib.Brotli.Components.Header{
                             }
                         }
                         
-                        reader.MarkEnd(new TextMarker("CMAP" + context.Category.Id() + "[" + index + "]", contextMap[index]));
+                        reader.MarkEnd(new ValueMarker("CMAP" + context.Category.Id() + "[" + index + "]", contextMap[index]));
                     }
 
                     if (reader.NextBit("IMTF")){

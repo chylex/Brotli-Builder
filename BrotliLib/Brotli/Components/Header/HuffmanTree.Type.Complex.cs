@@ -34,7 +34,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
                 void AddMarkedSymbol(HuffmanGenerator<T>.Entry entry){
                     symbolEntries.Add(entry);
-                    reader.MarkOne(new TextMarker("entry", entry));
+                    reader.MarkOne(new ValueMarker("entry", entry));
                 }
                 
                 while(bitSpaceRemaining > 0 && symbolIndex < symbolCount){
@@ -43,7 +43,7 @@ namespace BrotliLib.Brotli.Components.Header{
                     if (nextForcedCode == NoForcedCode){
                         reader.MarkStart();
                         nextCode = lengthCodes.LookupValue(reader).Code;
-                        reader.MarkEnd(new TextMarker("code", nextCode));
+                        reader.MarkEnd(new ValueMarker("code", nextCode));
                     }
                     else{
                         nextCode = nextForcedCode;
@@ -60,7 +60,7 @@ namespace BrotliLib.Brotli.Components.Header{
                             skipCount = 8 * (skipCount - 2) + NextSkipData();
                         }
 
-                        reader.MarkEnd(new TextMarker("skip count", skipCount));
+                        reader.MarkEnd(new ValueMarker("skip count", skipCount));
 
                         symbolIndex += skipCount;
                     }
@@ -77,7 +77,7 @@ namespace BrotliLib.Brotli.Components.Header{
                             repeatCount = 4 * (repeatCount - 2) + NextRepeatData();
                         }
 
-                        reader.MarkEnd(new TextMarker("repeat count", repeatCount));
+                        reader.MarkEnd(new ValueMarker("repeat count", repeatCount));
 
                         bitSpaceRemaining -= sumPerRepeat * repeatCount;
                     

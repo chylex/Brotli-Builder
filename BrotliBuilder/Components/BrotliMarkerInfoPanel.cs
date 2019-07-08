@@ -47,7 +47,7 @@ namespace BrotliBuilder.Components{
 
                 foreach(MarkerNode node in markerSequence){
                     build.Append('\t', node.Depth);
-                    build.Append(node.Marker.Info);
+                    node.Marker.Info.ToString(build);
                     build.Append('\n');
                 }
 
