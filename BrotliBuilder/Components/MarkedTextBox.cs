@@ -28,6 +28,8 @@ namespace BrotliBuilder.Components{
             }
         }
 
+        public IList<MarkerNode> MarkerSequence => markerSequence;
+
         public event EventHandler<MarkerUpdateEventArgs> MarkersUpdated;
 
         private readonly StyleIndex[] mainStyleIndex;

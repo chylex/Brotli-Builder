@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -30,6 +31,8 @@ namespace BrotliBuilder.Components{
         }
 
         public bool EnableBitMarkers { get; set; } = true;
+
+        public IList<MarkerNode> MarkerSequence => textBoxBitStream.MarkerSequence;
 
         public event EventHandler<MarkedTextBox.MarkerUpdateEventArgs> MarkersUpdated{
             add => textBoxBitStream.MarkersUpdated += value;

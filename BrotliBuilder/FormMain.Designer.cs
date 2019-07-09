@@ -36,6 +36,7 @@
             this.menuItemWrapMarkerInfo = new System.Windows.Forms.MenuItem();
             this.menuItemTools = new System.Windows.Forms.MenuItem();
             this.menuItemStaticDictionary = new System.Windows.Forms.MenuItem();
+            this.menuItemCompareMarkers = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeFile = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeUncompressedMBs = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeLiterals = new System.Windows.Forms.MenuItem();
@@ -154,7 +155,8 @@
             // 
             this.menuItemTools.Index = 2;
             this.menuItemTools.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItemStaticDictionary});
+            this.menuItemStaticDictionary,
+            this.menuItemCompareMarkers});
             this.menuItemTools.Text = "&Tools";
             // 
             // menuItemStaticDictionary
@@ -163,6 +165,13 @@
             this.menuItemStaticDictionary.Shortcut = System.Windows.Forms.Shortcut.CtrlD;
             this.menuItemStaticDictionary.Text = "Static Dictionary";
             this.menuItemStaticDictionary.Click += new System.EventHandler(this.menuItemStaticDictionary_Click);
+            // 
+            // menuItemCompareMarkers
+            // 
+            this.menuItemCompareMarkers.Index = 1;
+            this.menuItemCompareMarkers.Shortcut = System.Windows.Forms.Shortcut.CtrlM;
+            this.menuItemCompareMarkers.Text = "Compare Markers";
+            this.menuItemCompareMarkers.Click += new System.EventHandler(this.menuItemCompareMarkers_Click);
             // 
             // menuItemEncodeFile
             // 
@@ -467,5 +476,6 @@
         private System.Windows.Forms.MenuItem menuItemMarkerInfo;
         private System.Windows.Forms.MenuItem menuItemTransformSplitInsertCopyLengths;
         private System.Windows.Forms.MenuItem menuItemWrapMarkerInfo;
+        private System.Windows.Forms.MenuItem menuItemCompareMarkers;
     }
 }

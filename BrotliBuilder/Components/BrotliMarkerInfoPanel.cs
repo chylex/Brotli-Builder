@@ -18,6 +18,18 @@ namespace BrotliBuilder.Components{
             { StyleNormalBlack, StyleBoldBlack }
         };
 
+        public static string GenerateText(IList<MarkerNode> markerSequence){
+            StringBuilder build = new StringBuilder(512);
+
+            foreach(MarkerNode node in markerSequence){
+                build.Append('\t', node.Depth);
+                node.Marker.Info.ToString(build);
+                build.Append('\n');
+            }
+
+            return build.ToString();
+        }
+
         public bool WordWrap{
             set => textBoxContext.WordWrap = value;
         }
@@ -42,16 +54,7 @@ namespace BrotliBuilder.Components{
             
             if (!ReferenceEquals(prevMarkerNodes, markerSequence)){
                 prevMarkerNodes = markerSequence;
-
-                StringBuilder build = new StringBuilder(512);
-
-                foreach(MarkerNode node in markerSequence){
-                    build.Append('\t', node.Depth);
-                    node.Marker.Info.ToString(build);
-                    build.Append('\n');
-                }
-
-                textBoxContext.Text = build.ToString();
+                textBoxContext.Text = GenerateText(markerSequence);
             }
 
             for(int line = 0; line < markerSequence.Count; line++){
