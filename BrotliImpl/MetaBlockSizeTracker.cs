@@ -24,7 +24,7 @@ namespace BrotliImpl{
             }
 
             if (testedSize < SmallestSize){
-                if (debugText != null){
+                if (debugText != null && SmallestSize != int.MaxValue){
                     Debug.Write(" < " + SmallestSize + " bits (new best)");
                 }
 
