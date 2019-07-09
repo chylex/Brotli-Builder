@@ -11,15 +11,50 @@ namespace BrotliLib.Brotli.Components.Data{
         /// <summary>
         /// Represents a distance code which uses additional bits from the stream to calculate the distance value.
         /// </summary>
-        private sealed class Complex : DistanceCode{
+        public sealed class Complex : DistanceCode{
+            private static int Log2(int value){
+                byte result = 0;
+            
+                while(value > 0){
+                    value >>= 1;
+                    ++result;
+                }
+
+                return result;
+            }
+
+            public static Complex ForValue(in DistanceParameters parameters, int value){
+                if (parameters.PostfixBitCount > 0){ // TODO support postfix & remove this fallback to slow path
+                    for(int complex = Last.Codes.Length + parameters.DirectCodeCount; /*true*/; complex++){
+                        var code = new Complex(parameters, complex);
+
+                        if (code.CanEncodeValue(null, value)){
+                            return code;
+                        }
+                    }
+                }
+
+                int directCodeCount = parameters.DirectCodeCount;
+                int normalized = value - directCodeCount;
+
+                int baseCode = 2 * (Log2(normalized + 3) - 3);
+                int baseExtraBitCount = 1 + (baseCode >> 1);
+                int baseTopOffset = ((2 + (baseCode & 1)) << baseExtraBitCount) - 4;
+
+                if (normalized > baseTopOffset + (1 << baseExtraBitCount)){
+                    ++baseCode;
+                }
+
+                return new Complex(parameters, baseCode + directCodeCount + Last.CodeCount);
+            }
+
             private readonly byte postfixBitCount;
+            private readonly byte postfixBitMask;
             private readonly byte postfixBitValue;
 
             private readonly int extraBitCount;
             private readonly int topOffset;
             private readonly int bottomOffset;
-
-            private int PostfixBitMask => (1 << postfixBitCount) - 1;
 
             /// <summary>
             /// Since the Brotli format documentation only specifies a bunch of magic formulas, here's an attempt at an explanation.
@@ -37,28 +72,29 @@ namespace BrotliLib.Brotli.Components.Data{
             /// <para/>
             /// Finally, the value is offset by (1 + direct code count), as all values below that can be represented using <see cref="DistanceCode.Direct"/> instead.
             /// </summary>
-            public Complex(in DistanceParameters parameters, int code) : base(code){
+            internal Complex(in DistanceParameters parameters, int code) : base(code){
                 int directCodeCount = parameters.DirectCodeCount;
-                this.postfixBitCount = parameters.PostfixBitCount;
-
-                int normalized = code - directCodeCount - Last.Codes.Length;
+                int normalized = code - directCodeCount - Last.CodeCount;
 
                 if (normalized < 0){
                     throw new ArgumentOutOfRangeException(nameof(code), "Complex distance codes (normalized) must be at least 0.");
                 }
 
+                this.postfixBitCount = parameters.PostfixBitCount;
+                this.postfixBitMask = (byte)((1 << postfixBitCount) - 1);
+
                 int hcode = normalized >> postfixBitCount;
-                int lcode = normalized & PostfixBitMask;
+                int lcode = normalized & postfixBitMask;
 
                 this.postfixBitValue = (byte)lcode;
-                this.extraBitCount = 1 + (normalized >> (postfixBitCount + 1));
+                this.extraBitCount = 1 + (hcode >> 1);
 
                 this.topOffset = ((2 + (hcode & 1)) << extraBitCount) - 4;
                 this.bottomOffset = 1 + lcode + directCodeCount;
             }
 
             public override bool CanEncodeValue(BrotliGlobalState state, int value){
-                if (((value - 1) & PostfixBitMask) != postfixBitValue){
+                if (((value - 1) & postfixBitMask) != postfixBitValue){
                     return false;
                 }
 

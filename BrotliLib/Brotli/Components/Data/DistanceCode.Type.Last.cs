@@ -22,7 +22,9 @@ namespace BrotliLib.Brotli.Components.Data{
                 -1, 1, -2, 2, -3, 3
             };
 
-            public static readonly DistanceCode[] Codes = Enumerable.Range(0, BufferIndexes.Length)
+            public const int CodeCount = 16;
+
+            public static readonly DistanceCode[] Codes = Enumerable.Range(0, CodeCount)
                                                                     .Select(code => new Last(code))
                                                                     .ToArray<DistanceCode>();
 

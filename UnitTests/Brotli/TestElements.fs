@@ -16,6 +16,8 @@ module Helper =
         serializer.Invoke(stream.GetWriter(), obj, context)
         deserializer.Invoke(stream.GetReader(), context)
 
+    let cartesian a b = [for va in a do for vb in b -> (va, vb)]
+
 
 module WindowSize =
     let values: obj array seq = WindowSize.ValidValues |> Seq.map (fun value -> [| value |])
@@ -87,14 +89,12 @@ module VariableLength11Code =
 
 
 module DistanceParameters =
-    let cartesian a b = [for va in a do for vb in b -> (va, vb)]
-
     let postfix = seq { 0uy..3uy }
     let directbits = seq { 0uy..15uy }
 
     [<Fact>]
     let ``converting to and from bits yields same object`` () =
-        for (pb, db) in cartesian postfix directbits do
+        for (pb, db) in Helper.cartesian postfix directbits do
             let parameters = DistanceParameters(pb, db)
             Assert.Equal(parameters, Helper.convert parameters NoContext.Value DistanceParameters.Serialize DistanceParameters.Deserialize)
         
@@ -295,3 +295,24 @@ module InsertCopyLengths =
 
                 Assert.True(lengths.CanEncodeUsing(icCode))
                 Assert.Equal(lengths, Helper.convert lengths icCode InsertCopyLengths.Serialize InsertCopyLengths.Deserialize)
+
+
+module DistanceCodeComplex =
+    let distanceParameters : obj array seq = Helper.cartesian DistanceParameters.postfix DistanceParameters.directbits |> Seq.map(fun (pb, db) -> [| DistanceParameters(pb, db) |])
+    
+    let valueRanges = [|
+        seq { 1..10000 }
+        seq { 100000..100100 }
+        seq { 500000..500100 }
+        seq { 17025000..1702600 }
+    |]
+
+    [<Theory>]
+    [<MemberData("distanceParameters")>]
+    let ``constructed complex distance codes can encode the value they were generated from`` (parameters: DistanceParameters) =
+        for range in valueRanges do
+            for value in range do
+                let offset = value + parameters.DirectCodeCount;
+                let code = DistanceCode.Complex.ForValue(&parameters, offset)
+
+                Assert.True(code.CanEncodeValue(null, offset))

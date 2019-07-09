@@ -20,7 +20,7 @@ namespace BrotliLib.Brotli.Components.Data{
         }
 
         public static DistanceCode Zero => Last.Codes[0];
-        private static readonly int DirectCodeOffset = Last.Codes.Length - 1;
+        private static readonly int DirectCodeOffset = Last.CodeCount - 1;
 
         // Data
 
@@ -71,21 +71,14 @@ namespace BrotliLib.Brotli.Components.Data{
                 valid.Add(new Direct(value + DirectCodeOffset));
             }
             else{
-                for(int complex = Last.Codes.Length + parameters.DirectCodeCount; /*true*/; complex++){
-                    var code = new Complex(parameters, complex);
-
-                    if (code.CanEncodeValue(state, value)){
-                        valid.Add(code);
-                        break;
-                    }
-                }
+                valid.Add(Complex.ForValue(parameters, value));
             }
 
             return valid;
         }
 
         private static DistanceCode Create(in DistanceParameters parameters, int code){
-            if (code < Last.Codes.Length){
+            if (code < Last.CodeCount){
                 return Last.Codes[code];
             }
             
