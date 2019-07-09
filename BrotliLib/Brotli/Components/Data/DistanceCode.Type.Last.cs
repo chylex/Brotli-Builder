@@ -36,6 +36,8 @@ namespace BrotliLib.Brotli.Components.Data{
                 this.offset = BufferValueOffsets[code];
             }
 
+            public override int ExtraBits => 0;
+
             public override bool CanEncodeValue(BrotliGlobalState state, int value){
                 return value == state.DistanceBuffer[index] + offset;
             }

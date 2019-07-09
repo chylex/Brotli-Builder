@@ -21,6 +21,8 @@ namespace BrotliLib.Brotli.Components.Data{
                 }
             }
 
+            public override int ExtraBits => 0;
+
             public override bool CanEncodeValue(BrotliGlobalState state, int value){
                 return value == encodedValue;
             }

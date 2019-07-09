@@ -20,7 +20,7 @@ namespace BrotliLib.Brotli.Components.Data{
         }
 
         public static DistanceCode Zero => Last.Codes[0];
-        private static readonly int DirectCodeOffset = Last.CodeCount - 1;
+        private const int DirectCodeOffset = Last.CodeCount - 1;
 
         // Data
 
@@ -34,6 +34,7 @@ namespace BrotliLib.Brotli.Components.Data{
             return new DistanceContext(this, state);
         }
 
+        public abstract int ExtraBits { get; }
         public abstract bool CanEncodeValue(BrotliGlobalState state, int value);
         
         protected abstract int ReadValue(BrotliGlobalState state, IBitReader reader);

@@ -156,7 +156,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                 int contextID = icLengthValues.DistanceContextID;
                 int treeID = header.DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
-                var distanceEntry = header.DistanceTrees[treeID].FindEntry(code => distanceInfo.CanEncodeUsing(code, state));
+                var distanceEntry = header.DistanceTrees[treeID].Where(kvp => distanceInfo.CanEncodeUsing(kvp.Key, state)).OrderBy(kvp => kvp.Value.Length + kvp.Key.ExtraBits).First();
                 var distanceCode = distanceEntry.Key;
 
                 writer.WriteBits(distanceEntry.Value);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.State;
@@ -92,6 +93,9 @@ namespace BrotliLib.Brotli.Components.Data{
                 this.topOffset = ((2 + (hcode & 1)) << extraBitCount) - 4;
                 this.bottomOffset = 1 + lcode + directCodeCount;
             }
+
+            [SuppressMessage("ReSharper", "ConvertToAutoPropertyWhenPossible")]
+            public override int ExtraBits => extraBitCount;
 
             public override bool CanEncodeValue(BrotliGlobalState state, int value){
                 if (((value - 1) & postfixBitMask) != postfixBitValue){
