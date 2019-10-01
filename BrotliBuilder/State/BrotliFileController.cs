@@ -64,8 +64,8 @@ namespace BrotliBuilder.State{
             BitStream bits = new BitStream(bytes);
             UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), null));
 
-            if (!TryDeserialize(token, bytes, out BrotliFileStructure structure)) return;
-            UpdateState(token, new BrotliFileState.HasStructure(structure));
+            if (!TryDeserialize(token, bytes, out BrotliFileStructure structure, out Stopwatch swDeserialize)) return;
+            UpdateState(token, new BrotliFileState.HasStructure(structure, swDeserialize));
 
             if (!TryGetDecompressionState(token, structure, bits, out BrotliOutputStored output, out Stopwatch swOutput)) return;
             UpdateState(token, new BrotliFileState.Loaded(structure, bits, output, swOutput));
@@ -73,7 +73,7 @@ namespace BrotliBuilder.State{
 
         public void LoadStructure(BrotliFileStructure structure) => StartWorker(token => {
             UpdateState(token, new BrotliFileState.Starting());
-            UpdateState(token, new BrotliFileState.HasStructure(structure));
+            UpdateState(token, new BrotliFileState.HasStructure(structure, null));
 
             if (!TrySerialize(token, structure, out BitStream bits, out Stopwatch stopwatch)) return;
             UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), stopwatch));
@@ -86,8 +86,8 @@ namespace BrotliBuilder.State{
             UpdateState(token, new BrotliFileState.Starting());
 
             if (!TryReadFile(token, path, out byte[] bytes)) return;
-            if (!TryEncode(token, bytes, parameters, encoder, out BrotliFileStructure structure)) return;
-            UpdateState(token, new BrotliFileState.HasStructure(structure));
+            if (!TryEncode(token, bytes, parameters, encoder, out BrotliFileStructure structure, out Stopwatch swEncode)) return;
+            UpdateState(token, new BrotliFileState.HasStructure(structure, swEncode));
 
             if (!TrySerialize(token, structure, out BitStream bits, out Stopwatch swSerialization)) return;
             UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), swSerialization));
@@ -99,8 +99,8 @@ namespace BrotliBuilder.State{
         private void TransformInternal(BrotliFileStructure structure, IBrotliTransformer transformer) => StartWorker(token => {
             UpdateState(token, new BrotliFileState.Starting());
 
-            if (!TryTransform(token, structure, transformer, out structure)) return;
-            UpdateState(token, new BrotliFileState.HasStructure(structure));
+            if (!TryTransform(token, structure, transformer, out structure, out Stopwatch swTransform)) return;
+            UpdateState(token, new BrotliFileState.HasStructure(structure, swTransform));
 
             if (!TrySerialize(token, structure, out BitStream bits, out Stopwatch swSerialization)) return;
             UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), swSerialization));
@@ -135,12 +135,15 @@ namespace BrotliBuilder.State{
             }
         }
 
-        private bool TryDeserialize(int token, byte[] bytes, out BrotliFileStructure structure){
+        private bool TryDeserialize(int token, byte[] bytes, out BrotliFileStructure structure, out Stopwatch stopwatch){
             try{
+                stopwatch = Stopwatch.StartNew();
                 structure = BrotliFileStructure.FromBytes(bytes);
+                stopwatch.Stop();
                 return true;
             }catch(Exception ex){
                 structure = null;
+                stopwatch = null;
                 return OnError(token, ErrorType.DeserializingFile, ex);
             }
         }
@@ -158,22 +161,28 @@ namespace BrotliBuilder.State{
             }
         }
 
-        private bool TryEncode(int token, byte[] bytes, BrotliFileParameters parameters, IBrotliEncoder encoder, out BrotliFileStructure file){
+        private bool TryEncode(int token, byte[] bytes, BrotliFileParameters parameters, IBrotliEncoder encoder, out BrotliFileStructure file, out Stopwatch stopwatch){
             try{
+                stopwatch = Stopwatch.StartNew();
                 file = BrotliFileStructure.FromEncoder(parameters, encoder, bytes);
+                stopwatch.Stop();
                 return true;
             }catch(Exception ex){
                 file = null;
+                stopwatch = null;
                 return OnError(token, ErrorType.EncodingBytes, ex);
             }
         }
 
-        private bool TryTransform(int token, BrotliFileStructure structure, IBrotliTransformer transformer, out BrotliFileStructure transformed){
+        private bool TryTransform(int token, BrotliFileStructure structure, IBrotliTransformer transformer, out BrotliFileStructure transformed, out Stopwatch stopwatch){
             try{
+                stopwatch = Stopwatch.StartNew();
                 transformed = structure.Transform(transformer);
+                stopwatch.Stop();
                 return true;
             }catch(Exception ex){
                 transformed = null;
+                stopwatch = null;
                 return OnError(token, ErrorType.TransformingStructure, ex);
             }
         }

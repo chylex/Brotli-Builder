@@ -22,10 +22,10 @@ namespace BrotliBuilder.State{
         public sealed class Waiting : BrotliFileState{}
         public sealed class Starting : BrotliFileState{}
 
-        public sealed class HasStructure : BrotliFileState{
+        public sealed class HasStructure : TimedBrotliFileState{
             public BrotliFileStructure File { get; }
 
-            public HasStructure(BrotliFileStructure file){
+            public HasStructure(BrotliFileStructure file, Stopwatch stopwatch) : base(stopwatch){
                 this.File = file;
             }
         }

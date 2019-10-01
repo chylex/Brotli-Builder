@@ -48,8 +48,10 @@
             this.flowPanelBlocks = new System.Windows.Forms.FlowLayoutPanel();
             this.statusBar = new System.Windows.Forms.StatusBar();
             this.statusBarPanelPadding1 = new System.Windows.Forms.StatusBarPanel();
-            this.statusBarPanelTimeBits = new System.Windows.Forms.StatusBarPanel();
+            this.statusBarPanelTimeStructure = new System.Windows.Forms.StatusBarPanel();
             this.statusBarPanelPadding2 = new System.Windows.Forms.StatusBarPanel();
+            this.statusBarPanelTimeBits = new System.Windows.Forms.StatusBarPanel();
+            this.statusBarPanelPadding3 = new System.Windows.Forms.StatusBarPanel();
             this.statusBarPanelTimeOutput = new System.Windows.Forms.StatusBarPanel();
             this.timerRegenerationDelay = new System.Windows.Forms.Timer(this.components);
             this.splitContainerRightBottom = new System.Windows.Forms.SplitContainer();
@@ -60,8 +62,10 @@
             this.splitContainerMain = new System.Windows.Forms.SplitContainer();
             this.brotliMarkerInfoPanel = new BrotliBuilder.Components.BrotliMarkerInfoPanel();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeBits)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeStructure)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeBits)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeOutput)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerRightBottom)).BeginInit();
             this.splitContainerRightBottom.Panel1.SuspendLayout();
@@ -252,8 +256,10 @@
             this.statusBar.Name = "statusBar";
             this.statusBar.Panels.AddRange(new System.Windows.Forms.StatusBarPanel[] {
             this.statusBarPanelPadding1,
-            this.statusBarPanelTimeBits,
+            this.statusBarPanelTimeStructure,
             this.statusBarPanelPadding2,
+            this.statusBarPanelTimeBits,
+            this.statusBarPanelPadding3,
             this.statusBarPanelTimeOutput});
             this.statusBar.ShowPanels = true;
             this.statusBar.Size = new System.Drawing.Size(1264, 22);
@@ -267,10 +273,10 @@
             this.statusBarPanelPadding1.Name = "statusBarPanelPadding1";
             this.statusBarPanelPadding1.Width = 12;
             // 
-            // statusBarPanelTimeBits
+            // statusBarPanelTimeStructure
             // 
-            this.statusBarPanelTimeBits.Name = "statusBarPanelTimeBits";
-            this.statusBarPanelTimeBits.Width = 200;
+            this.statusBarPanelTimeStructure.Name = "statusBarPanelTimeStructure";
+            this.statusBarPanelTimeStructure.Width = 200;
             // 
             // statusBarPanelPadding2
             // 
@@ -278,6 +284,18 @@
             this.statusBarPanelPadding2.MinWidth = 9;
             this.statusBarPanelPadding2.Name = "statusBarPanelPadding2";
             this.statusBarPanelPadding2.Width = 9;
+            // 
+            // statusBarPanelTimeBits
+            // 
+            this.statusBarPanelTimeBits.Name = "statusBarPanelTimeBits";
+            this.statusBarPanelTimeBits.Width = 200;
+            // 
+            // statusBarPanelPadding3
+            // 
+            this.statusBarPanelPadding3.BorderStyle = System.Windows.Forms.StatusBarPanelBorderStyle.None;
+            this.statusBarPanelPadding3.MinWidth = 9;
+            this.statusBarPanelPadding3.Name = "statusBarPanelPadding3";
+            this.statusBarPanelPadding3.Width = 9;
             // 
             // statusBarPanelTimeOutput
             // 
@@ -420,8 +438,10 @@
             this.Text = "Brotli Builder";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMain_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeBits)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeStructure)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeBits)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeOutput)).EndInit();
             this.splitContainerRightBottom.Panel1.ResumeLayout(false);
             this.splitContainerRightBottom.Panel2.ResumeLayout(false);
@@ -477,5 +497,7 @@
         private System.Windows.Forms.MenuItem menuItemTransformSplitInsertCopyLengths;
         private System.Windows.Forms.MenuItem menuItemWrapMarkerInfo;
         private System.Windows.Forms.MenuItem menuItemCompareMarkers;
+        private System.Windows.Forms.StatusBarPanel statusBarPanelTimeStructure;
+        private System.Windows.Forms.StatusBarPanel statusBarPanelPadding3;
     }
 }

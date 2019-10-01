@@ -83,6 +83,21 @@ namespace BrotliBuilder{
 
         #region File state handling
 
+        private void ResetStatusBars(string text){
+            statusBarPanelTimeStructure.Text = text;
+            statusBarPanelTimeBits.Text = text;
+            statusBarPanelTimeOutput.Text = text;
+        }
+
+        private void UpdateStatusBar(StatusBarPanel bar, string type, Stopwatch sw){
+            if (sw != null){
+                bar.Text = "Generated " + type + " in " + sw.ElapsedMilliseconds + " ms.";
+            }
+            else{
+                bar.Text = "Loaded " + type + ".";
+            }
+        }
+
         private void HandleFileError(BrotliFileState.Error error, BrotliFilePanel panel){
             Exception ex = error.Exception;
             string message = ex.Message;
@@ -125,9 +140,7 @@ namespace BrotliBuilder{
                     }
 
                     filePanel.InvalidatePanel();
-
-                    statusBarPanelTimeBits.Text = "Generating...";
-                    statusBarPanelTimeOutput.Text = "Generating...";
+                    ResetStatusBars("Generating...");
                     break;
 
                 case BrotliFileState.Waiting _:
@@ -136,26 +149,19 @@ namespace BrotliBuilder{
 
                 case BrotliFileState.HasStructure hasStructure:
                     RegenerateBuildingBlocks(hasStructure.File);
+                    UpdateStatusBar(statusBarPanelTimeStructure, "structure", hasStructure.Stopwatch);
                     break;
 
                 case BrotliFileState.HasBits hasBits:
                     filePanel.UpdateBits(hasBits);
-
-                    Stopwatch sw = hasBits.Stopwatch;
-
-                    if (sw != null){
-                        statusBarPanelTimeBits.Text = "Generated bit stream in " + sw.ElapsedMilliseconds + " ms.";
-                    }
-                    else{
-                        statusBarPanelTimeBits.Text = "Loaded bit stream.";
-                    }
-
+                    UpdateStatusBar(statusBarPanelTimeBits, "bits", hasBits.Stopwatch);
                     break;
 
                 case BrotliFileState.Loaded loaded:
                     filePanel.UpdateOutput(loaded);
+                    UpdateStatusBar(statusBarPanelTimeOutput, "output", loaded.Stopwatch);
+
                     lastGeneratedFile = loaded.File;
-                    statusBarPanelTimeOutput.Text = "Generated output in " + loaded.Stopwatch.ElapsedMilliseconds + " ms.";
 
                     if (brotliFilePanelOriginal.MarkerSequence != null && brotliFilePanelGenerated.MarkerSequence != null){
                         menuItemCompareMarkers.Enabled = true;
@@ -183,9 +189,7 @@ namespace BrotliBuilder{
                     flowPanelBlocks.Controls.Clear();
                     fileGenerated.ResetToWaiting();
                     filePanel.InvalidatePanel();
-
-                    statusBarPanelTimeBits.Text = "Loading...";
-                    statusBarPanelTimeOutput.Text = "Loading...";
+                    ResetStatusBars("Loading...");
 
                     isDirty = false;
                     skipNextBlockRegeneration = false;
