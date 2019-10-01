@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using BrotliBuilder.Blocks;
 using BrotliBuilder.Components;
 using BrotliBuilder.Dialogs;
+using BrotliBuilder.State;
 using BrotliBuilder.Utils;
 using BrotliImpl.Encoders;
 using BrotliImpl.Transformers;
@@ -48,7 +49,7 @@ namespace BrotliBuilder{
                 Notified?.Invoke(container.Controls[depth], args);
 
                 if (parent == null){
-                    owner.RegenerateBrotliStream(markAsDirty: true);
+                    owner.RegenerateBrotliStream();
                 }
                 else{
                     parent.NotifyParent(args);
@@ -58,83 +59,191 @@ namespace BrotliBuilder{
 
         #endregion
 
-        private BrotliFileStructure brotliFile = BrotliFileStructure.NewEmpty();
         private string lastFileName = "compressed";
         private bool isDirty = false;
+
+        private BrotliFileStructure lastGeneratedFile;
+        private bool skipNextBlockRegeneration = false;
+
+        private readonly BrotliFileController fileGenerated;
+        private readonly BrotliFileController fileOriginal;
         
         public FormMain(){
             InitializeComponent();
+
+            this.fileGenerated = new BrotliFileController(brotliFilePanelGenerated.Title);
+            this.fileGenerated.StateChanged += FileGenerated_StateChanged;
+
+            this.fileOriginal = new BrotliFileController(brotliFilePanelOriginal.Title);
+            this.fileOriginal.StateChanged += FileOriginal_StateChanged;
             
-            splitContainerRightBottom.Panel2Collapsed = true;
-            OnNewBrotliFile();
+            fileGenerated.ResetToEmpty();
+            fileOriginal.ResetToNothing();
         }
 
         #region File state handling
 
-        private void LoadExistingBrotliFile(byte[] bytes){
-            splitContainerRightBottom.Panel2Collapsed = false;
-            statusBarPanelTimeBits.Text = "Decompressing...";
-            statusBarPanelTimeOutput.Text = "Decompressing...";
+        private void HandleFileError(BrotliFileState.Error error, BrotliFilePanel panel){
+            Exception ex = error.Exception;
+            string message = ex.Message;
 
-            flowPanelBlocks.Controls.Clear();
-            brotliFilePanelGenerated.InvalidatePanel();
+            switch(error.Type){
+                case ErrorType.ReadingFile:
+                    MessageBox.Show(message, "File Open Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    break;
 
-            brotliFilePanelOriginal.LoadBrotliFile(bytes, file => {
-                brotliFile = file;
-                OnNewBrotliFile();
-            });
+                case ErrorType.EncodingBytes:
+                    MessageBox.Show(message, "Encoder Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    break;
+
+                case ErrorType.TransformingStructure:
+                    MessageBox.Show(message, "Transformer Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    break;
+
+                case ErrorType.DeserializingFile:
+                case ErrorType.SerializingStructure:
+                    panel.UpdateBits(ex);
+                    break;
+
+                case ErrorType.DecompressingStructure:
+                    panel.UpdateOutput(ex);
+                    break;
+            }
         }
 
-        private void RegenerateBuildingBlocks(){
-            flowPanelBlocks.Controls.Clear();
-            flowPanelBlocks.Controls.Add(new BuildFileStructure(new BuildingBlockContext(this, flowPanelBlocks), brotliFile));
-        }
+        private void FileGenerated_StateChanged(object sender, StateChangedEventArgs e){
+            BrotliFilePanel filePanel = brotliFilePanelGenerated;
 
-        private void OnNewBrotliFile(){
-            RegenerateBuildingBlocks();
-            RegenerateBrotliStream(markAsDirty: false);
-            isDirty = false;
-        }
+            switch(e.To){
+                case BrotliFileState.NoFile _:
+                    menuItemCompareMarkers.Enabled = false;
+                    break;
 
-        private void UpdateBrotliFile(Func<BrotliFileStructure> mapper, bool regenerateBuildingBlocks = true){
-            statusBarPanelTimeBits.Text = "Generating...";
-            statusBarPanelTimeOutput.Text = "Generating...";
-
-            brotliFilePanelGenerated.LoadBrotliFile(
-                mapper,
-
-                newBrotliFile => {
-                    brotliFile = newBrotliFile;
-
-                    if (regenerateBuildingBlocks){
-                        RegenerateBuildingBlocks();
+                case BrotliFileState.Starting _:
+                    if (!skipNextBlockRegeneration){
+                        flowPanelBlocks.Controls.Clear();
                     }
 
+                    filePanel.InvalidatePanel();
+
+                    statusBarPanelTimeBits.Text = "Generating...";
+                    statusBarPanelTimeOutput.Text = "Generating...";
+                    break;
+
+                case BrotliFileState.Waiting _:
+                    filePanel.InvalidatePanel();
+                    break;
+
+                case BrotliFileState.HasStructure hasStructure:
+                    RegenerateBuildingBlocks(hasStructure.File);
+                    break;
+
+                case BrotliFileState.HasBits hasBits:
+                    filePanel.UpdateBits(hasBits);
+
+                    Stopwatch sw = hasBits.Stopwatch;
+
+                    if (sw != null){
+                        statusBarPanelTimeBits.Text = "Generated bit stream in " + sw.ElapsedMilliseconds + " ms.";
+                    }
+                    else{
+                        statusBarPanelTimeBits.Text = "Loaded bit stream.";
+                    }
+
+                    break;
+
+                case BrotliFileState.Loaded loaded:
+                    filePanel.UpdateOutput(loaded);
+                    lastGeneratedFile = loaded.File;
+                    statusBarPanelTimeOutput.Text = "Generated output in " + loaded.Stopwatch.ElapsedMilliseconds + " ms.";
+
+                    if (brotliFilePanelOriginal.MarkerSequence != null && brotliFilePanelGenerated.MarkerSequence != null){
+                        menuItemCompareMarkers.Enabled = true;
+                    }
+
+                    break;
+
+                case BrotliFileState.Error error:
+                    HandleFileError(error, filePanel);
+                    break;
+            }
+        }
+
+        private void FileOriginal_StateChanged(object sender, StateChangedEventArgs e){
+            BrotliFilePanel filePanel = brotliFilePanelOriginal;
+
+            switch(e.To){
+                case BrotliFileState.NoFile _:
+                    filePanel.ResetPanel();
+                    splitContainerRightBottom.Panel2Collapsed = true;
+                    menuItemCompareMarkers.Enabled = false;
+                    return;
+
+                case BrotliFileState.Starting _:
+                    flowPanelBlocks.Controls.Clear();
+                    fileGenerated.ResetToWaiting();
+                    filePanel.InvalidatePanel();
+
+                    statusBarPanelTimeBits.Text = "Loading...";
+                    statusBarPanelTimeOutput.Text = "Loading...";
+
                     isDirty = false;
-                },
+                    skipNextBlockRegeneration = false;
+                    break;
 
-                onSerializedStopwatch =>
-                    statusBarPanelTimeBits.Text = onSerializedStopwatch == null ?
-                        "Error generating bit stream." :
-                        "Generated bit stream in " + onSerializedStopwatch.ElapsedMilliseconds + " ms.",
+                case BrotliFileState.Waiting _:
+                    filePanel.InvalidatePanel();
+                    break;
 
-                onDecompressedStopwatch =>
-                    statusBarPanelTimeOutput.Text = onDecompressedStopwatch == null ?
-                        "Error generating output." :
-                        "Generated output in " + onDecompressedStopwatch.ElapsedMilliseconds + " ms."
-            );
+                case BrotliFileState.HasBits hasBits:
+                    filePanel.UpdateBits(hasBits);
+                    break;
+
+                case BrotliFileState.Loaded loaded:
+                    filePanel.UpdateOutput(loaded);
+                    fileGenerated.LoadStructure(loaded.File);
+                    break;
+
+                case BrotliFileState.Error error:
+                    HandleFileError(error, filePanel);
+                    break;
+            }
+
+            splitContainerRightBottom.Panel2Collapsed = false; // skipped for State.NoFile
+        }
+
+        #endregion
+
+        #region Building blocks
+
+        private void RegenerateBuildingBlocks(BrotliFileStructure file){
+            if (skipNextBlockRegeneration){
+                skipNextBlockRegeneration = false;
+                return;
+            }
+
+            flowPanelBlocks.Controls.Clear();
+            flowPanelBlocks.Controls.Add(new BuildFileStructure(new BuildingBlockContext(this, flowPanelBlocks), file));
+        }
+
+        private void RegenerateBrotliStream(){
+            isDirty = true;
+            skipNextBlockRegeneration = true;
+            timerRegenerationDelay.Stop();
+            timerRegenerationDelay.Start();
         }
         
         private void timerRegenerationDelay_Tick(object sender, EventArgs e){
             timerRegenerationDelay.Stop();
-            UpdateBrotliFile(() => brotliFile, regenerateBuildingBlocks: false);
+
+            if (lastGeneratedFile != null){
+                fileGenerated.LoadStructure(lastGeneratedFile);
+            }
         }
 
-        private void RegenerateBrotliStream(bool markAsDirty){
-            isDirty = isDirty || markAsDirty;
-            timerRegenerationDelay.Stop();
-            timerRegenerationDelay.Start();
-        }
+        #endregion
+
+        #region Form events
 
         private bool PromptUnsavedChanges(string message){
             if (!isDirty){
@@ -156,10 +265,6 @@ namespace BrotliBuilder{
 
             return false;
         }
-
-        #endregion
-
-        #region Form events
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e){
             e.Cancel = PromptUnsavedChanges("Would you like to save changes before exiting?");
@@ -198,18 +303,22 @@ namespace BrotliBuilder{
             }){
                 if (dialog.ShowDialog() == DialogResult.OK){
                     lastFileName = dialog.FileName;
+                    isDirty = false;
+                    skipNextBlockRegeneration = false;
 
-                    try{
-                        LoadExistingBrotliFile(File.ReadAllBytes(lastFileName));
-                    }catch(Exception ex){
-                        Debug.WriteLine(ex.ToString());
-                        MessageBox.Show(ex.Message, "File Open Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    fileOriginal.LoadFile(lastFileName);
                 }
             }
         }
 
         private void menuItemSave_Click(object sender, EventArgs e){
+            BrotliFileStructure currentFile = fileGenerated.CurrentFile;
+
+            if (currentFile == null){
+                MessageBox.Show("No structure loaded.", "Save File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             using(SaveFileDialog dialog = new SaveFileDialog{
                 Title = "Save Compressed File",
                 Filter = "Brotli (*.br)|*.br|All Files (*.*)|*.*",
@@ -218,9 +327,9 @@ namespace BrotliBuilder{
             }){
                 if (dialog.ShowDialog() == DialogResult.OK){
                     lastFileName = dialog.FileName;
-
-                    File.WriteAllBytes(lastFileName, brotliFile.Serialize().ToByteArray());
                     isDirty = false;
+
+                    File.WriteAllBytes(lastFileName, currentFile.Serialize().ToByteArray());
                 }
             }
         }
@@ -241,8 +350,8 @@ namespace BrotliBuilder{
             bool enable = menuItemMarkerInfo.Toggle();
 
             splitContainerMain.Panel1Collapsed = !enable;
-            brotliFilePanelGenerated.EnableBitMarkers = enable;
-            brotliFilePanelOriginal.EnableBitMarkers = enable;
+            fileGenerated.EnableBitMarkers = enable;
+            fileOriginal.EnableBitMarkers = enable;
 
             if (!enable){
                 brotliMarkerInfoPanel.ResetMarkers();
@@ -277,8 +386,6 @@ namespace BrotliBuilder{
                 MessageBox.Show("No original file opened.", "Compare Markers Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-
-            // TODO figure out when to enable the button
 
             string originalText = BrotliMarkerInfoPanel.GenerateText(brotliFilePanelOriginal.MarkerSequence);
             string generatedText = BrotliMarkerInfoPanel.GenerateText(brotliFilePanelGenerated.MarkerSequence);
@@ -319,28 +426,10 @@ namespace BrotliBuilder{
             }){
                 if (dialog.ShowDialog() == DialogResult.OK){
                     lastFileName = dialog.FileName;
+                    skipNextBlockRegeneration = false;
 
-                    byte[] bytes;
-
-                    try{
-                        bytes = File.ReadAllBytes(lastFileName);
-                    }catch(Exception ex){
-                        Debug.WriteLine(ex.ToString());
-                        MessageBox.Show(ex.Message, "File Open Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
-
-                    splitContainerRightBottom.Panel2Collapsed = true;
-
-                    UpdateBrotliFile(() => {
-                        try{
-                            return BrotliFileStructure.FromEncoder(parameters, encoder, bytes);
-                        }catch(Exception ex){
-                            Debug.WriteLine(ex.ToString());
-                            MessageBox.Show(ex.Message, "Encoder Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return null;
-                        }
-                    });
+                    fileOriginal.ResetToNothing();
+                    fileGenerated.EncodeFile(lastFileName, parameters, encoder);
                 }
             }
         }
@@ -362,15 +451,11 @@ namespace BrotliBuilder{
         }
         
         private void TransformCurrentFile(IBrotliTransformer transformer){
-            UpdateBrotliFile(() => {
-                try{
-                    return brotliFile.Transform(transformer);
-                }catch(Exception ex){
-                    Debug.WriteLine(ex.ToString());
-                    MessageBox.Show(ex.Message, "Transformer Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return null;
-                }
-            });
+            skipNextBlockRegeneration = false;
+
+            if (!fileGenerated.Transform(transformer)){
+                MessageBox.Show("No structure loaded.", "Transform Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         #endregion

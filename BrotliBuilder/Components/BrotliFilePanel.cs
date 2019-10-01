@@ -1,27 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using BrotliBuilder.Utils;
-using BrotliLib.Brotli;
-using BrotliLib.Brotli.State.Output;
-using BrotliLib.IO;
+using BrotliBuilder.State;
 using BrotliLib.Markers;
 using FastColoredTextBoxNS;
 
 namespace BrotliBuilder.Components{
-    public partial class BrotliFilePanel : UserControl{
-        public string LabelPrefix{
+    partial class BrotliFilePanel : UserControl{
+        public string Title{
             get{
-                return labelPrefix;
+                return title;
             }
 
             set{
-                labelPrefix = value;
-                loadWorker.Name = $"BrotliFilePanel ({value})";
+                title = value;
                 ResetLabels();
             }
         }
@@ -30,8 +24,6 @@ namespace BrotliBuilder.Components{
             set => textBoxOutput.WordWrap = value;
         }
 
-        public bool EnableBitMarkers { get; set; } = true;
-
         public IList<MarkerNode> MarkerSequence => textBoxBitStream.MarkerSequence;
 
         public event EventHandler<MarkedTextBox.MarkerUpdateEventArgs> MarkersUpdated{
@@ -39,129 +31,42 @@ namespace BrotliBuilder.Components{
             remove => textBoxBitStream.MarkersUpdated -= value;
         }
 
-        private readonly AsyncWorker loadWorker = new AsyncWorker();
-        
-        private string labelPrefix = null;
+        private string title = null;
 
         public BrotliFilePanel(){
             InitializeComponent();
         }
 
-        public void LoadBrotliFile(byte[] bytes, Action<BrotliFileStructure> callback){
-            InvalidatePanel();
-
-            bool enableBitMarkers = EnableBitMarkers;
-
-            loadWorker.Start(sync => {
-                BitStream bits = new BitStream(bytes);
-                string bitsStr = bits.ToString();
-
-                sync(() => UpdateTextBox(textBoxBitStream, bitsStr));
-                
-                BrotliFileStructure file = BrotliFileStructure.FromBytes(bytes);
-                BrotliOutputStored output;
-
-                try{
-                    output = file.GetDecompressionState(bits, enableBitMarkers);
-                }catch(Exception ex){
-                    sync(() => UpdateTextBox(textBoxOutput, ex));
-                    return;
-                }
-
-                string outputStr = output.AsUTF8;
-                MarkerNode[] markerSequence = output.BitMarkerRoot.ToArray();
-
-                int totalBits = markerSequence.LastOrDefault()?.Marker?.IndexEnd ?? bits.Length; // use markers to account for padding
-
-                sync(() => {
-                    textBoxBitStream.UpdateMarkers(markerSequence);
-                    UpdateTextBox(textBoxOutput, outputStr);
-                    UpdateLabels(totalBits, output.OutputSize);
-                    callback(file);
-                });
-            });
-        }
-
-        public void LoadBrotliFile(Func<BrotliFileStructure> fileLoader, Action<BrotliFileStructure> onLoaded, Action<Stopwatch> onSerialized, Action<Stopwatch> onDecompressed){
-            InvalidatePanel();
-
-            bool enableBitMarkers = EnableBitMarkers;
-
-            loadWorker.Start(sync => {
-                BrotliFileStructure file = fileLoader();
-
-                if (file == null){
-                    sync(() => {
-                        onSerialized(null);
-                        onDecompressed(null);
-                    });
-
-                    return;
-                }
-
-                sync(() => onLoaded(file));
-
-                BitStream bits;
-                BrotliOutputStored output;
-
-                Stopwatch stopwatchSerialization = Stopwatch.StartNew();
-
-                try{
-                    bits = file.Serialize();
-                }catch(Exception ex){
-                    sync(() => {
-                        UpdateTextBox(textBoxBitStream, ex);
-                        onSerialized(null);
-                        onDecompressed(null);
-                    });
-
-                    return;
-                }finally{
-                    stopwatchSerialization.Stop();
-                }
-
-                string bitsStr = bits.ToString();
-
-                sync(() => {
-                    UpdateTextBox(textBoxBitStream, bitsStr);
-                    onSerialized(stopwatchSerialization);
-                });
-                
-                Stopwatch stopwatchDecompression = Stopwatch.StartNew();
-                
-                try{
-                    output = file.GetDecompressionState(bits, enableBitMarkers);
-                }catch(Exception ex){
-                    sync(() => {
-                        UpdateTextBox(textBoxOutput, ex);
-                        onDecompressed(null);
-                    });
-
-                    return;
-                }finally{
-                    stopwatchDecompression.Stop();
-                }
-
-                string outputStr = output.AsUTF8;
-                MarkerNode[] markerSequence = output.BitMarkerRoot.ToArray();
-
-                sync(() => {
-                    textBoxBitStream.UpdateMarkers(markerSequence);
-                    UpdateTextBox(textBoxOutput, outputStr);
-                    UpdateLabels(bits.Length, output.OutputSize);
-                    onDecompressed(stopwatchDecompression);
-                });
-            });
+        public void ResetPanel(){
+            UpdateTextBox(textBoxBitStream, "");
+            UpdateTextBox(textBoxOutput, "");
+            ResetLabels();
         }
 
         public void InvalidatePanel(){
-            loadWorker.Abort();
-
             textBoxBitStream.ForeColor = SystemColors.ControlDark;
             textBoxOutput.ForeColor = SystemColors.ControlDark;
 
             textBoxBitStream.RemoveMarkers();
             ResetLabels();
+        }
+
+        public void UpdateBits(Exception ex){
+            UpdateTextBox(textBoxOutput, ex);
+        }
+
+        public void UpdateBits(BrotliFileState.HasBits state){
+            UpdateTextBox(textBoxBitStream, state.Bits);
+        }
+
+        public void UpdateOutput(Exception ex){
+            UpdateTextBox(textBoxOutput, ex);
+        }
+
+        public void UpdateOutput(BrotliFileState.Loaded state){
+            textBoxBitStream.UpdateMarkers(state.Markers);
+            UpdateTextBox(textBoxOutput, state.OutputText);
+            UpdateLabels(state.TotalBits, state.OutputText.Length);
         }
 
         private void UpdateTextBox(FastColoredTextBox tb, string text, Color color){
@@ -179,13 +84,13 @@ namespace BrotliBuilder.Components{
         }
 
         private void UpdateLabels(int bitStreamLength, int outputLength){
-            labelBitStream.Text = $"{labelPrefix} Bit Stream ({bitStreamLength} bits)";
-            labelOutput.Text = $"{labelPrefix} Output ({outputLength} bytes)";
+            labelBitStream.Text = $"{title} Bit Stream ({bitStreamLength} bits)";
+            labelOutput.Text = $"{title} Output ({outputLength} bytes)";
         }
 
         private void ResetLabels(){
-            labelBitStream.Text = $"{labelPrefix} Bit Stream";
-            labelOutput.Text = $"{labelPrefix} Output";
+            labelBitStream.Text = $"{title} Bit Stream";
+            labelOutput.Text = $"{title} Output";
         }
     }
 }

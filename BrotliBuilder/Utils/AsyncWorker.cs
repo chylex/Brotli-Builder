@@ -4,26 +4,24 @@ using System.Threading.Tasks;
 
 namespace BrotliBuilder.Utils{
     sealed class AsyncWorker{
-        public delegate void Work(Action<Action> sync);
-
         public string Name { get; set; }
 
         private readonly TaskFactory taskFactory = new TaskFactory(TaskScheduler.FromCurrentSynchronizationContext());
         private Thread currentThread;
         
-        public void Start(Work action){
+        public void Start(Action action){
             Abort();
 
-            void Worker(){
-                action(callback => taskFactory.StartNew(callback));
-            }
-
-            currentThread = new Thread(Worker){
+            currentThread = new Thread(new ThreadStart(action)){
                 Name = this.Name,
                 IsBackground = true
             };
 
             currentThread.Start();
+        }
+
+        public void Sync(Action action){
+            taskFactory.StartNew(action);
         }
 
         public void Abort(){

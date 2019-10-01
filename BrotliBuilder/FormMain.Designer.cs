@@ -318,12 +318,12 @@
             this.brotliFilePanelGenerated.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.brotliFilePanelGenerated.LabelPrefix = "Generated";
             this.brotliFilePanelGenerated.Location = new System.Drawing.Point(0, 5);
             this.brotliFilePanelGenerated.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
             this.brotliFilePanelGenerated.Name = "brotliFilePanelGenerated";
             this.brotliFilePanelGenerated.Size = new System.Drawing.Size(440, 365);
             this.brotliFilePanelGenerated.TabIndex = 0;
+            this.brotliFilePanelGenerated.Title = "Generated";
             this.brotliFilePanelGenerated.MarkersUpdated += new System.EventHandler<BrotliBuilder.Components.MarkedTextBox.MarkerUpdateEventArgs>(this.brotliFilePanel_MarkersUpdated);
             // 
             // brotliFilePanelOriginal
@@ -331,12 +331,12 @@
             this.brotliFilePanelOriginal.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.brotliFilePanelOriginal.LabelPrefix = "Original";
             this.brotliFilePanelOriginal.Location = new System.Drawing.Point(0, 5);
             this.brotliFilePanelOriginal.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
             this.brotliFilePanelOriginal.Name = "brotliFilePanelOriginal";
             this.brotliFilePanelOriginal.Size = new System.Drawing.Size(439, 365);
             this.brotliFilePanelOriginal.TabIndex = 0;
+            this.brotliFilePanelOriginal.Title = "Original";
             this.brotliFilePanelOriginal.MarkersUpdated += new System.EventHandler<BrotliBuilder.Components.MarkedTextBox.MarkerUpdateEventArgs>(this.brotliFilePanel_MarkersUpdated);
             // 
             // splitContainerRight
