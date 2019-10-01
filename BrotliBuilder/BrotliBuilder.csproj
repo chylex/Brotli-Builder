@@ -107,6 +107,7 @@
     <Compile Include="Utils\Colors.cs" />
     <Compile Include="Utils\ControlExtensions.cs" />
     <Compile Include="Utils\NativeMethods.cs" />
+    <Compile Include="Utils\WinMerge.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.1">

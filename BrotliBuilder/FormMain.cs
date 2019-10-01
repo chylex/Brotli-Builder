@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using BrotliBuilder.Blocks;
 using BrotliBuilder.Components;
 using BrotliBuilder.Dialogs;
+using BrotliBuilder.Utils;
 using BrotliImpl.Encoders;
 using BrotliImpl.Transformers;
 using BrotliLib.Brotli;
@@ -301,37 +302,7 @@ namespace BrotliBuilder{
             string generatedText = BrotliMarkerInfoPanel.GenerateText(brotliFilePanelGenerated.MarkerSequence);
 
             try{
-                string folder = Path.Combine(Path.GetTempPath(), "BrotliBuilder_Markers_" + Path.GetRandomFileName());
-                string originalFile = Path.Combine(folder, "original.txt");
-                string generatedFile = Path.Combine(folder, "generated.txt");
-                
-                Directory.CreateDirectory(folder);
-                File.WriteAllText(originalFile, originalText);
-                File.WriteAllText(generatedFile, generatedText);
-
-                string[] winMergePaths = {
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "WinMerge", "WinMergeU.exe"),
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "WinMerge", "WinMergeU.exe"),
-                    "WinMergeU.exe"
-                };
-
-                string winMergeArgs = "/E /U /DL Generated /DR Original \"" + generatedFile + "\" \"" + originalFile + "\"";
-
-                bool anySuccess = false;
-
-                foreach(string path in winMergePaths){
-                    try{
-                        using(Process.Start(path, winMergeArgs)){}
-                        anySuccess = true;
-                        break;
-                    }catch(Exception){
-                        // ignore
-                    }
-                }
-
-                if (!anySuccess){
-                    using(Process.Start("explorer.exe", folder)){}
-                }
+                WinMerge.CompareText(originalText, generatedText);
             }catch(Exception ex){
                 Debug.WriteLine(ex.ToString());
                 MessageBox.Show(ex.Message, "Compare Markers Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
