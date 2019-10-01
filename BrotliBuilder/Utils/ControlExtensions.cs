@@ -21,5 +21,21 @@ namespace BrotliBuilder.Utils{
 
             progressBar.Value = value;
         }
+
+        public static void SetChildHeight(this FlowLayoutPanel flowLayoutPanel, int height){
+            flowLayoutPanel.SuspendLayout();
+            
+            foreach(Control child in flowLayoutPanel.Controls){
+                child.Height = height;
+            }
+            
+            flowLayoutPanel.ResumeLayout(true);
+        }
+
+        public static bool Toggle(this MenuItem menuItem){
+            bool enable = !menuItem.Checked;
+            menuItem.Checked = enable;
+            return enable;
+        }
     }
 }

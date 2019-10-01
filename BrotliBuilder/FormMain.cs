@@ -174,15 +174,7 @@ namespace BrotliBuilder{
         }
 
         private void flowPanelBlocks_SizeChanged(object sender, EventArgs e){
-            int childHeight = flowPanelBlocks.ClientSize.Height - 8;
-
-            flowPanelBlocks.SuspendLayout();
-            
-            foreach(Control child in flowPanelBlocks.Controls){
-                child.Height = childHeight;
-            }
-            
-            flowPanelBlocks.ResumeLayout(true);
+            flowPanelBlocks.SetChildHeight(flowPanelBlocks.ClientSize.Height - 8);
         }
         
         private void brotliFilePanel_MarkersUpdated(object sender, MarkedTextBox.MarkerUpdateEventArgs e){
@@ -242,15 +234,11 @@ namespace BrotliBuilder{
         #region Menu events (View)
 
         private void menuItemFileStructure_Click(object sender, EventArgs e){
-            bool enable = !menuItemFileStructure.Checked;
-            menuItemFileStructure.Checked = enable;
-
-            splitContainerRight.Panel1Collapsed = !enable;
+            splitContainerRight.Panel1Collapsed = !menuItemFileStructure.Toggle();
         }
 
         private void menuItemMarkerInfo_Click(object sender, EventArgs e){
-            bool enable = !menuItemMarkerInfo.Checked;
-            menuItemMarkerInfo.Checked = enable;
+            bool enable = menuItemMarkerInfo.Toggle();
 
             splitContainerMain.Panel1Collapsed = !enable;
             brotliFilePanelGenerated.EnableBitMarkers = enable;
@@ -262,17 +250,11 @@ namespace BrotliBuilder{
         }
 
         private void menuItemWrapOutput_Click(object sender, EventArgs e){
-            bool enable = !menuItemWrapOutput.Checked;
-            menuItemWrapOutput.Checked = enable;
-
-            brotliFilePanelGenerated.WordWrapOutput = brotliFilePanelOriginal.WordWrapOutput = enable;
+            brotliFilePanelGenerated.WordWrapOutput = brotliFilePanelOriginal.WordWrapOutput = menuItemWrapOutput.Toggle();
         }
 
         private void menuItemWrapMarkerInfo_Click(object sender, EventArgs e){
-            bool enable = !menuItemWrapMarkerInfo.Checked;
-            menuItemWrapMarkerInfo.Checked = enable;
-
-            brotliMarkerInfoPanel.WordWrap = enable;
+            brotliMarkerInfoPanel.WordWrap = menuItemWrapMarkerInfo.Toggle();
         }
 
         #endregion
