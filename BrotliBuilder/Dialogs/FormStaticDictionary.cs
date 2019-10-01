@@ -143,7 +143,7 @@ namespace BrotliBuilder.Dialogs{
         }
 
         private void UpdateFilter(){
-            string matchingText = textBoxFilter.Text;
+            string matchingText = textBoxFilter.Text.Replace(' ', FormatSpace);
             bool showTransforms = checkBoxShowTransforms.Checked;
             
             DataTable data = ((DataView)dataGridViewWords.DataSource).Table;
