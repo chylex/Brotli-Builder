@@ -1,101 +1,57 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace BrotliLib.Collections.Trie{
-    public sealed class MultiTrie<K, V> : MultiTrieBase<K, V, MultiTrie<K, V>.NodeRef> where K : IComparable<K>{
-        internal ReadOnlyNode Root => RootNodeIdentifier.AsReadOnly();
+    public sealed class MultiTrie<K, V> where K : IComparable<K>{
+        private static readonly KeyComparer<K, Node> KeyComparer = new KeyComparer<K, Node>();
 
-        private protected override NodeRef RootNodeIdentifier { get; }
+        private readonly Node rootNode;
 
-        private MultiTrie(NodeRef rootNode){
-            this.RootNodeIdentifier = rootNode;
+        internal MultiTrie(Node rootNode){
+            this.rootNode = rootNode;
         }
 
-        private protected override Node ReachNode(NodeRef identifier){
-            return identifier.node;
-        }
+        public IReadOnlyList<V> FindLongest(IEnumerable<K> key){
+            Node node = rootNode;
+            Node last = null;
 
-        // TODO everything about this is utter hell
+            foreach(K ele in key){
+                var children = node.children;
+                int index = children == null ? -1 : Array.BinarySearch(children, new KeyValuePair<K, Node>(ele, default), KeyComparer);
 
-        public sealed class NodeRef{
-            internal readonly Node node;
-
-            internal NodeRef(Node node){
-                this.node = node;
-            }
-
-            internal ReadOnlyNode AsReadOnly(){
-                var clonedChildren = node.children?.Select(kvp => new KeyValuePair<K, ReadOnlyNode>(kvp.Key, kvp.Value.AsReadOnly())).ToArray();
-                var clonedValues = (V[])node.values?.Clone();
-
-                return new ReadOnlyNode(clonedChildren, clonedValues);
-            }
-        }
-
-        internal sealed class ReadOnlyNode{
-            public IReadOnlyList<KeyValuePair<K, ReadOnlyNode>> Children { get; }
-            public IReadOnlyList<V> Values { get; }
-
-            public ReadOnlyNode(IReadOnlyList<KeyValuePair<K, ReadOnlyNode>> children, IReadOnlyList<V> values){
-                this.Children = children;
-                this.Values = values;
-            }
-        }
-
-        public sealed class Builder{
-            private readonly MutableNode rootNode = new MutableNode();
-
-            public void Insert(IEnumerable<K> key, V value){
-                MutableNode node = rootNode;
-
-                foreach(K ele in key){
-                    var children = node.children ?? (node.children = new Dictionary<K, MutableNode>(1));
-
-                    if (!children.TryGetValue(ele, out node)){
-                        node = children[ele] = new MutableNode();
-                    }
-                }
-                
-                node.AddValue(value);
-            }
-
-            public MultiTrie<K, V> Build(){
-                return new MultiTrie<K, V>(rootNode.Build());
-            }
-
-            private sealed class MutableNode{
-                public Dictionary<K, MutableNode> children;
-                private V[] values;
-
-                public void AddValue(V value){
-                    if (values == null){
-                        values = new V[]{ value };
-                    }
-                    else{
-                        Array.Resize(ref values, values.Length + 1);
-                        values[values.Length - 1] = value;
-                    }
+                if (index < 0){
+                    break;
                 }
 
-                public NodeRef Build(){
-                    var node = new Node{ values = this.values };
+                node = children[index].Value;
 
-                    if (children != null){
-                        var sorted = new KeyValuePair<K, NodeRef>[children.Count];
-                        int index = 0;
-                        
-                        foreach(var kvp in children){
-                            sorted[index++] = new KeyValuePair<K, NodeRef>(kvp.Key, kvp.Value.Build());
-                        }
-                        
-                        Array.Sort(sorted, KeyComparer);
-                        node.children = sorted;
-                    }
-
-                    return new NodeRef(node);
+                if (node.HasValues){
+                    last = node;
                 }
             }
+
+            return last?.Values ?? new V[0];
+        }
+
+        internal class Node{
+            public KeyValuePair<K, Node>[] children;
+
+            public virtual bool HasValues => false;
+            public virtual V[] Values => null;
+        }
+
+        internal sealed class NodeWithValue : Node{
+            public V value;
+
+            public override bool HasValues => true;
+            public override V[] Values => new V[]{ value };
+        }
+
+        internal sealed class NodeWithValues : Node{
+            public V[] values;
+
+            public override bool HasValues => true;
+            public override V[] Values => values;
         }
     }
 }
