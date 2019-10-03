@@ -40,7 +40,9 @@
             this.menuItemEncodeFile = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeUncompressedMBs = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeLiterals = new System.Windows.Forms.MenuItem();
-            this.menuItemEncodeGreedyCopySearch = new System.Windows.Forms.MenuItem();
+            this.menuItemEncodeGreedySearch = new System.Windows.Forms.MenuItem();
+            this.menuItemEncodeGreedySearchOnlyCopies = new System.Windows.Forms.MenuItem();
+            this.menuItemEncodeGreedySearchOnlyDictionary = new System.Windows.Forms.MenuItem();
             this.menuItemTransform = new System.Windows.Forms.MenuItem();
             this.menuItemTransformRebuild = new System.Windows.Forms.MenuItem();
             this.menuItemTransformTestDistanceParams = new System.Windows.Forms.MenuItem();
@@ -61,6 +63,7 @@
             this.labelFileStructure = new System.Windows.Forms.Label();
             this.splitContainerMain = new System.Windows.Forms.SplitContainer();
             this.brotliMarkerInfoPanel = new BrotliBuilder.Components.BrotliMarkerInfoPanel();
+            this.menuItemEncodeGreedySearchMixed = new System.Windows.Forms.MenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeStructure)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding2)).BeginInit();
@@ -183,7 +186,7 @@
             this.menuItemEncodeFile.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItemEncodeUncompressedMBs,
             this.menuItemEncodeLiterals,
-            this.menuItemEncodeGreedyCopySearch});
+            this.menuItemEncodeGreedySearch});
             this.menuItemEncodeFile.Text = "&Encode";
             // 
             // menuItemEncodeUncompressedMBs
@@ -200,12 +203,27 @@
             this.menuItemEncodeLiterals.Text = "Into Literals";
             this.menuItemEncodeLiterals.Click += new System.EventHandler(this.menuItemEncodeLiterals_Click);
             // 
-            // menuItemEncodeGreedyCopySearch
+            // menuItemEncodeGreedySearch
             // 
-            this.menuItemEncodeGreedyCopySearch.Index = 2;
-            this.menuItemEncodeGreedyCopySearch.Shortcut = System.Windows.Forms.Shortcut.Ctrl2;
-            this.menuItemEncodeGreedyCopySearch.Text = "Simple Greedy Copy Search";
-            this.menuItemEncodeGreedyCopySearch.Click += new System.EventHandler(this.menuItemEncodeGreedyCopySearch_Click);
+            this.menuItemEncodeGreedySearch.Index = 2;
+            this.menuItemEncodeGreedySearch.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuItemEncodeGreedySearchOnlyCopies,
+            this.menuItemEncodeGreedySearchOnlyDictionary,
+            this.menuItemEncodeGreedySearchMixed});
+            this.menuItemEncodeGreedySearch.Shortcut = System.Windows.Forms.Shortcut.Ctrl2;
+            this.menuItemEncodeGreedySearch.Text = "Simple Greedy Search";
+            // 
+            // menuItemEncodeGreedySearchOnlyCopies
+            // 
+            this.menuItemEncodeGreedySearchOnlyCopies.Index = 0;
+            this.menuItemEncodeGreedySearchOnlyCopies.Text = "Only Copies";
+            this.menuItemEncodeGreedySearchOnlyCopies.Click += new System.EventHandler(this.menuItemEncodeGreedySearchOnlyCopies_Click);
+            // 
+            // menuItemEncodeGreedySearchOnlyDictionary
+            // 
+            this.menuItemEncodeGreedySearchOnlyDictionary.Index = 1;
+            this.menuItemEncodeGreedySearchOnlyDictionary.Text = "Only Dictionary";
+            this.menuItemEncodeGreedySearchOnlyDictionary.Click += new System.EventHandler(this.menuItemEncodeGreedySearchOnlyDictionary_Click);
             // 
             // menuItemTransform
             // 
@@ -422,6 +440,12 @@
             this.brotliMarkerInfoPanel.Size = new System.Drawing.Size(377, 575);
             this.brotliMarkerInfoPanel.TabIndex = 0;
             // 
+            // menuItemEncodeGreedySearchMixed
+            // 
+            this.menuItemEncodeGreedySearchMixed.Index = 2;
+            this.menuItemEncodeGreedySearchMixed.Text = "Mixed";
+            this.menuItemEncodeGreedySearchMixed.Click += new System.EventHandler(this.MenuItemEncodeGreedySearchMixed_Click);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -489,7 +513,7 @@
         private System.Windows.Forms.MenuItem menuItemTransform;
         private System.Windows.Forms.MenuItem menuItemTransformTestDistanceParams;
         private System.Windows.Forms.MenuItem menuItemTransformRebuild;
-        private System.Windows.Forms.MenuItem menuItemEncodeGreedyCopySearch;
+        private System.Windows.Forms.MenuItem menuItemEncodeGreedySearch;
         private System.Windows.Forms.SplitContainer splitContainerMain;
         private Components.BrotliMarkerInfoPanel brotliMarkerInfoPanel;
         private System.Windows.Forms.Label labelFileStructure;
@@ -499,5 +523,8 @@
         private System.Windows.Forms.MenuItem menuItemCompareMarkers;
         private System.Windows.Forms.StatusBarPanel statusBarPanelTimeStructure;
         private System.Windows.Forms.StatusBarPanel statusBarPanelPadding3;
+        private System.Windows.Forms.MenuItem menuItemEncodeGreedySearchOnlyCopies;
+        private System.Windows.Forms.MenuItem menuItemEncodeGreedySearchOnlyDictionary;
+        private System.Windows.Forms.MenuItem menuItemEncodeGreedySearchMixed;
     }
 }

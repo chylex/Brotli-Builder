@@ -11,7 +11,9 @@ namespace BrotliCalc.Commands{
     class CmdTestEncoder : ICommand{
         private static readonly Dictionary<string, IBrotliEncoder> Encoders = new Dictionary<string, IBrotliEncoder>{
             { "literals", new EncodeLiterals() },
-            { "greedycopy", new EncodeGreedyCopySearch() }
+            { "greedy-copies", new EncodeGreedySearch.OnlyBackReferences(minLength: 4) },
+            { "greedy-dict", new EncodeGreedySearch.OnlyDictionary() },
+            { "greedy-mixed", new EncodeGreedySearch.Mixed(minCopyLength: 4) }
         };
 
         public string FullName => "test-encoder";

@@ -414,8 +414,16 @@ namespace BrotliBuilder{
             OpenFileWithEncoder(new BrotliFileParameters(), new EncodeLiterals());
         }
 
-        private void menuItemEncodeGreedyCopySearch_Click(object sender, EventArgs e){
-            OpenFileWithEncoder(new BrotliFileParameters(), new EncodeGreedyCopySearch());
+        private void menuItemEncodeGreedySearchOnlyCopies_Click(object sender, EventArgs e){
+            OpenFileWithEncoder(new BrotliFileParameters(), new EncodeGreedySearch.OnlyBackReferences(minLength: 4));
+        }
+
+        private void menuItemEncodeGreedySearchOnlyDictionary_Click(object sender, EventArgs e){
+            OpenFileWithEncoder(new BrotliFileParameters(), new EncodeGreedySearch.OnlyDictionary());
+        }
+
+        private void MenuItemEncodeGreedySearchMixed_Click(object sender, EventArgs e){
+            OpenFileWithEncoder(new BrotliFileParameters(), new EncodeGreedySearch.Mixed(minCopyLength: 4));
         }
 
         private void OpenFileWithEncoder(BrotliFileParameters parameters, IBrotliEncoder encoder){
