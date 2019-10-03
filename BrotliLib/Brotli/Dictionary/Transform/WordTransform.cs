@@ -2,25 +2,26 @@
 
 namespace BrotliLib.Brotli.Dictionary.Transform{
     /// <summary>
-    /// Represents a combined transformation that modifies the bytes of a word using <see cref="transform"/>, and then surrounds it with a <see cref="prefix"/> and a <see cref="suffix"/>.
+    /// Represents a combined transformation that modifies the bytes of a word using transform <see cref="Type"/>, and then surrounds it with a <see cref="Prefix"/> and a <see cref="Suffix"/>.
     /// </summary>
     public sealed class WordTransform{
-        private readonly byte[] prefix, suffix;
-        private readonly TransformType transform;
+        public TransformType Type { get; }
+        internal byte[] Prefix { get; }
+        internal byte[] Suffix { get; }
 
         public WordTransform(byte[] prefix, TransformType transform, byte[] suffix){
-            this.prefix = prefix;
-            this.transform = transform;
-            this.suffix = suffix;
+            this.Type = transform;
+            this.Prefix = prefix;
+            this.Suffix = suffix;
         }
 
         public byte[] Process(byte[] rawWord){
-            byte[] middle = transform.Process(rawWord);
-            byte[] fullWord = new byte[prefix.Length + middle.Length + suffix.Length];
+            byte[] middle = Type.Process(rawWord);
+            byte[] fullWord = new byte[Prefix.Length + middle.Length + Suffix.Length];
             
-            Buffer.BlockCopy(prefix, 0, fullWord, 0, prefix.Length);
-            Buffer.BlockCopy(middle, 0, fullWord, prefix.Length, middle.Length);
-            Buffer.BlockCopy(suffix, 0, fullWord, prefix.Length + middle.Length, suffix.Length);
+            Buffer.BlockCopy(Prefix, 0, fullWord, 0, Prefix.Length);
+            Buffer.BlockCopy(middle, 0, fullWord, Prefix.Length, middle.Length);
+            Buffer.BlockCopy(Suffix, 0, fullWord, Prefix.Length + middle.Length, Suffix.Length);
 
             return fullWord;
         }

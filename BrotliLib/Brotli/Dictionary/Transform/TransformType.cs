@@ -27,6 +27,18 @@ namespace BrotliLib.Brotli.Dictionary.Transform{
     public static class TransformTypes{
         public static readonly TransformType[] All = Enumerable.Range(0, 21).Cast<TransformType>().ToArray();
 
+        public static int GetTransformedLength(this TransformType type, int originalLength){
+            if (type >= TransformType.OmitFirst1 && type <= TransformType.OmitFirst9){
+                return Math.Max(0, originalLength - (type - TransformType.OmitFirstN));
+            }
+            else if (type >= TransformType.OmitLast1 && type <= TransformType.OmitLast9){
+                return Math.Max(0, originalLength - (type - TransformType.OmitLastN));
+            }
+            else{
+                return originalLength;
+            }
+        }
+
         /// <summary>
         /// Returns a word transformed according to the <see cref="TransformType"/> rule defined in the format specification.
         /// </summary>

@@ -1,35 +1,34 @@
 ﻿namespace BrotliLib.Brotli.Dictionary.Index{
     public readonly struct DictionaryIndexEntry{
-        public int Length { get; }
         public int Packed { get; }
+        public byte CopyLength { get; }
+        public byte OutputLength { get; }
 
-        public DictionaryIndexEntry(int length, int packed){
-            this.Length = length;
+        public DictionaryIndexEntry(int packed, int copyLength, int outputLength){
             this.Packed = packed;
-        }
-
-        public void Deconstruct(out int length, out int packed){
-            length = this.Length;
-            packed = this.Packed;
+            this.CopyLength = (byte)copyLength;
+            this.OutputLength = (byte)outputLength;
         }
 
         public override bool Equals(object obj){
             return obj is DictionaryIndexEntry entry &&
-                   Length == entry.Length &&
-                   Packed == entry.Packed;
+                   Packed == entry.Packed &&
+                   CopyLength == entry.CopyLength &&
+                   OutputLength == entry.OutputLength;
         }
 
         public override int GetHashCode(){
             unchecked{
-                var hashCode = -295785090;
-                hashCode = hashCode * -1521134295 + Length.GetHashCode();
+                var hashCode = -1193651551;
                 hashCode = hashCode * -1521134295 + Packed.GetHashCode();
+                hashCode = hashCode * -1521134295 + CopyLength.GetHashCode();
+                hashCode = hashCode * -1521134295 + OutputLength.GetHashCode();
                 return hashCode;
             }
         }
 
         public override string ToString(){
-            return "Length = " + Length + ", Packed = " + Packed;
+            return "Packed = " + Packed + ", CopyLength = " + CopyLength + ", OutputLength = " + OutputLength;
         }
     }
 }

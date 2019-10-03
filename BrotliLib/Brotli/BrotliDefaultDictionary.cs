@@ -14,7 +14,7 @@ namespace BrotliLib.Brotli{
     /// https://tools.ietf.org/html/rfc7932#appendix-B
     /// </summary>
     public sealed class BrotliDefaultDictionary : BrotliDictionary{
-        public static BrotliDefaultDictionary Embedded => new BrotliDefaultDictionary(new StreamSource(Resource.Get("dict")));
+        public static BrotliDefaultDictionary Embedded { get; }
 
         private static readonly IDictionaryFormat DefaultFormat = new BitDepthFormat(new int[]{
             0, 0, 0, 0, 10, 10, 11, 11, 10, 10, 10, 10, 10, 9, 9, 8, 7, 7, 8, 7, 7, 6, 6, 5, 5
@@ -24,6 +24,7 @@ namespace BrotliLib.Brotli{
 
         static BrotliDefaultDictionary(){
             DefaultTransforms = Enumerable.Range(0, 121).Select(index => new WordTransform(PrefixMap[index], GetTransformType(index), SuffixMap[index])).ToArray();
+            Embedded = new BrotliDefaultDictionary(new StreamSource(Resource.Get("dict"))); 
         }
         
         public BrotliDefaultDictionary(IDictionarySource source) : base(DefaultFormat, DefaultTransforms, source){}

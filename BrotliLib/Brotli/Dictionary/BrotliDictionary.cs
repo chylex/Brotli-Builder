@@ -14,12 +14,16 @@ namespace BrotliLib.Brotli.Dictionary{
         public IDictionaryFormat Format { get; }
         public IReadOnlyList<WordTransform> Transforms { get; }
 
+        public BrotliDictionaryIndex Index => index.Value;
+
         private readonly IDictionarySource source;
+        private readonly Lazy<BrotliDictionaryIndex> index;
         
         public BrotliDictionary(IDictionaryFormat format, IReadOnlyList<WordTransform> transforms, IDictionarySource source){
             this.Format = format;
             this.Transforms = transforms;
             this.source = source;
+            this.index = new Lazy<BrotliDictionaryIndex>(() => new BrotliDictionaryIndex(this), isThreadSafe: true);
         }
         
         public void Dispose(){
