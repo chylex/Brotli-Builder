@@ -14,6 +14,7 @@ using BrotliLib.Brotli.Dictionary.Transform;
 namespace BrotliBuilder.Dialogs{
     public partial class FormStaticDictionary : Form{
         private static readonly char FormatSpace = Environment.OSVersion.Version >= new Version(6, 2) ? '⎵' : '␣';
+        private const string FormatNewLine = "↵";
 
         private static readonly NumberFormatInfo FormatCounters = new NumberFormatInfo{
             NumberGroupSeparator = " ",
@@ -72,7 +73,7 @@ namespace BrotliBuilder.Dialogs{
                         row[colLength] = length;
                         row[colIndex] = word;
                         row[colTransform] = transform;
-                        row[colText] = Encoding.UTF8.GetString(transforms[transform].Process(bytes)).Replace(' ', FormatSpace);
+                        row[colText] = Encoding.UTF8.GetString(transforms[transform].Process(bytes)).Replace(' ', FormatSpace).Replace("\r\n", FormatNewLine).Replace("\n", FormatNewLine).Replace("\r", "");
 
                         rows.Add(row);
                     }
