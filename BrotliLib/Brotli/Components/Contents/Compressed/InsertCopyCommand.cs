@@ -33,8 +33,8 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
             this.CopyDistance = newDistanceInfo;
         }
 
-        public InsertCopyCommand WithImplicitDistanceCodeZero(){
-            return CopyDistance == DistanceInfo.ImplicitCodeZero ? this : new InsertCopyCommand(this, DistanceInfo.ImplicitCodeZero);
+        public InsertCopyCommand WithDistance(DistanceInfo newDistanceInfo){
+            return CopyDistance == newDistanceInfo ? this : new InsertCopyCommand(this, newDistanceInfo);
         }
 
         // Object
@@ -46,7 +46,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                    CopyDistance == command.CopyDistance;
         }
 
-        public override int GetHashCode() {
+        public override int GetHashCode(){
             unchecked{
                 var hashCode = -1468049732;
                 hashCode = hashCode * -1521134295 + EqualityComparer<IReadOnlyList<Literal>>.Default.GetHashCode(Literals);
