@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using BrotliLib.Brotli.Components.Contents.Compressed;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Utils;
@@ -8,6 +9,7 @@ using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.Brotli.Markers.Reader;
 using BrotliLib.IO;
 using BrotliLib.IO.Writer;
+using BrotliLib.Markers;
 using BlockSwitchCommandMap = BrotliLib.Brotli.Components.Utils.CategoryMap<System.Collections.Generic.IReadOnlyList<BrotliLib.Brotli.Components.Contents.Compressed.BlockSwitchCommand>>;
 using BlockSwitchCommandMutableMap = BrotliLib.Brotli.Components.Utils.CategoryMap<System.Collections.Generic.IList<BrotliLib.Brotli.Components.Contents.Compressed.BlockSwitchCommand>>;
 
@@ -66,6 +68,24 @@ namespace BrotliLib.Brotli.Components.Contents{
 
             public void WriteCopy(int length, DistanceInfo distance){
                 bytesWritten += State.OutputCopy(length, distance);
+            }
+
+            public IMarkerInfo WriteCopyWithMarker(int length, DistanceInfo distance){
+                int prevBytesWritten = bytesWritten;
+                bool isBackReference = distance.GetValue(State) <= State.MaxDistance;
+
+                WriteCopy(length, distance);
+
+                int written = bytesWritten - prevBytesWritten;
+                byte[] value = new byte[written + 2];
+
+                for(int index = 0; index < written; index++){
+                    value[index + 1] = State.GetOutput(written - index);
+                }
+
+                value[0] = value[written + 1] = (byte)'"';
+                
+                return new ValueMarker(isBackReference ? "backreference" : "dictionary", Encoding.UTF8.GetString(value));
             }
         }
 
