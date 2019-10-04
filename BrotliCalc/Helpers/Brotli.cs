@@ -81,7 +81,7 @@ namespace BrotliCalc.Helpers{
 
             try{
                 foreach(string file in filePaths){
-                    Debug.WriteLine($"Compressing file {file} (quality {quality})...");
+                    Console.WriteLine($"Compressing file {file} (quality {quality})...");
 
                     using(Process process = Process.Start("brotli", argPrefix + '"' + file + '"')){
                         process.Start();

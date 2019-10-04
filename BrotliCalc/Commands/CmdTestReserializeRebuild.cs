@@ -31,6 +31,8 @@ namespace BrotliCalc.Commands{
                         int? reserializeBytes = null;
                         int? rebuildBytes = null;
 
+                        Console.WriteLine($"Processing {file.Name}...");
+
                         try{
                             reserializeBytes = group.CountBytesAndValidate(bfs);
                             rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild()));
@@ -51,6 +53,10 @@ namespace BrotliCalc.Commands{
                 }
                 
                 table.AddRow("(Successes)", "-", sumOriginal, sumReserialize, sumRebuild, sumReserialize - sumOriginal, sumRebuild - sumOriginal);
+            }
+
+            if (totalFiles > 0){
+                Console.WriteLine();
             }
 
             return "Processed " + totalFiles + " file(s) with " + failedFiles + " error(s).";

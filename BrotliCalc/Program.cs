@@ -90,11 +90,12 @@ namespace BrotliCalc{
                 lastInput = input;
 
                 try{
+                    Console.ForegroundColor = ConsoleColor.White;
+
                     var stopwatch = Stopwatch.StartNew();
                     var result = command.Process(args);
                     stopwatch.Stop();
 
-                    Console.ForegroundColor = ConsoleColor.White;
                     Console.WriteLine(result);
                     Console.ForegroundColor = ConsoleColor.Gray;
                     Console.WriteLine($"Command finished in {stopwatch.ElapsedMilliseconds} ms.");

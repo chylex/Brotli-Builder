@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using BrotliCalc.Helpers;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Numbers;
@@ -14,8 +15,14 @@ namespace BrotliCalc.Commands{
         public string Process(string[] args){
             var qualities = args[1] == "all" ? Enumerable.Range(0, 12) : Enumerable.Range(int.Parse(args[1]), 1);
             var windowSize = args.Length >= 3 ? new WindowSize(int.Parse(args[2])) : WindowSize.Default;
+
+            int totalFiles = qualities.Sum(quality => Brotli.CompressPath(args[0], quality, windowSize));
             
-            return $"Compressed files: {qualities.Sum(quality => Brotli.CompressPath(args[0], quality, windowSize))}";
+            if (totalFiles > 0){
+                Console.WriteLine();
+            }
+            
+            return $"Compressed {totalFiles} file(s).";
         }
     }
 }

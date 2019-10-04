@@ -44,6 +44,8 @@ namespace BrotliCalc.Commands{
                     int? uncompressedBytes = file.SizeBytes;
                     int? encodeBytes = null;
 
+                    Console.WriteLine($"Processing {file.Name}...");
+
                     try{
                         encodeBytes = group.CountBytesAndValidate(BrotliFileStructure.FromEncoder(parameters, encoder, file.Contents));
                     }catch(Exception e){
@@ -61,6 +63,10 @@ namespace BrotliCalc.Commands{
                 }
                 
                 table.AddRow("(Successes)", sumUncompressed, sumEncoded, sumEncoded - sumUncompressed);
+            }
+
+            if (totalFiles > 0){
+                Console.WriteLine();
             }
 
             return "Processed " + totalFiles + " file(s) with " + failedFiles + " error(s).";

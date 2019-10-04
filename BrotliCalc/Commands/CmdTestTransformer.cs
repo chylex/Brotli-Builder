@@ -43,6 +43,8 @@ namespace BrotliCalc.Commands{
                         int? rebuildBytes = null;
                         int? transformedBytes = null;
 
+                        Console.WriteLine($"Processing {file.Name}...");
+
                         try{
                             var transformed = bfs.Transform(transformer);
 
@@ -69,6 +71,10 @@ namespace BrotliCalc.Commands{
                 }
                 
                 table.AddRow("(Successes)", "-", sumOriginal, sumRebuild, sumTransformed, sumTransformed - sumOriginal, sumTransformed - sumRebuild);
+            }
+
+            if (totalFiles > 0){
+                Console.WriteLine();
             }
 
             return "Processed " + totalFiles + " file(s) with " + failedFiles + " error(s).";
