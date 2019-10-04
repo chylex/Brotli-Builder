@@ -43,11 +43,17 @@ namespace BrotliLib.Brotli.Components.Data{
         }
 
         public override string ToString(){
-            if (Value >= 32 && Value < 127){
+            if (Value == '\n'){
+                return "\\n";
+            }
+            else if (Value == '\r'){
+                return "\\r";
+            }
+            else if (Value >= 32 && Value < 127){
                 return "'" + (char)Value + "'";
             }
             else{
-                return "'\\" + Value + "'";
+                return "\\" + Value;
             }
         }
     }

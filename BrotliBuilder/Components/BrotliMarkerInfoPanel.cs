@@ -23,7 +23,13 @@ namespace BrotliBuilder.Components{
 
             foreach(MarkerNode node in markerSequence){
                 build.Append('\t', node.Depth);
+
+                int startIndex = build.Length;
                 node.Marker.Info.ToString(build);
+
+                build.Replace("\r", "\\r", startIndex, build.Length - startIndex);
+                build.Replace("\n", "\\n", startIndex, build.Length - startIndex);
+
                 build.Append('\n');
             }
 
