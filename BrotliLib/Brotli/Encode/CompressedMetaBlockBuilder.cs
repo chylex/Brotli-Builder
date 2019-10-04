@@ -79,7 +79,7 @@ namespace BrotliLib.Brotli.Encode{
         }
 
         public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, DictionaryIndexEntry dictionaryEntry){
-            return AddInsertCopy(new InsertCopyCommand(literals, dictionaryEntry.CopyLength, 1 + intermediateState.MaxDistance + literals.Count + dictionaryEntry.Packed));
+            return AddInsertCopy(new InsertCopyCommand(literals, dictionaryEntry.CopyLength, 1 + dictionaryEntry.Packed + Math.Min(intermediateState.Parameters.WindowSize.Bytes, intermediateState.OutputSize + literals.Count)));
         }
 
         // Building

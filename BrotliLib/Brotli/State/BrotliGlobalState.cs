@@ -10,7 +10,6 @@ namespace BrotliLib.Brotli.State{
     /// </summary>
     public class BrotliGlobalState{
         public int OutputSize => outputState.OutputSize;
-        public int MaxDistance => Math.Min(Parameters.WindowSize.Bytes, OutputSize);
 
         public BrotliFileParameters Parameters { get; }
         
@@ -74,7 +73,7 @@ namespace BrotliLib.Brotli.State{
         
         public int OutputCopy(int length, DistanceInfo distance){
             int distanceValue = distance.GetValue(this);
-            int maxDistance = MaxDistance;
+            int maxDistance = Math.Min(Parameters.WindowSize.Bytes, OutputSize);
 
             if (distanceValue <= maxDistance){
                 if (distance.ShouldWriteToDistanceBuffer()){
