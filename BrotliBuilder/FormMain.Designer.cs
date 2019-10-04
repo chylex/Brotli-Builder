@@ -26,8 +26,9 @@
             this.components = new System.ComponentModel.Container();
             this.mainMenu = new System.Windows.Forms.MainMenu(this.components);
             this.menuItemFile = new System.Windows.Forms.MenuItem();
-            this.menuItemOpen = new System.Windows.Forms.MenuItem();
-            this.menuItemSave = new System.Windows.Forms.MenuItem();
+            this.menuItemOpenBrotli = new System.Windows.Forms.MenuItem();
+            this.menuItemSaveBrotli = new System.Windows.Forms.MenuItem();
+            this.menuItemSaveOutput = new System.Windows.Forms.MenuItem();
             this.menuItemExit = new System.Windows.Forms.MenuItem();
             this.menuItemView = new System.Windows.Forms.MenuItem();
             this.menuItemFileStructure = new System.Windows.Forms.MenuItem();
@@ -43,6 +44,7 @@
             this.menuItemEncodeGreedySearch = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeGreedySearchOnlyCopies = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeGreedySearchOnlyDictionary = new System.Windows.Forms.MenuItem();
+            this.menuItemEncodeGreedySearchMixed = new System.Windows.Forms.MenuItem();
             this.menuItemTransform = new System.Windows.Forms.MenuItem();
             this.menuItemTransformRebuild = new System.Windows.Forms.MenuItem();
             this.menuItemTransformTestDistanceParams = new System.Windows.Forms.MenuItem();
@@ -63,7 +65,6 @@
             this.labelFileStructure = new System.Windows.Forms.Label();
             this.splitContainerMain = new System.Windows.Forms.SplitContainer();
             this.brotliMarkerInfoPanel = new BrotliBuilder.Components.BrotliMarkerInfoPanel();
-            this.menuItemEncodeGreedySearchMixed = new System.Windows.Forms.MenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelTimeStructure)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding2)).BeginInit();
@@ -97,28 +98,35 @@
             // 
             this.menuItemFile.Index = 0;
             this.menuItemFile.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItemOpen,
-            this.menuItemSave,
+            this.menuItemOpenBrotli,
+            this.menuItemSaveBrotli,
+            this.menuItemSaveOutput,
             this.menuItemExit});
             this.menuItemFile.Text = "&File";
             // 
-            // menuItemOpen
+            // menuItemOpenBrotli
             // 
-            this.menuItemOpen.Index = 0;
-            this.menuItemOpen.Shortcut = System.Windows.Forms.Shortcut.CtrlO;
-            this.menuItemOpen.Text = "Open";
-            this.menuItemOpen.Click += new System.EventHandler(this.menuItemOpen_Click);
+            this.menuItemOpenBrotli.Index = 0;
+            this.menuItemOpenBrotli.Shortcut = System.Windows.Forms.Shortcut.CtrlO;
+            this.menuItemOpenBrotli.Text = "Open Brotli";
+            this.menuItemOpenBrotli.Click += new System.EventHandler(this.menuItemOpenBrotli_Click);
             // 
-            // menuItemSave
+            // menuItemSaveBrotli
             // 
-            this.menuItemSave.Index = 1;
-            this.menuItemSave.Shortcut = System.Windows.Forms.Shortcut.CtrlS;
-            this.menuItemSave.Text = "Save";
-            this.menuItemSave.Click += new System.EventHandler(this.menuItemSave_Click);
+            this.menuItemSaveBrotli.Index = 1;
+            this.menuItemSaveBrotli.Shortcut = System.Windows.Forms.Shortcut.CtrlS;
+            this.menuItemSaveBrotli.Text = "Save Brotli";
+            this.menuItemSaveBrotli.Click += new System.EventHandler(this.menuItemSaveBrotli_Click);
+            // 
+            // menuItemSaveOutput
+            // 
+            this.menuItemSaveOutput.Index = 2;
+            this.menuItemSaveOutput.Text = "Save Output";
+            this.menuItemSaveOutput.Click += new System.EventHandler(this.menuItemSaveOutput_Click);
             // 
             // menuItemExit
             // 
-            this.menuItemExit.Index = 2;
+            this.menuItemExit.Index = 3;
             this.menuItemExit.Text = "Exit";
             this.menuItemExit.Click += new System.EventHandler(this.menuItemExit_Click);
             // 
@@ -224,6 +232,12 @@
             this.menuItemEncodeGreedySearchOnlyDictionary.Index = 1;
             this.menuItemEncodeGreedySearchOnlyDictionary.Text = "Only Dictionary";
             this.menuItemEncodeGreedySearchOnlyDictionary.Click += new System.EventHandler(this.menuItemEncodeGreedySearchOnlyDictionary_Click);
+            // 
+            // menuItemEncodeGreedySearchMixed
+            // 
+            this.menuItemEncodeGreedySearchMixed.Index = 2;
+            this.menuItemEncodeGreedySearchMixed.Text = "Mixed";
+            this.menuItemEncodeGreedySearchMixed.Click += new System.EventHandler(this.MenuItemEncodeGreedySearchMixed_Click);
             // 
             // menuItemTransform
             // 
@@ -440,12 +454,6 @@
             this.brotliMarkerInfoPanel.Size = new System.Drawing.Size(377, 575);
             this.brotliMarkerInfoPanel.TabIndex = 0;
             // 
-            // menuItemEncodeGreedySearchMixed
-            // 
-            this.menuItemEncodeGreedySearchMixed.Index = 2;
-            this.menuItemEncodeGreedySearchMixed.Text = "Mixed";
-            this.menuItemEncodeGreedySearchMixed.Click += new System.EventHandler(this.MenuItemEncodeGreedySearchMixed_Click);
-            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -490,8 +498,8 @@
         private System.Windows.Forms.MenuItem menuItemFile;
         private System.Windows.Forms.MenuItem menuItemExit;
         private System.Windows.Forms.FlowLayoutPanel flowPanelBlocks;
-        private System.Windows.Forms.MenuItem menuItemSave;
-        private System.Windows.Forms.MenuItem menuItemOpen;
+        private System.Windows.Forms.MenuItem menuItemSaveBrotli;
+        private System.Windows.Forms.MenuItem menuItemOpenBrotli;
         private System.Windows.Forms.StatusBar statusBar;
         private System.Windows.Forms.StatusBarPanel statusBarPanelTimeBits;
         private System.Windows.Forms.StatusBarPanel statusBarPanelTimeOutput;
@@ -526,5 +534,6 @@
         private System.Windows.Forms.MenuItem menuItemEncodeGreedySearchOnlyCopies;
         private System.Windows.Forms.MenuItem menuItemEncodeGreedySearchOnlyDictionary;
         private System.Windows.Forms.MenuItem menuItemEncodeGreedySearchMixed;
+        private System.Windows.Forms.MenuItem menuItemSaveOutput;
     }
 }

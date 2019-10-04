@@ -260,7 +260,7 @@ namespace BrotliBuilder{
                 return true;
             }
             else if (result == DialogResult.Yes){
-                menuItemSave_Click(null, EventArgs.Empty); // sets isDirty to false on success
+                menuItemSaveBrotli_Click(null, EventArgs.Empty); // sets isDirty to false on success
 
                 if (isDirty){
                     return true;
@@ -294,7 +294,7 @@ namespace BrotliBuilder{
 
         #region Menu events (File)
 
-        private void menuItemOpen_Click(object sender, EventArgs e){
+        private void menuItemOpenBrotli_Click(object sender, EventArgs e){
             if (PromptUnsavedChanges("Would you like to save changes before opening a new file?")){
                 return;
             }
@@ -315,16 +315,26 @@ namespace BrotliBuilder{
             }
         }
 
-        private void menuItemSave_Click(object sender, EventArgs e){
+        private BrotliFileStructure GetCurrentFileOrShowError(){
             BrotliFileStructure currentFile = fileGenerated.CurrentFile;
 
             if (currentFile == null){
                 MessageBox.Show("No structure loaded.", "Save File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+
+            return currentFile;
+        }
+
+        private void menuItemSaveBrotli_Click(object sender, EventArgs e){
+            BrotliFileStructure currentFile = GetCurrentFileOrShowError();
+
+            if (currentFile == null){
                 return;
             }
 
             using(SaveFileDialog dialog = new SaveFileDialog{
-                Title = "Save Compressed File",
+                Title = "Save Brotli",
                 Filter = "Brotli (*.br)|*.br|All Files (*.*)|*.*",
                 FileName = Path.GetFileName(lastFileName),
                 DefaultExt = "br"
@@ -334,6 +344,23 @@ namespace BrotliBuilder{
                     isDirty = false;
 
                     File.WriteAllBytes(lastFileName, currentFile.Serialize().ToByteArray());
+                }
+            }
+        }
+
+        private void menuItemSaveOutput_Click(object sender, EventArgs e){
+            BrotliFileStructure currentFile = GetCurrentFileOrShowError();
+
+            if (currentFile == null){
+                return;
+            }
+
+            using(SaveFileDialog dialog = new SaveFileDialog{
+                Title = "Save Output",
+                Filter = "All Files (*.*)|*.*"
+            }){
+                if (dialog.ShowDialog() == DialogResult.OK){
+                    File.WriteAllBytes(dialog.FileName, currentFile.GetDecompressionState(currentFile.Serialize(), enableMarkers: false).AsBytes);
                 }
             }
         }
