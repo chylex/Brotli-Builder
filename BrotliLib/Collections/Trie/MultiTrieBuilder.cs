@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 namespace BrotliLib.Collections.Trie{
-    public sealed class MultiTrieBuilder<K, V> where K : IComparable<K>{
+    sealed class MultiTrieBuilder<K, V> where K : IComparable<K> where V : IEquatable<V>{
         private static readonly KeyComparer<K, MutableNode> KeyComparer = new KeyComparer<K, MutableNode>();
 
         private MutableNode rootNode = new MutableNode();
@@ -33,8 +33,8 @@ namespace BrotliLib.Collections.Trie{
             node.AddValue(value);
         }
 
-        public MultiTrie<K, V> Build(){
-            var result = new MultiTrie<K, V>(rootNode.Build());
+        public MultiTrie<K, V> Build(MultiTrieCache<K, V> cache = null){
+            var result = new MultiTrie<K, V>(rootNode.Build(cache ?? new MultiTrieCache<K, V>()));
             rootNode = null; // prevent accessing the builder again
             return result;
         }
@@ -53,7 +53,7 @@ namespace BrotliLib.Collections.Trie{
                 }
             }
 
-            public MultiTrie<K, V>.Node Build(){
+            public MultiTrie<K, V>.Node Build(MultiTrieCache<K, V> cache){
                 MultiTrie<K, V>.Node node;
 
                 if (values == null){
@@ -71,13 +71,13 @@ namespace BrotliLib.Collections.Trie{
 
                     for(int index = 0, count = children.Count; index < count; index++){
                         var kvp = children[index];
-                        copy[index] = new KeyValuePair<K, MultiTrie<K, V>.Node>(kvp.Key, kvp.Value.Build());
+                        copy[index] = new KeyValuePair<K, MultiTrie<K, V>.Node>(kvp.Key, kvp.Value.Build(cache));
                     }
                     
                     node.children = copy;
                 }
 
-                return node;
+                return cache.Cache(node);
             }
         }
     }

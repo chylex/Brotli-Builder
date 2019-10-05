@@ -23,6 +23,8 @@ namespace BrotliLib.Brotli.Dictionary.Index{
 
             Stopwatch sw = Stopwatch.StartNew();
 
+            MultiTrieCache<byte, (int, int)> cache = new MultiTrieCache<byte, (int, int)>();
+
             this.lookups = TransformTypes.All.ToDictionary(type => type, type => {
                 var builder = new MultiTrieBuilder<byte, (int, int)>();
 
@@ -33,7 +35,7 @@ namespace BrotliLib.Brotli.Dictionary.Index{
                     }
                 }
 
-                return builder.Build();
+                return builder.Build(cache);
             });
 
             this.transformsNoPrefix = Enumerable.Range(0, transforms.Count).Where(index => transforms[index].Prefix.Length == 0).ToList();
