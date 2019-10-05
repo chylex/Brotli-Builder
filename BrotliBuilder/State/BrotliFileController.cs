@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using BrotliBuilder.Utils;
@@ -17,6 +18,8 @@ namespace BrotliBuilder.State{
 
         private readonly AsyncWorker worker;
         private int currentToken;
+
+        private readonly List<BrotliFileState> replay = new List<BrotliFileState>();
 
         public BrotliFileController(string name){
             worker = new AsyncWorker{ Name = name };
@@ -38,10 +41,24 @@ namespace BrotliBuilder.State{
             BrotliFileState prevState = state;
             state = newState;
 
+            if (state is BrotliFileState.Starting){
+                replay.Clear();
+            }
+
+            replay.Add(state);
+
             StateChanged?.Invoke(this, new StateChangedEventArgs(prevState, newState));
         });
 
         // Public triggers
+
+        public void ReplayOver(BrotliFileController target){
+            int token = ++target.currentToken;
+
+            foreach(var replayedState in replay){
+                target.UpdateState(token, replayedState);
+            }
+        }
 
         public void ResetToNothing(){
             worker.Abort();

@@ -64,6 +64,7 @@ namespace BrotliBuilder{
 
         private BrotliFileStructure lastGeneratedFile;
         private bool skipNextBlockRegeneration = false;
+        private bool skipNextOriginalToGeneratedFeed = false;
 
         private readonly BrotliFileController fileGenerated;
         private readonly BrotliFileController fileOriginal;
@@ -132,6 +133,7 @@ namespace BrotliBuilder{
             switch(e.To){
                 case BrotliFileState.NoFile _:
                     menuItemCompareMarkers.Enabled = false;
+                    menuItemCloneGeneratedToOriginal.Enabled = false;
                     break;
 
                 case BrotliFileState.Starting _:
@@ -162,6 +164,7 @@ namespace BrotliBuilder{
                     UpdateStatusBar(statusBarPanelTimeOutput, "output", loaded.Stopwatch);
 
                     lastGeneratedFile = loaded.File;
+                    menuItemCloneGeneratedToOriginal.Enabled = true;
 
                     if (brotliFilePanelOriginal.MarkerSequence != null && brotliFilePanelGenerated.MarkerSequence != null){
                         menuItemCompareMarkers.Enabled = true;
@@ -182,12 +185,17 @@ namespace BrotliBuilder{
                 case BrotliFileState.NoFile _:
                     filePanel.ResetPanel();
                     splitContainerRightBottom.Panel2Collapsed = true;
+
                     menuItemCompareMarkers.Enabled = false;
+                    menuItemCloneOriginalToGenerated.Enabled = false;
                     return;
 
                 case BrotliFileState.Starting _:
-                    flowPanelBlocks.Controls.Clear();
-                    fileGenerated.ResetToWaiting();
+                    if (!skipNextOriginalToGeneratedFeed){
+                        flowPanelBlocks.Controls.Clear();
+                        fileGenerated.ResetToWaiting();
+                    }
+
                     filePanel.InvalidatePanel();
                     ResetStatusBars("Loading...");
 
@@ -205,7 +213,15 @@ namespace BrotliBuilder{
 
                 case BrotliFileState.Loaded loaded:
                     filePanel.UpdateOutput(loaded);
-                    fileGenerated.LoadStructure(loaded.File);
+
+                    if (skipNextOriginalToGeneratedFeed){
+                        skipNextOriginalToGeneratedFeed = false;
+                    }
+                    else{
+                        fileGenerated.LoadStructure(loaded.File);
+                    }
+
+                    menuItemCloneOriginalToGenerated.Enabled = true;
                     break;
 
                 case BrotliFileState.Error error:
@@ -309,6 +325,7 @@ namespace BrotliBuilder{
                     lastFileName = dialog.FileName;
                     isDirty = false;
                     skipNextBlockRegeneration = false;
+                    skipNextOriginalToGeneratedFeed = false;
 
                     fileOriginal.LoadFile(lastFileName);
                 }
@@ -427,6 +444,24 @@ namespace BrotliBuilder{
                 Debug.WriteLine(ex.ToString());
                 MessageBox.Show(ex.Message, "Compare Markers Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void CloneFileBetweenControllers(BrotliFileController from, BrotliFileController to){
+            if (from.CurrentFile == null){
+                MessageBox.Show("No structure loaded.", "Clone File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            from.ReplayOver(to);
+        }
+
+        private void menuItemCloneGeneratedToOriginal_Click(object sender, EventArgs e){
+            CloneFileBetweenControllers(fileGenerated, fileOriginal);
+        }
+
+        private void menuItemCloneOriginalToGenerated_Click(object sender, EventArgs e){
+            skipNextOriginalToGeneratedFeed = true;
+            CloneFileBetweenControllers(fileOriginal, fileGenerated);
         }
 
         #endregion

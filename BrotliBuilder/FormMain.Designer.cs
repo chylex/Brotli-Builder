@@ -38,6 +38,9 @@
             this.menuItemTools = new System.Windows.Forms.MenuItem();
             this.menuItemStaticDictionary = new System.Windows.Forms.MenuItem();
             this.menuItemCompareMarkers = new System.Windows.Forms.MenuItem();
+            this.menuItemSeparatorT1 = new System.Windows.Forms.MenuItem();
+            this.menuItemCloneGeneratedToOriginal = new System.Windows.Forms.MenuItem();
+            this.menuItemCloneOriginalToGenerated = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeFile = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeUncompressedMBs = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeLiterals = new System.Windows.Forms.MenuItem();
@@ -171,7 +174,10 @@
             this.menuItemTools.Index = 2;
             this.menuItemTools.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItemStaticDictionary,
-            this.menuItemCompareMarkers});
+            this.menuItemCompareMarkers,
+            this.menuItemSeparatorT1,
+            this.menuItemCloneGeneratedToOriginal,
+            this.menuItemCloneOriginalToGenerated});
             this.menuItemTools.Text = "&Tools";
             // 
             // menuItemStaticDictionary
@@ -188,6 +194,25 @@
             this.menuItemCompareMarkers.Shortcut = System.Windows.Forms.Shortcut.CtrlM;
             this.menuItemCompareMarkers.Text = "Compare Markers";
             this.menuItemCompareMarkers.Click += new System.EventHandler(this.menuItemCompareMarkers_Click);
+            // 
+            // menuItemSeparatorT1
+            // 
+            this.menuItemSeparatorT1.Index = 2;
+            this.menuItemSeparatorT1.Text = "-";
+            // 
+            // menuItemCloneGeneratedToOriginal
+            // 
+            this.menuItemCloneGeneratedToOriginal.Enabled = false;
+            this.menuItemCloneGeneratedToOriginal.Index = 3;
+            this.menuItemCloneGeneratedToOriginal.Text = "Generated >> Original";
+            this.menuItemCloneGeneratedToOriginal.Click += new System.EventHandler(this.menuItemCloneGeneratedToOriginal_Click);
+            // 
+            // menuItemCloneOriginalToGenerated
+            // 
+            this.menuItemCloneOriginalToGenerated.Enabled = false;
+            this.menuItemCloneOriginalToGenerated.Index = 4;
+            this.menuItemCloneOriginalToGenerated.Text = "Generated << Original";
+            this.menuItemCloneOriginalToGenerated.Click += new System.EventHandler(this.menuItemCloneOriginalToGenerated_Click);
             // 
             // menuItemEncodeFile
             // 
@@ -533,6 +558,9 @@
         private System.Windows.Forms.MenuItem menuItemEncodeGreedySearchOnlyDictionary;
         private System.Windows.Forms.MenuItem menuItemEncodeGreedySearchMixed;
         private System.Windows.Forms.MenuItem menuItemSaveOutput;
+        private System.Windows.Forms.MenuItem menuItemSeparatorT1;
         private System.Windows.Forms.MenuItem menuItemSeparatorE1;
+        private System.Windows.Forms.MenuItem menuItemCloneGeneratedToOriginal;
+        private System.Windows.Forms.MenuItem menuItemCloneOriginalToGenerated;
     }
 }
