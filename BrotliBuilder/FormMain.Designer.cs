@@ -41,7 +41,7 @@
             this.menuItemEncodeFile = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeUncompressedMBs = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeLiterals = new System.Windows.Forms.MenuItem();
-            this.menuItemEncodeGreedySearch = new System.Windows.Forms.MenuItem();
+            this.menuItemSeparatorE1 = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeGreedySearchOnlyCopies = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeGreedySearchOnlyDictionary = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeGreedySearchMixed = new System.Windows.Forms.MenuItem();
@@ -183,6 +183,7 @@
             // 
             // menuItemCompareMarkers
             // 
+            this.menuItemCompareMarkers.Enabled = false;
             this.menuItemCompareMarkers.Index = 1;
             this.menuItemCompareMarkers.Shortcut = System.Windows.Forms.Shortcut.CtrlM;
             this.menuItemCompareMarkers.Text = "Compare Markers";
@@ -194,7 +195,10 @@
             this.menuItemEncodeFile.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItemEncodeUncompressedMBs,
             this.menuItemEncodeLiterals,
-            this.menuItemEncodeGreedySearch});
+            this.menuItemSeparatorE1,
+            this.menuItemEncodeGreedySearchOnlyCopies,
+            this.menuItemEncodeGreedySearchOnlyDictionary,
+            this.menuItemEncodeGreedySearchMixed});
             this.menuItemEncodeFile.Text = "&Encode";
             // 
             // menuItemEncodeUncompressedMBs
@@ -211,32 +215,27 @@
             this.menuItemEncodeLiterals.Text = "Into Literals";
             this.menuItemEncodeLiterals.Click += new System.EventHandler(this.menuItemEncodeLiterals_Click);
             // 
-            // menuItemEncodeGreedySearch
+            // menuItemSeparatorE1
             // 
-            this.menuItemEncodeGreedySearch.Index = 2;
-            this.menuItemEncodeGreedySearch.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItemEncodeGreedySearchOnlyCopies,
-            this.menuItemEncodeGreedySearchOnlyDictionary,
-            this.menuItemEncodeGreedySearchMixed});
-            this.menuItemEncodeGreedySearch.Shortcut = System.Windows.Forms.Shortcut.Ctrl2;
-            this.menuItemEncodeGreedySearch.Text = "Simple Greedy Search";
+            this.menuItemSeparatorE1.Index = 2;
+            this.menuItemSeparatorE1.Text = "-";
             // 
             // menuItemEncodeGreedySearchOnlyCopies
             // 
-            this.menuItemEncodeGreedySearchOnlyCopies.Index = 0;
-            this.menuItemEncodeGreedySearchOnlyCopies.Text = "Only Copies";
+            this.menuItemEncodeGreedySearchOnlyCopies.Index = 3;
+            this.menuItemEncodeGreedySearchOnlyCopies.Text = "Greedy Search (Only Copies)";
             this.menuItemEncodeGreedySearchOnlyCopies.Click += new System.EventHandler(this.menuItemEncodeGreedySearchOnlyCopies_Click);
             // 
             // menuItemEncodeGreedySearchOnlyDictionary
             // 
-            this.menuItemEncodeGreedySearchOnlyDictionary.Index = 1;
-            this.menuItemEncodeGreedySearchOnlyDictionary.Text = "Only Dictionary";
+            this.menuItemEncodeGreedySearchOnlyDictionary.Index = 4;
+            this.menuItemEncodeGreedySearchOnlyDictionary.Text = "Greedy Search (Only Dictionary)";
             this.menuItemEncodeGreedySearchOnlyDictionary.Click += new System.EventHandler(this.menuItemEncodeGreedySearchOnlyDictionary_Click);
             // 
             // menuItemEncodeGreedySearchMixed
             // 
-            this.menuItemEncodeGreedySearchMixed.Index = 2;
-            this.menuItemEncodeGreedySearchMixed.Text = "Mixed";
+            this.menuItemEncodeGreedySearchMixed.Index = 5;
+            this.menuItemEncodeGreedySearchMixed.Text = "Greedy Search (Mixed)";
             this.menuItemEncodeGreedySearchMixed.Click += new System.EventHandler(this.MenuItemEncodeGreedySearchMixed_Click);
             // 
             // menuItemTransform
@@ -521,7 +520,6 @@
         private System.Windows.Forms.MenuItem menuItemTransform;
         private System.Windows.Forms.MenuItem menuItemTransformTestDistanceParams;
         private System.Windows.Forms.MenuItem menuItemTransformRebuild;
-        private System.Windows.Forms.MenuItem menuItemEncodeGreedySearch;
         private System.Windows.Forms.SplitContainer splitContainerMain;
         private Components.BrotliMarkerInfoPanel brotliMarkerInfoPanel;
         private System.Windows.Forms.Label labelFileStructure;
@@ -535,5 +533,6 @@
         private System.Windows.Forms.MenuItem menuItemEncodeGreedySearchOnlyDictionary;
         private System.Windows.Forms.MenuItem menuItemEncodeGreedySearchMixed;
         private System.Windows.Forms.MenuItem menuItemSaveOutput;
+        private System.Windows.Forms.MenuItem menuItemSeparatorE1;
     }
 }
