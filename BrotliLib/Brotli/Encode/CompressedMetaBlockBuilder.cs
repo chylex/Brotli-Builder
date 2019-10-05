@@ -128,8 +128,8 @@ namespace BrotliLib.Brotli.Encode{
                     icLengthCode = icLengthValues.MakeCode(DistanceCodeZeroStrategy.PreferEnabled); // TODO good strategy?
                 }
                 else{
+                    DistanceCode distanceCode = null;
                     var distanceCodes = icCommand.CopyDistance.MakeCode(DistanceParameters, state);
-                    DistanceCode distanceCode;
                     
                     if (distanceCodes != null){
                         int blockID = NextBlockID(Category.Distance);
@@ -139,16 +139,20 @@ namespace BrotliLib.Brotli.Encode{
                         var codeList = distanceCodeFreq[treeID];
                         codeList.Add(distanceCode = distanceCodes.FirstOrDefault(codeList.Contains) ?? distanceCodes[0]); // TODO figure out a better strategy for picking the code
                     }
-                    else{
-                        throw new InvalidOperationException("Could not generate distance codes for command " + icCommand + ".");
-                    }
-                    
-                    icLengthCode = icLengthValues.MakeCode(distanceCode.Equals(DistanceCode.Zero) ? DistanceCodeZeroStrategy.PreferEnabled : DistanceCodeZeroStrategy.Disable);
+
+                    bool isImplicitCodeZero = distanceCode == null;
+                    bool isDistanceCodeZero = isImplicitCodeZero || distanceCode.Equals(DistanceCode.Zero);
+
+                    icLengthCode = icLengthValues.MakeCode(
+                        isImplicitCodeZero ? DistanceCodeZeroStrategy.ForceEnabled :
+                        isDistanceCodeZero ? DistanceCodeZeroStrategy.PreferEnabled :
+                                             DistanceCodeZeroStrategy.Disable
+                    );
 
                     if (icLengthCode.UseDistanceCodeZero){
                         icCommand = icCommand.WithDistance(DistanceInfo.ImplicitCodeZero);
                     }
-                    else if (distanceCode.Equals(DistanceCode.Zero)){
+                    else if (isDistanceCodeZero){
                         icCommand = icCommand.WithDistance(DistanceInfo.ExplicitCodeZero);
                     }
 
