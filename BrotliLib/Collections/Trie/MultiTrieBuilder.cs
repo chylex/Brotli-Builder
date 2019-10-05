@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BrotliLib.Collections.Trie{
     sealed class MultiTrieBuilder<K, V> where K : IComparable<K> where V : IEquatable<V>{
-        private static readonly KeyComparer<K, MutableNode> KeyComparer = new KeyComparer<K, MutableNode>();
+        private static readonly TupleKeyComparer<K, MutableNode> KeyComparer = new TupleKeyComparer<K, MutableNode>();
 
         private MutableNode rootNode = new MutableNode();
 
@@ -14,18 +14,18 @@ namespace BrotliLib.Collections.Trie{
                 var children = node.children;
 
                 if (children == null){
-                    node.children = new List<KeyValuePair<K, MutableNode>>(4){
-                        new KeyValuePair<K, MutableNode>(ele, node = new MutableNode())
+                    node.children = new List<(K, MutableNode)>(4){
+                        (ele, node = new MutableNode())
                     };
                 }
                 else{
-                    int index = children.BinarySearch(new KeyValuePair<K, MutableNode>(ele, null), KeyComparer);
+                    int index = children.BinarySearch((ele, null), KeyComparer);
 
                     if (index >= 0){
-                        node = children[index].Value;
+                        node = children[index].child;
                     }
                     else{
-                        children.Insert(~index, new KeyValuePair<K, MutableNode>(ele, node = new MutableNode()));
+                        children.Insert(~index, (ele, node = new MutableNode()));
                     }
                 }
             }
@@ -40,7 +40,7 @@ namespace BrotliLib.Collections.Trie{
         }
 
         private sealed class MutableNode{
-            public List<KeyValuePair<K, MutableNode>> children;
+            public List<(K key, MutableNode child)> children;
             private V[] values;
 
             public void AddValue(V value){
@@ -67,11 +67,11 @@ namespace BrotliLib.Collections.Trie{
                 }
 
                 if (children != null){
-                    var copy = new KeyValuePair<K, MultiTrie<K, V>.Node>[children.Count];
+                    var copy = new (K, MultiTrie<K, V>.Node)[children.Count];
 
                     for(int index = 0, count = children.Count; index < count; index++){
-                        var kvp = children[index];
-                        copy[index] = new KeyValuePair<K, MultiTrie<K, V>.Node>(kvp.Key, kvp.Value.Build(cache));
+                        var (key, child) = children[index];
+                        copy[index] = (key, child.Build(cache));
                     }
                     
                     node.children = copy;

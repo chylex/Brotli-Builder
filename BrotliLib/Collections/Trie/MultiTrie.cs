@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace BrotliLib.Collections.Trie{
     public sealed class MultiTrie<K, V> where K : IComparable<K> where V : IEquatable<V>{
-        private static readonly KeyComparer<K, Node> KeyComparer = new KeyComparer<K, Node>();
+        private static readonly TupleKeyComparer<K, Node> KeyComparer = new TupleKeyComparer<K, Node>();
 
         private readonly Node rootNode;
 
@@ -19,13 +19,14 @@ namespace BrotliLib.Collections.Trie{
 
             foreach(K ele in key){
                 var children = node.children;
-                int index = children == null ? -1 : Array.BinarySearch(children, new KeyValuePair<K, Node>(ele, default), KeyComparer);
+                int index = children == null ? -1 : Array.BinarySearch(children, (ele, default), KeyComparer);
 
                 if (index < 0){
                     break;
                 }
 
-                node = children[index].Value;
+                // ReSharper disable once PossibleNullReferenceException
+                node = children[index].child;
 
                 if (node.HasValues){
                     last = node;
@@ -36,7 +37,7 @@ namespace BrotliLib.Collections.Trie{
         }
 
         internal class Node{
-            public KeyValuePair<K, Node>[] children;
+            public (K key, Node child)[] children;
 
             public virtual bool HasValues => false;
             public virtual V[] Values => null;
@@ -77,9 +78,9 @@ namespace BrotliLib.Collections.Trie{
                     int result = 1;
 
                     if (children != null){
-                        foreach(var kvp in children){
-                            result = (prime * result) + kvp.Key.GetHashCode();
-                            result = (prime * result) + kvp.Value.GetHashCode();
+                        foreach(var (key, child) in children){
+                            result = (prime * result) + key.GetHashCode();
+                            result = (prime * result) + child.GetHashCode();
                         }
                     }
 
