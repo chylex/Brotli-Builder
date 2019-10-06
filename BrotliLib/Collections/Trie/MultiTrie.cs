@@ -49,8 +49,8 @@ namespace BrotliLib.Collections.Trie{
                     return false;
                 }
 
-                var children1 = Values;
-                var children2 = node.Values;
+                var children1 = children;
+                var children2 = node.children;
 
                 if (!((children1 == null && children2 == null) || (children1 != null && children2 != null && children1.SequenceEqual(children2)))){
                     return false;
