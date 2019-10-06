@@ -85,7 +85,9 @@ namespace BrotliBuilder.State{
             UpdateState(token, new BrotliFileState.HasStructure(structure, swDeserialize));
 
             if (!TryGetDecompressionState(token, structure, bits, out BrotliOutputStored output, out Stopwatch swOutput)) return;
-            UpdateState(token, new BrotliFileState.Loaded(structure, bits, output, swOutput));
+            UpdateState(token, new BrotliFileState.HasOutput(null, output.AsBytes, swOutput));
+
+            UpdateState(token, new BrotliFileState.Loaded(structure, bits, output));
         });
 
         public void LoadStructure(BrotliFileStructure structure) => StartWorker(token => {
@@ -96,7 +98,9 @@ namespace BrotliBuilder.State{
             UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), stopwatch));
 
             if (!TryGetDecompressionState(token, structure, bits, out BrotliOutputStored output, out Stopwatch swOutput)) return;
-            UpdateState(token, new BrotliFileState.Loaded(structure, bits, output, swOutput));
+            UpdateState(token, new BrotliFileState.HasOutput(null, output.AsBytes, swOutput));
+
+            UpdateState(token, new BrotliFileState.Loaded(structure, bits, output));
         });
 
         public void EncodeFile(string path, BrotliFileParameters parameters, IBrotliEncoder encoder) => StartWorker(token => {
@@ -110,11 +114,15 @@ namespace BrotliBuilder.State{
             UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), swSerialization));
 
             if (!TryGetDecompressionState(token, structure, bits, out BrotliOutputStored output, out Stopwatch swOutput)) return;
-            UpdateState(token, new BrotliFileState.Loaded(structure, bits, output, swOutput));
+            UpdateState(token, new BrotliFileState.HasOutput(bytes, output.AsBytes, swOutput));
+
+            UpdateState(token, new BrotliFileState.Loaded(structure, bits, output));
         });
 
         private void TransformInternal(BrotliFileStructure structure, IBrotliTransformer transformer) => StartWorker(token => {
             UpdateState(token, new BrotliFileState.Starting());
+
+            TryGetDecompressionState(token, structure, structure.Serialize(), out BrotliOutputStored prevOutput, out Stopwatch _);
 
             if (!TryTransform(token, structure, transformer, out structure, out Stopwatch swTransform)) return;
             UpdateState(token, new BrotliFileState.HasStructure(structure, swTransform));
@@ -123,7 +131,9 @@ namespace BrotliBuilder.State{
             UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), swSerialization));
 
             if (!TryGetDecompressionState(token, structure, bits, out BrotliOutputStored output, out Stopwatch swOutput)) return;
-            UpdateState(token, new BrotliFileState.Loaded(structure, bits, output, swOutput));
+            UpdateState(token, new BrotliFileState.HasOutput(prevOutput?.AsBytes ?? new byte[0], output.AsBytes, swOutput));
+
+            UpdateState(token, new BrotliFileState.Loaded(structure, bits, output));
         });
 
         public bool Transform(IBrotliTransformer transformer){

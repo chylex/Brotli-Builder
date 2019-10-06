@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using BrotliBuilder.State;
@@ -63,10 +64,13 @@ namespace BrotliBuilder.Components{
             UpdateTextBox(textBoxOutput, ex);
         }
 
-        public void UpdateOutput(BrotliFileState.Loaded state){
+        public void UpdateOutput(BrotliFileState.HasOutput state){
+            UpdateTextBox(textBoxOutput, Encoding.UTF8.GetString(state.OutputBytes));
+        }
+
+        public void FinalizeOutput(BrotliFileState.Loaded state){
+            UpdateLabels(state.TotalCompressedBits, state.TotalOutputBytes);
             textBoxBitStream.UpdateMarkers(state.Markers);
-            UpdateTextBox(textBoxOutput, state.OutputText);
-            UpdateLabels(state.TotalBits, state.OutputText.Length);
         }
 
         private void UpdateTextBox(FastColoredTextBox tb, string text, Color color){

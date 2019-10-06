@@ -38,17 +38,29 @@ namespace BrotliBuilder.State{
             }
         }
 
-        public sealed class Loaded : TimedBrotliFileState{
+        public sealed class HasOutput : TimedBrotliFileState{
+            public byte[] PreviousBytes { get; }
+            public byte[] OutputBytes { get; }
+
+            public HasOutput(byte[] previousBytes, byte[] outputBytes, Stopwatch stopwatch) : base(stopwatch){
+                this.PreviousBytes = previousBytes;
+                this.OutputBytes = outputBytes;
+            }
+        }
+
+        public sealed class Loaded : BrotliFileState{
             public BrotliFileStructure File { get; }
             public MarkerNode[] Markers { get; }
-            public string OutputText { get; }
-            public int TotalBits { get; }
 
-            public Loaded(BrotliFileStructure file, BitStream bits, BrotliOutputStored output, Stopwatch stopwatch) : base(stopwatch){
+            public int TotalCompressedBits { get; }
+            public int TotalOutputBytes { get; }
+
+            public Loaded(BrotliFileStructure file, BitStream bits, BrotliOutputStored output){
                 this.File = file;
                 this.Markers = output.BitMarkerRoot.ToArray();
-                this.OutputText = output.AsUTF8;
-                this.TotalBits = Markers.LastOrDefault()?.Marker?.IndexEnd ?? bits.Length; // use markers to account for padding whenever possible
+
+                this.TotalCompressedBits = Markers.LastOrDefault()?.Marker?.IndexEnd ?? bits.Length; // use markers to account for padding whenever possible
+                this.TotalOutputBytes = output.OutputSize;
             }
         }
 

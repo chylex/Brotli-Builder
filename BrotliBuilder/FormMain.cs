@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using BrotliBuilder.Blocks;
 using BrotliBuilder.Components;
@@ -127,6 +129,28 @@ namespace BrotliBuilder{
             }
         }
 
+        private void CheckOutputMatches(BrotliFileState.HasOutput hasOutput){
+            var prev = hasOutput.PreviousBytes;
+            var gen = hasOutput.OutputBytes;
+
+            if (prev == null){
+                return;
+            }
+
+            bool sameLength = prev.Length == gen.Length;
+
+            if (sameLength && prev.SequenceEqual(gen)){
+                return;
+            }
+
+            string BytesText(int n) => n + (n == 1 ? " byte" : " bytes");
+            string sizeMessage = sameLength ? "same length" : "previously " + BytesText(prev.Length) + ", now " + BytesText(gen.Length);
+
+            if (MessageBox.Show("Found mismatched output (" + sizeMessage + "). Would you like to compare?", "Output Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes){
+                WinMerge.CompareText(Encoding.UTF8.GetString(prev), Encoding.UTF8.GetString(gen));
+            }
+        }
+
         private void FileGenerated_StateChanged(object sender, StateChangedEventArgs e){
             BrotliFilePanel filePanel = brotliFilePanelGenerated;
 
@@ -159,9 +183,14 @@ namespace BrotliBuilder{
                     UpdateStatusBar(statusBarPanelTimeBits, "bits", hasBits.Stopwatch);
                     break;
 
+                case BrotliFileState.HasOutput hasOutput:
+                    filePanel.UpdateOutput(hasOutput);
+                    UpdateStatusBar(statusBarPanelTimeOutput, "output", hasOutput.Stopwatch);
+                    CheckOutputMatches(hasOutput);
+                    break;
+
                 case BrotliFileState.Loaded loaded:
-                    filePanel.UpdateOutput(loaded);
-                    UpdateStatusBar(statusBarPanelTimeOutput, "output", loaded.Stopwatch);
+                    filePanel.FinalizeOutput(loaded);
 
                     lastGeneratedFile = loaded.File;
                     menuItemCloneGeneratedToOriginal.Enabled = true;
@@ -211,8 +240,13 @@ namespace BrotliBuilder{
                     filePanel.UpdateBits(hasBits);
                     break;
 
+                case BrotliFileState.HasOutput hasOutput:
+                    filePanel.UpdateOutput(hasOutput);
+                    CheckOutputMatches(hasOutput);
+                    break;
+
                 case BrotliFileState.Loaded loaded:
-                    filePanel.UpdateOutput(loaded);
+                    filePanel.FinalizeOutput(loaded);
 
                     if (skipNextOriginalToGeneratedFeed){
                         skipNextOriginalToGeneratedFeed = false;
