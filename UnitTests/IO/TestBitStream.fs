@@ -29,9 +29,14 @@ module Representations =
     [<InlineData("0000_1111")>]
     let ``constructing from string with invalid characters throws exception`` (bits: string) =
         Assert.Throws<ArgumentOutOfRangeException>(fun () -> BitStream(bits) |> ignore)
+    
+    [<Fact>]
+    let ``constructing from empty byte array yields same length and byte array representation`` () =
+        let stream = BitStream()
+        Assert.Equal(0, stream.Length)
+        Assert.Equal<byte array>([||], stream.ToByteArray())
         
     [<Theory>]
-    [<InlineData()>]
     [<InlineData(0b00000000uy)>]
     [<InlineData(0b11100110uy)>]
     [<InlineData(0b00000000uy, 0b11111111uy)>]

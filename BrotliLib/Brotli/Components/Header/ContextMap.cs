@@ -78,7 +78,7 @@ namespace BrotliLib.Brotli.Components.Header{
                 return this;
             }
 
-            public Builder Set(Range range, byte value){
+            public Builder Set(IntRange range, byte value){
                 for(int index = range.First; index <= range.Last; index++){
                     contextMap[index] = value;
                 }

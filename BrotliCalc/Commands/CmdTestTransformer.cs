@@ -18,7 +18,7 @@ namespace BrotliCalc.Commands{
         public string ShortName => "tt";
 
         public string ArgumentDesc => "<{" + string.Join('|', Transformers.Keys) + "}> <source-path> <output-file>";
-        public Range ArgumentCount => Range.Only(3);
+        public IntRange ArgumentCount => IntRange.Only(3);
 
         public string Process(string[] args){
             if (!Transformers.TryGetValue(args[0], out var transformer)){

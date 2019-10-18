@@ -41,7 +41,7 @@ namespace BrotliLib.Brotli.Components.Data{
             130, 194, 322, 578, 1090, 2114, 6210, 22594,
         };
 
-        private static readonly Range[] InsertCodeRanges = InsertCodeValueOffsets.Zip(InsertCodeExtraBits, Range.FromOffsetBitPair).ToArray();
+        private static readonly IntRange[] InsertCodeRanges = InsertCodeValueOffsets.Zip(InsertCodeExtraBits, IntRange.FromOffsetBitPair).ToArray();
 
         // Copy code tables
 
@@ -57,7 +57,7 @@ namespace BrotliLib.Brotli.Components.Data{
             70, 102, 134, 198, 326, 582, 1094, 2118,
         };
 
-        private static readonly Range[] CopyCodeRanges = CopyCodeValueOffsets.Zip(CopyCodeExtraBits, Range.FromOffsetBitPair).ToArray();
+        private static readonly IntRange[] CopyCodeRanges = CopyCodeValueOffsets.Zip(CopyCodeExtraBits, IntRange.FromOffsetBitPair).ToArray();
 
         // Data
 

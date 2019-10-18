@@ -34,7 +34,7 @@ namespace BrotliLib.Brotli.Components.Data{
             369, 497, 753, 1265, 2289, 4337, 8433, 16625,
         };
 
-        private static readonly Range[] BlockLengthRanges = BlockLengthOffsets.Zip(BlockLengthExtraBits, Range.FromOffsetBitPair).ToArray();
+        private static readonly IntRange[] BlockLengthRanges = BlockLengthOffsets.Zip(BlockLengthExtraBits, IntRange.FromOffsetBitPair).ToArray();
 
         public static BlockLengthCode MakeCode(int length){
             return new BlockLengthCode(Array.FindIndex(BlockLengthRanges, range => range.Contains(length)));

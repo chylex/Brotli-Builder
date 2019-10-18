@@ -8,7 +8,7 @@ namespace BrotliCalc.Commands{
         public string ShortName => "cs";
 
         public string ArgumentDesc => "<source-path> <output-file>";
-        public Range ArgumentCount => Range.Only(2);
+        public IntRange ArgumentCount => IntRange.Only(2);
 
         public string Process(string[] args){
             int totalFiles = 0;

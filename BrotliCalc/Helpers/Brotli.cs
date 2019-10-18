@@ -14,7 +14,7 @@ namespace BrotliCalc.Helpers{
         private const string CompressedFileExtension = ".br";
         
         private static readonly Regex RegexCompressionIdentifier = new Regex(@"\.([^.]+)\.br$");
-        private static readonly Range QualityRange = new Range(0, 11);
+        private static readonly IntRange QualityRange = new IntRange(0, 11);
 
         private static string GetUncompressedName(string path){
             return Path.GetExtension(path) == CompressedFileExtension ? RegexCompressionIdentifier.Replace(path, "") : path;

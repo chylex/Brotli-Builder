@@ -72,7 +72,7 @@ namespace BrotliCalc{
                     continue;
                 }
 
-                Range range = command.ArgumentCount;
+                IntRange range = command.ArgumentCount;
                 string[] args = ParseCommandArguments(input.ElementAtOrDefault(1) ?? string.Empty);
 
                 if (!range.Contains(args.Length)){

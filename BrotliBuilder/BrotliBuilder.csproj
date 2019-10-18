@@ -1,183 +1,120 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3684F055-8D45-42D6-AE8B-7F8C895994E0}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>BrotliBuilder</RootNamespace>
-    <AssemblyName>BrotliBuilder</AssemblyName>
-    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFrameworkProfile />
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Copyright>Daniel Chýlek</Copyright>
+    <RepositoryUrl>https://github.com/chylex/Brotli-Builder</RepositoryUrl>
+    <Authors>Daniel Chýlek</Authors>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>BrotliBuilder.Program</StartupObject>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <LangVersion>latest</LangVersion>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <Optimize>true</Optimize>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <LangVersion>latest</LangVersion>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
+    <ContentWithTargetPath Include="Resources\LICENSE-BROTLI.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>LICENSE-BROTLI.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Resources\LICENSE-FCTB.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>LICENSE-FCTB.txt</TargetPath>
+    </ContentWithTargetPath>
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Blocks\Structure\BuildEmptyMetaBlock.cs">
+    <PackageReference Include="FCTB" Version="2.16.24">
+      <NoWarn>NU1701</NoWarn>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BrotliImpl\BrotliImpl.csproj" />
+    <ProjectReference Include="..\BrotliLib\BrotliLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Blocks\BuildFileStructure.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Blocks\Structure\BuildEmptyMetaBlock.Designer.cs">
-      <DependentUpon>BuildEmptyMetaBlock.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Blocks\Structure\BuildUncompressedMetaBlock.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Blocks\Structure\BuildUncompressedMetaBlock.Designer.cs">
-      <DependentUpon>BuildUncompressedMetaBlock.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Blocks\Structure\BuildWindowSize.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Blocks\BuildFileStructure.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Blocks\BuildFileStructure.Designer.cs">
+    <Compile Update="Blocks\BuildFileStructure.Designer.cs">
       <DependentUpon>BuildFileStructure.cs</DependentUpon>
     </Compile>
-    <Compile Include="Blocks\Structure\BuildWindowSize.Designer.cs">
+    <Compile Update="Blocks\Structure\BuildEmptyMetaBlock.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Blocks\Structure\BuildEmptyMetaBlock.Designer.cs">
+      <DependentUpon>BuildEmptyMetaBlock.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Blocks\Structure\BuildUncompressedMetaBlock.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Blocks\Structure\BuildUncompressedMetaBlock.Designer.cs">
+      <DependentUpon>BuildUncompressedMetaBlock.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Blocks\Structure\BuildWindowSize.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Blocks\Structure\BuildWindowSize.Designer.cs">
       <DependentUpon>BuildWindowSize.cs</DependentUpon>
     </Compile>
-    <Compile Include="Blocks\IBuildingBlockContext.cs" />
-    <Compile Include="State\BrotliFileController.cs" />
-    <Compile Include="Components\BrotliFilePanel.cs">
+    <Compile Update="Components\BrotliFilePanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Components\BrotliFilePanel.Designer.cs">
+    <Compile Update="Components\BrotliFilePanel.Designer.cs">
       <DependentUpon>BrotliFilePanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="State\BrotliFileState.cs" />
-    <Compile Include="Components\BrotliMarkerInfoPanel.cs">
+    <Compile Update="Components\BrotliMarkerInfoPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Components\BrotliMarkerInfoPanel.Designer.cs">
+    <Compile Update="Components\BrotliMarkerInfoPanel.Designer.cs">
       <DependentUpon>BrotliMarkerInfoPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="Components\MarkedTextBox.cs">
+    <Compile Update="Components\MarkedTextBox.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Dialogs\FormStaticDictionary.cs">
+    <Compile Update="Dialogs\FormStaticDictionary.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Dialogs\FormStaticDictionary.Designer.cs">
+    <Compile Update="Dialogs\FormStaticDictionary.Designer.cs">
       <DependentUpon>FormStaticDictionary.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormMain.cs">
+    <Compile Update="FormMain.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormMain.Designer.cs">
+    <Compile Update="FormMain.Designer.cs">
       <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="State\ErrorType.cs" />
-    <Compile Include="State\StateChangedEventArgs.cs" />
-    <Compile Include="Utils\AsyncWorker.cs" />
-    <Compile Include="Utils\Colors.cs" />
-    <Compile Include="Utils\ControlExtensions.cs" />
-    <Compile Include="Utils\NativeMethods.cs" />
-    <Compile Include="Utils\WinMerge.cs" />
   </ItemGroup>
+
   <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.7.1">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.7.1 %28x86 and x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BrotliImpl\BrotliImpl.csproj">
-      <Project>{8137df6e-21f1-445f-b29d-80032df1d711}</Project>
-      <Name>BrotliImpl</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BrotliLib\BrotliLib.csproj">
-      <Project>{09692edc-dc35-46a9-83c6-746e447f3b86}</Project>
-      <Name>BrotliLib</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="FCTB">
-      <Version>2.16.24</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Net.Compilers">
-      <Version>2.9.0</Version>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Blocks\BuildFileStructure.resx">
+    <EmbeddedResource Update="Blocks\BuildFileStructure.resx">
       <DependentUpon>BuildFileStructure.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Blocks\Structure\BuildEmptyMetaBlock.resx">
+    <EmbeddedResource Update="Blocks\Structure\BuildEmptyMetaBlock.resx">
       <DependentUpon>BuildEmptyMetaBlock.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Blocks\Structure\BuildUncompressedMetaBlock.resx">
+    <EmbeddedResource Update="Blocks\Structure\BuildUncompressedMetaBlock.resx">
       <DependentUpon>BuildUncompressedMetaBlock.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Blocks\Structure\BuildWindowSize.resx">
+    <EmbeddedResource Update="Blocks\Structure\BuildWindowSize.resx">
       <DependentUpon>BuildWindowSize.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Components\BrotliFilePanel.resx">
-      <DependentUpon>BrotliFilePanel.cs</DependentUpon>
+    <EmbeddedResource Update="Components\BrotliFilePanel.resx">
       <SubType>Designer</SubType>
+      <DependentUpon>BrotliFilePanel.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Components\BrotliMarkerInfoPanel.resx">
+    <EmbeddedResource Update="Components\BrotliMarkerInfoPanel.resx">
       <DependentUpon>BrotliMarkerInfoPanel.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\FormStaticDictionary.resx">
+    <EmbeddedResource Update="Dialogs\FormStaticDictionary.resx">
       <DependentUpon>FormStaticDictionary.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormMain.resx">
+    <EmbeddedResource Update="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\LICENSE-BROTLI.txt" />
-    <Content Include="Resources\LICENSE-FCTB.txt" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>xcopy /Y "$(ProjectDir)Resources\*" "$(TargetDir)"</PostBuildEvent>
-  </PropertyGroup>
+
 </Project>

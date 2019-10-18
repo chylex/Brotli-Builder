@@ -10,7 +10,7 @@ namespace BrotliCalc.Commands{
         public string ShortName => "c";
 
         public string ArgumentDesc => "<source-path> <quality|all> [window-size]";
-        public Range ArgumentCount => new Range(2, 3);
+        public IntRange ArgumentCount => new IntRange(2, 3);
 
         public string Process(string[] args){
             var qualities = args[1] == "all" ? Enumerable.Range(0, 12) : Enumerable.Range(int.Parse(args[1]), 1);

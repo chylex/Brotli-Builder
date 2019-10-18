@@ -6,7 +6,7 @@ namespace BrotliCalc{
         string ShortName { get; }
 
         string ArgumentDesc { get; }
-        Range ArgumentCount { get; }
+        IntRange ArgumentCount { get; }
 
         string Process(string[] args);
     }

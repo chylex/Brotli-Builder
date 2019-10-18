@@ -24,7 +24,7 @@ namespace BrotliLib.Brotli.Components.Data{
             0, 8, 0, 8, 0, 8, 16, 0, 16, 8, 16
         };
 
-        private static readonly (Range i, Range c)[] PairedCellOffsets = InsertCellOffsets.Zip(CopyCellOffsets, (i, c) => (new Range(i, i + 7), new Range(c, c + 7))).ToArray();
+        private static readonly (IntRange i, IntRange c)[] PairedCellOffsets = InsertCellOffsets.Zip(CopyCellOffsets, (i, c) => (new IntRange(i, i + 7), new IntRange(c, c + 7))).ToArray();
 
         // Data
 

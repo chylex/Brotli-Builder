@@ -6,10 +6,10 @@ Before documentation and the APIs themselves reach a more finished state, I woul
 
 | Project | Type | Framework | Description |
 | ------- | :--: | --------- | ----------- |
-| BrotliLib | Library | .NET&nbsp;Standard&nbsp;2.0 | APIs for Brotli structure and serialization; main dependency |
-| BrotliImpl | Library | .NET&nbsp;Standard&nbsp;2.0 | Example implementations of *encoders* and *transformers* |
-| BrotliBuilder | WinForms&nbsp;App | .NET&nbsp;Framework&nbsp;4.7.1 | GUI for analysis of Brotli-compressed files & static dictionary |
-| BrotliCalc | Console&nbsp;App | .NET&nbsp;Core&nbsp;2.0 | CLI for batch file processing, analysis, and statistics |
+| BrotliLib | Library | .NET&nbsp;Standard&nbsp;2.1 | APIs for Brotli structure and serialization; main dependency |
+| BrotliImpl | Library | .NET&nbsp;Standard&nbsp;2.1 | Example implementations of *encoders* and *transformers* |
+| BrotliBuilder | WinForms&nbsp;App | .NET&nbsp;Core&nbsp;3.0 | GUI for analysis of Brotli-compressed files & static dictionary |
+| BrotliCalc | Console&nbsp;App | .NET&nbsp;Core&nbsp;3.0 | CLI for batch file processing, analysis, and statistics |
 
 The key principle behind *BrotliLib* is representing the structure of a compressed file using a structure of objects, which is easy to analyze and manipulate.
 
@@ -39,6 +39,5 @@ The bit stream text fields let you navigate the color-coded bit groups:
 
 The project is written primarily in C# and built using Visual Studio 2019. Make sure you have the following components:
 
- - **.NET Framework 4.7.1 SDK**
- - **[.NET Core 2.0 SDK](https://dotnet.microsoft.com/download)**
+ - **[.NET Core 3.0 SDK](https://dotnet.microsoft.com/download)** (included in Visual Studio v16.3)
  - **F# desktop language support** (optional, only required for unit tests)

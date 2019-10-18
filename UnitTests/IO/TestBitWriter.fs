@@ -92,7 +92,6 @@ module AlignToByteBoundary =
 
 module WriteAlignedBytes =
     let bytes : obj array seq = seq {
-        yield [||]
         yield Array.map box [| 0b0uy |]
         yield Array.map box [| 0b1uy |]
         yield Array.map box [| 120uy; 0uy; 255uy; 33uy |]
@@ -100,6 +99,14 @@ module WriteAlignedBytes =
         yield Array.map box [| 1uy; 2uy; 3uy; 4uy; 5uy; 6uy; 7uy; 8uy; 9uy; 10uy; 11uy; 12uy; 13uy; 14uy; 15uy; 16uy |]
         yield Array.map box [| 1uy; 2uy; 3uy; 4uy; 5uy; 6uy; 7uy; 8uy; 9uy; 10uy; 11uy; 12uy; 13uy; 14uy; 15uy; 16uy; 17uy |]
     }
+
+    [<Fact>]
+    let ``writing empty byte array into stream yields correct byte array representation`` () =
+        let stream = BitStream()
+        let writer = stream.GetWriter()
+
+        writer.WriteAlignedBytes([||])
+        Assert.Equal<byte array>([||], stream.ToByteArray())
 
     [<Theory>]
     [<MemberData("bytes")>]
@@ -109,6 +116,15 @@ module WriteAlignedBytes =
 
         writer.WriteAlignedBytes(bytes)
         Assert.Equal<byte array>(bytes, stream.ToByteArray())
+
+    [<Fact>]
+    let ``writing empty byte array into unaligned stream skips to next boundary and then writes correct byte sequence with correct final alignment`` () =
+        let stream = BitStream("1")
+        let writer = stream.GetWriter()
+
+        writer.WriteAlignedBytes([||])
+        writer.WriteBit(true)
+        Assert.Equal<byte array>(Array.concat [ [| 0b1uy |]; [| 0b1uy |] ], stream.ToByteArray())
         
     [<Theory>]
     [<MemberData("bytes")>]
