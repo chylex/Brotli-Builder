@@ -16,6 +16,7 @@
     <Compile Include="IO\TestBitReader.fs" />
     <Compile Include="IO\TestBitStream.fs" />
     <Compile Include="IO\TestBitWriter.fs" />
+    <Compile Include="Numbers\TestAlphabetSize.fs" />
     <Compile Include="EntryPoint.fs" />
   </ItemGroup>
 

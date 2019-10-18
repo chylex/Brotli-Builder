@@ -73,14 +73,12 @@ namespace BrotliLib.Brotli.Components.Header{
             "Data Length",
 
             (reader, context) => {
-                int chunkNibbles = reader.NextChunk(2, "MNIBBLES", value => {
-                    switch(value){
-                        case 0b00: return 4;
-                        case 0b01: return 5;
-                        case 0b10: return 6;
-                        case 0b11: return 0;
-                        default: throw new InvalidOperationException("Reading two bits somehow returned a value outside [0, 3].");
-                    }
+                int chunkNibbles = reader.NextChunk(2, "MNIBBLES", value => value switch{
+                   0b00 => 4,
+                   0b01 => 5,
+                   0b10 => 6,
+                   0b11 => 0,
+                   _ => throw new InvalidOperationException("Reading two bits somehow returned a value outside [0, 3]."),
                 });
 		        
                 int uncompressedBytes = (chunkNibbles == 0) ? 0 : reader.NextChunk(4 * chunkNibbles, "MLEN", value => 1 + value);

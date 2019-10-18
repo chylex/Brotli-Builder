@@ -143,7 +143,7 @@ namespace BrotliBuilder{
                 return;
             }
 
-            string BytesText(int n) => n + (n == 1 ? " byte" : " bytes");
+            static string BytesText(int n) => n + (n == 1 ? " byte" : " bytes");
             string sizeMessage = sameLength ? "same length" : "previously " + BytesText(prev.Length) + ", now " + BytesText(gen.Length);
 
             if (MessageBox.Show("Found mismatched output (" + sizeMessage + "). Would you like to compare?", "Output Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes){
@@ -349,20 +349,20 @@ namespace BrotliBuilder{
                 return;
             }
 
-            using(OpenFileDialog dialog = new OpenFileDialog{
+            using OpenFileDialog dialog = new OpenFileDialog{
                 Title = "Open Compressed File",
                 Filter = "Brotli (*.br)|*.br|All Files (*.*)|*.*",
                 FileName = Path.GetFileName(lastFileName),
                 DefaultExt = "br"
-            }){
-                if (dialog.ShowDialog() == DialogResult.OK){
-                    lastFileName = dialog.FileName;
-                    isDirty = false;
-                    skipNextBlockRegeneration = false;
-                    skipNextOriginalToGeneratedFeed = false;
+            };
 
-                    fileOriginal.LoadFile(lastFileName);
-                }
+            if (dialog.ShowDialog() == DialogResult.OK){
+                lastFileName = dialog.FileName;
+                isDirty = false;
+                skipNextBlockRegeneration = false;
+                skipNextOriginalToGeneratedFeed = false;
+
+                fileOriginal.LoadFile(lastFileName);
             }
         }
 
@@ -384,18 +384,18 @@ namespace BrotliBuilder{
                 return;
             }
 
-            using(SaveFileDialog dialog = new SaveFileDialog{
+            using SaveFileDialog dialog = new SaveFileDialog{
                 Title = "Save Brotli",
                 Filter = "Brotli (*.br)|*.br|All Files (*.*)|*.*",
                 FileName = Path.GetFileName(lastFileName),
                 DefaultExt = "br"
-            }){
-                if (dialog.ShowDialog() == DialogResult.OK){
-                    lastFileName = dialog.FileName;
-                    isDirty = false;
+            };
 
-                    File.WriteAllBytes(lastFileName, currentFile.Serialize().ToByteArray());
-                }
+            if (dialog.ShowDialog() == DialogResult.OK){
+                lastFileName = dialog.FileName;
+                isDirty = false;
+
+                File.WriteAllBytes(lastFileName, currentFile.Serialize().ToByteArray());
             }
         }
 
@@ -406,13 +406,13 @@ namespace BrotliBuilder{
                 return;
             }
 
-            using(SaveFileDialog dialog = new SaveFileDialog{
+            using SaveFileDialog dialog = new SaveFileDialog{
                 Title = "Save Output",
                 Filter = "All Files (*.*)|*.*"
-            }){
-                if (dialog.ShowDialog() == DialogResult.OK){
-                    File.WriteAllBytes(dialog.FileName, currentFile.GetDecompressionState(currentFile.Serialize(), enableMarkers: false).AsBytes);
-                }
+            };
+
+            if (dialog.ShowDialog() == DialogResult.OK){
+                File.WriteAllBytes(dialog.FileName, currentFile.GetDecompressionState(currentFile.Serialize(), enableMarkers: false).AsBytes);
             }
         }
 
@@ -454,9 +454,8 @@ namespace BrotliBuilder{
 
         private void menuItemStaticDictionary_Click(object sender, EventArgs e){
             try{
-                using(FormStaticDictionary form = new FormStaticDictionary(BrotliDefaultDictionary.Embedded)){
-                    form.ShowDialog();
-                }
+                using FormStaticDictionary form = new FormStaticDictionary(BrotliDefaultDictionary.Embedded);
+                form.ShowDialog();
             }catch(Exception ex){
                 Debug.WriteLine(ex.ToString());
                 MessageBox.Show(ex.Message, "Static Dictionary Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -527,18 +526,18 @@ namespace BrotliBuilder{
                 return;
             }
 
-            using(OpenFileDialog dialog = new OpenFileDialog{
+            using OpenFileDialog dialog = new OpenFileDialog{
                 Title = "Open File to Encode",
                 Filter = "All Files (*.*)|*.*",
                 FileName = Path.GetFileName(lastFileName)
-            }){
-                if (dialog.ShowDialog() == DialogResult.OK){
-                    lastFileName = dialog.FileName;
-                    skipNextBlockRegeneration = false;
+            };
 
-                    fileOriginal.ResetToNothing();
-                    fileGenerated.EncodeFile(lastFileName, parameters, encoder);
-                }
+            if (dialog.ShowDialog() == DialogResult.OK){
+                lastFileName = dialog.FileName;
+                skipNextBlockRegeneration = false;
+
+                fileOriginal.ResetToNothing();
+                fileGenerated.EncodeFile(lastFileName, parameters, encoder);
             }
         }
 

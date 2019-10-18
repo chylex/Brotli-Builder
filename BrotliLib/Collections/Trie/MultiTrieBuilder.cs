@@ -49,7 +49,7 @@ namespace BrotliLib.Collections.Trie{
                 }
                 else{
                     Array.Resize(ref values, values.Length + 1);
-                    values[values.Length - 1] = value;
+                    values[^1] = value;
                 }
             }
 

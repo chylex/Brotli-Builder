@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BrotliLib.Brotli.Components.Utils{
+namespace BrotliLib.Numbers{
     /// <summary>
     /// Defines properties of a symbol alphabet.
     /// </summary>

@@ -8,6 +8,7 @@ open BrotliLib.Brotli.Components.Data
 open BrotliLib.Brotli.Components.Header
 open BrotliLib.Brotli.Components.Utils
 open BrotliLib.Huffman
+open BrotliLib.Numbers
 
 
 module Helper =

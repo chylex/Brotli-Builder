@@ -15,13 +15,13 @@ namespace BrotliLib.Brotli.Components.Utils{
 
     public static class LiteralContextModes{
         public static int DetermineContextID(this LiteralContextMode mode, byte mostRecentByte, byte secondRecentByte){
-            switch(mode){
-                case LiteralContextMode.LSB6: return mostRecentByte & 0x3F;
-                case LiteralContextMode.MSB6: return mostRecentByte >> 2;
-                case LiteralContextMode.UTF8: return LUT0[mostRecentByte] | LUT1[secondRecentByte];
-                case LiteralContextMode.Signed: return (LUT2[mostRecentByte] << 3) | LUT2[secondRecentByte];
-                default: throw new InvalidOperationException("Invalid literal context mode: "+mode);
-            }
+            return mode switch{
+                LiteralContextMode.LSB6 => mostRecentByte & 0x3F,
+                LiteralContextMode.MSB6 => mostRecentByte >> 2,
+                LiteralContextMode.UTF8 => LUT0[mostRecentByte] | LUT1[secondRecentByte],
+                LiteralContextMode.Signed => (LUT2[mostRecentByte] << 3) | LUT2[secondRecentByte],
+                _ => throw new InvalidOperationException("Invalid literal context mode: " + mode),
+            };
         }
 
         public static readonly BitDeserializer<LiteralContextMode, NoContext> Deserialize = (reader, context) => (LiteralContextMode)reader.NextChunk(2);

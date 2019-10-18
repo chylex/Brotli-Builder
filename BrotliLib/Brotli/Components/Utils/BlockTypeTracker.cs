@@ -34,11 +34,11 @@ namespace BrotliLib.Brotli.Components.Utils{
         }
 
         private int FindValueSilent(int code){
-            switch(code){
-                case 0: return Code0Value;
-                case 1: return Code1Value;
-                default: return code - 2;
-            }
+            return code switch{
+                0 => Code0Value,
+                1 => Code1Value,
+                _ => code - 2,
+            };
         }
 
         public int FindValue(int code){

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Header;
-using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Numbers;
 using LiteralTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.Literal>;
 
 namespace BrotliLib.Brotli.Components.Data{

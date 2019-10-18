@@ -83,10 +83,9 @@ namespace BrotliCalc.Helpers{
                 foreach(string file in filePaths){
                     Console.WriteLine($"Compressing file {file} (quality {quality})...");
 
-                    using(Process process = Process.Start("brotli", argPrefix + '"' + file + '"')){
-                        process.Start();
-                        process.WaitForExit();
-                    }
+                    using Process process = Process.Start("brotli", argPrefix + '"' + file + '"');
+                    process.Start();
+                    process.WaitForExit();
 
                     // TODO add multiprocess support
                 }

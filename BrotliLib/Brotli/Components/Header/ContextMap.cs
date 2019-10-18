@@ -13,21 +13,26 @@ namespace BrotliLib.Brotli.Components.Header{
     /// https://tools.ietf.org/html/rfc7932#section-7.3
     /// </summary>
     public sealed class ContextMap{
+        private const int LiteralTreesPerBlockType = 64;
+        private const int DistanceTreesPerBlockType = 4;
+
+        // Instance
+
         public Category Category { get; }
         public int TreeCount { get; }
-
-        public int TreesPerBlockType => Category.HuffmanTreesPerBlockType();
-
+        
+        private readonly int treesPerBlockType;
         private readonly byte[] contextMap;
 
-        private ContextMap(Category category, int treeCount, byte[] contextMap){
+        private ContextMap(Category category, int treeCount, int treesPerBlockType, byte[] contextMap){
             this.Category = category;
             this.TreeCount = treeCount;
+            this.treesPerBlockType = treesPerBlockType;
             this.contextMap = contextMap;
         }
 
         public byte DetermineTreeID(int blockID, int contextID){
-            return contextMap[blockID * TreesPerBlockType + contextID];
+            return contextMap[blockID * treesPerBlockType + contextID];
         }
 
         // Object
@@ -58,6 +63,7 @@ namespace BrotliLib.Brotli.Components.Header{
         public abstract class Builder{
             private readonly Category category;
             private readonly int treeCount;
+            private readonly int treesPerBlockType;
             private readonly byte[] contextMap;
 
             public int Length => contextMap.Length;
@@ -67,10 +73,11 @@ namespace BrotliLib.Brotli.Components.Header{
                 set => contextMap[index] = value;
             }
 
-            private protected Builder(Category category, int treeCount, int blockTypeCount){
+            private protected Builder(Category category, int treeCount, int treesPerBlockType, int blockTypeCount){
                 this.category = category;
                 this.treeCount = treeCount;
-                this.contextMap = new byte[blockTypeCount * category.HuffmanTreesPerBlockType()];
+                this.treesPerBlockType = treesPerBlockType;
+                this.contextMap = new byte[blockTypeCount * treesPerBlockType];
             }
 
             public Builder Set(int index, byte value){
@@ -91,28 +98,28 @@ namespace BrotliLib.Brotli.Components.Header{
             }
 
             public ContextMap Build(){
-                return new ContextMap(category, treeCount, CollectionHelper.Clone(contextMap));
+                return new ContextMap(category, treeCount, treesPerBlockType, CollectionHelper.Clone(contextMap));
             }
         }
 
         public sealed class Literals : Builder{
-            public static readonly ContextMap Simple = new Literals(1).Build();
+            public static readonly ContextMap Simple = new Literals(1, 1).Build();
 
-            public Literals(int treeCount, int blockTypeCount = 1) : base(Category.Literal, treeCount, blockTypeCount){}
+            public Literals(int treeCount, int blockTypeCount) : base(Category.Literal, treeCount, LiteralTreesPerBlockType, blockTypeCount){}
         }
 
         public sealed class Distances : Builder{
-            public static readonly ContextMap Simple = new Distances(1).Build();
+            public static readonly ContextMap Simple = new Distances(1, 1).Build();
 
-            public Distances(int treeCount, int blockTypeCount = 1) : base(Category.Distance, treeCount, blockTypeCount){}
+            public Distances(int treeCount, int blockTypeCount) : base(Category.Distance, treeCount, DistanceTreesPerBlockType, blockTypeCount){}
         }
 
         public static Builder For(int treeCount, BlockTypeInfo blockTypeInfo){
-            switch(blockTypeInfo.Category){
-                case Category.Literal: return new Literals(treeCount, blockTypeInfo.Count);
-                case Category.Distance: return new Distances(treeCount, blockTypeInfo.Count);
-                default: throw new InvalidOperationException("Context maps can only be created for literals and distances.");
-            }
+            return blockTypeInfo.Category switch{
+                Category.Literal => new Literals(treeCount, blockTypeInfo.Count),
+                Category.Distance => new Distances(treeCount, blockTypeInfo.Count),
+                _ => throw new InvalidOperationException("Context maps can only be created for literals and distances."),
+            };
         }
         
         // Helpers

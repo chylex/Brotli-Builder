@@ -255,11 +255,11 @@ namespace BrotliLib.Brotli.Components.Header{
         }
 
         public override string ToString(){
-            switch(Code){
-                case Repeat: return "Repeat";
-                case Skip: return "Skip";
-                default: return "Length = " + Code;
-            }
+            return Code switch{
+                Repeat => "Repeat",
+                Skip => "Skip",
+                _ => "Length = " + Code,
+            };
         }
 
         // Serialization

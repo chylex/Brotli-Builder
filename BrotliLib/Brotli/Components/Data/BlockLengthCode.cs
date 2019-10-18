@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using BrotliLib.Brotli.Components.Header;
-using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.IO;
 using BrotliLib.IO.Reader;
 using BrotliLib.IO.Writer;

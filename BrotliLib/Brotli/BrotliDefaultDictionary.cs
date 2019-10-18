@@ -54,29 +54,27 @@ namespace BrotliLib.Brotli{
                 return TransformType.FermentAll;
             }
 
-            switch(index){
-                case  3: return TransformType.OmitFirstN + 1;
-                case 11: return TransformType.OmitFirstN + 2;
-                case 12: return TransformType.OmitLastN + 1;
-                case 23: return TransformType.OmitLastN + 3;
-                case 26: return TransformType.OmitFirstN + 3;
-                case 27: return TransformType.OmitLastN + 2;
-                case 34: return TransformType.OmitFirstN + 4;
-                case 39: return TransformType.OmitFirstN + 5;
-                case 40: return TransformType.OmitFirstN + 6;
-                case 42: return TransformType.OmitLastN + 4;
-                case 48: return TransformType.OmitLastN + 7;
-                case 49: return TransformType.OmitLastN + 1;
-                case 54: return TransformType.OmitFirstN + 9;
-                case 55: return TransformType.OmitFirstN + 7;
-                case 56: return TransformType.OmitLastN + 6;
-                case 59: return TransformType.OmitLastN + 8;
-                case 63: return TransformType.OmitLastN + 5;
-                case 64: return TransformType.OmitLastN + 9;
-                // all combinations except for (OmitFirstN + 8) are used
-            }
-
-            return TransformType.Identity;
+            return index switch{
+                3  => TransformType.OmitFirstN + 1,
+                11 => TransformType.OmitFirstN + 2,
+                12 => TransformType.OmitLastN + 1,
+                23 => TransformType.OmitLastN + 3,
+                26 => TransformType.OmitFirstN + 3,
+                27 => TransformType.OmitLastN + 2,
+                34 => TransformType.OmitFirstN + 4,
+                39 => TransformType.OmitFirstN + 5,
+                40 => TransformType.OmitFirstN + 6,
+                42 => TransformType.OmitLastN + 4,
+                48 => TransformType.OmitLastN + 7,
+                49 => TransformType.OmitLastN + 1,
+                54 => TransformType.OmitFirstN + 9,
+                55 => TransformType.OmitFirstN + 7,
+                56 => TransformType.OmitLastN + 6,
+                59 => TransformType.OmitLastN + 8,
+                63 => TransformType.OmitLastN + 5,
+                64 => TransformType.OmitLastN + 9,
+                _  => TransformType.Identity,
+            };
         }
     }
 }

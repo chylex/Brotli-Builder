@@ -65,11 +65,11 @@ namespace BrotliLib.Brotli.Components{
                         else{
                             next = reader.NextChunk(3); // [1000xxx]
 
-                            switch(next){
-                                case 1: throw new InvalidOperationException("Invalid window size, 1000001 is a reserved value.");
-                                case 0: return 17;
-                                default: return 8 + next;
-                            }
+                            return next switch{
+                                1 => throw new InvalidOperationException("Invalid window size, 1000001 is a reserved value."),
+                                0 => 17,
+                                _ => 8 + next,
+                            };
                         }
                     }
                 });

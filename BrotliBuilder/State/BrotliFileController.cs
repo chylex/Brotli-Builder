@@ -73,6 +73,8 @@ namespace BrotliBuilder.State{
         public void ResetToEmpty(){
             LoadStructure(BrotliFileStructure.NewEmpty());
         }
+        
+        #pragma warning disable IDE0011 // Add braces
 
         public void LoadFile(string path) => StartWorker(token => {
             UpdateState(token, new BrotliFileState.Starting());
@@ -135,6 +137,8 @@ namespace BrotliBuilder.State{
 
             UpdateState(token, new BrotliFileState.Loaded(structure, bits, output));
         });
+
+        #pragma warning restore IDE0011 // Add braces
 
         public bool Transform(IBrotliTransformer transformer){
             if (state is BrotliFileState.Loaded loaded){

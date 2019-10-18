@@ -235,7 +235,7 @@ namespace BrotliLib.IO{
 
             while(bitsLeft > 0){
                 build.Append((lastValue & 1) == 1 ? True : False);
-                lastValue = lastValue >> 1;
+                lastValue >>= 1;
                 --bitsLeft;
             }
 

@@ -3,6 +3,7 @@ using BrotliLib.IO;
 using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Markers;
+using BrotliLib.Numbers;
 using BlockTypeCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<int>;
 using BlockLengthCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.BlockLengthCode>;
 

@@ -24,25 +24,24 @@ namespace BrotliLib.Brotli.Components.Utils{
 
     internal static class DistanceCodeZeroStrategies{
         public static bool Determine(this DistanceCodeZeroStrategy strategy, int insertCode, int copyCode){
-            switch(strategy){
-                case DistanceCodeZeroStrategy.Disable:
-                    return false;
+            return strategy switch{
+                DistanceCodeZeroStrategy.Disable
+                => false,
 
-                case DistanceCodeZeroStrategy.PreferEnabled:
-                    return insertCode <= 7 && copyCode <= 15;
+                DistanceCodeZeroStrategy.PreferEnabled
+                => insertCode <= 7 && copyCode <= 15,
 
-                case DistanceCodeZeroStrategy.ForceEnabled when insertCode > 7:
-                    throw new ArgumentOutOfRangeException(nameof(insertCode), "Insert code must be in range [0; 7] when using implied distance code zero.");
+                DistanceCodeZeroStrategy.ForceEnabled when insertCode > 7
+                => throw new ArgumentOutOfRangeException(nameof(insertCode), "Insert code must be in range [0; 7] when using implied distance code zero."),
 
-                case DistanceCodeZeroStrategy.ForceEnabled when copyCode > 15:
-                    throw new ArgumentOutOfRangeException(nameof(copyCode), "Copy code must be in range [0; 15] when using implied distance code zero.");
+                DistanceCodeZeroStrategy.ForceEnabled when copyCode > 15
+                => throw new ArgumentOutOfRangeException(nameof(copyCode), "Copy code must be in range [0; 15] when using implied distance code zero."),
 
-                case DistanceCodeZeroStrategy.ForceEnabled:
-                    return true;
+                DistanceCodeZeroStrategy.ForceEnabled
+                => true,
 
-                default:
-                    throw new InvalidOperationException("Invalid distance code zero strategy: " + strategy);
-            }
+                _ => throw new InvalidOperationException("Invalid distance code zero strategy: " + strategy),
+            };
         }
     }
 }

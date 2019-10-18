@@ -1,7 +1,7 @@
 ﻿using System;
-using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.IO;
+using BrotliLib.Numbers;
 
 namespace BrotliLib.Brotli.Components.Header{
     /// <summary>

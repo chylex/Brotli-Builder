@@ -42,13 +42,13 @@ namespace BrotliLib.Brotli.Components.Header{
         /// If <paramref name="symbolCount"/> equals 4, another bit is consumed from the <paramref name="reader"/> to determine the correct lengths.
         /// </summary>
         private static byte[] DetermineSimpleCodeLengths(IMarkedBitReader reader, int symbolCount){
-            switch(symbolCount){
-                case 1: return new byte[]{ 0 };
-                case 2: return new byte[]{ 1, 1 };
-                case 3: return new byte[]{ 1, 2, 2 };
-                case 4: return reader.NextBit("tree-select") ? new byte[]{ 1, 2, 3, 3 } : new byte[]{ 2, 2, 2, 2 };
-                default: throw new ArgumentOutOfRangeException(nameof(symbolCount), "The amount of symbols in a simple code must be in the range [1; 4].");
-            }
+            return symbolCount switch{
+                1 => new byte[] { 0 },
+                2 => new byte[] { 1, 1 },
+                3 => new byte[] { 1, 2, 2 },
+                4 => reader.NextBit("tree-select") ? new byte[] { 1, 2, 3, 3 } : new byte[] { 2, 2, 2, 2 },
+                _ => throw new ArgumentOutOfRangeException(nameof(symbolCount), "The amount of symbols in a simple code must be in the range [1; 4]."),
+            };
         }
     }
 }
