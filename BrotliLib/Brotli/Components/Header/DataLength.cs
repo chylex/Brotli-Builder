@@ -55,12 +55,7 @@ namespace BrotliLib.Brotli.Components.Header{
         }
 
         public override int GetHashCode(){
-            unchecked{
-                var hashCode = 1631702163;
-                hashCode = hashCode * -1521134295 + ChunkNibbles.GetHashCode();
-                hashCode = hashCode * -1521134295 + UncompressedBytes.GetHashCode();
-                return hashCode;
-            }
+            return HashCode.Combine(ChunkNibbles, UncompressedBytes);
         }
 
         public override string ToString(){

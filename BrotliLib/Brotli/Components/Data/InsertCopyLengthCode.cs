@@ -99,9 +99,7 @@ namespace BrotliLib.Brotli.Components.Data{
         }
 
         public override int GetHashCode(){
-            unchecked{
-                return 905739190 + CompactedCode.GetHashCode();
-            }
+            return HashCode.Combine(CompactedCode);
         }
 
         public override string ToString(){

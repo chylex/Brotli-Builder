@@ -1,4 +1,5 @@
-﻿using BrotliLib.Brotli.Components.Data;
+﻿using System;
+using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Markers;
@@ -23,12 +24,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
         }
 
         public override int GetHashCode(){
-            unchecked{
-                var hashCode = 229038177;
-                hashCode = hashCode * -1521134295 + Type.GetHashCode();
-                hashCode = hashCode * -1521134295 + Length.GetHashCode();
-                return hashCode;
-            }
+            return HashCode.Combine(Type, Length);
         }
 
         // Context

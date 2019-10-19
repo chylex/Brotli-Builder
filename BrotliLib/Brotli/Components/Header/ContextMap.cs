@@ -41,17 +41,11 @@ namespace BrotliLib.Brotli.Components.Header{
             return obj is ContextMap map &&
                    Category == map.Category &&
                    TreeCount == map.TreeCount &&
-                   EqualityComparer<byte[]>.Default.Equals(contextMap, map.contextMap);
+                   CollectionHelper.Equal(contextMap, map.contextMap);
         }
 
         public override int GetHashCode(){
-            unchecked{
-                var hashCode = -1436479929;
-                hashCode = hashCode * -1521134295 + Category.GetHashCode();
-                hashCode = hashCode * -1521134295 + TreeCount.GetHashCode();
-                hashCode = hashCode * -1521134295 + EqualityComparer<byte[]>.Default.GetHashCode(contextMap);
-                return hashCode;
-            }
+            return HashCode.Combine(Category, TreeCount, CollectionHelper.HashCode(contextMap));
         }
 
         public override string ToString(){

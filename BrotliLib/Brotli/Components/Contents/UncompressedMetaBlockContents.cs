@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.Collections;
@@ -19,13 +18,11 @@ namespace BrotliLib.Brotli.Components.Contents{
 
         public override bool Equals(object obj){
             return obj is UncompressedMetaBlockContents contents &&
-                   EqualityComparer<byte[]>.Default.Equals(uncompressedData, contents.uncompressedData);
+                   CollectionHelper.Equal(uncompressedData, contents.uncompressedData);
         }
 
         public override int GetHashCode(){
-            unchecked{
-                return 1470885995 + EqualityComparer<byte[]>.Default.GetHashCode(uncompressedData);
-            }
+            return CollectionHelper.HashCode(uncompressedData);
         }
         
         // Serialization

@@ -118,12 +118,7 @@ namespace BrotliLib.Brotli.Components.Data{
         }
 
         public override int GetHashCode(){
-            unchecked{
-                var hashCode = -1099318212;
-                hashCode = hashCode * -1521134295 + InsertLength.GetHashCode();
-                hashCode = hashCode * -1521134295 + CopyLength.GetHashCode();
-                return hashCode;
-            }
+            return HashCode.Combine(InsertLength, CopyLength);
         }
 
         public override string ToString(){

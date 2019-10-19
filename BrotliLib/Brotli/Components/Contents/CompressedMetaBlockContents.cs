@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using BrotliLib.Brotli.Components.Contents.Compressed;
@@ -7,6 +8,7 @@ using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.Brotli.Markers.Reader;
+using BrotliLib.Collections;
 using BrotliLib.IO;
 using BrotliLib.IO.Writer;
 using BrotliLib.Markers;
@@ -29,19 +31,13 @@ namespace BrotliLib.Brotli.Components.Contents{
 
         public override bool Equals(object obj){
             return obj is CompressedMetaBlockContents contents &&
-                   EqualityComparer<MetaBlockCompressionHeader>.Default.Equals(Header, contents.Header) &&
-                   EqualityComparer<IReadOnlyList<InsertCopyCommand>>.Default.Equals(InsertCopyCommands, contents.InsertCopyCommands) &&
-                   EqualityComparer<BlockSwitchCommandMap>.Default.Equals(BlockSwitchCommands, contents.BlockSwitchCommands);
+                   Header.Equals(contents.Header) &&
+                   CollectionHelper.Equal(InsertCopyCommands, contents.InsertCopyCommands) &&
+                   Categories.LID.All(category => CollectionHelper.Equal(BlockSwitchCommands[category], contents.BlockSwitchCommands[category]));
         }
 
         public override int GetHashCode(){
-            unchecked{
-                var hashCode = -1778056541;
-                hashCode = hashCode * -1521134295 + EqualityComparer<MetaBlockCompressionHeader>.Default.GetHashCode(Header);
-                hashCode = hashCode * -1521134295 + EqualityComparer<IReadOnlyList<InsertCopyCommand>>.Default.GetHashCode(InsertCopyCommands);
-                hashCode = hashCode * -1521134295 + EqualityComparer<BlockSwitchCommandMap>.Default.GetHashCode(BlockSwitchCommands);
-                return hashCode;
-            }
+            return HashCode.Combine(Header, CollectionHelper.HashCode(InsertCopyCommands), BlockSwitchCommands.Select(CollectionHelper.HashCode).GetHashCode());
         }
 
         // Context

@@ -43,9 +43,7 @@ namespace BrotliLib.Numbers{
         }
 
         public override int GetHashCode(){
-            unchecked{
-                return -1048165080 + SymbolCount.GetHashCode();
-            }
+            return HashCode.Combine(SymbolCount);
         }
 
         public override string ToString(){

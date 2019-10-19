@@ -1,4 +1,6 @@
-﻿namespace BrotliLib.Brotli.Dictionary.Index{
+﻿using System;
+
+namespace BrotliLib.Brotli.Dictionary.Index{
     public readonly struct DictionaryIndexEntry{
         public int Packed { get; }
         public byte CopyLength { get; }
@@ -18,13 +20,7 @@
         }
 
         public override int GetHashCode(){
-            unchecked{
-                var hashCode = -1193651551;
-                hashCode = hashCode * -1521134295 + Packed.GetHashCode();
-                hashCode = hashCode * -1521134295 + CopyLength.GetHashCode();
-                hashCode = hashCode * -1521134295 + OutputLength.GetHashCode();
-                return hashCode;
-            }
+            return HashCode.Combine(Packed, CopyLength, OutputLength);
         }
 
         public override string ToString(){

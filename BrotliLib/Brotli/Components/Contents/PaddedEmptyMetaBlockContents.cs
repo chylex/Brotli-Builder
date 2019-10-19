@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.Collections;
@@ -45,13 +44,11 @@ namespace BrotliLib.Brotli.Components.Contents{
 
         public override bool Equals(object obj){
             return obj is PaddedEmptyMetaBlockContents contents &&
-                   EqualityComparer<byte[]>.Default.Equals(hiddenData, contents.hiddenData);
+                   CollectionHelper.Equal(hiddenData, contents.hiddenData);
         }
 
         public override int GetHashCode(){
-            unchecked{
-                return 1863676209 + EqualityComparer<byte[]>.Default.GetHashCode(hiddenData);
-            }
+            return CollectionHelper.HashCode(hiddenData);
         }
         
         // Serialization

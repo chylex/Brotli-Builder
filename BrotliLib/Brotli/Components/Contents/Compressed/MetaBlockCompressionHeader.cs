@@ -6,6 +6,7 @@ using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.Markers.Reader;
+using BrotliLib.Collections;
 using BrotliLib.IO;
 using BrotliLib.IO.Reader;
 using LiteralTree    = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.Literal>;
@@ -51,29 +52,22 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
 
         public override bool Equals(object obj){
             return obj is MetaBlockCompressionHeader header &&
-                   EqualityComparer<CategoryMap<BlockTypeInfo>>.Default.Equals(BlockTypes, header.BlockTypes) &&
-                   EqualityComparer<DistanceParameters>.Default.Equals(DistanceParameters, header.DistanceParameters) &&
-                   EqualityComparer<IReadOnlyList<LiteralContextMode>>.Default.Equals(LiteralCtxModes, header.LiteralCtxModes) &&
-                   EqualityComparer<ContextMap>.Default.Equals(LiteralCtxMap, header.LiteralCtxMap) &&
-                   EqualityComparer<ContextMap>.Default.Equals(DistanceCtxMap, header.DistanceCtxMap) &&
-                   EqualityComparer<IReadOnlyList<LiteralTree>>.Default.Equals(LiteralTrees, header.LiteralTrees) &&
-                   EqualityComparer<IReadOnlyList<InsertCopyTree>>.Default.Equals(InsertCopyTrees, header.InsertCopyTrees) &&
-                   EqualityComparer<IReadOnlyList<DistanceTree>>.Default.Equals(DistanceTrees, header.DistanceTrees);
+                   BlockTypes.Equals(header.BlockTypes) &&
+                   DistanceParameters.Equals(header.DistanceParameters) &&
+                   CollectionHelper.Equal(LiteralCtxModes, header.LiteralCtxModes) &&
+                   LiteralCtxMap.Equals(header.LiteralCtxMap) &&
+                   DistanceCtxMap.Equals(header.DistanceCtxMap) &&
+                   CollectionHelper.Equal(LiteralTrees, header.LiteralTrees) &&
+                   CollectionHelper.Equal(InsertCopyTrees, header.InsertCopyTrees) &&
+                   CollectionHelper.Equal(DistanceTrees, header.DistanceTrees);
         }
 
         public override int GetHashCode(){
-            unchecked{
-                var hashCode = -301170250;
-                hashCode = hashCode * -1521134295 + EqualityComparer<CategoryMap<BlockTypeInfo>>.Default.GetHashCode(BlockTypes);
-                hashCode = hashCode * -1521134295 + EqualityComparer<DistanceParameters>.Default.GetHashCode(DistanceParameters);
-                hashCode = hashCode * -1521134295 + EqualityComparer<IReadOnlyList<LiteralContextMode>>.Default.GetHashCode(LiteralCtxModes);
-                hashCode = hashCode * -1521134295 + EqualityComparer<ContextMap>.Default.GetHashCode(LiteralCtxMap);
-                hashCode = hashCode * -1521134295 + EqualityComparer<ContextMap>.Default.GetHashCode(DistanceCtxMap);
-                hashCode = hashCode * -1521134295 + EqualityComparer<IReadOnlyList<LiteralTree>>.Default.GetHashCode(LiteralTrees);
-                hashCode = hashCode * -1521134295 + EqualityComparer<IReadOnlyList<InsertCopyTree>>.Default.GetHashCode(InsertCopyTrees);
-                hashCode = hashCode * -1521134295 + EqualityComparer<IReadOnlyList<DistanceTree>>.Default.GetHashCode(DistanceTrees);
-                return hashCode;
-            }
+            return HashCode.Combine(
+                BlockTypes, DistanceParameters,
+                CollectionHelper.HashCode(LiteralCtxModes), LiteralCtxMap, DistanceCtxMap,
+                CollectionHelper.HashCode(LiteralTrees), CollectionHelper.HashCode(InsertCopyTrees), CollectionHelper.HashCode(DistanceTrees)
+            );
         }
         
         // Serialization

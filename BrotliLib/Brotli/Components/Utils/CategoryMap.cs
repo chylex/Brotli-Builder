@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using BrotliLib.Collections;
 
 namespace BrotliLib.Brotli.Components.Utils{
     /// <summary>
@@ -29,6 +30,15 @@ namespace BrotliLib.Brotli.Components.Utils{
 
         public CategoryMap<U> Select<U>(Func<T, U> mapper){
             return new CategoryMap<U>(category => mapper(this[category]));
+        }
+
+        public override bool Equals(object obj){
+            return obj is CategoryMap<T> map &&
+                   CollectionHelper.Equal(values, map.values);
+        }
+
+        public override int GetHashCode(){
+            return CollectionHelper.HashCode(values);
         }
     }
 }

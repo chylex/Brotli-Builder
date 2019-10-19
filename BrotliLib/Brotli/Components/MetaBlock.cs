@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Contents;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Markers;
@@ -8,8 +7,6 @@ using BrotliLib.Brotli.State;
 using BrotliLib.IO;
 using BrotliLib.IO.Reader;
 using BrotliLib.IO.Writer;
-
-#pragma warning disable CS0659
 
 namespace BrotliLib.Brotli.Components{
     /// <summary>
@@ -43,7 +40,11 @@ namespace BrotliLib.Brotli.Components{
         
         protected bool Equals(MetaBlock other){
             return IsLast == other.IsLast &&
-                   EqualityComparer<DataLength>.Default.Equals(DataLength, other.DataLength);
+                   DataLength.Equals(other.DataLength);
+        }
+
+        protected int ParentHashCode(){
+            return HashCode.Combine(IsLast, DataLength);
         }
 
         // Types
@@ -57,6 +58,10 @@ namespace BrotliLib.Brotli.Components{
 
             public override bool Equals(object obj){
                 return obj is LastEmpty;
+            }
+
+            public override int GetHashCode(){
+                return ParentHashCode();
             }
 
             internal override void SerializeContents(IBitWriter writer, BrotliGlobalState state){}
@@ -79,6 +84,10 @@ namespace BrotliLib.Brotli.Components{
             public override bool Equals(object obj){
                 return obj is PaddedEmpty other &&
                        Contents.Equals(other.Contents);
+            }
+
+            public override int GetHashCode(){
+                return HashCode.Combine(ParentHashCode(), Contents);
             }
 
             internal override void SerializeContents(IBitWriter writer, BrotliGlobalState state) => PaddedEmptyMetaBlockContents.Serialize(writer, Contents, NoContext.Value);
@@ -104,6 +113,10 @@ namespace BrotliLib.Brotli.Components{
                        Contents.Equals(other.Contents);
             }
 
+            public override int GetHashCode(){
+                return HashCode.Combine(ParentHashCode(), Contents);
+            }
+
             internal override void SerializeContents(IBitWriter writer, BrotliGlobalState state) => UncompressedMetaBlockContents.Serialize(writer, Contents, new Context(this, state));
             internal override void DeserializeContents(IBitReader reader, BrotliGlobalState state) => Contents = UncompressedMetaBlockContents.Deserialize(reader, new Context(this, state));
         }
@@ -121,6 +134,10 @@ namespace BrotliLib.Brotli.Components{
                 return obj is Compressed other &&
                        base.Equals(other) &&
                        Contents.Equals(other.Contents);
+            }
+
+            public override int GetHashCode(){
+                return HashCode.Combine(ParentHashCode(), Contents);
             }
 
             internal override void SerializeContents(IBitWriter writer, BrotliGlobalState state) => CompressedMetaBlockContents.Serialize(writer, Contents, new Context(this, state));
@@ -205,5 +222,3 @@ namespace BrotliLib.Brotli.Components{
         };
     }
 }
-
-#pragma warning restore CS0659

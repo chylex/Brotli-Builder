@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.Brotli.State;
+using BrotliLib.Collections;
 using BrotliLib.IO;
 
 namespace BrotliLib.Brotli.Components.Contents.Compressed{
@@ -41,19 +43,13 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
 
         public override bool Equals(object obj){
             return obj is InsertCopyCommand command &&
-                   EqualityComparer<IReadOnlyList<Literal>>.Default.Equals(Literals, command.Literals) &&
+                   CollectionHelper.Equal(Literals, command.Literals) &&
                    CopyLength == command.CopyLength &&
                    CopyDistance == command.CopyDistance;
         }
 
         public override int GetHashCode(){
-            unchecked{
-                var hashCode = -1468049732;
-                hashCode = hashCode * -1521134295 + EqualityComparer<IReadOnlyList<Literal>>.Default.GetHashCode(Literals);
-                hashCode = hashCode * -1521134295 + CopyLength.GetHashCode();
-                hashCode = hashCode * -1521134295 + CopyDistance.GetHashCode();
-                return hashCode;
-            }
+            return HashCode.Combine(CollectionHelper.HashCode(Literals), CopyLength, CopyDistance);
         }
 
         // Serialization

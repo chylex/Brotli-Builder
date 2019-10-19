@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using BrotliLib.Collections;
 using BrotliLib.IO.Reader;
 using BrotliLib.IO.Writer;
 
@@ -247,24 +248,20 @@ namespace BrotliLib.IO{
         #region Equality
 
         /// <summary>
-        /// Returns the hash code for this instance.
-        /// </summary>
-        public override int GetHashCode(){
-            int hash = Length * 17;
-
-            foreach(ulong bitEntry in entryCollection){
-                hash = unchecked((hash * 31) + (bitEntry.GetHashCode()));
-            }
-
-            return hash;
-        }
-
-        /// <summary>
         /// Returns true if and only if the <paramref name="obj"/> parameter is a <see cref="BitStream"/> with the same <see cref="Length"/> and contents.
         /// </summary>
         /// <param name="obj"></param>
         public override bool Equals(object obj){
-            return obj is BitStream other && Length == other.Length && entryCollection.SequenceEqual(other.entryCollection);
+            return obj is BitStream stream &&
+                   Length == stream.Length &&
+                   CollectionHelper.Equal(entryCollection, stream.entryCollection);
+        }
+
+        /// <summary>
+        /// Returns the hash code for this instance.
+        /// </summary>
+        public override int GetHashCode(){
+            return HashCode.Combine(Length, CollectionHelper.HashCode(entryCollection));
         }
 
         #endregion

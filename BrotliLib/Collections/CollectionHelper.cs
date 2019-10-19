@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BrotliLib.Collections{
     public static class CollectionHelper{
@@ -35,6 +36,28 @@ namespace BrotliLib.Collections{
             for(int index = start; index < array.Length; index++){
                 yield return array[index];
             }
+        }
+
+        public static bool Equal<T>(IReadOnlyList<T> a, IReadOnlyList<T> b){
+            if (a == null && b == null){
+                return true;
+            }
+            else if (ReferenceEquals(a, b)){
+                return true;
+            }
+            else{
+                return a != null && b != null && a.Count == b.Count && a.SequenceEqual(b);
+            }
+        }
+
+        public static int HashCode<T>(IEnumerable<T> collection){
+            var hash = new HashCode();
+
+            foreach(var element in collection){
+                hash.Add(element);
+            }
+
+            return hash.ToHashCode();
         }
     }
 }

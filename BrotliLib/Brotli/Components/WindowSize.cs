@@ -37,9 +37,7 @@ namespace BrotliLib.Brotli.Components{
         }
 
         public override int GetHashCode(){
-            unchecked{
-                return -943821695 + Bits.GetHashCode();
-            }
+            return HashCode.Combine(Bits);
         }
 
         public override string ToString(){

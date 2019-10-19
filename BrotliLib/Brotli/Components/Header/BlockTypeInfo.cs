@@ -1,11 +1,11 @@
 ﻿using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.IO;
-using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.Numbers;
 using BlockTypeCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<int>;
 using BlockLengthCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.BlockLengthCode>;
+using System;
 
 namespace BrotliLib.Brotli.Components.Header{
     /// <summary>
@@ -45,19 +45,12 @@ namespace BrotliLib.Brotli.Components.Header{
             return obj is BlockTypeInfo info &&
                    Count == info.Count &&
                    InitialLength == info.InitialLength &&
-                   EqualityComparer<BlockTypeCodeTree>.Default.Equals(TypeCodeTree, info.TypeCodeTree) &&
-                   EqualityComparer<BlockLengthCodeTree>.Default.Equals(LengthCodeTree, info.LengthCodeTree);
+                   Equals(TypeCodeTree, info.TypeCodeTree) &&
+                   Equals(LengthCodeTree, info.LengthCodeTree);
         }
 
         public override int GetHashCode(){
-            unchecked{
-                var hashCode = 1953717823;
-                hashCode = hashCode * -1521134295 + Count.GetHashCode();
-                hashCode = hashCode * -1521134295 + InitialLength.GetHashCode();
-                hashCode = hashCode * -1521134295 + EqualityComparer<BlockTypeCodeTree>.Default.GetHashCode(TypeCodeTree);
-                hashCode = hashCode * -1521134295 + EqualityComparer<BlockLengthCodeTree>.Default.GetHashCode(LengthCodeTree);
-                return hashCode;
-            }
+            return HashCode.Combine(Count, InitialLength, TypeCodeTree, LengthCodeTree);
         }
 
         // Serialization

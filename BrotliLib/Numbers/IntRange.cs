@@ -81,13 +81,7 @@ namespace BrotliLib.Numbers{
         }
 
         public override int GetHashCode(){
-            unchecked{
-                var hashCode = -1176758481;
-                hashCode = hashCode * -1521134295 + initialized.GetHashCode();
-                hashCode = hashCode * -1521134295 + first.GetHashCode();
-                hashCode = hashCode * -1521134295 + last.GetHashCode();
-                return hashCode;
-            }
+            return HashCode.Combine(initialized, first, last);
         }
 
         public override string ToString(){

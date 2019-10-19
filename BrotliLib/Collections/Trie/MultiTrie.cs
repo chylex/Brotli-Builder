@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace BrotliLib.Collections.Trie{
     public sealed class MultiTrie<K, V> where K : IComparable<K> where V : IEquatable<V>{
@@ -52,14 +51,14 @@ namespace BrotliLib.Collections.Trie{
                 var children1 = children;
                 var children2 = node.children;
 
-                if (!((children1 == null && children2 == null) || (children1 != null && children2 != null && children1.SequenceEqual(children2)))){
+                if (!CollectionHelper.Equal(children1, children2)){
                     return false;
                 }
 
                 var values1 = Values;
                 var values2 = node.Values;
 
-                if (!((values1 == null && values2 == null) || (values1 != null && values2 != null && values1.SequenceEqual(values2)))){
+                if (!CollectionHelper.Equal(values1, values2)){
                     return false;
                 }
 
