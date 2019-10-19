@@ -27,7 +27,7 @@ namespace BrotliBuilder.Blocks{
             listElements.Items.Add(new StructureWindowSizeItem(brotliFile));
 
             foreach(MetaBlock metaBlock in brotliFile.MetaBlocks){
-                listElements.Items.Add(new StructureMetaBlockItem(metaBlock));
+                listElements.Items.Add(new StructureMetaBlockItem(brotliFile, metaBlock));
             }
 
             listElements.SelectedIndex = selectIndex;
@@ -157,10 +157,17 @@ namespace BrotliBuilder.Blocks{
         }
 
         private class StructureMetaBlockItem{
-            public MetaBlock Value { get; }
+            public MetaBlock Value { get; private set; }
 
-            public StructureMetaBlockItem(MetaBlock value){
+            private readonly BrotliFileStructure brotliFile;
+
+            public StructureMetaBlockItem(BrotliFileStructure brotliFile, MetaBlock value){
+                this.brotliFile = brotliFile;
                 this.Value = value;
+            }
+
+            private void ReplaceMetaBlock(MetaBlock newMetaBlock){
+                brotliFile.MetaBlocks[brotliFile.MetaBlocks.IndexOf(Value)] = Value = newMetaBlock;
             }
 
             public Func<IBuildingBlockContext, UserControl> CreateStructureBlock(){
@@ -182,18 +189,11 @@ namespace BrotliBuilder.Blocks{
             public void HandleNotification(EventArgs args){
                 switch(args){
                     case BuildEmptyMetaBlock.HiddenBytesNotifyArgs hbna:
-                        if (Value is MetaBlock.PaddedEmpty pe){
-                            pe.Contents = new PaddedEmptyMetaBlockContents(hbna.Bytes);
-                        }
-
+                        ReplaceMetaBlock(new MetaBlock.PaddedEmpty(hbna.Bytes));
                         break;
 
                     case BuildUncompressedMetaBlock.UncompressedBytesNotifyArgs ubna:
-                        if (Value is MetaBlock.Uncompressed u){
-                            u.Contents = new UncompressedMetaBlockContents(ubna.Bytes);
-                            u.DataLength = new DataLength(ubna.Bytes.Length);
-                        }
-
+                        ReplaceMetaBlock(new MetaBlock.Uncompressed(ubna.Bytes));
                         break;
                 }
             }

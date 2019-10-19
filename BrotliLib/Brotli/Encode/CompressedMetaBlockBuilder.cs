@@ -188,11 +188,10 @@ namespace BrotliLib.Brotli.Encode{
                 ConstructHuffmanTrees(distanceCodeFreq)
             );
 
-            var metaBlock = new MetaBlock.Compressed(isLast: false, new DataLength(OutputSize)){
-                Contents = new CompressedMetaBlockContents(header, icCommandsFinal, bsCommands)
-            };
+            var contents = new CompressedMetaBlockContents(header, icCommandsFinal, bsCommands);
+            var dataLength = new DataLength(OutputSize);
 
-            return (metaBlock, () => new CompressedMetaBlockBuilder(state));
+            return (new MetaBlock.Compressed(isLast: false, dataLength, contents), () => new CompressedMetaBlockBuilder(state));
         }
 
         // Helpers

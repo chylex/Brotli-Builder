@@ -27,8 +27,8 @@ namespace BrotliLib.Brotli.Components{
 
         // Data
 
-        public bool IsLast { get; set; }
-        public DataLength DataLength { get; set; }
+        public bool IsLast { get; internal set; }
+        public DataLength DataLength { get; }
         
         protected MetaBlock(bool isLast, DataLength dataLength){
             this.IsLast = isLast;
@@ -73,7 +73,7 @@ namespace BrotliLib.Brotli.Components{
         /// <code>ISLAST = 0, MLEN = 0</code>
         /// </summary>
         public class PaddedEmpty : MetaBlock{
-            public PaddedEmptyMetaBlockContents Contents { get; set; }
+            public PaddedEmptyMetaBlockContents Contents { get; private set; }
 
             internal PaddedEmpty() : base(false, DataLength.Empty){}
 
@@ -99,7 +99,7 @@ namespace BrotliLib.Brotli.Components{
         /// <code>ISLAST = 0, MLEN > 0, ISUNCOMPRESSED = 1</code>
         /// </summary>
         public class Uncompressed : MetaBlock{
-            public UncompressedMetaBlockContents Contents { get; set; }
+            public UncompressedMetaBlockContents Contents { get; private set; }
 
             internal Uncompressed(DataLength dataLength) : base(false, dataLength){}
 
@@ -126,9 +126,12 @@ namespace BrotliLib.Brotli.Components{
         /// <code>ISLAST = ?, MLEN > 0, ISUNCOMPRESSED = 0</code>
         /// </summary>
         public class Compressed : MetaBlock{
-            public CompressedMetaBlockContents Contents { get; set; }
+            public CompressedMetaBlockContents Contents { get; private set; }
 
             public Compressed(bool isLast, DataLength dataLength) : base(isLast, dataLength){}
+            public Compressed(bool isLast, DataLength dataLength, CompressedMetaBlockContents contents) : this(isLast, dataLength){
+                this.Contents = contents;
+            }
             
             public override bool Equals(object obj){
                 return obj is Compressed other &&
