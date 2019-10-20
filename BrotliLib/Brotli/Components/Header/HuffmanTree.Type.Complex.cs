@@ -127,7 +127,7 @@ namespace BrotliLib.Brotli.Components.Header{
             int ProcessRepetitions(int length, int multiplier){
                 Stack<byte> newExtra = new Stack<byte>();
 
-                int remaining = length - 3; // TODO official compressor special-cases 7 (mp = 2) and 11 (mp = 3), but not other values that are 1 above the boundary... potential point for improvement?
+                int remaining = length - 3;
 
                 do{
                     newExtra.Push((byte)(remaining % multiplier));
@@ -146,6 +146,17 @@ namespace BrotliLib.Brotli.Components.Header{
                 symbolEntries.InsertRange(index, Enumerable.Repeat(new HuffmanGenerator<T>.Entry(default, code), insertLength));
                 return index + insertLength;
             }
+
+            int ReplaceSequenceWithRepetition(int index, byte code, int length, int multiplier){
+                if (length - 3 == multiplier){
+                    // when the amount of repetitions equals the first value that requires a second repetition code to encode, it's more efficient to write it as 1 literal code and 1 repetition code
+                    // TODO official compressor (and this) only works for the first value that crosses the boundary... potential point for improvement?
+                    --length;
+                    ++index;
+                }
+
+                return ReplaceSequence(index, code, length, ProcessRepetitions(length, multiplier));
+            }
             
             for(int entryIndex = 0, lastRepeatStartIndex = 0, lastRepeatCode = ComplexLengthCode.DefaultRepeatCode; entryIndex < symbolEntries.Count + 1; entryIndex++){
                 int nextCode = entryIndex < symbolEntries.Count ? symbolEntries[entryIndex].Bits : -1;
@@ -158,8 +169,8 @@ namespace BrotliLib.Brotli.Components.Header{
                     int skipLength = entryIndex - lastRepeatStartIndex;
 
                     if (skipLength >= 3){
-                        entryIndex = lastRepeatCode == 0 ? ReplaceSequence(lastRepeatStartIndex, ComplexLengthCode.Skip, skipLength, ProcessRepetitions(skipLength, 8)) :
-                                                           ReplaceSequence(lastRepeatStartIndex, ComplexLengthCode.Repeat, skipLength, ProcessRepetitions(skipLength, 4));
+                        entryIndex = lastRepeatCode == 0 ? ReplaceSequenceWithRepetition(lastRepeatStartIndex, ComplexLengthCode.Skip, skipLength, 8)
+                                                         : ReplaceSequenceWithRepetition(lastRepeatStartIndex, ComplexLengthCode.Repeat, skipLength, 4);
                     }
                     
                     lastRepeatCode = nextCode;
