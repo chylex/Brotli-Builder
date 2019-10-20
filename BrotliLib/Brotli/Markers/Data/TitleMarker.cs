@@ -11,8 +11,8 @@ namespace BrotliLib.Brotli.Markers.Data{
             this.title = string.Intern("[" + title + "]");
         }
 
-        public void ToString(StringBuilder build){
-            build.Append(title);
+        public void ToString(StringBuilder build, int length){
+            build.Append(title).Append(" · ").Append(length).Append(length == 1 ? " bit" : " bits");
         }
         
         public override string ToString(){

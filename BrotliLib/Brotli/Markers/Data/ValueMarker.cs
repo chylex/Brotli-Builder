@@ -25,7 +25,7 @@ namespace BrotliLib.Brotli.Markers.Data{
             }
         }
 
-        public void ToString(StringBuilder build){
+        public void ToString(StringBuilder build, int length){
             build.Append(name).Append(" = ").Append(value);
         }
         

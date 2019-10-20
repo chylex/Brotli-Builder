@@ -11,7 +11,7 @@ namespace BrotliLib.Brotli.Markers.Data{
             this.text = string.Intern(text);
         }
 
-        public void ToString(StringBuilder build){
+        public void ToString(StringBuilder build, int length){
             build.Append(text);
         }
         
