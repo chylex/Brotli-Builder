@@ -5,6 +5,7 @@ using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.State;
 using BrotliLib.IO.Reader;
 using BrotliLib.IO.Writer;
+using BrotliLib.Numbers;
 
 namespace BrotliLib.Brotli.Components.Data{
     public abstract partial class DistanceCode{
@@ -13,17 +14,6 @@ namespace BrotliLib.Brotli.Components.Data{
         /// Represents a distance code which uses additional bits from the stream to calculate the distance value.
         /// </summary>
         public sealed class Complex : DistanceCode{
-            private static int Log2(int value){
-                byte result = 0;
-            
-                while(value > 0){
-                    value >>= 1;
-                    ++result;
-                }
-
-                return result;
-            }
-
             public static Complex ForValue(in DistanceParameters parameters, int value){
                 if (parameters.PostfixBitCount > 0){ // TODO support postfix & remove this fallback to slow path
                     for(int complex = Last.Codes.Length + parameters.DirectCodeCount; /*true*/; complex++){
@@ -38,7 +28,7 @@ namespace BrotliLib.Brotli.Components.Data{
                 int directCodeCount = parameters.DirectCodeCount;
                 int normalized = value - directCodeCount;
 
-                int baseCode = 2 * (Log2(normalized + 3) - 3);
+                int baseCode = 2 * (Log2.Floor((normalized + 3) << 1) - 3);
                 int baseExtraBitCount = 1 + (baseCode >> 1);
                 int baseTopOffset = ((2 + (baseCode & 1)) << baseExtraBitCount) - 4;
 

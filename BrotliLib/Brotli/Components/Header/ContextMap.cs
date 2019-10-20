@@ -144,15 +144,7 @@ namespace BrotliLib.Brotli.Components.Header{
         /// </list>
         /// </summary>
         private static byte CalculateRunLengthCodeFor(int value){
-            byte runLengthCode = 0;
-            int remaining = (value + 1) >> 1;
-
-            while(remaining > 0){
-                remaining >>= 1;
-                ++runLengthCode;
-            }
-
-            return runLengthCode;
+            return Log2.Floor(value + 1);
         }
 
         /// <summary>
