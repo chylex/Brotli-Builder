@@ -8,17 +8,13 @@ namespace BrotliLib.Numbers{
         /// <summary>
         /// Returns the minimum amount of bits required to represent every symbol in the alphabet.
         /// </summary>
-        public byte BitsPerSymbol{
+        public int BitsPerSymbol{
             get{
-                int size = SymbolCount - 1;
-                byte bitsPerSymbol = 0;
-            
-                while(size > 0){
-                    size >>= 1;
-                    ++bitsPerSymbol;
+                if (SymbolCount <= 1){
+                    return 0;
                 }
 
-                return bitsPerSymbol;
+                return Log2.Floor(SymbolCount - 1) + 1;
             }
         }
 

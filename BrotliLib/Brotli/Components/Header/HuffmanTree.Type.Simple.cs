@@ -12,7 +12,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
         private static readonly BitDeserializer<HuffmanTree<T>, Context> SimpleCodeDeserialize = MarkedBitDeserializer.Wrap<HuffmanTree<T>, Context>(
             (reader, context) => {
-                byte bitsPerSymbol = context.AlphabetSize.BitsPerSymbol;
+                int bitsPerSymbol = context.AlphabetSize.BitsPerSymbol;
                 int symbolCount = reader.NextChunk(2, "NSYM", value => 1 + value);
 
                 T[] symbols = reader.ReadValueArray(symbolCount, "symbol", () => context.BitsToSymbol(reader.NextChunk(bitsPerSymbol)));
@@ -24,7 +24,7 @@ namespace BrotliLib.Brotli.Components.Header{
         );
 
         private static readonly BitSerializer<HuffmanTree<T>, Context> SimpleCodeSerialize = (writer, obj, context) => {
-            byte bitsPerSymbol = context.AlphabetSize.BitsPerSymbol;
+            int bitsPerSymbol = context.AlphabetSize.BitsPerSymbol;
 
             writer.WriteChunk(2, obj.Root.SymbolCount - 1);
 
