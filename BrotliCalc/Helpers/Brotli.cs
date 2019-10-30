@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Numbers;
 
@@ -64,36 +66,42 @@ namespace BrotliCalc.Helpers{
                 throw new ArgumentOutOfRangeException(nameof(quality), $"Compression quality must be in range {QualityRange}.");
             }
 
-            IList<string> filePaths;
+            BrotliFileGroup[] groups;
             
             if (File.GetAttributes(path).HasFlag(FileAttributes.Directory)){
-                filePaths = ListPath(path).Select(group => group.Uncompressed.Path).ToArray();
+                groups = ListPath(path).ToArray();
             }
             else{
-                filePaths = new []{ path };
+                groups = new BrotliFileGroup[]{
+                    new BrotliFileGroup(new BrotliFile.Uncompressed(path, Path.GetFileName(path)), new BrotliFile.Compressed[0])
+                };
             }
 
-            if (filePaths.Count > CompressionFileLimit){
-                throw new InvalidOperationException($"Too many files to process ({filePaths.Count} > {CompressionFileLimit}), cancelling command for safety.");
+            if (groups.Length > CompressionFileLimit){
+                throw new InvalidOperationException($"Too many files to process ({groups.Length} > {CompressionFileLimit}), cancelling command for safety.");
             }
 
             string argPrefix = $"-w {windowSize.Bits} -q {quality} -S .{quality}{CompressedFileExtension} -f ";
 
             try{
-                foreach(string file in filePaths){
-                    Console.WriteLine($"Compressing file {file} (quality {quality})...");
+                Parallel.ForEach(Partitioner.Create(groups, EnumerablePartitionerOptions.NoBuffering), (group, state) => {
+                    var file = group.Uncompressed;
 
-                    using Process process = Process.Start("brotli", argPrefix + '"' + file + '"');
-                    process.Start();
+                    using Process process = Process.Start("brotli", argPrefix + '"' + file.Path + '"');
                     process.WaitForExit();
 
-                    // TODO add multiprocess support
+                    Console.WriteLine($"Finished {file.Name} (quality {quality}).");
+                });
+            }catch(AggregateException e){
+                if (e.InnerException is Win32Exception we){
+                    throw new InvalidOperationException("Brotli executable must be named 'brotli' and placed into the working directory or environment path.", we);
                 }
-            }catch(Win32Exception e){
-                throw new InvalidOperationException("Brotli executable must be named 'brotli' and placed into the working directory or environment path.", e);
+                else{
+                    throw;
+                }
             }
 
-            return filePaths.Count;
+            return groups.Length;
         }
     }
 }
