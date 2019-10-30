@@ -63,16 +63,22 @@ namespace BrotliLib.Brotli.Components.Contents{
             }
 
             public void WriteCopy(int length, DistanceInfo distance){
-                bytesWritten += State.OutputCopy(length, distance);
+                bytesWritten += State.OutputCopy(length, distance).BytesWritten;
             }
 
-            public IMarkerInfo WriteCopyWithMarker(int length, DistanceInfo distance){
-                int prevBytesWritten = bytesWritten;
-                bool isBackReference = distance.GetValue(State) <= State.MaxDistance;
+            public void WriteCopyWithMarker(IMarkedBitReader reader, int length, DistanceInfo distance){
+                reader.MarkCall(() => WriteCopyTracked(length, distance), GenerateCopyMarker);
+            }
 
-                WriteCopy(length, distance);
+            private CopyOutputInfo WriteCopyTracked(int length, DistanceInfo distance){
+                var info = State.OutputCopy(length, distance);
 
-                int written = bytesWritten - prevBytesWritten;
+                bytesWritten += info.BytesWritten;
+                return info;
+            }
+
+            private IMarkerInfo GenerateCopyMarker(CopyOutputInfo info){
+                int written = Math.Min(info.BytesWritten, State.Parameters.WindowSize.Bytes); // State.GetOutput doesn't guarantee access past window size
                 byte[] value = new byte[written + 2];
 
                 for(int index = 0; index < written; index++){
@@ -80,8 +86,8 @@ namespace BrotliLib.Brotli.Components.Contents{
                 }
 
                 value[0] = value[written + 1] = (byte)'"';
-                
-                return new ValueMarker(isBackReference ? "backreference" : "dictionary", Encoding.UTF8.GetString(value));
+
+                return new ValueMarker(info.IsBackReference ? "backreference" : "dictionary", Encoding.UTF8.GetString(value));
             }
         }
 

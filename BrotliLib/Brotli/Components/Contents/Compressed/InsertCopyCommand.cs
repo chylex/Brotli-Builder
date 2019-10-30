@@ -105,8 +105,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
                     distanceInfo = reader.ReadValue(DistanceCode.Deserialize, distanceCode.MakeContext(state), "distance value");
                 }
 
-                reader.MarkStart();
-                reader.MarkEnd(context.WriteCopyWithMarker(copyLength, distanceInfo));
+                context.WriteCopyWithMarker(reader, copyLength, distanceInfo);
 
                 return new InsertCopyCommand(literals, copyLength, distanceInfo);
             }

@@ -76,7 +76,7 @@ namespace BrotliLib.Brotli.State{
             WriteByte(literal.Value);
         }
         
-        public int OutputCopy(int length, DistanceInfo distance){
+        public CopyOutputInfo OutputCopy(int length, DistanceInfo distance){
             int distanceValue = distance.GetValue(this);
             int maxDistance = MaxDistance;
 
@@ -89,13 +89,13 @@ namespace BrotliLib.Brotli.State{
                     WriteByte(outputState.GetByte(distanceValue));
                 }
 
-                return length;
+                return new CopyOutputInfo(length, isBackReference: true);
             }
             else{
                 byte[] word = Parameters.Dictionary.ReadTransformed(length, distanceValue - maxDistance - 1);
 
                 OutputBytes(word);
-                return word.Length;
+                return new CopyOutputInfo(word.Length, isBackReference: false);
             }
         }
     }
