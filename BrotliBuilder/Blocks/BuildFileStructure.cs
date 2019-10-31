@@ -4,8 +4,6 @@ using System.Windows.Forms;
 using BrotliBuilder.Blocks.Structure;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
-using BrotliLib.Brotli.Components.Contents;
-using BrotliLib.Brotli.Components.Header;
 
 namespace BrotliBuilder.Blocks{
     partial class BuildFileStructure : UserControl{
@@ -98,7 +96,7 @@ namespace BrotliBuilder.Blocks{
         }
 
         private void buttonAddMetaBlockUncompressed_Click(object sender, EventArgs e){
-            AddMetaBlock(new MetaBlock.Uncompressed(new byte[0]));
+            AddMetaBlock(new MetaBlock.Uncompressed(Array.Empty<byte>()));
         }
 
         private void buttonAddMetaBlockEmpty_Click(object sender, EventArgs e){
@@ -106,7 +104,7 @@ namespace BrotliBuilder.Blocks{
                 AddMetaBlock(new MetaBlock.LastEmpty());
             }
             else{
-                AddMetaBlock(new MetaBlock.PaddedEmpty(new byte[0]));
+                AddMetaBlock(new MetaBlock.PaddedEmpty(Array.Empty<byte>()));
             }
         }
 

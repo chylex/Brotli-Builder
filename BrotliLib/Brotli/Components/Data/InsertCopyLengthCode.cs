@@ -53,7 +53,7 @@ namespace BrotliLib.Brotli.Components.Data{
         /// </summary>
         public InsertCopyLengthCode(int compactedCode){
             if (compactedCode < 0 || compactedCode >= AlphabetSize.SymbolCount){
-                throw new ArgumentOutOfRangeException(nameof(compactedCode), "Compacted insert&copy length code must be in range [0; " + AlphabetSize.SymbolCount + ").");
+                throw new ArgumentOutOfRangeException(nameof(compactedCode), "Compacted insert&copy length code must be in the range [0; " + AlphabetSize.SymbolCount + ").");
             }
             
             int cell = compactedCode / 64;
@@ -69,11 +69,11 @@ namespace BrotliLib.Brotli.Components.Data{
         /// </summary>
         public InsertCopyLengthCode(int insertCode, int copyCode, DistanceCodeZeroStrategy dczStrategy){
             if (insertCode < 0 || insertCode > 23){
-                throw new ArgumentOutOfRangeException(nameof(insertCode), "Insert code must be in range [0; 23].");
+                throw new ArgumentOutOfRangeException(nameof(insertCode), "Insert code must be in the range [0; 23].");
             }
 
             if (copyCode < 0 || copyCode > 23){
-                throw new ArgumentOutOfRangeException(nameof(copyCode), "Copy code must be in range [0; 23].");
+                throw new ArgumentOutOfRangeException(nameof(copyCode), "Copy code must be in the range [0; 23].");
             }
 
             bool useDistanceCodeZero = dczStrategy.Determine(insertCode, copyCode);

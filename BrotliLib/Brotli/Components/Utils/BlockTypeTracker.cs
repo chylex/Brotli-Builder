@@ -33,16 +33,13 @@ namespace BrotliLib.Brotli.Components.Utils{
             return list;
         }
 
-        private int FindValueSilent(int code){
-            return code switch{
+        public int FindValue(int code){
+            int value = code switch{
                 0 => Code0Value,
                 1 => Code1Value,
                 _ => code - 2,
             };
-        }
 
-        public int FindValue(int code){
-            int value = FindValueSilent(code);
             last.Push(value);
             return value;
         }

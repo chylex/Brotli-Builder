@@ -133,7 +133,7 @@ namespace BrotliBuilder.State{
             UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), swSerialization));
 
             if (!TryGetDecompressionState(token, structure, bits, out BrotliOutputStored output, out Stopwatch swOutput)) return;
-            UpdateState(token, new BrotliFileState.HasOutput(prevOutput?.AsBytes ?? new byte[0], output.AsBytes, swOutput));
+            UpdateState(token, new BrotliFileState.HasOutput(prevOutput?.AsBytes ?? Array.Empty<byte>(), output.AsBytes, swOutput));
 
             UpdateState(token, new BrotliFileState.Loaded(structure, bits, output));
         });

@@ -1,5 +1,6 @@
 ﻿using System;
 using BrotliLib.IO;
+using BrotliLib.Numbers;
 
 namespace BrotliLib.Brotli.Components.Header{
     /// <summary>
@@ -7,16 +8,18 @@ namespace BrotliLib.Brotli.Components.Header{
     /// https://tools.ietf.org/html/rfc7932#section-9.2
     /// </summary>
     public sealed class VariableLength11Code{
-        private const int MinValue = 1;
-        private const int MaxValue = 256;
+        public const int MinValue = 1;
+        public const int MaxValue = 256;
+
+        public static readonly IntRange Range = new IntRange(MinValue, MaxValue);
 
         // Data
 
         public int Value { get; }
 
         public VariableLength11Code(int value){
-            if (value < MinValue || value > MaxValue){
-                throw new ArgumentOutOfRangeException(nameof(value), "The value must be in the range [" + MinValue + "; " + MaxValue + "].");
+            if (!Range.Contains(value)){
+                throw new ArgumentOutOfRangeException(nameof(value), "The value must be in the range " + Range + ".");
             }
 
             this.Value = value;

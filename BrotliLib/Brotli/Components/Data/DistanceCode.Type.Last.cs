@@ -10,13 +10,13 @@ namespace BrotliLib.Brotli.Components.Data{
         /// Represents a distance code which uses the global ring buffer of last distances.
         /// </summary>
         private sealed class Last : DistanceCode{
-            private static readonly byte[] BufferIndexes ={
+            private static readonly byte[] BufferIndexes = {
                 3, 2, 1, 0,
                 3, 3, 3, 3, 3, 3,
                 2, 2, 2, 2, 2, 2
             };
 
-            private static readonly sbyte[] BufferValueOffsets ={
+            private static readonly sbyte[] BufferValueOffsets = {
                 0, 0, 0, 0,
                 -1, 1, -2, 2, -3, 3,
                 -1, 1, -2, 2, -3, 3

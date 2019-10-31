@@ -32,10 +32,10 @@ namespace BrotliLib.Brotli.Components.Utils{
                 => insertCode <= 7 && copyCode <= 15,
 
                 DistanceCodeZeroStrategy.ForceEnabled when insertCode > 7
-                => throw new ArgumentOutOfRangeException(nameof(insertCode), "Insert code must be in range [0; 7] when using implied distance code zero."),
+                => throw new ArgumentOutOfRangeException(nameof(insertCode), "Insert code must be in the range [0; 7] when using implied distance code zero."),
 
                 DistanceCodeZeroStrategy.ForceEnabled when copyCode > 15
-                => throw new ArgumentOutOfRangeException(nameof(copyCode), "Copy code must be in range [0; 15] when using implied distance code zero."),
+                => throw new ArgumentOutOfRangeException(nameof(copyCode), "Copy code must be in the range [0; 15] when using implied distance code zero."),
 
                 DistanceCodeZeroStrategy.ForceEnabled
                 => true,

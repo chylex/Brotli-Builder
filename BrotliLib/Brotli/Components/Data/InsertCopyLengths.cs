@@ -17,13 +17,16 @@ namespace BrotliLib.Brotli.Components.Data{
         public const int MinCopyLength = 2;
         public const int MaxCopyLength = 2118 + (1 << 24) - 1;
 
+        public static readonly IntRange InsertLengthRange = new IntRange(MinInsertLength, MaxInsertLength);
+        public static readonly IntRange CopyLengthRange = new IntRange(MinCopyLength, MaxCopyLength);
+
         internal static void CheckBounds(int insertLength, int copyLength){
-            if (insertLength < MinInsertLength || insertLength > MaxInsertLength){
-                throw new ArgumentOutOfRangeException(nameof(insertLength), "Insert length must be in the range [" + MinInsertLength + "; " + MaxInsertLength + "].");
+            if (!InsertLengthRange.Contains(insertLength)){
+                throw new ArgumentOutOfRangeException(nameof(insertLength), insertLength, "Insert length must be in the range " + InsertLengthRange + ".");
             }
 
-            if (copyLength < MinCopyLength || copyLength > MaxCopyLength){
-                throw new ArgumentOutOfRangeException(nameof(copyLength), "Copy length must be in the range [" + MinCopyLength + "; " + MaxCopyLength + "].");
+            if (!CopyLengthRange.Contains(copyLength)){
+                throw new ArgumentOutOfRangeException(nameof(copyLength), copyLength, "Copy length must be in the range " + CopyLengthRange + ".");
             }
         }
 

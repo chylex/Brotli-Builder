@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.IO;
+using BrotliLib.Numbers;
 
 namespace BrotliLib.Brotli.Components{
     /// <summary>
@@ -13,8 +12,9 @@ namespace BrotliLib.Brotli.Components{
         public const int MinBits = 10;
         public const int MaxBits = 24;
 
+        public static readonly IntRange BitsRange = new IntRange(MinBits, MaxBits);
+
         public static WindowSize Default => new WindowSize(16);
-        public static IEnumerable<WindowSize> ValidValues = Enumerable.Range(MinBits, MaxBits - MinBits + 1).Select(bits => new WindowSize(bits)).ToList();
 
         // Data
         
@@ -22,8 +22,8 @@ namespace BrotliLib.Brotli.Components{
         public int Bits { get; }
 
         public WindowSize(int wbits){
-            if (wbits < MinBits || wbits > MaxBits){
-                throw new ArgumentOutOfRangeException(nameof(wbits), "Window size parameter (WBITS) must be between " + MinBits + " and " + MaxBits + ".");
+            if (!BitsRange.Contains(wbits)){
+                throw new ArgumentOutOfRangeException(nameof(wbits), wbits, "Window size bits must be in the range " + BitsRange + ".");
             }
 
             this.Bits = wbits;
@@ -77,29 +77,24 @@ namespace BrotliLib.Brotli.Components{
         );
 
         public static readonly BitSerializer<WindowSize, NoContext> Serialize = (writer, obj, context) => {
-            int value;
-            int count;
-
             switch(obj.Bits){
-                case 10: value = 0b010_000_1; count = 7; break;
-                case 11: value = 0b011_000_1; count = 7; break;
-                case 12: value = 0b100_000_1; count = 7; break;
-                case 13: value = 0b101_000_1; count = 7; break;
-                case 14: value = 0b110_000_1; count = 7; break;
-                case 15: value = 0b111_000_1; count = 7; break;
-                case 16: value = 0b0; count = 1; break;
-                case 17: value = 0b000_000_1; count = 7; break;
-                case 18: value = 0b001_1; count = 4; break;
-                case 19: value = 0b010_1; count = 4; break;
-                case 20: value = 0b011_1; count = 4; break;
-                case 21: value = 0b100_1; count = 4; break;
-                case 22: value = 0b101_1; count = 4; break;
-                case 23: value = 0b110_1; count = 4; break;
-                case 24: value = 0b111_1; count = 4; break;
+                case 10: writer.WriteChunk(7, 0b_010_000_1); break;
+                case 11: writer.WriteChunk(7, 0b_011_000_1); break;
+                case 12: writer.WriteChunk(7, 0b_100_000_1); break;
+                case 13: writer.WriteChunk(7, 0b_101_000_1); break;
+                case 14: writer.WriteChunk(7, 0b_110_000_1); break;
+                case 15: writer.WriteChunk(7, 0b_111_000_1); break;
+                case 16: writer.WriteChunk(1, 0b_0); break;
+                case 17: writer.WriteChunk(7, 0b_000_000_1); break;
+                case 18: writer.WriteChunk(4, 0b_001_1); break;
+                case 19: writer.WriteChunk(4, 0b_010_1); break;
+                case 20: writer.WriteChunk(4, 0b_011_1); break;
+                case 21: writer.WriteChunk(4, 0b_100_1); break;
+                case 22: writer.WriteChunk(4, 0b_101_1); break;
+                case 23: writer.WriteChunk(4, 0b_110_1); break;
+                case 24: writer.WriteChunk(4, 0b_111_1); break;
                 default: throw new InvalidOperationException("Window size object has an invalid window size parameter (WBITS): " + obj.Bits);
             }
-
-            writer.WriteChunk(count, value);
         };
     }
 }

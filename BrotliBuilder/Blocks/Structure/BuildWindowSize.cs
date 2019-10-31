@@ -12,7 +12,7 @@ namespace BrotliBuilder.Blocks.Structure{
 
             this.context = context;
 
-            var items = WindowSize.ValidValues.Select(value => new WindowSizeItem(value)).ToArray();
+            var items = WindowSize.BitsRange.Values.Select(bits => new WindowSizeItem(new WindowSize(bits))).ToArray();
             this.listElements.Items.AddRange(items);
             this.listElements.SelectedItem = items.FirstOrDefault(item => windowSize.Equals(item.Value));
             this.listElements.SelectedValueChanged += listElements_SelectedValueChanged;

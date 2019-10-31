@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BrotliLib.Numbers{
     /// <summary>
@@ -53,6 +55,11 @@ namespace BrotliLib.Numbers{
         /// Upper bound (inclusive).
         /// </summary>
         public int Last => initialized ? last : int.MaxValue;
+
+        /// <summary>
+        /// Sequence of all numbers within the range.
+        /// </summary>
+        public IEnumerable<int> Values => Enumerable.Range(First, Last - First + 1);
 
         /// <summary>
         /// Initializes the range with the provided lower and upper bound (both inclusive).

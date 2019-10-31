@@ -32,7 +32,7 @@ namespace BrotliLib.Collections.Trie{
                 }
             }
 
-            return last?.Values ?? new V[0];
+            return last?.Values ?? Array.Empty<V>();
         }
 
         internal class Node{

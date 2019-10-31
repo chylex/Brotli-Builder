@@ -47,7 +47,7 @@ namespace BrotliLib.IO{
                 switch(chr){
                     case False: this.Add(false); break;
                     case True: this.Add(true); break;
-                    default: throw new ArgumentOutOfRangeException(nameof(bits), "Invalid character found in input string: "+chr);
+                    default: throw new ArgumentOutOfRangeException(nameof(bits), "Invalid character found in input string: " + chr);
                 }
             }
         }

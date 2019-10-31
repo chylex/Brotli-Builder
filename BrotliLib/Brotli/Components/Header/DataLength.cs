@@ -1,6 +1,7 @@
 ﻿using System;
 using BrotliLib.Brotli.Markers;
 using BrotliLib.IO;
+using BrotliLib.Numbers;
 
 namespace BrotliLib.Brotli.Components.Header{
     /// <summary>
@@ -13,6 +14,8 @@ namespace BrotliLib.Brotli.Components.Header{
 
         public const int MinUncompressedBytes = 0;
         public const int MaxUncompressedBytes = 1 << (4 * MaxNibbles);
+
+        public static readonly IntRange BytesRange = new IntRange(MinUncompressedBytes, MaxUncompressedBytes);
 
         public static readonly DataLength Empty = new DataLength(0);
 
@@ -39,8 +42,8 @@ namespace BrotliLib.Brotli.Components.Header{
         public int UncompressedBytes { get; }
 
         public DataLength(int uncompressedBytes){
-            if (uncompressedBytes < MinUncompressedBytes || uncompressedBytes > MaxUncompressedBytes){
-                throw new ArgumentOutOfRangeException(nameof(uncompressedBytes), "The amount of uncompressed bytes must be in the range [" + MinUncompressedBytes + "; " + MaxUncompressedBytes + "].");
+            if (!BytesRange.Contains(uncompressedBytes)){
+                throw new ArgumentOutOfRangeException(nameof(uncompressedBytes), uncompressedBytes, "The amount of uncompressed bytes must be in the range " + BytesRange + ".");
             }
 
             this.UncompressedBytes = uncompressedBytes;
@@ -73,7 +76,7 @@ namespace BrotliLib.Brotli.Components.Header{
                    0b01 => 5,
                    0b10 => 6,
                    0b11 => 0,
-                   _ => throw new InvalidOperationException("Reading two bits somehow returned a value outside [0, 3]."),
+                   _ => throw new InvalidOperationException("Reading two bits somehow returned a value outside [0; 3]."),
                 });
 		        
                 int uncompressedBytes = (chunkNibbles == 0) ? 0 : reader.NextChunk(4 * chunkNibbles, "MLEN", value => 1 + value);

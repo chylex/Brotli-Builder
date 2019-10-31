@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
@@ -87,7 +88,7 @@ namespace BrotliBuilder.Components{
         }
 
         public void ResetMarkers(){
-            UpdateMarkers(new MarkerNode[0], null, null);
+            UpdateMarkers(Array.Empty<MarkerNode>(), null, null);
         }
     }
 }
