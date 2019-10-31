@@ -11,191 +11,194 @@ using ComplexLengthNode = BrotliLib.Huffman.HuffmanNode<byte>;
 
 namespace BrotliLib.Brotli.Components.Header{
     partial class HuffmanTree<T>{
-        private const int SymbolBitSpace = 1 << DefaultMaxDepth;
-        private const byte NoForcedCode = byte.MaxValue;
+        /// <summary>
+        /// https://tools.ietf.org/html/rfc7932#section-3.5
+        /// </summary>
+        private static class Complex{
+            private const int SymbolBitSpace = 1 << DefaultMaxDepth;
+            private const byte NoForcedCode = byte.MaxValue;
 
-        // https://tools.ietf.org/html/rfc7932#section-3.5
+            public static readonly BitDeserializer<HuffmanTree<T>, Context> Deserialize = MarkedBitDeserializer.Wrap<HuffmanTree<T>, Context>(
+                (reader, context) => {
+                    Func<int, T> getSymbol = context.BitsToSymbol;
 
-        private static readonly BitDeserializer<HuffmanTree<T>, Context> ComplexCodeDeserialize = MarkedBitDeserializer.Wrap<HuffmanTree<T>, Context>(
-            (reader, context) => {
-                Func<int, T> getSymbol = context.BitsToSymbol;
+                    var defaultRepeatCode = new HuffmanGenerator<T>.Entry(getSymbol(0), ComplexLengthCode.DefaultRepeatCode);
+                    var lengthCodes = ComplexLengthCode.Read(reader, context.SkippedComplexCodeLengths);
+                    byte nextForcedCode = NoForcedCode;
 
-                var defaultRepeatCode = new HuffmanGenerator<T>.Entry(getSymbol(0), ComplexLengthCode.DefaultRepeatCode);
-                var lengthCodes = ComplexLengthCode.Read(reader, context.SkippedComplexCodeLengths);
-                byte nextForcedCode = NoForcedCode;
+                    int symbolIndex = 0;
+                    int symbolCount = context.AlphabetSize.SymbolCount;
+                    var symbolEntries = new List<HuffmanGenerator<T>.Entry>(symbolCount);
 
-                int symbolIndex = 0;
-                int symbolCount = context.AlphabetSize.SymbolCount;
-                var symbolEntries = new List<HuffmanGenerator<T>.Entry>(symbolCount);
+                    int bitSpaceRemaining = SymbolBitSpace;
 
-                int bitSpaceRemaining = SymbolBitSpace;
-
-                reader.MarkStart();
-
-                void AddMarkedSymbol(HuffmanGenerator<T>.Entry entry){
-                    symbolEntries.Add(entry);
                     reader.MarkStart();
-                    reader.MarkEnd(new ValueMarker("entry", entry));
+
+                    void AddMarkedSymbol(HuffmanGenerator<T>.Entry entry){
+                        symbolEntries.Add(entry);
+                        reader.MarkStart();
+                        reader.MarkEnd(new ValueMarker("entry", entry));
+                    }
+                    
+                    while(bitSpaceRemaining > 0 && symbolIndex < symbolCount){
+                        byte nextCode;
+
+                        if (nextForcedCode == NoForcedCode){
+                            nextCode = reader.ReadValue(lengthCodes, "code", code => code.Code);
+                        }
+                        else{
+                            nextCode = nextForcedCode;
+                            nextForcedCode = NoForcedCode;
+                        }
+                        
+                        if (nextCode == ComplexLengthCode.Skip){
+                            reader.MarkStart();
+
+                            int NextSkipData() => 3 + reader.NextChunk(3, "skip data");
+                            int skipCount = NextSkipData();
+
+                            while((nextForcedCode = reader.ReadValue(lengthCodes, "code", code => code.Code)) == ComplexLengthCode.Skip){
+                                skipCount = 8 * (skipCount - 2) + NextSkipData();
+                            }
+
+                            reader.MarkEnd(new ValueMarker("skip count", skipCount));
+
+                            symbolIndex += skipCount;
+                        }
+                        else if (nextCode == ComplexLengthCode.Repeat){
+                            byte repeatedCode = symbolEntries.DefaultIfEmpty(defaultRepeatCode).Select(entry => entry.Bits).Last(value => value > 0);
+                            int sumPerRepeat = SymbolBitSpace >> repeatedCode;
+                            
+                            reader.MarkStart();
+                            
+                            int NextRepeatData() => 3 + reader.NextChunk(2, "repeat data");
+                            int repeatCount = NextRepeatData();
+
+                            while(bitSpaceRemaining - sumPerRepeat * repeatCount > 0 && (nextForcedCode = reader.ReadValue(lengthCodes, "code", code => code.Code)) == ComplexLengthCode.Repeat){
+                                repeatCount = 4 * (repeatCount - 2) + NextRepeatData();
+                            }
+
+                            reader.MarkEnd(new ValueMarker("repeat count", repeatCount));
+
+                            bitSpaceRemaining -= sumPerRepeat * repeatCount;
+                        
+                            while(--repeatCount >= 0){
+                                AddMarkedSymbol(new HuffmanGenerator<T>.Entry(getSymbol(symbolIndex++), repeatedCode));
+                            }
+                        }
+                        else if (nextCode == 0){
+                            ++symbolIndex;
+                        }
+                        else if (nextCode <= ComplexLengthCode.MaxLength){
+                            AddMarkedSymbol(new HuffmanGenerator<T>.Entry(getSymbol(symbolIndex++), nextCode));
+                            bitSpaceRemaining -= SymbolBitSpace >> nextCode;
+                        }
+                    }
+
+                    reader.MarkEnd(new TitleMarker("Symbols"));
+
+                    return new HuffmanTree<T>(HuffmanGenerator<T>.FromBitCountsCanonical(symbolEntries));
+                }
+            );
+
+            public static readonly BitSerializer<HuffmanTree<T>, Context> Serialize = (writer, obj, context) => {
+                Func<int, T> getSymbol = context.BitsToSymbol;
+                
+                int symbolCount = context.AlphabetSize.SymbolCount;
+                var symbolEntries = new List<HuffmanGenerator<T>.Entry>();
+
+                Queue<byte> extra = new Queue<byte>();
+                
+                for(int symbolIndex = 0, bitSpaceRemaining = SymbolBitSpace; bitSpaceRemaining > 0 && symbolIndex < symbolCount; symbolIndex++){
+                    T symbol = getSymbol(symbolIndex);
+                    BitStream path = obj.FindPathOrNull(symbol);
+
+                    byte length = (byte)(path?.Length ?? 0);
+                    
+                    if (length > 0){
+                        bitSpaceRemaining -= SymbolBitSpace >> length;
+                    }
+                    else if (symbolIndex == symbolCount - 1){
+                        length = 15; // if the tree is incomplete, a zero lengh last symbol would generate an ending length code 0 or 17, which Brotli spec forbids
+                                     // if the tree is complete and the final symbol was supposed to be a 0, the writer will run out of bit space before it writes the final symbol
+                    }
+
+                    symbolEntries.Add(new HuffmanGenerator<T>.Entry(symbol, length));
+                }
+
+                int ProcessRepetitions(int length, int multiplier){
+                    Stack<byte> newExtra = new Stack<byte>();
+
+                    int remaining = length - 3;
+
+                    do{
+                        newExtra.Push((byte)(remaining % multiplier));
+                        remaining /= multiplier;
+                    }while(--remaining >= 0);
+
+                    foreach(byte entry in newExtra){
+                        extra.Enqueue(entry);
+                    }
+
+                    return newExtra.Count;
+                }
+
+                int ReplaceSequence(int index, byte code, int removeLength, int insertLength){
+                    symbolEntries.RemoveRange(index, removeLength);
+                    symbolEntries.InsertRange(index, Enumerable.Repeat(new HuffmanGenerator<T>.Entry(default, code), insertLength));
+                    return index + insertLength;
+                }
+
+                int ReplaceSequenceWithRepetition(int index, byte code, int length, int multiplier){
+                    if (length - 3 == multiplier){
+                        // when the amount of repetitions equals the first value that requires a second repetition code to encode, it's more efficient to write it as 1 literal code and 1 repetition code
+                        // TODO official compressor (and this) only works for the first value that crosses the boundary... potential point for improvement?
+                        --length;
+                        ++index;
+                    }
+
+                    return ReplaceSequence(index, code, length, ProcessRepetitions(length, multiplier));
                 }
                 
-                while(bitSpaceRemaining > 0 && symbolIndex < symbolCount){
-                    byte nextCode;
+                for(int entryIndex = 0, lastRepeatStartIndex = 0, lastRepeatCode = ComplexLengthCode.DefaultRepeatCode; entryIndex < symbolEntries.Count + 1; entryIndex++){
+                    int nextCode = entryIndex < symbolEntries.Count ? symbolEntries[entryIndex].Bits : -1;
 
-                    if (nextForcedCode == NoForcedCode){
-                        nextCode = reader.ReadValue(lengthCodes, "code", code => code.Code);
-                    }
-                    else{
-                        nextCode = nextForcedCode;
-                        nextForcedCode = NoForcedCode;
-                    }
-                    
-                    if (nextCode == ComplexLengthCode.Skip){
-                        reader.MarkStart();
-
-                        int NextSkipData() => 3 + reader.NextChunk(3, "skip data");
-                        int skipCount = NextSkipData();
-
-                        while((nextForcedCode = reader.ReadValue(lengthCodes, "code", code => code.Code)) == ComplexLengthCode.Skip){
-                            skipCount = 8 * (skipCount - 2) + NextSkipData();
+                    if (nextCode != lastRepeatCode){
+                        if (lastRepeatCode == 0){
+                            --lastRepeatStartIndex;
                         }
 
-                        reader.MarkEnd(new ValueMarker("skip count", skipCount));
+                        int skipLength = entryIndex - lastRepeatStartIndex;
 
-                        symbolIndex += skipCount;
-                    }
-                    else if (nextCode == ComplexLengthCode.Repeat){
-                        byte repeatedCode = symbolEntries.DefaultIfEmpty(defaultRepeatCode).Select(entry => entry.Bits).Last(value => value > 0);
-                        int sumPerRepeat = SymbolBitSpace >> repeatedCode;
+                        if (skipLength >= 3){
+                            entryIndex = lastRepeatCode == 0 ? ReplaceSequenceWithRepetition(lastRepeatStartIndex, ComplexLengthCode.Skip, skipLength, 8)
+                                                             : ReplaceSequenceWithRepetition(lastRepeatStartIndex, ComplexLengthCode.Repeat, skipLength, 4);
+                        }
                         
-                        reader.MarkStart();
-                        
-                        int NextRepeatData() => 3 + reader.NextChunk(2, "repeat data");
-                        int repeatCount = NextRepeatData();
-
-                        while(bitSpaceRemaining - sumPerRepeat * repeatCount > 0 && (nextForcedCode = reader.ReadValue(lengthCodes, "code", code => code.Code)) == ComplexLengthCode.Repeat){
-                            repeatCount = 4 * (repeatCount - 2) + NextRepeatData();
-                        }
-
-                        reader.MarkEnd(new ValueMarker("repeat count", repeatCount));
-
-                        bitSpaceRemaining -= sumPerRepeat * repeatCount;
-                    
-                        while(--repeatCount >= 0){
-                            AddMarkedSymbol(new HuffmanGenerator<T>.Entry(getSymbol(symbolIndex++), repeatedCode));
-                        }
-                    }
-                    else if (nextCode == 0){
-                        ++symbolIndex;
-                    }
-                    else if (nextCode <= ComplexLengthCode.MaxLength){
-                        AddMarkedSymbol(new HuffmanGenerator<T>.Entry(getSymbol(symbolIndex++), nextCode));
-                        bitSpaceRemaining -= SymbolBitSpace >> nextCode;
+                        lastRepeatCode = nextCode;
+                        lastRepeatStartIndex = entryIndex + 1;
                     }
                 }
-
-                reader.MarkEnd(new TitleMarker("Symbols"));
-
-                return new HuffmanTree<T>(HuffmanGenerator<T>.FromBitCountsCanonical(symbolEntries));
-            }
-        );
-
-        private static readonly BitSerializer<HuffmanTree<T>, Context> ComplexCodeSerialize = (writer, obj, context) => {
-            Func<int, T> getSymbol = context.BitsToSymbol;
-            
-            int symbolCount = context.AlphabetSize.SymbolCount;
-            var symbolEntries = new List<HuffmanGenerator<T>.Entry>();
-
-            Queue<byte> extra = new Queue<byte>();
-            
-            for(int symbolIndex = 0, bitSpaceRemaining = SymbolBitSpace; bitSpaceRemaining > 0 && symbolIndex < symbolCount; symbolIndex++){
-                T symbol = getSymbol(symbolIndex);
-                BitStream path = obj.FindPathOrNull(symbol);
-
-                byte length = (byte)(path?.Length ?? 0);
                 
-                if (length > 0){
-                    bitSpaceRemaining -= SymbolBitSpace >> length;
-                }
-                else if (symbolIndex == symbolCount - 1){
-                    length = 15; // if the tree is incomplete, a zero lengh last symbol would generate an ending length code 0 or 17, which Brotli spec forbids
-                                 // if the tree is complete and the final symbol was supposed to be a 0, the writer will run out of bit space before it writes the final symbol
-                }
+                var lengthEntries = symbolEntries.GroupBy(kvp => kvp.Bits).Select(group => new HuffmanGenerator<byte>.SymbolFreq(group.Key, group.Count())).ToArray();
+                var lengthMap = HuffmanGenerator<byte>.FromFrequenciesCanonical(lengthEntries, ComplexLengthCode.LengthMaxDepth).GenerateValueMap();
+                
+                ComplexLengthCode.Write(writer, lengthMap);
+                
+                foreach(byte code in symbolEntries.Select(entry => entry.Bits)){
+                    writer.WriteBits(lengthMap[code]);
 
-                symbolEntries.Add(new HuffmanGenerator<T>.Entry(symbol, length));
-            }
-
-            int ProcessRepetitions(int length, int multiplier){
-                Stack<byte> newExtra = new Stack<byte>();
-
-                int remaining = length - 3;
-
-                do{
-                    newExtra.Push((byte)(remaining % multiplier));
-                    remaining /= multiplier;
-                }while(--remaining >= 0);
-
-                foreach(byte entry in newExtra){
-                    extra.Enqueue(entry);
-                }
-
-                return newExtra.Count;
-            }
-
-            int ReplaceSequence(int index, byte code, int removeLength, int insertLength){
-                symbolEntries.RemoveRange(index, removeLength);
-                symbolEntries.InsertRange(index, Enumerable.Repeat(new HuffmanGenerator<T>.Entry(default, code), insertLength));
-                return index + insertLength;
-            }
-
-            int ReplaceSequenceWithRepetition(int index, byte code, int length, int multiplier){
-                if (length - 3 == multiplier){
-                    // when the amount of repetitions equals the first value that requires a second repetition code to encode, it's more efficient to write it as 1 literal code and 1 repetition code
-                    // TODO official compressor (and this) only works for the first value that crosses the boundary... potential point for improvement?
-                    --length;
-                    ++index;
-                }
-
-                return ReplaceSequence(index, code, length, ProcessRepetitions(length, multiplier));
-            }
-            
-            for(int entryIndex = 0, lastRepeatStartIndex = 0, lastRepeatCode = ComplexLengthCode.DefaultRepeatCode; entryIndex < symbolEntries.Count + 1; entryIndex++){
-                int nextCode = entryIndex < symbolEntries.Count ? symbolEntries[entryIndex].Bits : -1;
-
-                if (nextCode != lastRepeatCode){
-                    if (lastRepeatCode == 0){
-                        --lastRepeatStartIndex;
+                    if (code == ComplexLengthCode.Skip){
+                        writer.WriteChunk(3, extra.Dequeue());
                     }
-
-                    int skipLength = entryIndex - lastRepeatStartIndex;
-
-                    if (skipLength >= 3){
-                        entryIndex = lastRepeatCode == 0 ? ReplaceSequenceWithRepetition(lastRepeatStartIndex, ComplexLengthCode.Skip, skipLength, 8)
-                                                         : ReplaceSequenceWithRepetition(lastRepeatStartIndex, ComplexLengthCode.Repeat, skipLength, 4);
+                    else if (code == ComplexLengthCode.Repeat){
+                        writer.WriteChunk(2, extra.Dequeue());
                     }
-                    
-                    lastRepeatCode = nextCode;
-                    lastRepeatStartIndex = entryIndex + 1;
                 }
-            }
-            
-            var lengthEntries = symbolEntries.GroupBy(kvp => kvp.Bits).Select(group => new HuffmanGenerator<byte>.SymbolFreq(group.Key, group.Count())).ToArray();
-            var lengthMap = HuffmanGenerator<byte>.FromFrequenciesCanonical(lengthEntries, ComplexLengthCode.LengthMaxDepth).GenerateValueMap();
-            
-            ComplexLengthCode.Write(writer, lengthMap);
-            
-            foreach(byte code in symbolEntries.Select(entry => entry.Bits)){
-                writer.WriteBits(lengthMap[code]);
-
-                if (code == ComplexLengthCode.Skip){
-                    writer.WriteChunk(3, extra.Dequeue());
-                }
-                else if (code == ComplexLengthCode.Repeat){
-                    writer.WriteChunk(2, extra.Dequeue());
-                }
-            }
-        };
+            };
+        }
     }
-    
+
     internal sealed class ComplexLengthCode : IComparable<ComplexLengthCode>{
         public const byte MaxLength = 15;
         public const byte Repeat = 16;

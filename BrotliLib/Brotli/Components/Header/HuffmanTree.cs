@@ -116,12 +116,12 @@ namespace BrotliLib.Brotli.Components.Header{
                 HuffmanTree<T> tree;
 
                 if (type == 1){
-                    tree = SimpleCodeDeserialize(reader, context);
+                    tree = Simple.Deserialize(reader, context);
                     reader.MarkEnd(new TitleMarker("Simple Huffman Tree"));
                 }
                 else{
                     context.SkippedComplexCodeLengths = type;
-                    tree = ComplexCodeDeserialize(reader, context);
+                    tree = Complex.Deserialize(reader, context);
                     reader.MarkEnd(new TitleMarker("Complex Huffman Tree"));
                 }
 
@@ -132,11 +132,11 @@ namespace BrotliLib.Brotli.Components.Header{
         public static readonly BitSerializer<HuffmanTree<T>, Context> Serialize = (writer, obj, context) => {
             if (obj.Root.SymbolCount <= 4){
                 writer.WriteChunk(2, 0b01);
-                SimpleCodeSerialize(writer, obj, context);
+                Simple.Serialize(writer, obj, context);
             }
             else{
                 // type identifier is written by the serializer
-                ComplexCodeSerialize(writer, obj, context);
+                Complex.Serialize(writer, obj, context);
             }
         };
     }

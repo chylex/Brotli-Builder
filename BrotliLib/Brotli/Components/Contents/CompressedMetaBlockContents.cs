@@ -47,12 +47,10 @@ namespace BrotliLib.Brotli.Components.Contents{
 
             public bool NeedsMoreData => bytesWritten < MetaBlock.DataLength.UncompressedBytes;
 
-            protected readonly CategoryMap<BlockSwitchTracker> blockTrackers;
             private int bytesWritten;
 
             protected DataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header) : base(wrapped.MetaBlock, wrapped.State){
                 this.Header = header;
-                this.blockTrackers = Header.BlockTypes.Select(info => new BlockSwitchTracker(info));
             }
 
             public abstract int NextBlockID(Category category);
@@ -92,40 +90,32 @@ namespace BrotliLib.Brotli.Components.Contents{
         }
 
         private class ReaderDataContext : DataContext{
-            public BlockSwitchCommandMutableMap BlockSwitchCommands { get; }
+            public BlockSwitchCommandMutableMap BlockSwitchCommands => blockTrackers.Select(tracker => tracker.ReadCommands);
             
             private readonly IMarkedBitReader reader;
+            private readonly CategoryMap<BlockSwitchTracker.Reading> blockTrackers;
 
             public ReaderDataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header, IMarkedBitReader reader) : base(wrapped, header){
                 this.reader = reader;
-                this.BlockSwitchCommands = new CategoryMap<IList<BlockSwitchCommand>>(_ => new List<BlockSwitchCommand>());
+                this.blockTrackers = Header.BlockTypes.Select(info => new BlockSwitchTracker.Reading(info));
             }
 
             public override int NextBlockID(Category category){
-                BlockSwitchTracker tracker = blockTrackers[category];
-                BlockSwitchCommand nextCommand = tracker.ReadCommand(reader);
-
-                if (nextCommand != null){
-                    BlockSwitchCommands[category].Add(nextCommand);
-                }
-
-                return tracker.CurrentID;
+                return blockTrackers[category].ReadCommand(reader);
             }
         }
 
         private class WriterDataContext : DataContext{
             private readonly IBitWriter writer;
-            private readonly CategoryMap<Queue<BlockSwitchCommand>> blockSwitchQueues;
+            private readonly CategoryMap<BlockSwitchTracker.Writing> blockTrackers;
 
             public WriterDataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header, BlockSwitchCommandMap blockSwitchCommands, IBitWriter writer) : base(wrapped, header){
                 this.writer = writer;
-                this.blockSwitchQueues = blockSwitchCommands.Select(list => new Queue<BlockSwitchCommand>(list));
+                this.blockTrackers = header.BlockTypes.Select(info => new BlockSwitchTracker.Writing(info, new Queue<BlockSwitchCommand>(blockSwitchCommands[info.Category])));
             }
 
             public override int NextBlockID(Category category){
-                BlockSwitchTracker tracker = blockTrackers[category];
-                tracker.WriteCommand(writer, blockSwitchQueues);
-                return tracker.CurrentID;
+                return blockTrackers[category].WriteCommand(writer);
             }
         }
 

@@ -7,62 +7,76 @@ using BrotliLib.IO.Writer;
 
 namespace BrotliLib.Brotli.Components.Data{
     /// <summary>
-    /// Tracks the current block type, and allows reading and writing block-switch commands.
+    /// Tracks the current block type. Its subtypes <see cref="Reading"/> and <see cref="Writing"/> allow reading and writing block-switch commands.
     /// </summary>
-    public sealed class BlockSwitchTracker{
-        public int CurrentID { get; private set; } = 0;
+    public abstract class BlockSwitchTracker{
+        protected readonly BlockSwitchCommand.Context context;
 
-        private readonly BlockSwitchCommand.Context context;
-        private int remaining;
+        protected int currentID;
+        protected int remaining;
         
-        public BlockSwitchTracker(BlockTypeInfo info){
+        protected BlockSwitchTracker(BlockTypeInfo info){
             this.context = info.Count == 1 ? null : new BlockSwitchCommand.Context(info, new BlockTypeTracker(info.Count));
             this.remaining = info.InitialLength;
         }
         
-        private void UpdateState(BlockSwitchCommand command){
-            CurrentID = command.Type;
+        protected void UpdateState(BlockSwitchCommand command){
+            currentID = command.Type;
             remaining = command.Length;
         }
 
-        /// <summary>
-        /// Reads a block-switch command if there are no more symbols in the current block type, then decreases the amount of remaining symbols.
-        /// </summary>
-        public BlockSwitchCommand ReadCommand(IBitReader reader){
-            BlockSwitchCommand nextCommand = null;
+        public sealed class Reading : BlockSwitchTracker{
+            public IList<BlockSwitchCommand> ReadCommands { get; } = new List<BlockSwitchCommand>();
 
-            if (remaining == 0){
-                nextCommand = BlockSwitchCommand.Deserialize(reader, context);
-                UpdateState(nextCommand);
+            public Reading(BlockTypeInfo info) : base(info){}
+
+            /// <summary>
+            /// Reads a block-switch command if there are no more symbols in the current block type, then decreases the amount of remaining symbols. Returns <see cref="BlockSwitchTracker.currentID"/>.
+            /// </summary>
+            public int ReadCommand(IBitReader reader){
+                if (remaining == 0){
+                    BlockSwitchCommand nextCommand = BlockSwitchCommand.Deserialize(reader, context);
+                    ReadCommands.Add(nextCommand);
+                    UpdateState(nextCommand);
+                }
+
+                --remaining;
+                return currentID;
             }
-
-            --remaining;
-            return nextCommand;
         }
 
-        /// <summary>
-        /// Writes a block-switch command if there are no more symbols in the current block type, then decreases the amount of remaining symbols.
-        /// </summary>
-        public void WriteCommand(IBitWriter writer, CategoryMap<Queue<BlockSwitchCommand>> commands){
-            if (remaining == 0){
-                BlockSwitchCommand nextCommand = commands[context.Info.Category].Dequeue();
-                BlockSwitchCommand.Serialize(writer, nextCommand, context);
-                UpdateState(nextCommand);
+        public sealed class Writing : BlockSwitchTracker{
+            private readonly Queue<BlockSwitchCommand> queue;
+
+            public Writing(BlockTypeInfo info, Queue<BlockSwitchCommand> queue) : base(info){
+                this.queue = queue;
             }
 
-            --remaining;
-        }
+            /// <summary>
+            /// Writes a block-switch command if there are no more symbols in the current block type, then decreases the amount of remaining symbols. Returns <see cref="BlockSwitchTracker.currentID"/>.
+            /// </summary>
+            public int WriteCommand(IBitWriter writer){
+                if (remaining == 0){
+                    BlockSwitchCommand nextCommand = queue.Dequeue();
+                    BlockSwitchCommand.Serialize(writer, nextCommand, context);
+                    UpdateState(nextCommand);
+                }
 
-        /// <summary>
-        /// Simulates processing a block-switch command if there are no more symbols in the current block type, then decreases the amount of remaining symbols. Returns <see cref="CurrentID"/>.
-        /// </summary>
-        public int SimulateCommand(CategoryMap<Queue<BlockSwitchCommand>> commands){
-            if (remaining == 0){
-                UpdateState(commands[context.Info.Category].Dequeue());
+                --remaining;
+                return currentID;
             }
 
-            --remaining;
-            return CurrentID;
+            /// <summary>
+            /// Simulates processing a block-switch command if there are no more symbols in the current block type, then decreases the amount of remaining symbols. Returns <see cref="BlockSwitchTracker.currentID"/>.
+            /// </summary>
+            public int SimulateCommand(){
+                if (remaining == 0){
+                    UpdateState(queue.Dequeue());
+                }
+
+                --remaining;
+                return currentID;
+            }
         }
     }
 }

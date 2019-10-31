@@ -87,20 +87,13 @@ namespace BrotliLib.Brotli.Encode{
         public (MetaBlock MetaBlock, Func<CompressedMetaBlockBuilder> Next) Build(){
             var state = initialState.Clone();
 
-            // Block type setup
-            
-            var blockTypeInfo = BlockTypes.Select(builder => builder.Build());
-            var bsCommands = BlockTypes.Select<IList<BlockSwitchCommand>>(builder => new List<BlockSwitchCommand>(builder.Commands));
-
-            var blockTrackers = blockTypeInfo.Select(info => new BlockSwitchTracker(info));
-            var blockSwitchQueues = bsCommands.Select(commands => new Queue<BlockSwitchCommand>(commands));
-
-            int NextBlockID(Category category){
-                return blockTrackers[category].SimulateCommand(blockSwitchQueues);
-            }
-
             // Command processing
             
+            var bsCommands = BlockTypes.Select<IList<BlockSwitchCommand>>(builder => new List<BlockSwitchCommand>(builder.Commands));
+
+            var blockTypeInfo = BlockTypes.Select(builder => builder.Build());
+            var blockTrackers = blockTypeInfo.Select(info => new BlockSwitchTracker.Writing(info, new Queue<BlockSwitchCommand>(bsCommands[info.Category])));
+
             var literalFreq = NewFreqArray<Literal>(LiteralCtxMap.TreeCount);
             var icLengthCodeFreq = NewFreqArray<InsertCopyLengthCode>(blockTypeInfo[Category.InsertCopy].Count);
             var distanceCodeFreq = NewFreqArray<DistanceCode>(DistanceCtxMap.TreeCount);
@@ -110,10 +103,10 @@ namespace BrotliLib.Brotli.Encode{
 
             for(int index = 0; index < icCommandCount; index++){
                 var icCommand = icCommands[index];
-                int icBlockID = NextBlockID(Category.InsertCopy);
+                int icBlockID = blockTrackers[Category.InsertCopy].SimulateCommand();
 
                 foreach(Literal literal in icCommand.Literals){
-                    int blockID = NextBlockID(Category.Literal);
+                    int blockID = blockTrackers[Category.Literal].SimulateCommand();
                     int contextID = state.NextLiteralContextID(LiteralContextModes[blockID]);
                     int treeID = LiteralCtxMap.DetermineTreeID(blockID, contextID);
 
@@ -132,7 +125,7 @@ namespace BrotliLib.Brotli.Encode{
                     var distanceCodes = icCommand.CopyDistance.MakeCode(DistanceParameters, state);
                     
                     if (distanceCodes != null){
-                        int blockID = NextBlockID(Category.Distance);
+                        int blockID = blockTrackers[Category.Distance].SimulateCommand();
                         int contextID = icLengthValues.DistanceContextID;
                         int treeID = DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
