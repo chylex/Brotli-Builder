@@ -24,7 +24,7 @@ namespace BrotliLib.Brotli{
 
         static BrotliDefaultDictionary(){
             DefaultTransforms = Enumerable.Range(0, 121).Select(index => new WordTransform(PrefixMap[index], GetTransformType(index), SuffixMap[index])).ToArray();
-            Embedded = new BrotliDefaultDictionary(new StreamSource(Resource.Get("dict"))); 
+            Embedded = new BrotliDefaultDictionary(new StreamSource(Resource.Get("dict")));
         }
         
         public BrotliDefaultDictionary(IDictionarySource source) : base(DefaultFormat, DefaultTransforms, source){}

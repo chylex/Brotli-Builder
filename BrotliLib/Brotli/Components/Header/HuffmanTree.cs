@@ -97,12 +97,19 @@ namespace BrotliLib.Brotli.Components.Header{
             public Func<int, T> BitsToSymbol { get; }
             public Func<T, int> SymbolToBits { get; }
 
-            internal int SkippedComplexCodeLengths { get; set; }
+            internal int SkippedComplexCodeLengths { get; }
             
-            public Context(AlphabetSize alphabetSize, Func<int, T> bitsToSymbol, Func<T, int> symbolToBits){
+            private Context(AlphabetSize alphabetSize, Func<int, T> bitsToSymbol, Func<T, int> symbolToBits, int skippedComplexCodeLengths){
                 this.AlphabetSize = alphabetSize;
                 this.BitsToSymbol = bitsToSymbol;
                 this.SymbolToBits = symbolToBits;
+                this.SkippedComplexCodeLengths = skippedComplexCodeLengths;
+            }
+
+            public Context(AlphabetSize alphabetSize, Func<int, T> bitsToSymbol, Func<T, int> symbolToBits) : this(alphabetSize, bitsToSymbol, symbolToBits, -1){}
+
+            public Context ForComplexDeserialization(int skippedComplexCodeLengths){
+                return new Context(AlphabetSize, BitsToSymbol, SymbolToBits, skippedComplexCodeLengths);
             }
         }
 
@@ -120,8 +127,7 @@ namespace BrotliLib.Brotli.Components.Header{
                     reader.MarkEnd(new TitleMarker("Simple Huffman Tree"));
                 }
                 else{
-                    context.SkippedComplexCodeLengths = type;
-                    tree = Complex.Deserialize(reader, context);
+                    tree = Complex.Deserialize(reader, context.ForComplexDeserialization(type));
                     reader.MarkEnd(new TitleMarker("Complex Huffman Tree"));
                 }
 

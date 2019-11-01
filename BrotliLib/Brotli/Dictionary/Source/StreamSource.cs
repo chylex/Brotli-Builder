@@ -17,8 +17,12 @@ namespace BrotliLib.Brotli.Dictionary.Source{
 
         byte[] IDictionarySource.ReadBytes(int position, int count){
             byte[] bytes = new byte[count];
-            stream.Seek(position, SeekOrigin.Begin);
-            stream.Read(bytes, 0, count);
+
+            lock(stream){
+                stream.Seek(position, SeekOrigin.Begin);
+                stream.Read(bytes, 0, count);
+            }
+
             return bytes;
         }
     }
