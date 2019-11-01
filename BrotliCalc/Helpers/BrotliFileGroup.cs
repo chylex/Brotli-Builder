@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using BrotliLib.Brotli;
+using BrotliLib.Collections;
 
 namespace BrotliCalc.Helpers{
     class BrotliFileGroup{
@@ -17,7 +17,7 @@ namespace BrotliCalc.Helpers{
             var serialized = bfs.Serialize();
             var output = bfs.GetDecompressionState(serialized, enableMarkers: false);
 
-            if (!output.AsBytes.SequenceEqual(Uncompressed.Contents)){
+            if (!CollectionHelper.Equal(output.AsBytes, Uncompressed.Contents)){
                 throw new InvalidOperationException("Mismatched output bytes.");
             }
 
