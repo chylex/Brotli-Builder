@@ -42,29 +42,29 @@ namespace BrotliLib.Brotli.Components.Header{
         /// <summary>
         /// Length of the longest path in the tree.
         /// </summary>
-        public int MaxDepth => reverseLookup.Values.Max(stream => stream.Length);
+        public int MaxDepth => ReverseLookup.Values.Max(stream => stream.Length);
 
-        private readonly Dictionary<T, BitStream> reverseLookup;
+        private Dictionary<T, BitStream> ReverseLookup => reverseLookupCached ?? (reverseLookupCached = Root.GenerateValueMap());
+        private Dictionary<T, BitStream> reverseLookupCached;
         
         public HuffmanTree(HuffmanNode<T> root){
-            this.reverseLookup = root.GenerateValueMap();
             this.Root = root;
         }
 
         public BitStream FindPath(T element){
-            return reverseLookup[element];
+            return ReverseLookup[element];
         }
 
         public BitStream FindPathOrNull(T element){
-            return reverseLookup.TryGetValue(element, out BitStream path) ? path : null;
+            return ReverseLookup.TryGetValue(element, out BitStream path) ? path : null;
         }
 
         public KeyValuePair<T, BitStream> FindEntry(Predicate<T> predicate){
-            return reverseLookup.First(kvp => predicate(kvp.Key));
+            return ReverseLookup.First(kvp => predicate(kvp.Key));
         }
 
         public IEnumerator<KeyValuePair<T, BitStream>> GetEnumerator(){
-            return reverseLookup.GetEnumerator();
+            return ReverseLookup.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator(){
@@ -75,11 +75,11 @@ namespace BrotliLib.Brotli.Components.Header{
 
         public override bool Equals(object obj){
             return obj is HuffmanTree<T> tree &&
-                   reverseLookup.SequenceEqual(tree.reverseLookup);
+                   ReverseLookup.SequenceEqual(tree.ReverseLookup);
         }
 
         public override int GetHashCode(){
-            int hash = reverseLookup.Count * 17;
+            int hash = ReverseLookup.Count * 17;
 
             foreach(KeyValuePair<T, BitStream> kvp in this){
                 hash = unchecked((hash * 31) + kvp.Key.GetHashCode());
