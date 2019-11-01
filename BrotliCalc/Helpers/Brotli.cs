@@ -14,6 +14,7 @@ namespace BrotliCalc.Helpers{
     static class Brotli{
         private const int CompressionFileLimit = 2000;
         private const string CompressedFileExtension = ".br";
+        public const char DirectorySeparator = '/';
         
         private static readonly Regex RegexCompressionIdentifier = new Regex(@"\.([^.]+)\.br$");
         private static readonly IntRange QualityRange = new IntRange(0, 11);
@@ -31,10 +32,17 @@ namespace BrotliCalc.Helpers{
         }
 
         public static IEnumerable<BrotliFileGroup> ListPath(string path){
+            if (!File.GetAttributes(path).HasFlag(FileAttributes.Directory)){
+                var name = Path.GetFileName(path) ?? path;
+                var file = new BrotliFile.Uncompressed(path, name);
+
+                return new BrotliFileGroup[]{ new BrotliFileGroup(file, Array.Empty<BrotliFile.Compressed>()) };
+            }
+
             int fullPathLength = Path.GetFullPath(path).Length;
 
             string GetRelativePath(string file){
-                return file.Substring(fullPathLength).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                return file.Substring(fullPathLength).Replace(Path.DirectorySeparatorChar, DirectorySeparator).Replace(Path.AltDirectorySeparatorChar, DirectorySeparator).TrimStart(DirectorySeparator);
             }
 
             BrotliFile.Compressed ConstructCompressed(string file){
