@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Threading;
 using BrotliCalc.Helpers;
 using BrotliImpl.Encoders;
 using BrotliLib.Brotli;
@@ -27,49 +27,41 @@ namespace BrotliCalc.Commands{
                 throw new ArgumentException($"Unknown encoder: {args[0]}");
             }
 
+            var items = Brotli.ListPath(args[1]).SelectUncompressedFiles();
             var parameters = new BrotliFileParameters();
 
-            int totalFiles = 0;
-            int failedFiles = 0;
-
-            using(var table = new Table.CSV(args[2], new []{
+            using var table = new Table.CSV(args[2], new []{
                 "File", "Uncompressed Bytes", "Encoded Bytes", "Encoded-Uncompressed"
-            })){
-                long sumUncompressed = 0;
-                long sumEncoded = 0;
+            });
 
-                foreach(var group in Brotli.ListPath(args[1])){
-                    var file = group.Uncompressed;
+            long sumUncompressed = 0;
+            long sumEncoded = 0;
 
+            var result = new FileWorker<BrotliFile.Uncompressed>{
+                Work = (group, file) => {
                     int? uncompressedBytes = file.SizeBytes;
-                    int? encodeBytes = null;
+                    int encodeBytes = group.CountBytesAndValidate(BrotliFileStructure.FromEncoder(parameters, encoder, file.Contents));
 
-                    Console.WriteLine($"Processing {file.Name}...");
-
-                    try{
-                        encodeBytes = group.CountBytesAndValidate(BrotliFileStructure.FromEncoder(parameters, encoder, file.Contents));
-                    }catch(Exception e){
-                        Debug.WriteLine(e.ToString());
-                        ++failedFiles;
+                    if (uncompressedBytes.HasValue){
+                        Interlocked.Add(ref sumUncompressed, uncompressedBytes.Value);
+                        Interlocked.Add(ref sumEncoded, encodeBytes);
                     }
 
-                    ++totalFiles;
-                    table.AddRow(file.Name, uncompressedBytes, encodeBytes, encodeBytes - uncompressedBytes); // subtraction propagates null
+                    return new List<object[]>{
+                        new object[]{ file.Name, uncompressedBytes, encodeBytes, encodeBytes - uncompressedBytes } // subtraction propagates null
+                    };
+                },
 
-                    if (uncompressedBytes.HasValue && encodeBytes.HasValue){
-                        sumUncompressed += uncompressedBytes.Value;
-                        sumEncoded += encodeBytes.Value;
-                    }
+                Error = (group, file, e) => {
+                    return new List<object[]>{
+                        new object[]{ file.Name, file.SizeBytes, null, null }
+                    };
                 }
-                
-                table.AddRow("(Successes)", sumUncompressed, sumEncoded, sumEncoded - sumUncompressed);
-            }
+            }.Start(table, items);
 
-            if (totalFiles > 0){
-                Console.WriteLine();
-            }
-
-            return "Processed " + totalFiles + " file(s) with " + failedFiles + " error(s).";
+            table.AddRow("(Successes)", sumUncompressed, sumEncoded, sumEncoded - sumUncompressed);
+            
+            return $"Processed {result.TotalProcessed} file(s) with {result.TotalErrors} error(s).";
         }
     }
 }

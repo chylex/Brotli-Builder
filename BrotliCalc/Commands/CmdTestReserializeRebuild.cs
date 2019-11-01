@@ -1,5 +1,5 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Threading;
 using BrotliCalc.Helpers;
 using BrotliImpl.Transformers;
 using BrotliLib.Numbers;
@@ -13,53 +13,45 @@ namespace BrotliCalc.Commands{
         public IntRange ArgumentCount => IntRange.Only(2);
 
         public string Process(string[] args){
-            int totalFiles = 0;
-            int failedFiles = 0;
+            var items = Brotli.ListPath(args[0]).SelectCompressedFiles();
 
-            using(var table = new Table.CSV(args[1], new []{
+            using var table = new Table.CSV(args[1], new []{
                 "File", "Quality", "Original Bytes", "Reserialize Bytes", "Rebuild Bytes", "Reserialize-Original", "Rebuild-Original"
-            })){
-                long sumOriginal = 0;
-                long sumReserialize = 0;
-                long sumRebuild = 0;
+            });
 
-                foreach(var group in Brotli.ListPath(args[0])){
-                    foreach(var file in group.Compressed){
-                        var bfs = file.Structure;
+            long sumOriginal = 0;
+            long sumReserialize = 0;
+            long sumRebuild = 0;
 
-                        int? originalBytes = file.SizeBytes;
-                        int? reserializeBytes = null;
-                        int? rebuildBytes = null;
+            var result = new FileWorker<BrotliFile.Compressed>{
+                Work = (group, file) => {
+                    var bfs = file.Structure;
 
-                        Console.WriteLine($"Processing {file.Name}...");
+                    int? originalBytes = file.SizeBytes;
+                    var reserializeBytes = group.CountBytesAndValidate(bfs);
+                    var rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild()));
 
-                        try{
-                            reserializeBytes = group.CountBytesAndValidate(bfs);
-                            rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild()));
-                        }catch(Exception e){
-                            Debug.WriteLine(e.ToString());
-                            ++failedFiles;
-                        }
-                        
-                        ++totalFiles;
-                        table.AddRow(file.Name, file.Identifier, originalBytes, reserializeBytes, rebuildBytes, reserializeBytes - originalBytes, rebuildBytes - originalBytes); // subtraction propagates null
-
-                        if (originalBytes.HasValue && reserializeBytes.HasValue && rebuildBytes.HasValue){
-                            sumOriginal += originalBytes.Value;
-                            sumReserialize += reserializeBytes.Value;
-                            sumRebuild += rebuildBytes.Value;
-                        }
+                    if (originalBytes.HasValue){
+                        Interlocked.Add(ref sumOriginal, originalBytes.Value);
+                        Interlocked.Add(ref sumReserialize, reserializeBytes);
+                        Interlocked.Add(ref sumRebuild, rebuildBytes);
                     }
+
+                    return new List<object[]>{
+                        new object[]{ file.Name, file.Identifier, originalBytes, reserializeBytes, rebuildBytes, reserializeBytes - originalBytes, rebuildBytes - originalBytes } // subtraction propagates null
+                    };
+                },
+
+                Error = (group, file, e) => {
+                    return new List<object[]>{
+                        new object[]{ file.Name, file.Identifier, file.SizeBytes, null, null, null, null }
+                    };
                 }
-                
-                table.AddRow("(Successes)", "-", sumOriginal, sumReserialize, sumRebuild, sumReserialize - sumOriginal, sumRebuild - sumOriginal);
-            }
+            }.Start(table, items);
+            
+            table.AddRow("(Successes)", "-", sumOriginal, sumReserialize, sumRebuild, sumReserialize - sumOriginal, sumRebuild - sumOriginal);
 
-            if (totalFiles > 0){
-                Console.WriteLine();
-            }
-
-            return "Processed " + totalFiles + " file(s) with " + failedFiles + " error(s).";
+            return $"Processed {result.TotalProcessed} file(s) with {result.TotalErrors} error(s).";
         }
     }
 }

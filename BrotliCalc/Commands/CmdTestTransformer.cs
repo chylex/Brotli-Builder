@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using BrotliCalc.Helpers;
 using BrotliImpl.Transformers;
 using BrotliLib.Brotli.Encode;
@@ -25,59 +25,50 @@ namespace BrotliCalc.Commands{
                 throw new ArgumentException($"Unknown transformer: {args[0]}");
             }
 
-            int totalFiles = 0;
-            int failedFiles = 0;
+            var items = Brotli.ListPath(args[1]).SelectCompressedFiles();
 
-            using(var table = new Table.CSV(args[2], new []{
+            using var table = new Table.CSV(args[2], new []{
                 "File", "Quality", "Original Bytes", "Rebuild Bytes", "Transformed Bytes", "Transformed-Original", "Transformed-Rebuild"
-            })){
-                long sumOriginal = 0;
-                long sumRebuild = 0;
-                long sumTransformed = 0;
+            });
 
-                foreach(var group in Brotli.ListPath(args[1])){
-                    foreach(var file in group.Compressed){
-                        var bfs = file.Structure;
+            long sumOriginal = 0;
+            long sumRebuild = 0;
+            long sumTransformed = 0;
 
-                        int? originalBytes = file.SizeBytes;
-                        int? rebuildBytes = null;
-                        int? transformedBytes = null;
+            var result = new FileWorker<BrotliFile.Compressed>{
+                Work = (group, file) => {
+                    var bfs = file.Structure;
+                    var transformed = bfs.Transform(transformer);
 
-                        Console.WriteLine($"Processing {file.Name}...");
-
-                        try{
-                            var transformed = bfs.Transform(transformer);
-
-                            if (transformed.MetaBlocks.SequenceEqual(bfs.MetaBlocks)){ // if the references have not changed, there was no transformation
-                                continue;
-                            }
-
-                            rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild()));
-                            transformedBytes = group.CountBytesAndValidate(transformed);
-                        }catch(Exception e){
-                            Debug.WriteLine(e.ToString());
-                            ++failedFiles;
-                        }
-
-                        ++totalFiles;
-                        table.AddRow(file.Name, file.Identifier, originalBytes, rebuildBytes, transformedBytes, transformedBytes - originalBytes, transformedBytes - rebuildBytes); // subtraction propagates null
-
-                        if (originalBytes.HasValue && rebuildBytes.HasValue && transformedBytes.HasValue){
-                            sumOriginal += originalBytes.Value;
-                            sumRebuild += rebuildBytes.Value;
-                            sumTransformed += transformedBytes.Value;
-                        }
+                    if (transformed.MetaBlocks.SequenceEqual(bfs.MetaBlocks)){ // if the references have not changed, there was no transformation
+                        return new List<object[]>();
                     }
+                    
+                    int? originalBytes = file.SizeBytes;
+                    int rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild()));
+                    int transformedBytes = group.CountBytesAndValidate(transformed);
+
+                    if (originalBytes.HasValue){
+                        Interlocked.Add(ref sumOriginal, originalBytes.Value);
+                        Interlocked.Add(ref sumRebuild, rebuildBytes);
+                        Interlocked.Add(ref sumTransformed, transformedBytes);
+                    }
+
+                    return new List<object[]>{
+                        new object[]{ file.Name, file.Identifier, originalBytes, rebuildBytes, transformedBytes, transformedBytes - originalBytes, transformedBytes - rebuildBytes } // subtraction propagates null
+                    };
+                },
+
+                Error = (group, file, e) => {
+                    return new List<object[]>{
+                        new object[]{ file.Name, file.Identifier, file.SizeBytes, null, null, null, null }
+                    };
                 }
-                
-                table.AddRow("(Successes)", "-", sumOriginal, sumRebuild, sumTransformed, sumTransformed - sumOriginal, sumTransformed - sumRebuild);
-            }
+            }.Start(table, items);
 
-            if (totalFiles > 0){
-                Console.WriteLine();
-            }
+            table.AddRow("(Successes)", "-", sumOriginal, sumRebuild, sumTransformed, sumTransformed - sumOriginal, sumTransformed - sumRebuild);
 
-            return "Processed " + totalFiles + " file(s) with " + failedFiles + " error(s).";
+            return $"Processed {result.TotalProcessed} file(s) with {result.TotalErrors} error(s).";
         }
     }
 }

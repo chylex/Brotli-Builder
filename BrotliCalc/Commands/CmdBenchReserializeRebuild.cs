@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using BrotliCalc.Helpers;
 using BrotliImpl.Transformers;
 using BrotliLib.Numbers;
@@ -19,61 +20,64 @@ namespace BrotliCalc.Commands{
             int totalFiles = 0;
             int failedFiles = 0;
 
+            var items = Brotli.ListPath(args[0]).SelectCompressedFiles().ToArray();
+
+            using(var progress = new Progress(items.Length))
             using(var table = new Table.CSV(args[1], new []{
                 "File", "Quality", "Original Bytes", "Reserialize Bytes", "Rebuild Bytes", "Avg Reserialize Time (ms)", "Avg Rebuild Time (ms)"
             })){
-                foreach(var group in Brotli.ListPath(args[0])){
-                    foreach(var file in group.Compressed){
-                        var bfs = file.Structure;
+                foreach(var (group, file) in items){
+                    progress.Post($"Processing {file}...");
 
-                        int? originalBytes = file.SizeBytes;
-                        int? reserializeBytes = null;
-                        int? rebuildBytes = null;
-                        long? reserializeTotalTime = 0L;
-                        long? rebuildTotalTime = 0L;
+                    var bfs = file.Structure;
 
-                        for(int run = 1; run <= SkippedRuns + CountedRuns; run++){
-                            Stopwatch swReserialize = Stopwatch.StartNew();
+                    int? originalBytes = file.SizeBytes;
+                    int? reserializeBytes = null;
+                    int? rebuildBytes = null;
+                    long? reserializeTotalTime = 0L;
+                    long? rebuildTotalTime = 0L;
 
-                            try{
-                                reserializeBytes = group.CountBytesAndValidate(bfs);
-                            }catch(Exception e){
-                                Debug.WriteLine(e.ToString());
-                                ++failedFiles;
-                                reserializeTotalTime = null;
-                                rebuildTotalTime = null;
-                                break;
-                            }finally{
-                                swReserialize.Stop();
-                            }
+                    for(int run = 1; run <= SkippedRuns + CountedRuns; run++){
+                        Stopwatch swReserialize = Stopwatch.StartNew();
 
-                            Stopwatch swRebuild = Stopwatch.StartNew();
-
-                            try{
-                                rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild()));
-                            }catch(Exception e){
-                                Debug.WriteLine(e.ToString());
-                                ++failedFiles;
-                                reserializeTotalTime = null;
-                                rebuildTotalTime = null;
-                                break;
-                            }finally{
-                                swRebuild.Stop();
-                            }
-
-                            if (run > SkippedRuns){
-                                reserializeTotalTime += swReserialize.ElapsedMilliseconds;
-                                rebuildTotalTime += swRebuild.ElapsedMilliseconds;
-                            }
+                        try{
+                            reserializeBytes = group.CountBytesAndValidate(bfs);
+                        }catch(Exception e){
+                            Debug.WriteLine(e.ToString());
+                            ++failedFiles;
+                            reserializeTotalTime = null;
+                            rebuildTotalTime = null;
+                            break;
+                        }finally{
+                            swReserialize.Stop();
                         }
-                        
-                        ++totalFiles;
-                        table.AddRow(file.Name, file.Identifier, originalBytes, reserializeBytes, rebuildBytes, reserializeTotalTime / CountedRuns, rebuildTotalTime / CountedRuns); // subtraction propagates null
+
+                        Stopwatch swRebuild = Stopwatch.StartNew();
+
+                        try{
+                            rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild()));
+                        }catch(Exception e){
+                            Debug.WriteLine(e.ToString());
+                            ++failedFiles;
+                            reserializeTotalTime = null;
+                            rebuildTotalTime = null;
+                            break;
+                        }finally{
+                            swRebuild.Stop();
+                        }
+
+                        if (run > SkippedRuns){
+                            reserializeTotalTime += swReserialize.ElapsedMilliseconds;
+                            rebuildTotalTime += swRebuild.ElapsedMilliseconds;
+                        }
                     }
+                    
+                    ++totalFiles;
+                    table.AddRow(file.Name, file.Identifier, originalBytes, reserializeBytes, rebuildBytes, reserializeTotalTime / CountedRuns, rebuildTotalTime / CountedRuns); // subtraction propagates null
                 }
             }
 
-            return "Processed " + totalFiles + " file(s) with " + failedFiles + " error(s).";
+            return $"Processed {totalFiles} file(s) with {failedFiles} error(s).";
         }
     }
 }
