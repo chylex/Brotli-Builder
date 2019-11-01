@@ -103,5 +103,13 @@ namespace BrotliCalc.Helpers{
 
             return groups.Length;
         }
+
+        public static IEnumerable<(BrotliFileGroup, BrotliFile.Uncompressed)> SelectUncompressedFiles(this IEnumerable<BrotliFileGroup> me){
+            return me.Select(group => (group, group.Uncompressed));
+        }
+
+        public static IEnumerable<(BrotliFileGroup, BrotliFile.Compressed)> SelectCompressedFiles(this IEnumerable<BrotliFileGroup> me){
+            return me.SelectMany(group => group.Compressed.Select(file => (group, file)));
+        }
     }
 }

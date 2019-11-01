@@ -41,20 +41,24 @@ namespace BrotliCalc.Helpers{
 
         internal class Uncompressed : BrotliFile{
             public Uncompressed(string path, string name) : base(path, name){}
+
+            public override string ToString(){
+                return Name;
+            }
         }
 
         internal class Compressed : BrotliFile{
             public string Identifier { get; }
 
-            public BrotliFileStructure Structure{
-                get{
-                    Debug.WriteLine($"Decompressing file {Name}.{Identifier}...");
-                    return BrotliFileStructure.FromBytes(Contents);
-                }
-            }
+            public string FullName => $"{Name}.{Identifier}{Brotli.CompressedFileExtension}";
+            public BrotliFileStructure Structure => BrotliFileStructure.FromBytes(Contents);
 
             public Compressed(string path, string name, string identifier) : base(path, name){
                 this.Identifier = identifier;
+            }
+
+            public override string ToString(){
+                return FullName;
             }
         }
     }
