@@ -191,7 +191,7 @@ namespace BrotliLib.Brotli.Components.Header{
                             if (code <= runLengthCodeCount){
                                 index += (1 << code) - 1 + reader.NextChunk(code);
 
-                                reader.MarkEnd(new TextMarker("skip to index " + (index + 1)));
+                                reader.MarkEnd(() => new TextMarker("skip to index " + (index + 1)));
                                 continue;
                             }
                             else{
@@ -199,7 +199,7 @@ namespace BrotliLib.Brotli.Components.Header{
                             }
                         }
                         
-                        reader.MarkEnd(new ValueMarker("CMAP" + context.Category.Id() + "[" + index + "]", contextMap[index]));
+                        reader.MarkEnd(() => new ValueMarker("CMAP" + context.Category.Id() + "[" + index + "]", contextMap[index]));
                     }
 
                     if (reader.NextBit("IMTF")){

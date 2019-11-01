@@ -212,9 +212,9 @@ namespace BrotliLib.Brotli.Components{
                 
                 reader.MarkStart();
                 mb.DeserializeContents(reader, context);
-                reader.MarkEnd(new TitleMarker("Contents"));
+                reader.MarkEnd(() => new TitleMarker("Contents"));
 
-                reader.MarkEnd(new TitleMarker("Meta-Block (" + mb.GetType().Name + ")"));
+                reader.MarkEnd(() => new TitleMarker("Meta-Block (" + mb.GetType().Name + ")"));
                 return mb;
             }
         );

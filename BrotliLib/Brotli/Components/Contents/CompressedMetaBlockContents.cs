@@ -134,7 +134,7 @@ namespace BrotliLib.Brotli.Components.Contents{
                     icCommands.Add(InsertCopyCommand.Deserialize(reader, dataContext));
                 }while(dataContext.NeedsMoreData);
 
-                reader.MarkEnd(new TitleMarker("Command List"));
+                reader.MarkEnd(() => new TitleMarker("Command List"));
                 
                 return new CompressedMetaBlockContents(header, icCommands, dataContext.BlockSwitchCommands);
             }

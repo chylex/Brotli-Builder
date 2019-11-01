@@ -124,11 +124,11 @@ namespace BrotliLib.Brotli.Components.Header{
 
                 if (type == 1){
                     tree = Simple.Deserialize(reader, context);
-                    reader.MarkEnd(new TitleMarker("Simple Huffman Tree"));
+                    reader.MarkEnd(() => new TitleMarker("Simple Huffman Tree"));
                 }
                 else{
                     tree = Complex.Deserialize(reader, context.ForComplexDeserialization(type));
-                    reader.MarkEnd(new TitleMarker("Complex Huffman Tree"));
+                    reader.MarkEnd(() => new TitleMarker("Complex Huffman Tree"));
                 }
 
                 return tree;

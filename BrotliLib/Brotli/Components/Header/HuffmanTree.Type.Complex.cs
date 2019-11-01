@@ -36,8 +36,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
                     void AddMarkedSymbol(HuffmanGenerator<T>.Entry entry){
                         symbolEntries.Add(entry);
-                        reader.MarkStart();
-                        reader.MarkEnd(new ValueMarker("entry", entry));
+                        reader.MarkValue("entry", () => entry);
                     }
                     
                     while(bitSpaceRemaining > 0 && symbolIndex < symbolCount){
@@ -61,7 +60,7 @@ namespace BrotliLib.Brotli.Components.Header{
                                 skipCount = 8 * (skipCount - 2) + NextSkipData();
                             }
 
-                            reader.MarkEnd(new ValueMarker("skip count", skipCount));
+                            reader.MarkEnd(() => new ValueMarker("skip count", skipCount));
 
                             symbolIndex += skipCount;
                         }
@@ -78,7 +77,7 @@ namespace BrotliLib.Brotli.Components.Header{
                                 repeatCount = 4 * (repeatCount - 2) + NextRepeatData();
                             }
 
-                            reader.MarkEnd(new ValueMarker("repeat count", repeatCount));
+                            reader.MarkEnd(() => new ValueMarker("repeat count", repeatCount));
 
                             bitSpaceRemaining -= sumPerRepeat * repeatCount;
                         
@@ -95,7 +94,7 @@ namespace BrotliLib.Brotli.Components.Header{
                         }
                     }
 
-                    reader.MarkEnd(new TitleMarker("Symbols"));
+                    reader.MarkEnd(() => new TitleMarker("Symbols"));
 
                     return new HuffmanTree<T>(HuffmanGenerator<T>.FromBitCountsCanonical(symbolEntries));
                 }

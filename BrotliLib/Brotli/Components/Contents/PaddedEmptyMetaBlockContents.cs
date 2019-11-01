@@ -71,7 +71,7 @@ namespace BrotliLib.Brotli.Components.Contents{
                     bytes[index] = reader.NextAlignedByte("byte");
                 }
 
-                reader.MarkEnd(new TitleMarker("Skipped Bytes"));
+                reader.MarkEnd(() => new TitleMarker("Skipped Bytes"));
 
                 return new PaddedEmptyMetaBlockContents(bytes);
             }

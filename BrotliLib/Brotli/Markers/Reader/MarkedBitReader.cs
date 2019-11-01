@@ -39,6 +39,10 @@ namespace BrotliLib.Brotli.Markers.Reader{
             nodes.Pop().Marker = new Marker(start, end, info);
         }
 
+        public void MarkEnd(Func<IMarkerInfo> info){
+            MarkEnd(info());
+        }
+
         public T MarkCall<T>(Func<T> supplier, Func<T, IMarkerInfo> marker){
             MarkStart();
             T result = supplier();

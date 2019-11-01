@@ -42,7 +42,7 @@ namespace BrotliLib.Brotli.Components.Contents{
                     bytes[index] = reader.NextAlignedByte("byte");
                 }
 
-                reader.MarkEnd(new TitleMarker("Uncompressed Bytes"));
+                reader.MarkEnd(() => new TitleMarker("Uncompressed Bytes"));
 
                 context.State.OutputBytes(bytes);
                 return new UncompressedMetaBlockContents(bytes);

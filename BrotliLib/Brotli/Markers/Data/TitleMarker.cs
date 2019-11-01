@@ -8,11 +8,11 @@ namespace BrotliLib.Brotli.Markers.Data{
         private readonly string title;
 
         public TitleMarker(string title){
-            this.title = string.Intern("[" + title + "]");
+            this.title = string.Intern(title);
         }
 
         public void ToString(StringBuilder build, int length){
-            build.Append(title).Append(" · ").Append(length).Append(length == 1 ? " bit" : " bits");
+            build.Append('[').Append(title).Append("] · ").Append(length).Append(length == 1 ? " bit" : " bits");
         }
         
         public override string ToString(){

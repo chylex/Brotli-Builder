@@ -8,6 +8,7 @@ namespace BrotliLib.Brotli.Markers.Reader{
 
         void MarkStart();
         void MarkEnd(IMarkerInfo info);
+        void MarkEnd(Func<IMarkerInfo> info);
 
         T MarkCall<T>(Func<T> supplier, Func<T, IMarkerInfo> marker);
     }
