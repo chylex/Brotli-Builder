@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace BrotliCalc.Helpers{
     static class Linq{
-        public static int MaxThreads { get; set; } = int.MaxValue; // TODO add command line argument
+        public static int MaxThreads { get; set; } = int.MaxValue;
 
         public static IEnumerable<(TA a, TB b)> Cartesian<TA, TB>(this IEnumerable<TA> me, IReadOnlyList<TB> other){
             foreach(var a in me){

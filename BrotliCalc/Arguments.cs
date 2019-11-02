@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using BrotliCalc.Helpers;
 using BrotliLib.Numbers;
 
 namespace BrotliCalc{
@@ -29,9 +30,14 @@ namespace BrotliCalc{
                     Console.WriteLine("BrotliCalc arguments");
                     Console.WriteLine("--------------------");
 
+                    Print("-maxdop <n>", "Maximum degree of parallelism (threads/processes) to use for parallel tasks.");
 
                     Environment.Exit(0);
                     return 1;
+
+                case "-maxdop":
+                    Linq.MaxThreads = ParseInt(key, value, IntRange.AtLeast(1));
+                    return 2;
 
                 default:
                     throw new ArgumentException($"Unknown argument {key}");
