@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using BrotliCalc.Helpers;
 using BrotliLib.Brotli.Components;
@@ -14,6 +13,8 @@ namespace BrotliCalc.Commands{
 
         public string ArgumentDesc => "<source-path> <quality|all> [window-size]";
         public IntRange ArgumentCount => new IntRange(2, 3);
+
+        public static string CustomExePath { get; set; }
 
         private static readonly IntRange QualityRange = new IntRange(0, 11);
         private const int AutoWindowSize = 0;
@@ -46,8 +47,13 @@ namespace BrotliCalc.Commands{
                         Compress(wbits, quality, file.Path);
                         progress.Post($"Finished {file} (quality {quality})");
                     });
-                }catch(Win32Exception e){
-                    throw new InvalidOperationException("Brotli executable must be named 'brotli' and placed into the working directory or environment path.", e);
+                }catch(Exception e) when (HasWin32Exception(e, out var we)){
+                    if (CustomExePath == null){
+                        throw new InvalidOperationException("Brotli executable must be named 'brotli' and placed into the working directory or environment path.", we);
+                    }
+                    else{
+                        throw new InvalidOperationException("Brotli executable failed to start.", we);
+                    }
                 }
             }
 
@@ -55,8 +61,18 @@ namespace BrotliCalc.Commands{
         }
 
         private static void Compress(int wbits, int quality, string path){
-            using DiagProcess process = DiagProcess.Start("brotli", $"-w {wbits} -q {quality} -S .{quality}{Brotli.CompressedFileExtension} -f \"{path}\"");
+            using DiagProcess process = DiagProcess.Start(CustomExePath ?? "brotli", $"-w {wbits} -q {quality} -S .{quality}{Brotli.CompressedFileExtension} -f \"{path}\"");
             process.WaitForExit();
+        }
+
+        private static bool HasWin32Exception(Exception e, out Win32Exception we){
+            we = e switch{
+                Win32Exception we2 => we2,
+                AggregateException ae => ae.InnerException as Win32Exception,
+                _ => null
+            };
+
+            return we != null;
         }
     }
 }

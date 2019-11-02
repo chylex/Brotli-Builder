@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using BrotliCalc.Commands;
 using BrotliCalc.Helpers;
 using BrotliLib.Numbers;
 
@@ -30,10 +31,15 @@ namespace BrotliCalc{
                     Console.WriteLine("BrotliCalc arguments");
                     Console.WriteLine("--------------------");
 
+                    Print("-brotliexe <path>", "Path to brotli executable used for compression.");
                     Print("-maxdop <n>", "Maximum degree of parallelism (threads/processes) to use for parallel tasks.");
 
                     Environment.Exit(0);
                     return 1;
+
+                case "-brotliexe":
+                    CmdCompress.CustomExePath = ParseFile(key, value);
+                    return 2;
 
                 case "-maxdop":
                     Linq.MaxThreads = ParseInt(key, value, IntRange.AtLeast(1));
