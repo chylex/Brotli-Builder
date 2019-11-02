@@ -6,15 +6,7 @@ using System.Threading;
 
 namespace BrotliCalc.Helpers{
     sealed class FileWorker<T> where T : BrotliFile{
-        public class Result{
-            public int TotalProcessed { get; }
-            public int TotalErrors { get; }
-
-            public Result(int totalProcessed, int totalErrors){
-                this.TotalProcessed = totalProcessed;
-                this.TotalErrors = totalErrors;
-            }
-        }
+        private const int WriterSleepMillis = 200;
 
         private static readonly List<object[]> ErrorEntry = new List<object[]>();
 
@@ -35,6 +27,17 @@ namespace BrotliCalc.Helpers{
             var results = new List<object[]>[count];
             using var progress = new Progress(count);
 
+            var writerToken = new CancellationTokenSource();
+            var writerInfo = new ResultWriter(output, results, writerToken.Token);
+
+            var writerThread = new Thread(ResultWriterThread){
+                Name = "ResultWriter",
+                Priority = ThreadPriority.BelowNormal,
+                IsBackground = true
+            };
+
+            writerThread.Start(writerInfo);
+
             items.WithIndex().Parallelize().ForAll(entry => {
                 var (index, (group, file)) = entry;
 
@@ -51,20 +54,72 @@ namespace BrotliCalc.Helpers{
                 }
             });
 
-            for(int index = 0; index < count; index++){
+            writerToken.Cancel();
+            writerThread.Join();
+
+            if (writerInfo.MissingEntries.Count > 0){
+                foreach(int index in writerInfo.MissingEntries){
+                    progress.Print($"Missing result entry for file {items[index].file}");
+                }
+
+                progress.Print("");
+            }
+
+            return new Result(count, errors);
+        }
+
+        public class Result{
+            public int TotalProcessed { get; }
+            public int TotalErrors { get; }
+
+            public Result(int totalProcessed, int totalErrors){
+                this.TotalProcessed = totalProcessed;
+                this.TotalErrors = totalErrors;
+            }
+        }
+
+        private class ResultWriter{
+            public Table Output { get; }
+            public List<object[]>[] Results { get; }
+            public CancellationToken Token { get; }
+
+            public List<int> MissingEntries { get; } = new List<int>();
+
+            public ResultWriter(Table output, List<object[]>[] results, CancellationToken token){
+                this.Output = output;
+                this.Results = results;
+                this.Token = token;
+            }
+        }
+
+        private void ResultWriterThread(object obj){
+            var info = (ResultWriter)obj;
+            var output = info.Output;
+            var results = info.Results;
+            var token = info.Token;
+
+            int index = 0;
+            int count = results.Length;
+
+            while(index < count){
                 var result = results[index];
 
                 if (result == null){
-                    progress.Print($"Missing result entry for file {items[index].file}");
+                    if (token.IsCancellationRequested){
+                        info.MissingEntries.Add(index++);
+                    }
+                    else{
+                        Thread.Sleep(WriterSleepMillis);
+                    }
                 }
                 else{
                     foreach(var row in result){
                         output.AddRow(row.ToArray());
                     }
+
+                    ++index;
                 }
             }
-
-            return new Result(count, errors);
         }
     }
 }
