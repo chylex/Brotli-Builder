@@ -28,10 +28,6 @@ namespace BrotliCalc.Commands{
                 throw new ArgumentException($"Compression quality must be in range {QualityRange}.");
             }
 
-            if (!File.Exists("dict")){
-                throw new FileNotFoundException("Dictionary file must be named 'dict' and placed into the working directory.", "dict");
-            }
-
             var groups = Brotli.ListPath(path).ToArray();
             int totalFiles = groups.Length;
 
