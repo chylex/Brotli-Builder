@@ -18,9 +18,20 @@ namespace BrotliCalc{
             new CmdBenchReserializeRebuild()
         };
 
-        private static void Main(){
+        private static void Main(string[] args){
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
+            try{
+                Arguments.Read(args);
+            }catch(Exception e){
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Error parsing the arguments:");
+                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.WriteLine(e.Message);
+                Debug.Print(e.ToString());
+                return;
+            }
 
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Available commands:");
@@ -73,9 +84,9 @@ namespace BrotliCalc{
                 }
 
                 IntRange range = command.ArgumentCount;
-                string[] args = ParseCommandArguments(input.ElementAtOrDefault(1) ?? string.Empty);
+                string[] arguments = ParseCommandArguments(input.ElementAtOrDefault(1) ?? string.Empty);
 
-                if (!range.Contains(args.Length)){
+                if (!range.Contains(arguments.Length)){
                     if (range.First == range.Last){
                         Console.WriteLine($"Command requires exactly {range.First} argument(s).");
                     }
@@ -93,7 +104,7 @@ namespace BrotliCalc{
                     Console.ForegroundColor = ConsoleColor.White;
 
                     var stopwatch = Stopwatch.StartNew();
-                    var result = command.Process(args);
+                    var result = command.Process(arguments);
                     stopwatch.Stop();
 
                     Console.WriteLine(result);
