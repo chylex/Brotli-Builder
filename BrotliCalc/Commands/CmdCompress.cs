@@ -16,12 +16,13 @@ namespace BrotliCalc.Commands{
         public IntRange ArgumentCount => new IntRange(2, 3);
 
         private static readonly IntRange QualityRange = new IntRange(0, 11);
+        private const int AutoWindowSize = 0;
         private const int FileLimit = 2000;
 
         public string Process(string[] args){
             var path = args[0];
             var qualities = args[1] == "all" ? QualityRange : IntRange.Only(int.Parse(args[1]));
-            var wbits = (args.Length >= 3 ? new WindowSize(int.Parse(args[2])) : WindowSize.Default).Bits;
+            var wbits = args.Length >= 3 ? new WindowSize(int.Parse(args[2])).Bits : AutoWindowSize;
 
             if (!qualities.Values.All(QualityRange.Contains)){
                 throw new ArgumentException($"Compression quality must be in range {QualityRange}.");
