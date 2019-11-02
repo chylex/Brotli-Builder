@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -26,8 +26,12 @@
     <ProjectReference Include="..\BrotliLib\BrotliLib.csproj" />
   </ItemGroup>
   
-  <Target Name="CopyResources" AfterTargets="Build">
+  <Target Name="CopyResourcesBuild" AfterTargets="Build">
     <Copy SourceFiles="Resources\brotli.exe;Resources\LICENSE-BROTLI.txt" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+  
+  <Target Name="CopyResourcesPublish" AfterTargets="Publish">
+    <Copy SourceFiles="Resources\brotli.exe;Resources\LICENSE-BROTLI.txt" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>
