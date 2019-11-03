@@ -5,6 +5,11 @@
 
     <IsPackable>false</IsPackable>
     <GenerateProgramFile>false</GenerateProgramFile>
+    <Version>1.1.0</Version>
+    <Copyright>Daniel Chýlek</Copyright>
+    <Company>Daniel Chýlek</Company>
+    <Authors>Daniel Chýlek</Authors>
+    <RepositoryUrl>https://github.com/chylex/Brotli-Builder</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
