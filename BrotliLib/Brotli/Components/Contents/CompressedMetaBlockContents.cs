@@ -5,13 +5,12 @@ using System.Text;
 using BrotliLib.Brotli.Components.Contents.Compressed;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Utils;
-using BrotliLib.Brotli.Markers;
-using BrotliLib.Brotli.Markers.Data;
-using BrotliLib.Brotli.Markers.Reader;
 using BrotliLib.Collections;
-using BrotliLib.IO;
-using BrotliLib.IO.Writer;
-using BrotliLib.Markers;
+using BrotliLib.Markers.Serialization;
+using BrotliLib.Markers.Serialization.Reader;
+using BrotliLib.Markers.Types;
+using BrotliLib.Serialization;
+using BrotliLib.Serialization.Writer;
 using BlockSwitchCommandMap = BrotliLib.Brotli.Components.Utils.CategoryMap<System.Collections.Generic.IReadOnlyList<BrotliLib.Brotli.Components.Contents.Compressed.BlockSwitchCommand>>;
 using BlockSwitchCommandMutableMap = BrotliLib.Brotli.Components.Utils.CategoryMap<System.Collections.Generic.IList<BrotliLib.Brotli.Components.Contents.Compressed.BlockSwitchCommand>>;
 

@@ -2,8 +2,8 @@
 using BrotliLib.Brotli.Components.Contents.Compressed;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
-using BrotliLib.IO.Reader;
-using BrotliLib.IO.Writer;
+using BrotliLib.Serialization.Reader;
+using BrotliLib.Serialization.Writer;
 
 namespace BrotliLib.Brotli.Components.Data{
     /// <summary>

@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using BrotliLib.Markers;
+using BrotliLib.Markers.Types;
 using FastColoredTextBoxNS;
 
 namespace BrotliBuilder.Components{

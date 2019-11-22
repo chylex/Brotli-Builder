@@ -5,8 +5,8 @@ using System.IO;
 using BrotliBuilder.Utils;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Encode;
-using BrotliLib.Brotli.State.Output;
-using BrotliLib.IO;
+using BrotliLib.Brotli.Output;
+using BrotliLib.Serialization;
 
 namespace BrotliBuilder.State{
     sealed class BrotliFileController{

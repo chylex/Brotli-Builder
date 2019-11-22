@@ -1,8 +1,8 @@
 ﻿using System;
-using BrotliLib.Brotli.Markers;
-using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.Collections;
-using BrotliLib.IO;
+using BrotliLib.Markers.Serialization;
+using BrotliLib.Markers.Types;
+using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components.Contents{
     public sealed class PaddedEmptyMetaBlockContents{

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
 using BrotliLib.Brotli.Components.Header;
-using BrotliLib.IO;
-using BrotliLib.IO.Reader;
-using BrotliLib.IO.Writer;
 using BrotliLib.Numbers;
+using BrotliLib.Serialization;
+using BrotliLib.Serialization.Reader;
+using BrotliLib.Serialization.Writer;
 using BlockLengthCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.BlockLengthCode>;
 
 namespace BrotliLib.Brotli.Components.Data{

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Components.Contents.Compressed;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Encode;
-using BrotliLib.Brotli.State;
 
 namespace BrotliImpl.Transformers{
     public class TransformSplitInsertCopyLengths : CompressedMetaBlockTransformer{

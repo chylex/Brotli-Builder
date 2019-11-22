@@ -1,5 +1,5 @@
 ﻿using System;
-using BrotliLib.IO;
+using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components.Utils{
     /// <summary>

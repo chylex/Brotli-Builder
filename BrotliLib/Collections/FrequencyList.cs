@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using BrotliLib.Huffman;
+using BrotliLib.Collections.Huffman;
 
 namespace BrotliLib.Collections{
     /// <summary>

@@ -1,6 +1,6 @@
 ﻿using System;
-using BrotliLib.IO;
 using BrotliLib.Numbers;
+using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components.Header{
     /// <summary>

@@ -2,9 +2,9 @@
 using System.Diagnostics;
 using System.Linq;
 using BrotliLib.Brotli;
-using BrotliLib.Brotli.State.Output;
-using BrotliLib.IO;
+using BrotliLib.Brotli.Output;
 using BrotliLib.Markers;
+using BrotliLib.Serialization;
 
 namespace BrotliBuilder.State{
     abstract class BrotliFileState{

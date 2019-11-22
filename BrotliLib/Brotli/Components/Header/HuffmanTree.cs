@@ -2,12 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using BrotliLib.Brotli.Markers;
-using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.Collections;
-using BrotliLib.Huffman;
-using BrotliLib.IO;
+using BrotliLib.Collections.Huffman;
+using BrotliLib.Markers.Serialization;
+using BrotliLib.Markers.Types;
 using BrotliLib.Numbers;
+using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components.Header{
     /// <summary>

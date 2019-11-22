@@ -1,8 +1,7 @@
 ﻿using System;
 using BrotliLib.Brotli.Components.Header;
-using BrotliLib.Brotli.State;
-using BrotliLib.IO.Reader;
-using BrotliLib.IO.Writer;
+using BrotliLib.Serialization.Reader;
+using BrotliLib.Serialization.Writer;
 
 namespace BrotliLib.Brotli.Components.Data{
     public abstract partial class DistanceCode{

@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Dictionary;
+using BrotliLib.Brotli.Dictionary.Default;
 using BrotliLib.Brotli.Encode;
-using BrotliLib.Brotli.Markers.Reader;
-using BrotliLib.Brotli.State;
-using BrotliLib.Brotli.State.Output;
-using BrotliLib.IO;
-using BrotliLib.IO.Writer;
+using BrotliLib.Brotli.Output;
+using BrotliLib.Markers.Serialization.Reader;
+using BrotliLib.Serialization;
+using BrotliLib.Serialization.Writer;
 
 namespace BrotliLib.Brotli{
     /// <summary>
@@ -92,14 +92,14 @@ namespace BrotliLib.Brotli{
 
         private class FileContext{
             public BrotliDictionary Dictionary { get; }
-            public Func<WindowSize, IBrotliOutputState> OutputState { get; }
+            public Func<WindowSize, IBrotliOutput> OutputState { get; }
 
-            public FileContext(BrotliDictionary dictionary, Func<WindowSize, IBrotliOutputState> outputState){
+            public FileContext(BrotliDictionary dictionary, Func<WindowSize, IBrotliOutput> outputState){
                 Dictionary = dictionary;
                 OutputState = outputState;
             }
 
-            public FileContext(BrotliDictionary dictionary, IBrotliOutputState outputState) : this(dictionary, _ => outputState){}
+            public FileContext(BrotliDictionary dictionary, IBrotliOutput outputState) : this(dictionary, _ => outputState){}
         }
 
         private static IMarkedBitReader CreateReader(BitStream bitStream, bool enableMarkers){

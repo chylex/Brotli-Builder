@@ -1,4 +1,5 @@
 ﻿using System;
+using BrotliLib.Markers.Types;
 
 namespace BrotliLib.Markers{
     public class Marker : IComparable<Marker>{

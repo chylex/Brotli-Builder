@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Utils;
-using BrotliLib.Brotli.Markers;
-using BrotliLib.Brotli.State;
 using BrotliLib.Collections;
-using BrotliLib.IO;
+using BrotliLib.Markers.Serialization;
+using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components.Contents.Compressed{
     public sealed class InsertCopyCommand{

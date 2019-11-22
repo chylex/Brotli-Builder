@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
-using BrotliLib.Brotli.State;
 
 namespace BrotliLib.Brotli.Components.Utils{
     /// <summary>

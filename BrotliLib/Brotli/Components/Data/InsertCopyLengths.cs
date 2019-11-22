@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using BrotliLib.Brotli.Components.Utils;
-using BrotliLib.Brotli.Markers;
-using BrotliLib.IO;
+using BrotliLib.Markers.Serialization;
 using BrotliLib.Numbers;
+using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components.Data{
     /// <summary>

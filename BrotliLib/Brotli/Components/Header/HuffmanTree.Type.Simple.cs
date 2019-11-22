@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
-using BrotliLib.Brotli.Markers;
-using BrotliLib.Brotli.Markers.Reader;
-using BrotliLib.Huffman;
-using BrotliLib.IO;
+using BrotliLib.Collections.Huffman;
+using BrotliLib.Markers.Serialization;
+using BrotliLib.Markers.Serialization.Reader;
+using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components.Header{
     partial class HuffmanTree<T>{

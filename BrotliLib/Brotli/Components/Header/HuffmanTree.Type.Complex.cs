@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BrotliLib.Brotli.Markers;
-using BrotliLib.Brotli.Markers.Data;
-using BrotliLib.Brotli.Markers.Reader;
-using BrotliLib.Huffman;
-using BrotliLib.IO;
-using BrotliLib.IO.Writer;
-using ComplexLengthNode = BrotliLib.Huffman.HuffmanNode<byte>;
+using BrotliLib.Collections.Huffman;
+using BrotliLib.Markers.Serialization;
+using BrotliLib.Markers.Serialization.Reader;
+using BrotliLib.Markers.Types;
+using BrotliLib.Serialization;
+using BrotliLib.Serialization.Writer;
+using ComplexLengthNode = BrotliLib.Collections.Huffman.HuffmanNode<byte>;
 
 namespace BrotliLib.Brotli.Components.Header{
     partial class HuffmanTree<T>{

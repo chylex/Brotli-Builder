@@ -1,5 +1,6 @@
 ﻿using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Dictionary;
+using BrotliLib.Brotli.Dictionary.Default;
 
 namespace BrotliLib.Brotli{
     public sealed class BrotliFileParameters{

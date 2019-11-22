@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
+using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Encode;
-using BrotliLib.Brotli.State;
 
 namespace BrotliImpl.Transformers{
     public class TransformTestDistanceParameters : CompressedMetaBlockTransformer{

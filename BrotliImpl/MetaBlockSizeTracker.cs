@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
+using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Encode;
-using BrotliLib.Brotli.State;
-using BrotliLib.IO.Writer;
+using BrotliLib.Serialization.Writer;
 
 namespace BrotliImpl{
     class MetaBlockSizeTracker{

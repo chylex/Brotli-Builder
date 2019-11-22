@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
-using BrotliLib.Brotli.State;
-using BrotliLib.IO;
-using BrotliLib.IO.Reader;
-using BrotliLib.IO.Writer;
+using BrotliLib.Serialization;
+using BrotliLib.Serialization.Reader;
+using BrotliLib.Serialization.Writer;
 using DistanceTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.DistanceCode>;
 
 namespace BrotliLib.Brotli.Components.Data{

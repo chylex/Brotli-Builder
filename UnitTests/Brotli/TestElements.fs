@@ -2,13 +2,13 @@
 
 open Xunit
 open System
-open BrotliLib.IO
 open BrotliLib.Brotli.Components
 open BrotliLib.Brotli.Components.Data
 open BrotliLib.Brotli.Components.Header
 open BrotliLib.Brotli.Components.Utils
-open BrotliLib.Huffman
+open BrotliLib.Collections.Huffman
 open BrotliLib.Numbers
+open BrotliLib.Serialization
 
 
 module Helper =

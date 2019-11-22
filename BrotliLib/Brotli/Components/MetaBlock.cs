@@ -1,12 +1,11 @@
 ﻿using System;
 using BrotliLib.Brotli.Components.Contents;
 using BrotliLib.Brotli.Components.Header;
-using BrotliLib.Brotli.Markers;
-using BrotliLib.Brotli.Markers.Data;
-using BrotliLib.Brotli.State;
-using BrotliLib.IO;
-using BrotliLib.IO.Reader;
-using BrotliLib.IO.Writer;
+using BrotliLib.Markers.Serialization;
+using BrotliLib.Markers.Types;
+using BrotliLib.Serialization;
+using BrotliLib.Serialization.Reader;
+using BrotliLib.Serialization.Writer;
 
 namespace BrotliLib.Brotli.Components{
     /// <summary>

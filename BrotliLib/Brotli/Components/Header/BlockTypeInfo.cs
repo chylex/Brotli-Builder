@@ -1,11 +1,11 @@
 ﻿using BrotliLib.Brotli.Components.Utils;
-using BrotliLib.IO;
 using BrotliLib.Brotli.Components.Data;
-using BrotliLib.Brotli.Markers;
 using BrotliLib.Numbers;
 using BlockTypeCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<int>;
 using BlockLengthCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.BlockLengthCode>;
 using System;
+using BrotliLib.Markers.Serialization;
+using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components.Header{
     /// <summary>

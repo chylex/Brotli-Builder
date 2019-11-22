@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\dict" />
+    <EmbeddedResource Include="Brotli\Dictionary\Default\dict" />
   </ItemGroup>
 
   <ItemGroup>

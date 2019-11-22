@@ -2,8 +2,8 @@
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
-using BrotliLib.Brotli.Markers;
-using BrotliLib.IO;
+using BrotliLib.Markers.Serialization;
+using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components.Contents.Compressed{
     public sealed class BlockSwitchCommand{

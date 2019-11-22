@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Utils;
-using BrotliLib.Brotli.Markers;
-using BrotliLib.Brotli.Markers.Data;
 using BrotliLib.Collections;
-using BrotliLib.IO;
+using BrotliLib.Markers.Serialization;
+using BrotliLib.Markers.Types;
 using BrotliLib.Numbers;
+using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components.Header{
     /// <summary>
