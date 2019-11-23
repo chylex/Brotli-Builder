@@ -9,7 +9,7 @@ namespace BrotliLib.Brotli.Components.Data{
         /// <summary>
         /// Represents a direct distance code, which is converted to a distance value between 1 and <see cref="DistanceParameters.DirectCodeCount"/> (both inclusive).
         /// </summary>
-        private sealed class Direct : DistanceCode{
+        public sealed class Direct : DistanceCode{
             private readonly int encodedValue;
 
             public Direct(int code) : base(code){

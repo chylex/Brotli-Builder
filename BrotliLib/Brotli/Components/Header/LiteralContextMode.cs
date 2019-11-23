@@ -1,7 +1,7 @@
 ﻿using System;
 using BrotliLib.Serialization;
 
-namespace BrotliLib.Brotli.Components.Utils{
+namespace BrotliLib.Brotli.Components.Header{
     /// <summary>
     /// Lists functions for context modeling of literals.
     /// https://tools.ietf.org/html/rfc7932#section-7.1

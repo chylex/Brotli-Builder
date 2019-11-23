@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using BrotliLib.Brotli.Components.Header;
-using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Serialization;
 using BrotliLib.Serialization.Reader;
 using BrotliLib.Serialization.Writer;
@@ -60,7 +59,7 @@ namespace BrotliLib.Brotli.Components.Data{
 
         // Types
 
-        internal static IReadOnlyList<DistanceCode> ForValue(in DistanceParameters parameters, BrotliGlobalState state, int value){
+        internal static IList<DistanceCode> ForValue(in DistanceParameters parameters, BrotliGlobalState state, int value){
             List<DistanceCode> valid = new List<DistanceCode>();
 
             valid.AddRange(Last.Codes.Where(code => code.CanEncodeValue(state, value)));

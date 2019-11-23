@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 
-namespace BrotliLib.Brotli.Components.Utils{
+namespace BrotliLib.Brotli.Components.Data{
     /// <summary>
     /// Represents either an exact copy distance value, or a value with special meaning used to determine the distance code.
     /// </summary>
@@ -62,7 +61,7 @@ namespace BrotliLib.Brotli.Components.Utils{
             }
         }
 
-        public static IReadOnlyList<DistanceCode> MakeCode(this DistanceInfo info, in DistanceParameters parameters, BrotliGlobalState state){
+        public static IList<DistanceCode> MakeCode(this DistanceInfo info, in DistanceParameters parameters, BrotliGlobalState state){
             switch(info){
                 case DistanceInfo.EndsAfterLiterals:
                 case DistanceInfo.ImplicitCodeZero:

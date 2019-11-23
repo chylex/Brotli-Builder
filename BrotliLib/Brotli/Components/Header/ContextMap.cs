@@ -13,11 +13,6 @@ namespace BrotliLib.Brotli.Components.Header{
     /// https://tools.ietf.org/html/rfc7932#section-7.3
     /// </summary>
     public sealed class ContextMap{
-        private const int LiteralTreesPerBlockType = 64;
-        private const int DistanceTreesPerBlockType = 4;
-
-        // Instance
-
         public Category Category { get; }
         public int TreeCount { get; }
         
@@ -97,15 +92,17 @@ namespace BrotliLib.Brotli.Components.Header{
         }
 
         public sealed class Literals : Builder{
+            public const int TreesPerBlockType = 64;
             public static readonly ContextMap Simple = new Literals(1, 1).Build();
 
-            public Literals(int treeCount, int blockTypeCount) : base(Category.Literal, treeCount, LiteralTreesPerBlockType, blockTypeCount){}
+            public Literals(int treeCount, int blockTypeCount) : base(Category.Literal, treeCount, TreesPerBlockType, blockTypeCount){}
         }
 
         public sealed class Distances : Builder{
+            public const int TreesPerBlockType = 4;
             public static readonly ContextMap Simple = new Distances(1, 1).Build();
 
-            public Distances(int treeCount, int blockTypeCount) : base(Category.Distance, treeCount, DistanceTreesPerBlockType, blockTypeCount){}
+            public Distances(int treeCount, int blockTypeCount) : base(Category.Distance, treeCount, TreesPerBlockType, blockTypeCount){}
         }
 
         public static Builder For(int treeCount, BlockTypeInfo blockTypeInfo){

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using BrotliLib.Collections;
 
-namespace BrotliLib.Brotli.Components.Utils{
+namespace BrotliLib.Brotli.Components.Data{
     /// <summary>
     /// Tracks the current block type, and allows converting between type codes and type values.
     /// </summary>
@@ -17,7 +17,7 @@ namespace BrotliLib.Brotli.Components.Utils{
             this.last = new RingBuffer<int>(1, 0);
         }
 
-        public List<int> FindCodes(int value){
+        public IList<int> FindCodes(int value){
             List<int> list = new List<int>(3);
 
             if (value == Code0Value){
