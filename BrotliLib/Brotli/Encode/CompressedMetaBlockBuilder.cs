@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BrotliLib.Brotli.Components;
-using BrotliLib.Brotli.Components.Contents;
-using BrotliLib.Brotli.Components.Contents.Compressed;
+using BrotliLib.Brotli.Components.Compressed;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
@@ -39,8 +38,8 @@ namespace BrotliLib.Brotli.Encode{
         public CompressedMetaBlockBuilder(BrotliFileParameters parameters) : this(new BrotliGlobalState(parameters, new BrotliOutputWindowed(parameters.WindowSize))){}
 
         public CompressedMetaBlockBuilder(MetaBlock.Compressed metaBlock, BrotliGlobalState state) : this(state){
-            var contents = metaBlock.Contents;
-            var header = contents.Header;
+            var header = metaBlock.Header;
+            var data = metaBlock.Data;
             
             this.BlockTypes = header.BlockTypes.Select(info => new BlockSwitchBuilder(info));
             this.DistanceParameters = header.DistanceParameters;
@@ -48,14 +47,14 @@ namespace BrotliLib.Brotli.Encode{
             this.LiteralCtxMap = header.LiteralCtxMap;
             this.DistanceCtxMap = header.DistanceCtxMap;
 
-            foreach(InsertCopyCommand command in contents.InsertCopyCommands){
+            foreach(InsertCopyCommand command in data.InsertCopyCommands){
                 AddInsertCopy(command);
             }
 
             foreach(Category category in Categories.LID){
                 var bsBuilder = BlockTypes[category];
 
-                foreach(BlockSwitchCommand command in contents.BlockSwitchCommands[category]){
+                foreach(BlockSwitchCommand command in data.BlockSwitchCommands[category]){
                     bsBuilder.AddBlockSwitch(command);
                 }
             }
@@ -180,10 +179,10 @@ namespace BrotliLib.Brotli.Encode{
                 ConstructHuffmanTrees(distanceCodeFreq)
             );
 
-            var contents = new CompressedMetaBlockContents(header, icCommandsFinal, bsCommands);
+            var data = new MetaBlockCompressionData(icCommandsFinal, bsCommands);
             var dataLength = new DataLength(OutputSize);
 
-            return (new MetaBlock.Compressed(isLast: false, dataLength, contents), () => new CompressedMetaBlockBuilder(state));
+            return (new MetaBlock.Compressed(isLast: false, dataLength, header, data), () => new CompressedMetaBlockBuilder(state));
         }
 
         // Helpers

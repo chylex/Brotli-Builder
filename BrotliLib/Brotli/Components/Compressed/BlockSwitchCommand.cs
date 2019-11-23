@@ -5,7 +5,7 @@ using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Markers.Serialization;
 using BrotliLib.Serialization;
 
-namespace BrotliLib.Brotli.Components.Contents.Compressed{
+namespace BrotliLib.Brotli.Components.Compressed{
     public sealed class BlockSwitchCommand{
         public int Type { get; }
         public int Length { get; }

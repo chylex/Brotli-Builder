@@ -7,7 +7,7 @@ using BrotliLib.Collections;
 using BrotliLib.Markers.Serialization;
 using BrotliLib.Serialization;
 
-namespace BrotliLib.Brotli.Components.Contents.Compressed{
+namespace BrotliLib.Brotli.Components.Compressed{
     public sealed class InsertCopyCommand{
         public IReadOnlyList<Literal> Literals { get; }
 
@@ -53,7 +53,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
 
         // Serialization
 
-        internal static readonly BitDeserializer<InsertCopyCommand, CompressedMetaBlockContents.DataContext> Deserialize = MarkedBitDeserializer.Title<InsertCopyCommand, CompressedMetaBlockContents.DataContext>(
+        internal static readonly BitDeserializer<InsertCopyCommand, MetaBlockCompressionData.DataContext> Deserialize = MarkedBitDeserializer.Title<InsertCopyCommand, MetaBlockCompressionData.DataContext>(
             "Insert & Copy Command",
 
             (reader, context) => {
@@ -110,7 +110,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
             }
         );
 
-        internal static readonly BitSerializer<InsertCopyCommand, CompressedMetaBlockContents.DataContext> Serialize = (writer, obj, context) => {
+        internal static readonly BitSerializer<InsertCopyCommand, MetaBlockCompressionData.DataContext> Serialize = (writer, obj, context) => {
             MetaBlockCompressionHeader header = context.Header;
             BrotliGlobalState state = context.State;
             

@@ -2,18 +2,18 @@
 using System.Text;
 using System.Windows.Forms;
 using BrotliBuilder.Utils;
-using BrotliLib.Brotli.Components.Contents;
+using BrotliLib.Brotli.Components;
 
 namespace BrotliBuilder.Blocks.Structure{
     partial class BuildEmptyMetaBlock : UserControl{
         private readonly IBuildingBlockContext context;
 
-        public BuildEmptyMetaBlock(IBuildingBlockContext context, PaddedEmptyMetaBlockContents contents){
+        public BuildEmptyMetaBlock(IBuildingBlockContext context, MetaBlock.PaddedEmpty metaBlock){
             InitializeComponent();
 
             this.context = context;
             this.textBoxHiddenText.SetPlainTextMode();
-            this.textBoxHiddenText.Text = Encoding.UTF8.GetString(contents.HiddenData);
+            this.textBoxHiddenText.Text = Encoding.UTF8.GetString(metaBlock.HiddenData);
             this.textBoxHiddenText.TextChanged += textBoxHiddenText_TextChanged;
         }
 

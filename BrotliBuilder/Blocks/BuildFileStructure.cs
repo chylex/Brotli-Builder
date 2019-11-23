@@ -171,10 +171,10 @@ namespace BrotliBuilder.Blocks{
             public Func<IBuildingBlockContext, UserControl> CreateStructureBlock(){
                 switch(Value){
                     case MetaBlock.PaddedEmpty pe:
-                        return ctx => new BuildEmptyMetaBlock(ctx, pe.Contents);
+                        return ctx => new BuildEmptyMetaBlock(ctx, pe);
 
                     case MetaBlock.Uncompressed u:
-                        return ctx => new BuildUncompressedMetaBlock(ctx, u.Contents);
+                        return ctx => new BuildUncompressedMetaBlock(ctx, u);
 
                     case MetaBlock.Compressed c:
                         // TODO
@@ -205,7 +205,7 @@ namespace BrotliBuilder.Blocks{
                         break;
 
                     case MetaBlock.PaddedEmpty pe:
-                        int length = pe.Contents.HiddenData.Length;
+                        int length = pe.HiddenData.Length;
                         detail = length == 0 ? "Empty, Padded" : $"Empty, Skip {length} B";
                         break;
 

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using BrotliLib.Brotli.Components.Contents.Compressed;
+using BrotliLib.Brotli.Components.Compressed;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Serialization.Reader;

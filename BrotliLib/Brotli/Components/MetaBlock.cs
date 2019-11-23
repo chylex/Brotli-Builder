@@ -1,11 +1,7 @@
 ﻿using System;
-using BrotliLib.Brotli.Components.Contents;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Markers.Serialization;
-using BrotliLib.Markers.Types;
 using BrotliLib.Serialization;
-using BrotliLib.Serialization.Reader;
-using BrotliLib.Serialization.Writer;
 
 namespace BrotliLib.Brotli.Components{
     /// <summary>
@@ -13,13 +9,15 @@ namespace BrotliLib.Brotli.Components{
     /// https://tools.ietf.org/html/rfc7932#section-9.2
     /// https://tools.ietf.org/html/rfc7932#section-9.3
     /// </summary>
-    public abstract class MetaBlock{
+    public abstract partial class MetaBlock{
         internal class Context{
-            public MetaBlock MetaBlock { get; }
+            public bool IsLast { get; }
+            public DataLength DataLength { get; }
             public BrotliGlobalState State { get; }
 
-            public Context(MetaBlock metaBlock, BrotliGlobalState state){
-                this.MetaBlock = metaBlock;
+            public Context(bool isLast, DataLength dataLength, BrotliGlobalState state){
+                this.IsLast = isLast;
+                this.DataLength = dataLength;
                 this.State = state;
             }
         }
@@ -34,9 +32,6 @@ namespace BrotliLib.Brotli.Components{
             this.DataLength = dataLength;
         }
 
-        internal abstract void SerializeContents(IBitWriter writer, BrotliGlobalState state);
-        internal abstract void DeserializeContents(IBitReader reader, BrotliGlobalState state);
-        
         protected bool Equals(MetaBlock other){
             return IsLast == other.IsLast &&
                    DataLength.Equals(other.DataLength);
@@ -46,109 +41,11 @@ namespace BrotliLib.Brotli.Components{
             return HashCode.Combine(IsLast, DataLength);
         }
 
-        // Types
-
-        /// <inheritdoc />
-        /// <summary>
-        /// <code>ISLAST = 1, ISLASTEMPTY = 1</code>
-        /// </summary>
-        public class LastEmpty : MetaBlock{
-            public LastEmpty() : base(true, DataLength.Empty){}
-
-            public override bool Equals(object obj){
-                return obj is LastEmpty;
-            }
-
-            public override int GetHashCode(){
-                return ParentHashCode();
-            }
-
-            internal override void SerializeContents(IBitWriter writer, BrotliGlobalState state){}
-            internal override void DeserializeContents(IBitReader reader, BrotliGlobalState state){}
-        }
-        
-        /// <inheritdoc />
-        /// <summary>
-        /// <code>ISLAST = 0, MLEN = 0</code>
-        /// </summary>
-        public class PaddedEmpty : MetaBlock{
-            public PaddedEmptyMetaBlockContents Contents { get; private set; }
-
-            internal PaddedEmpty() : base(false, DataLength.Empty){}
-
-            public PaddedEmpty(byte[] data) : this(){
-                this.Contents = new PaddedEmptyMetaBlockContents(data);
-            }
-
-            public override bool Equals(object obj){
-                return obj is PaddedEmpty other &&
-                       Contents.Equals(other.Contents);
-            }
-
-            public override int GetHashCode(){
-                return HashCode.Combine(ParentHashCode(), Contents);
-            }
-
-            internal override void SerializeContents(IBitWriter writer, BrotliGlobalState state) => PaddedEmptyMetaBlockContents.Serialize(writer, Contents, NoContext.Value);
-            internal override void DeserializeContents(IBitReader reader, BrotliGlobalState state) => Contents = PaddedEmptyMetaBlockContents.Deserialize(reader, NoContext.Value);
-        }
-        
-        /// <inheritdoc />
-        /// <summary>
-        /// <code>ISLAST = 0, MLEN > 0, ISUNCOMPRESSED = 1</code>
-        /// </summary>
-        public class Uncompressed : MetaBlock{
-            public UncompressedMetaBlockContents Contents { get; private set; }
-
-            internal Uncompressed(DataLength dataLength) : base(false, dataLength){}
-
-            public Uncompressed(byte[] data) : base(false, new DataLength(data.Length)){
-                this.Contents = new UncompressedMetaBlockContents(data);
-            }
-            
-            public override bool Equals(object obj){
-                return obj is Uncompressed other &&
-                       base.Equals(other) &&
-                       Contents.Equals(other.Contents);
-            }
-
-            public override int GetHashCode(){
-                return HashCode.Combine(ParentHashCode(), Contents);
-            }
-
-            internal override void SerializeContents(IBitWriter writer, BrotliGlobalState state) => UncompressedMetaBlockContents.Serialize(writer, Contents, new Context(this, state));
-            internal override void DeserializeContents(IBitReader reader, BrotliGlobalState state) => Contents = UncompressedMetaBlockContents.Deserialize(reader, new Context(this, state));
-        }
-        
-        /// <inheritdoc />
-        /// <summary>
-        /// <code>ISLAST = ?, MLEN > 0, ISUNCOMPRESSED = 0</code>
-        /// </summary>
-        public class Compressed : MetaBlock{
-            public CompressedMetaBlockContents Contents { get; private set; }
-
-            public Compressed(bool isLast, DataLength dataLength) : base(isLast, dataLength){}
-            public Compressed(bool isLast, DataLength dataLength, CompressedMetaBlockContents contents) : this(isLast, dataLength){
-                this.Contents = contents;
-            }
-            
-            public override bool Equals(object obj){
-                return obj is Compressed other &&
-                       base.Equals(other) &&
-                       Contents.Equals(other.Contents);
-            }
-
-            public override int GetHashCode(){
-                return HashCode.Combine(ParentHashCode(), Contents);
-            }
-
-            internal override void SerializeContents(IBitWriter writer, BrotliGlobalState state) => CompressedMetaBlockContents.Serialize(writer, Contents, new Context(this, state));
-            internal override void DeserializeContents(IBitReader reader, BrotliGlobalState state) => Contents = CompressedMetaBlockContents.Deserialize(reader, new Context(this, state));
-        }
-
         // Serialization
-        
-        private static readonly BitDeserializer<MetaBlock, BrotliGlobalState> MetaBlockBaseDeserialize = MarkedBitDeserializer.Wrap<MetaBlock, BrotliGlobalState>(
+
+        public static readonly BitDeserializer<MetaBlock, BrotliGlobalState> Deserialize = MarkedBitDeserializer.Title<MetaBlock, BrotliGlobalState>(
+            "Meta-Block",
+
             (reader, context) => {
                 bool isLast = reader.NextBit("ISLAST");
                 bool isLastEmpty = isLast && reader.NextBit("ISLASTEMPTY");
@@ -160,67 +57,61 @@ namespace BrotliLib.Brotli.Components{
                 DataLength dataLength = DataLength.Deserialize(reader, NoContext.Value);
 
                 if (dataLength.UncompressedBytes == 0){
-                    return new PaddedEmpty();
+                    return reader.ReadStructure(PaddedEmpty.Deserialize, NoContext.Value, "Contents");
                 }
                 
                 bool isUncompressed = !isLast && reader.NextBit("ISUNCOMPRESSED");
 
                 if (isUncompressed){
-                    return new Uncompressed(dataLength);
+                    return reader.ReadStructure(Uncompressed.Deserialize, new Context(isLast: false, dataLength, context), "Contents");
                 }
                 else{
-                    return new Compressed(isLast, dataLength);
+                    return reader.ReadStructure(Compressed.Deserialize, new Context(isLast, dataLength, context), "Contents");
                 }
-            }
-        );
-
-        private static readonly BitSerializer<MetaBlock, BrotliGlobalState> MetaBlockBaseSerialize = (writer, obj, context) => {
-            if (obj is LastEmpty){
-                writer.WriteBit(true);
-                writer.WriteBit(true);
-                return;
-            }
-
-            if (obj.IsLast){
-                writer.WriteBit(true);
-                writer.WriteBit(false);
-            }
-            else{
-                writer.WriteBit(false);
-            }
-
-            DataLength.Serialize(writer, obj.DataLength, NoContext.Value);
-
-            if (obj.DataLength.ChunkNibbles == 0){
-                return;
-            }
-
-            if (!obj.IsLast){
-                writer.WriteBit(obj is Uncompressed);
-            }
-            else if (obj is Uncompressed){
-                throw new InvalidOperationException("An uncompressed meta-block cannot also be the last.");
-            }
-        };
-
-        public static readonly BitDeserializer<MetaBlock, BrotliGlobalState> Deserialize = MarkedBitDeserializer.Wrap<MetaBlock, BrotliGlobalState>(
-            (reader, context) => {
-                reader.MarkStart();
-
-                MetaBlock mb = reader.ReadStructure(MetaBlockBaseDeserialize, context, "Header");
-                
-                reader.MarkStart();
-                mb.DeserializeContents(reader, context);
-                reader.MarkEnd(() => new TitleMarker("Contents"));
-
-                reader.MarkEnd(() => new TitleMarker("Meta-Block (" + mb.GetType().Name + ")"));
-                return mb;
             }
         );
 
         public static readonly BitSerializer<MetaBlock, BrotliGlobalState> Serialize = (writer, obj, context) => {
-            MetaBlockBaseSerialize(writer, obj, context);
-            obj.SerializeContents(writer, context);
+            if (obj is LastEmpty){
+                writer.WriteBit(true); // ISLAST
+                writer.WriteBit(true); // ISLASTEMPTY
+                return;
+            }
+
+            if (obj.IsLast){
+                writer.WriteBit(true); // ISLAST
+                writer.WriteBit(false); // ISLASTEMPTY
+            }
+            else{
+                writer.WriteBit(false); // ISLAST
+            }
+
+            DataLength.Serialize(writer, obj.DataLength, NoContext.Value);
+
+            switch(obj){
+                case PaddedEmpty pe:
+                    PaddedEmpty.Serialize(writer, pe, NoContext.Value);
+                    break;
+
+                case Uncompressed u:
+                    if (u.IsLast){
+                        throw new InvalidOperationException("An uncompressed meta-block cannot also be the last.");
+                    }
+                    else{
+                        writer.WriteBit(true); // ISUNCOMPRESSED
+                    }
+
+                    Uncompressed.Serialize(writer, u, new Context(u.IsLast, u.DataLength, context));
+                    break;
+
+                case Compressed c:
+                    if (!c.IsLast){
+                        writer.WriteBit(false); // ISUNCOMPRESSED
+                    }
+
+                    Compressed.Serialize(writer, c, new Context(c.IsLast, c.DataLength, context));
+                    break;
+            }
         };
     }
 }

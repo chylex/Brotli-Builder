@@ -13,7 +13,7 @@ using LiteralTree    = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.
 using InsertCopyTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.InsertCopyLengthCode>;
 using DistanceTree   = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.DistanceCode>;
 
-namespace BrotliLib.Brotli.Components.Contents.Compressed{
+namespace BrotliLib.Brotli.Components.Compressed{
     public sealed class MetaBlockCompressionHeader{
         public CategoryMap<BlockTypeInfo> BlockTypes { get; }
         public DistanceParameters DistanceParameters { get; }
@@ -84,7 +84,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
             return reader.ReadStructureArray(treeCount, HuffmanTree<T>.Deserialize, context, "HTREE" + category.Id());
         }
         
-        internal static readonly BitDeserializer<MetaBlockCompressionHeader, NoContext> Deserialize = MarkedBitDeserializer.Wrap<MetaBlockCompressionHeader, NoContext>(
+        public static readonly BitDeserializer<MetaBlockCompressionHeader, NoContext> Deserialize = MarkedBitDeserializer.Wrap<MetaBlockCompressionHeader, NoContext>(
             (reader, context) => {
                 var blockTypes = new CategoryMap<BlockTypeInfo>(category => BlockTypeInfo.Deserialize(reader, category));
                 var distanceParameters = DistanceParameters.Deserialize(reader, NoContext.Value);
@@ -101,7 +101,7 @@ namespace BrotliLib.Brotli.Components.Contents.Compressed{
             }
         );
 
-        internal static readonly BitSerializer<MetaBlockCompressionHeader, NoContext> Serialize = (writer, obj, context) => {
+        public static readonly BitSerializer<MetaBlockCompressionHeader, NoContext> Serialize = (writer, obj, context) => {
             foreach(BlockTypeInfo blockTypeInfo in obj.BlockTypes.Values){
                 BlockTypeInfo.Serialize(writer, blockTypeInfo, NoContext.Value);
             }

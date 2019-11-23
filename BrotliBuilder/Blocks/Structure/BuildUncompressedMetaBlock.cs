@@ -2,18 +2,18 @@
 using System.Text;
 using System.Windows.Forms;
 using BrotliBuilder.Utils;
-using BrotliLib.Brotli.Components.Contents;
+using BrotliLib.Brotli.Components;
 
 namespace BrotliBuilder.Blocks.Structure{
     partial class BuildUncompressedMetaBlock : UserControl{
         private readonly IBuildingBlockContext context;
 
-        public BuildUncompressedMetaBlock(IBuildingBlockContext context, UncompressedMetaBlockContents contents){
+        public BuildUncompressedMetaBlock(IBuildingBlockContext context, MetaBlock.Uncompressed metaBlock){
             InitializeComponent();
 
             this.context = context;
             this.textBoxUncompressedText.SetPlainTextMode();
-            this.textBoxUncompressedText.Text = Encoding.UTF8.GetString(contents.UncompressedData);
+            this.textBoxUncompressedText.Text = Encoding.UTF8.GetString(metaBlock.UncompressedData);
             this.textBoxUncompressedText.TextChanged += textBoxUncompressedText_TextChanged;
         }
 

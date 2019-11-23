@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using BrotliLib.Brotli.Components.Contents.Compressed;
 using BrotliLib.Brotli.Components.Data;
+using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Collections;
 using BrotliLib.Markers.Serialization;
@@ -11,46 +11,53 @@ using BrotliLib.Markers.Serialization.Reader;
 using BrotliLib.Markers.Types;
 using BrotliLib.Serialization;
 using BrotliLib.Serialization.Writer;
-using BlockSwitchCommandMap = BrotliLib.Brotli.Components.Utils.CategoryMap<System.Collections.Generic.IReadOnlyList<BrotliLib.Brotli.Components.Contents.Compressed.BlockSwitchCommand>>;
-using BlockSwitchCommandMutableMap = BrotliLib.Brotli.Components.Utils.CategoryMap<System.Collections.Generic.IList<BrotliLib.Brotli.Components.Contents.Compressed.BlockSwitchCommand>>;
+using BlockSwitchCommandMap = BrotliLib.Brotli.Components.Utils.CategoryMap<System.Collections.Generic.IReadOnlyList<BrotliLib.Brotli.Components.Compressed.BlockSwitchCommand>>;
+using BlockSwitchCommandMutableMap = BrotliLib.Brotli.Components.Utils.CategoryMap<System.Collections.Generic.IList<BrotliLib.Brotli.Components.Compressed.BlockSwitchCommand>>;
 
-namespace BrotliLib.Brotli.Components.Contents{
-    public sealed class CompressedMetaBlockContents{
-        public MetaBlockCompressionHeader Header { get; }
+namespace BrotliLib.Brotli.Components.Compressed{
+    public sealed class MetaBlockCompressionData{
         public IReadOnlyList<InsertCopyCommand> InsertCopyCommands { get; }
         public BlockSwitchCommandMap BlockSwitchCommands { get; }
 
-        public CompressedMetaBlockContents(MetaBlockCompressionHeader header, IList<InsertCopyCommand> insertCopyCommands, BlockSwitchCommandMutableMap blockSwitchCommands){
-            this.Header = header;
+        public MetaBlockCompressionData(IList<InsertCopyCommand> insertCopyCommands, BlockSwitchCommandMap blockSwitchCommands){
             this.InsertCopyCommands = insertCopyCommands.ToArray();
-            this.BlockSwitchCommands = blockSwitchCommands.Select<IReadOnlyList<BlockSwitchCommand>>(list => list.ToArray());
+            this.BlockSwitchCommands = blockSwitchCommands;
         }
+
+        public MetaBlockCompressionData(IList<InsertCopyCommand> insertCopyCommands, BlockSwitchCommandMutableMap blockSwitchCommands) :
+            this(insertCopyCommands, blockSwitchCommands.Select<IReadOnlyList<BlockSwitchCommand>>(list => list.ToArray())){}
 
         // Object
 
         public override bool Equals(object obj){
-            return obj is CompressedMetaBlockContents contents &&
-                   Header.Equals(contents.Header) &&
+            return obj is MetaBlockCompressionData contents &&
                    CollectionHelper.Equal(InsertCopyCommands, contents.InsertCopyCommands) &&
                    Categories.LID.All(category => CollectionHelper.Equal(BlockSwitchCommands[category], contents.BlockSwitchCommands[category]));
         }
 
         public override int GetHashCode(){
-            return HashCode.Combine(Header, CollectionHelper.HashCode(InsertCopyCommands), BlockSwitchCommands.Select(CollectionHelper.HashCode).GetHashCode());
+            return HashCode.Combine(CollectionHelper.HashCode(InsertCopyCommands), BlockSwitchCommands.Select(CollectionHelper.HashCode).GetHashCode());
         }
 
         // Context
 
-        internal abstract class DataContext : MetaBlock.Context{
+        public class Context{
             public MetaBlockCompressionHeader Header { get; }
+            public DataLength DataLength { get; }
+            public BrotliGlobalState State { get; }
 
-            public bool NeedsMoreData => bytesWritten < MetaBlock.DataLength.UncompressedBytes;
+            public Context(MetaBlockCompressionHeader header, DataLength dataLength, BrotliGlobalState state){
+                this.Header = header;
+                this.DataLength = dataLength;
+                this.State = state;
+            }
+        }
 
+        internal abstract class DataContext : Context{
+            public bool NeedsMoreData => bytesWritten < DataLength.UncompressedBytes;
             private int bytesWritten;
 
-            protected DataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header) : base(wrapped.MetaBlock, wrapped.State){
-                this.Header = header;
-            }
+            protected DataContext(Context wrapped) : base(wrapped.Header, wrapped.DataLength, wrapped.State){}
 
             public abstract int NextBlockID(Category category);
 
@@ -94,7 +101,7 @@ namespace BrotliLib.Brotli.Components.Contents{
             private readonly IMarkedBitReader reader;
             private readonly CategoryMap<BlockSwitchTracker.Reading> blockTrackers;
 
-            public ReaderDataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header, IMarkedBitReader reader) : base(wrapped, header){
+            public ReaderDataContext(Context wrapped, IMarkedBitReader reader) : base(wrapped){
                 this.reader = reader;
                 this.blockTrackers = Header.BlockTypes.Select(info => new BlockSwitchTracker.Reading(info));
             }
@@ -108,9 +115,9 @@ namespace BrotliLib.Brotli.Components.Contents{
             private readonly IBitWriter writer;
             private readonly CategoryMap<BlockSwitchTracker.Writing> blockTrackers;
 
-            public WriterDataContext(MetaBlock.Context wrapped, MetaBlockCompressionHeader header, BlockSwitchCommandMap blockSwitchCommands, IBitWriter writer) : base(wrapped, header){
+            public WriterDataContext(Context wrapped, BlockSwitchCommandMap blockSwitchCommands, IBitWriter writer) : base(wrapped){
                 this.writer = writer;
-                this.blockTrackers = header.BlockTypes.Select(info => new BlockSwitchTracker.Writing(info, new Queue<BlockSwitchCommand>(blockSwitchCommands[info.Category])));
+                this.blockTrackers = Header.BlockTypes.Select(info => new BlockSwitchTracker.Writing(info, new Queue<BlockSwitchCommand>(blockSwitchCommands[info.Category])));
             }
 
             public override int NextBlockID(Category category){
@@ -120,11 +127,9 @@ namespace BrotliLib.Brotli.Components.Contents{
 
         // Serialization
 
-        internal static readonly BitDeserializer<CompressedMetaBlockContents, MetaBlock.Context> Deserialize = MarkedBitDeserializer.Wrap<CompressedMetaBlockContents, MetaBlock.Context>(
+        public static readonly BitDeserializer<MetaBlockCompressionData, Context> Deserialize = MarkedBitDeserializer.Wrap<MetaBlockCompressionData, Context>(
             (reader, context) => {
-                MetaBlockCompressionHeader header = MetaBlockCompressionHeader.Deserialize(reader, NoContext.Value);
-
-                ReaderDataContext dataContext = new ReaderDataContext(context, header, reader);
+                ReaderDataContext dataContext = new ReaderDataContext(context, reader);
                 List<InsertCopyCommand> icCommands = new List<InsertCopyCommand>();
                 
                 reader.MarkStart();
@@ -135,14 +140,12 @@ namespace BrotliLib.Brotli.Components.Contents{
 
                 reader.MarkEnd(() => new TitleMarker("Command List"));
                 
-                return new CompressedMetaBlockContents(header, icCommands, dataContext.BlockSwitchCommands);
+                return new MetaBlockCompressionData(icCommands, dataContext.BlockSwitchCommands);
             }
         );
 
-        internal static readonly BitSerializer<CompressedMetaBlockContents, MetaBlock.Context> Serialize = (writer, obj, context) => {
-            MetaBlockCompressionHeader.Serialize(writer, obj.Header, NoContext.Value);
-            
-            DataContext dataContext = new WriterDataContext(context, obj.Header, obj.BlockSwitchCommands, writer);
+        public static readonly BitSerializer<MetaBlockCompressionData, Context> Serialize = (writer, obj, context) => {
+            DataContext dataContext = new WriterDataContext(context, obj.BlockSwitchCommands, writer);
 
             foreach(InsertCopyCommand icCommand in obj.InsertCopyCommands){
                 InsertCopyCommand.Serialize(writer, icCommand, dataContext);

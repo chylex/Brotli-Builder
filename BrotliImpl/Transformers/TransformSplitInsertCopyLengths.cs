@@ -2,7 +2,7 @@
 using System.Linq;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
-using BrotliLib.Brotli.Components.Contents.Compressed;
+using BrotliLib.Brotli.Components.Compressed;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Encode;
 
