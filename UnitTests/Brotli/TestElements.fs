@@ -21,7 +21,7 @@ module Helper =
 
 
 module WindowSize =
-    let values: obj array seq = WindowSize.BitsRange.Values |> Seq.map (fun value -> [| value |])
+    let values: obj array seq = WindowSize.BitsRange.Values |> Seq.map (fun value -> [| WindowSize(value) |])
 
     [<Theory>]
     [<MemberData("values")>]

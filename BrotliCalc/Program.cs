@@ -56,7 +56,7 @@ namespace BrotliCalc{
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.Write("> ");
 
-                string[] input = Console.ReadLine().Split(new []{ ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
+                string[] input = Console.ReadLine()?.Split(new []{ ' ' }, 2, StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
                 
                 if (input.Length == 0){
                     continue;

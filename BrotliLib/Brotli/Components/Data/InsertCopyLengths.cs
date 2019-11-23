@@ -90,7 +90,7 @@ namespace BrotliLib.Brotli.Components.Data{
         }
 
         /// <summary>
-        /// Constructs an <see cref="InsertCopyLengthCode"/> that can encode the stored lengths, and can therefore be used as context in the <see cref="Serializer"/>.
+        /// Constructs an <see cref="InsertCopyLengthCode"/> that can encode the stored lengths, and can therefore be used as context in the <see cref="Serialize"/>.
         /// </summary>
         public InsertCopyLengthCode MakeCode(DistanceCodeZeroStrategy dczStrategy = DistanceCodeZeroStrategy.Disable){
             int insertLength = InsertLength;
@@ -103,7 +103,7 @@ namespace BrotliLib.Brotli.Components.Data{
         }
 
         /// <summary>
-        /// Returns true if the provided <paramref name="code"/> can encode the stored lengths, and can therefore be used as context in the <see cref="Serializer"/>.
+        /// Returns true if the provided <paramref name="code"/> can encode the stored lengths, and can therefore be used as context in the <see cref="Serialize"/>.
         /// </summary>
         public bool CanEncodeUsing(InsertCopyLengthCode code){
             return (
