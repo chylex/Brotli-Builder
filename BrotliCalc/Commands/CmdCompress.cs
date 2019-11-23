@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using BrotliCalc.Commands.Base;
 using BrotliCalc.Helpers;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Numbers;

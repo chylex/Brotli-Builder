@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using BrotliCalc.Commands.Base;
 using BrotliLib.Numbers;
 
 namespace BrotliCalc{

@@ -1,6 +1,6 @@
 ﻿using BrotliLib.Numbers;
 
-namespace BrotliCalc{
+namespace BrotliCalc.Commands.Base{
     interface ICommand{
         string FullName { get; }
         string ShortName { get; }

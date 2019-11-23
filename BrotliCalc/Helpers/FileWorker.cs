@@ -8,11 +8,14 @@ namespace BrotliCalc.Helpers{
     sealed class FileWorker<T> where T : BrotliFile{
         private const int WriterSleepMillis = 200;
 
+        public delegate IEnumerable<object[]> WorkFunc(BrotliFileGroup group, T file);
+        public delegate IEnumerable<object[]> ErrorFunc(BrotliFileGroup group, T file, Exception ex);
+
         private static readonly List<object[]> ErrorEntry = new List<object[]>();
 
         public Func<T, string> Name { get; set; }
-        public Func<BrotliFileGroup, T, IEnumerable<object[]>> Work { get; set; }
-        public Func<BrotliFileGroup, T, Exception, IEnumerable<object[]>> Error { get; set; }
+        public WorkFunc Work { get; set; }
+        public ErrorFunc Error { get; set; }
 
         public Result Start(Table output, IEnumerable<(BrotliFileGroup group, T file)> input){
             int errors = 0;
