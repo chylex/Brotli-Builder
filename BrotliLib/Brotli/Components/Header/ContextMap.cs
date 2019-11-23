@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Collections;
 using BrotliLib.Markers.Serialization;
-using BrotliLib.Markers.Types;
 using BrotliLib.Numbers;
 using BrotliLib.Serialization;
 
@@ -188,7 +187,7 @@ namespace BrotliLib.Brotli.Components.Header{
                             if (code <= runLengthCodeCount){
                                 index += (1 << code) - 1 + reader.NextChunk(code);
 
-                                reader.MarkEnd(() => new TextMarker("skip to index " + (index + 1)));
+                                reader.MarkEndTitle("skip to index " + (index + 1));
                                 continue;
                             }
                             else{
@@ -196,7 +195,7 @@ namespace BrotliLib.Brotli.Components.Header{
                             }
                         }
                         
-                        reader.MarkEnd(() => new ValueMarker("CMAP" + context.Category.Id() + "[" + index + "]", contextMap[index]));
+                        reader.MarkEndValue("CMAP" + context.Category.Id() + "[" + index + "]", contextMap[index]);
                     }
 
                     if (reader.NextBit("IMTF")){

@@ -2,41 +2,84 @@
 using System.Linq;
 using BrotliLib.Collections.Huffman;
 using BrotliLib.Markers.Serialization.Reader;
-using BrotliLib.Markers.Types;
 using BrotliLib.Serialization;
 
 namespace BrotliLib.Markers.Serialization{
     static class MarkedBitExtensions{
         public static T MarkTitle<T>(this IMarkedBitReader reader, string title, Func<T> action){
-            return reader.MarkCall(action, _ => new TitleMarker(title));
+            reader.MarkStart();
+
+            T result = action();
+
+            reader.MarkEndTitle(title);
+            return result;
         }
 
         public static T MarkValue<T>(this IMarkedBitReader reader, string title, Func<T> action){
-            return reader.MarkCall(action, result => new ValueMarker(title, result));
+            reader.MarkStart();
+
+            T result = action();
+
+            reader.MarkEndValue(title, result);
+            return result;
         }
 
         // Marking overloads
 
         public static bool NextBit(this IMarkedBitReader reader, string name){
-            return reader.MarkValue(name, reader.NextBit);
+            reader.MarkStart();
+
+            bool result = reader.NextBit();
+
+            reader.MarkEndValue(name, result);
+            return result;
         }
 
         public static int NextChunk(this IMarkedBitReader reader, int bits, string name){
-            return reader.MarkValue(name, () => reader.NextChunk(bits));
+            reader.MarkStart();
+
+            int result = reader.NextChunk(bits);
+
+            reader.MarkEndValue(name, result);
+            return result;
         }
 
         public static T NextChunk<T>(this IMarkedBitReader reader, int bits, string name, Func<int, T> mapper){
-            return reader.MarkValue(name, () => mapper(reader.NextChunk(bits)));
+            reader.MarkStart();
+
+            T result = mapper(reader.NextChunk(bits));
+
+            reader.MarkEndValue(name, result);
+            return result;
+        }
+
+        public static T NextChunk<T, U>(this IMarkedBitReader reader, int bits, string name, U context, Func<int, U, T> mapper){
+            reader.MarkStart();
+
+            T result = mapper(reader.NextChunk(bits), context);
+
+            reader.MarkEndValue(name, result);
+            return result;
         }
 
         public static byte NextAlignedByte(this IMarkedBitReader reader, string name){
-            return reader.MarkValue(name, reader.NextAlignedByte);
+            reader.MarkStart();
+
+            byte result = reader.NextAlignedByte();
+
+            reader.MarkEndValue(name, result);
+            return result;
         }
 
         // Complex structures
 
         public static O ReadValue<T, C, O>(this IMarkedBitReader reader, BitDeserializer<T, C> deserialize, C context, string name, Func<T, O> mapper){
-            return reader.MarkCall(() => mapper(deserialize(reader, context)), result => new ValueMarker(name, result));
+            reader.MarkStart();
+
+            O result = mapper(deserialize(reader, context));
+
+            reader.MarkEndValue(name, result);
+            return result;
         }
 
         public static T ReadValue<T, C>(this IMarkedBitReader reader, BitDeserializer<T, C> deserialize, C context, string name){
@@ -44,7 +87,12 @@ namespace BrotliLib.Markers.Serialization{
         }
 
         public static O ReadValue<T, O>(this IMarkedBitReader reader, HuffmanNode<T> tree, string name, Func<T, O> mapper) where T : IComparable<T>{
-            return reader.MarkCall(() => mapper(tree.LookupValue(reader)), result => new ValueMarker(name, result));
+            reader.MarkStart();
+
+            O result = mapper(tree.LookupValue(reader));
+
+            reader.MarkEndValue(name, result);
+            return result;
         }
 
         public static T ReadValue<T>(this IMarkedBitReader reader, HuffmanNode<T> tree, string name) where T : IComparable<T>{
@@ -52,7 +100,12 @@ namespace BrotliLib.Markers.Serialization{
         }
 
         public static T ReadStructure<T, C>(this IMarkedBitReader reader, BitDeserializer<T, C> deserialize, C context, string title){
-            return reader.MarkCall(() => deserialize(reader, context), _ => new TitleMarker(title));
+            reader.MarkStart();
+
+            T result = deserialize(reader, context);
+
+            reader.MarkEndTitle(title);
+            return result;
         }
 
         public static T[] ReadValueArray<T>(this IMarkedBitReader reader, int length, string name, Func<T> supplier){
@@ -63,7 +116,7 @@ namespace BrotliLib.Markers.Serialization{
 
         public static T[] ReadStructureArray<T, C>(this IMarkedBitReader reader, int length, BitDeserializer<T, C> deserialize, C context, string title){
             return Enumerable.Range(0, length)
-                             .Select(counter => reader.MarkTitle(title + " " + (counter + 1) + "/" + length, () => deserialize(reader, context)))
+                             .Select(counter => reader.ReadStructure(deserialize, context, title + " " + (counter + 1) + "/" + length))
                              .ToArray();
         }
     }

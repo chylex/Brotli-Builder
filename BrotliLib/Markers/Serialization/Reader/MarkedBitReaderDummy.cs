@@ -1,5 +1,4 @@
-﻿using System;
-using BrotliLib.Markers.Types;
+﻿using BrotliLib.Markers.Types;
 using BrotliLib.Serialization.Reader;
 
 namespace BrotliLib.Markers.Serialization.Reader{
@@ -13,8 +12,9 @@ namespace BrotliLib.Markers.Serialization.Reader{
         }
 
         public void MarkStart(){}
-        public void MarkEnd(Func<IMarkerInfo> info){}
-        public T MarkCall<T>(Func<T> supplier, Func<T, IMarkerInfo> marker) => supplier();
+        public void MarkEnd(IMarkerInfo info){}
+        public void MarkEndTitle(string title){}
+        public void MarkEndValue(string name, object value){}
 
         public int Index => wrapped.Index;
 

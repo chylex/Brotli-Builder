@@ -2,7 +2,6 @@
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Collections;
 using BrotliLib.Markers.Serialization;
-using BrotliLib.Markers.Types;
 using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components{
@@ -47,7 +46,7 @@ namespace BrotliLib.Brotli.Components{
                         bytes[index] = reader.NextAlignedByte("byte");
                     }
 
-                    reader.MarkEnd(() => new TitleMarker("Uncompressed Bytes"));
+                    reader.MarkEndTitle("Uncompressed Bytes");
 
                     context.State.OutputBytes(bytes);
                     return new Uncompressed(bytes);

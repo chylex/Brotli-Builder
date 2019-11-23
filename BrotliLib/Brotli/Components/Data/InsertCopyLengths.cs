@@ -135,8 +135,8 @@ namespace BrotliLib.Brotli.Components.Data{
                 int insertCode = context.InsertCode;
                 int copyCode = context.CopyCode;
 
-                int insertLength = reader.NextChunk(InsertCodeExtraBits[insertCode], "ILEN", value => InsertCodeValueOffsets[insertCode] + value);
-                int copyLength = reader.NextChunk(CopyCodeExtraBits[copyCode], "CLEN", value => CopyCodeValueOffsets[copyCode] + value);
+                int insertLength = reader.NextChunk(InsertCodeExtraBits[insertCode], "ILEN", insertCode, (value, index) => InsertCodeValueOffsets[index] + value);
+                int copyLength = reader.NextChunk(CopyCodeExtraBits[copyCode], "CLEN", copyCode, (value, index) => CopyCodeValueOffsets[index] + value);
 
                 return new InsertCopyLengths(insertLength, copyLength);
             }

@@ -2,7 +2,6 @@
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Collections;
 using BrotliLib.Markers.Serialization;
-using BrotliLib.Markers.Types;
 using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components{
@@ -78,7 +77,7 @@ namespace BrotliLib.Brotli.Components{
                         bytes[index] = reader.NextAlignedByte("byte");
                     }
 
-                    reader.MarkEnd(() => new TitleMarker("Skipped Bytes"));
+                    reader.MarkEndTitle("Skipped Bytes");
 
                     return new PaddedEmpty(bytes);
                 }

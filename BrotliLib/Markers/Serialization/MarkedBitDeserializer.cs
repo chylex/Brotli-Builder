@@ -18,14 +18,24 @@ namespace BrotliLib.Markers.Serialization{
         public static BitDeserializer<T, C> Title<T, C>(string title, Func<IMarkedBitReader, C, T> deserialize){
             return (reader, context) => {
                 var markedReader = Cast(reader);
-                return markedReader.MarkTitle(title, () => deserialize(markedReader, context));
+                markedReader.MarkStart();
+
+                var result = deserialize(markedReader, context);
+
+                markedReader.MarkEndTitle(title);
+                return result;
             };
         }
 
         public static BitDeserializer<T, C> Title<T, C>(Func<C, string> title, Func<IMarkedBitReader, C, T> deserialize){
             return (reader, context) => {
                 var markedReader = Cast(reader);
-                return markedReader.MarkTitle(title(context), () => deserialize(markedReader, context));
+                markedReader.MarkStart();
+
+                var result = deserialize(markedReader, context);
+
+                markedReader.MarkEndTitle(title(context));
+                return result;
             };
         }
 

@@ -5,7 +5,6 @@ using System.Linq;
 using BrotliLib.Collections;
 using BrotliLib.Collections.Huffman;
 using BrotliLib.Markers.Serialization;
-using BrotliLib.Markers.Types;
 using BrotliLib.Numbers;
 using BrotliLib.Serialization;
 
@@ -124,11 +123,11 @@ namespace BrotliLib.Brotli.Components.Header{
 
                 if (type == 1){
                     tree = Simple.Deserialize(reader, context);
-                    reader.MarkEnd(() => new TitleMarker("Simple Huffman Tree"));
+                    reader.MarkEndTitle("Simple Huffman Tree");
                 }
                 else{
                     tree = Complex.Deserialize(reader, context.ForComplexDeserialization(type));
-                    reader.MarkEnd(() => new TitleMarker("Complex Huffman Tree"));
+                    reader.MarkEndTitle("Complex Huffman Tree");
                 }
 
                 return tree;

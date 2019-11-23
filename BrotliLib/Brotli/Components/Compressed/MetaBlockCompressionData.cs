@@ -71,7 +71,14 @@ namespace BrotliLib.Brotli.Components.Compressed{
             }
 
             public void WriteCopyWithMarker(IMarkedBitReader reader, int length, DistanceInfo distance){
-                reader.MarkCall(() => WriteCopyTracked(length, distance), GenerateCopyMarker);
+                if (reader is MarkedBitReaderDummy){
+                    WriteCopy(length, distance);
+                }
+                else{
+                    reader.MarkStart();
+                    CopyOutputInfo copy = WriteCopyTracked(length, distance);
+                    reader.MarkEnd(GenerateCopyMarker(copy));
+                }
             }
 
             private CopyOutputInfo WriteCopyTracked(int length, DistanceInfo distance){
@@ -138,7 +145,7 @@ namespace BrotliLib.Brotli.Components.Compressed{
                     icCommands.Add(InsertCopyCommand.Deserialize(reader, dataContext));
                 }while(dataContext.NeedsMoreData);
 
-                reader.MarkEnd(() => new TitleMarker("Command List"));
+                reader.MarkEndTitle("Command List");
                 
                 return new MetaBlockCompressionData(icCommands, dataContext.BlockSwitchCommands);
             }
