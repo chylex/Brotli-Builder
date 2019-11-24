@@ -42,16 +42,7 @@
             this.menuItemCloneGeneratedToOriginal = new System.Windows.Forms.MenuItem();
             this.menuItemCloneOriginalToGenerated = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeFile = new System.Windows.Forms.MenuItem();
-            this.menuItemEncodeUncompressedMBs = new System.Windows.Forms.MenuItem();
-            this.menuItemEncodeLiterals = new System.Windows.Forms.MenuItem();
-            this.menuItemSeparatorE1 = new System.Windows.Forms.MenuItem();
-            this.menuItemEncodeGreedySearchOnlyCopies = new System.Windows.Forms.MenuItem();
-            this.menuItemEncodeGreedySearchOnlyDictionary = new System.Windows.Forms.MenuItem();
-            this.menuItemEncodeGreedySearchMixed = new System.Windows.Forms.MenuItem();
             this.menuItemTransform = new System.Windows.Forms.MenuItem();
-            this.menuItemTransformRebuild = new System.Windows.Forms.MenuItem();
-            this.menuItemTransformTestDistanceParams = new System.Windows.Forms.MenuItem();
-            this.menuItemTransformSplitInsertCopyLengths = new System.Windows.Forms.MenuItem();
             this.flowPanelBlocks = new System.Windows.Forms.FlowLayoutPanel();
             this.statusBar = new System.Windows.Forms.StatusBar();
             this.statusBarPanelPadding1 = new System.Windows.Forms.StatusBarPanel();
@@ -217,78 +208,12 @@
             // menuItemEncodeFile
             // 
             this.menuItemEncodeFile.Index = 3;
-            this.menuItemEncodeFile.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItemEncodeUncompressedMBs,
-            this.menuItemEncodeLiterals,
-            this.menuItemSeparatorE1,
-            this.menuItemEncodeGreedySearchOnlyCopies,
-            this.menuItemEncodeGreedySearchOnlyDictionary,
-            this.menuItemEncodeGreedySearchMixed});
             this.menuItemEncodeFile.Text = "&Encode";
-            // 
-            // menuItemEncodeUncompressedMBs
-            // 
-            this.menuItemEncodeUncompressedMBs.Index = 0;
-            this.menuItemEncodeUncompressedMBs.Shortcut = System.Windows.Forms.Shortcut.Ctrl0;
-            this.menuItemEncodeUncompressedMBs.Text = "Into Uncompressed Meta-Blocks";
-            this.menuItemEncodeUncompressedMBs.Click += new System.EventHandler(this.menuItemEncodeUncompressedMBs_Click);
-            // 
-            // menuItemEncodeLiterals
-            // 
-            this.menuItemEncodeLiterals.Index = 1;
-            this.menuItemEncodeLiterals.Shortcut = System.Windows.Forms.Shortcut.Ctrl1;
-            this.menuItemEncodeLiterals.Text = "Into Literals";
-            this.menuItemEncodeLiterals.Click += new System.EventHandler(this.menuItemEncodeLiterals_Click);
-            // 
-            // menuItemSeparatorE1
-            // 
-            this.menuItemSeparatorE1.Index = 2;
-            this.menuItemSeparatorE1.Text = "-";
-            // 
-            // menuItemEncodeGreedySearchOnlyCopies
-            // 
-            this.menuItemEncodeGreedySearchOnlyCopies.Index = 3;
-            this.menuItemEncodeGreedySearchOnlyCopies.Text = "Greedy Search (Only Copies)";
-            this.menuItemEncodeGreedySearchOnlyCopies.Click += new System.EventHandler(this.menuItemEncodeGreedySearchOnlyCopies_Click);
-            // 
-            // menuItemEncodeGreedySearchOnlyDictionary
-            // 
-            this.menuItemEncodeGreedySearchOnlyDictionary.Index = 4;
-            this.menuItemEncodeGreedySearchOnlyDictionary.Text = "Greedy Search (Only Dictionary)";
-            this.menuItemEncodeGreedySearchOnlyDictionary.Click += new System.EventHandler(this.menuItemEncodeGreedySearchOnlyDictionary_Click);
-            // 
-            // menuItemEncodeGreedySearchMixed
-            // 
-            this.menuItemEncodeGreedySearchMixed.Index = 5;
-            this.menuItemEncodeGreedySearchMixed.Text = "Greedy Search (Mixed)";
-            this.menuItemEncodeGreedySearchMixed.Click += new System.EventHandler(this.MenuItemEncodeGreedySearchMixed_Click);
             // 
             // menuItemTransform
             // 
             this.menuItemTransform.Index = 4;
-            this.menuItemTransform.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItemTransformRebuild,
-            this.menuItemTransformTestDistanceParams,
-            this.menuItemTransformSplitInsertCopyLengths});
             this.menuItemTransform.Text = "Transfor&m";
-            // 
-            // menuItemTransformRebuild
-            // 
-            this.menuItemTransformRebuild.Index = 0;
-            this.menuItemTransformRebuild.Text = "Rebuild";
-            this.menuItemTransformRebuild.Click += new System.EventHandler(this.menuItemTransformRebuild_Click);
-            // 
-            // menuItemTransformTestDistanceParams
-            // 
-            this.menuItemTransformTestDistanceParams.Index = 1;
-            this.menuItemTransformTestDistanceParams.Text = "Test Distance Parameters";
-            this.menuItemTransformTestDistanceParams.Click += new System.EventHandler(this.menuItemTransformTestDistanceParams_Click);
-            // 
-            // menuItemTransformSplitInsertCopyLengths
-            // 
-            this.menuItemTransformSplitInsertCopyLengths.Index = 2;
-            this.menuItemTransformSplitInsertCopyLengths.Text = "Split Insert Copy Lengths";
-            this.menuItemTransformSplitInsertCopyLengths.Click += new System.EventHandler(this.menuItemTransformSplitInsertCopyLengths_Click);
             // 
             // flowPanelBlocks
             // 
@@ -532,7 +457,6 @@
         private System.Windows.Forms.Timer timerRegenerationDelay;
         private System.Windows.Forms.MenuItem menuItemTools;
         private System.Windows.Forms.MenuItem menuItemEncodeFile;
-        private System.Windows.Forms.MenuItem menuItemEncodeUncompressedMBs;
         private System.Windows.Forms.MenuItem menuItemView;
         private System.Windows.Forms.MenuItem menuItemStaticDictionary;
         private System.Windows.Forms.SplitContainer splitContainerRightBottom;
@@ -541,25 +465,17 @@
         private Components.BrotliFilePanel brotliFilePanelOriginal;
         private System.Windows.Forms.SplitContainer splitContainerRight;
         private System.Windows.Forms.MenuItem menuItemFileStructure;
-        private System.Windows.Forms.MenuItem menuItemEncodeLiterals;
         private System.Windows.Forms.MenuItem menuItemTransform;
-        private System.Windows.Forms.MenuItem menuItemTransformTestDistanceParams;
-        private System.Windows.Forms.MenuItem menuItemTransformRebuild;
         private System.Windows.Forms.SplitContainer splitContainerMain;
         private Components.BrotliMarkerInfoPanel brotliMarkerInfoPanel;
         private System.Windows.Forms.Label labelFileStructure;
         private System.Windows.Forms.MenuItem menuItemMarkerInfo;
-        private System.Windows.Forms.MenuItem menuItemTransformSplitInsertCopyLengths;
         private System.Windows.Forms.MenuItem menuItemWrapMarkerInfo;
         private System.Windows.Forms.MenuItem menuItemCompareMarkers;
         private System.Windows.Forms.StatusBarPanel statusBarPanelTimeStructure;
         private System.Windows.Forms.StatusBarPanel statusBarPanelPadding3;
-        private System.Windows.Forms.MenuItem menuItemEncodeGreedySearchOnlyCopies;
-        private System.Windows.Forms.MenuItem menuItemEncodeGreedySearchOnlyDictionary;
-        private System.Windows.Forms.MenuItem menuItemEncodeGreedySearchMixed;
         private System.Windows.Forms.MenuItem menuItemSaveOutput;
         private System.Windows.Forms.MenuItem menuItemSeparatorT1;
-        private System.Windows.Forms.MenuItem menuItemSeparatorE1;
         private System.Windows.Forms.MenuItem menuItemCloneGeneratedToOriginal;
         private System.Windows.Forms.MenuItem menuItemCloneOriginalToGenerated;
     }

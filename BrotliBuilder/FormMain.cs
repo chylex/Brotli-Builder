@@ -9,8 +9,6 @@ using BrotliBuilder.Components;
 using BrotliBuilder.Dialogs;
 using BrotliBuilder.State;
 using BrotliBuilder.Utils;
-using BrotliImpl.Encoders;
-using BrotliImpl.Transformers;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Dictionary.Default;
 using BrotliLib.Brotli.Encode;
@@ -74,6 +72,11 @@ namespace BrotliBuilder{
         
         public FormMain(){
             InitializeComponent();
+
+            SuspendLayout();
+            InitializeMenuEncoders();
+            InitializeMenuTransformers();
+            ResumeLayout(true);
 
             this.fileGenerated = new BrotliFileController(brotliFilePanelGenerated.Title);
             this.fileGenerated.StateChanged += FileGenerated_StateChanged;
@@ -500,27 +503,7 @@ namespace BrotliBuilder{
 
         #endregion
 
-        #region Menu events (Encode)
-
-        private void menuItemEncodeUncompressedMBs_Click(object sender, EventArgs e){
-            OpenFileWithEncoder(new BrotliFileParameters(), new EncodeUncompressedOnly());
-        }
-        
-        private void menuItemEncodeLiterals_Click(object sender, EventArgs e){
-            OpenFileWithEncoder(new BrotliFileParameters(), new EncodeLiterals());
-        }
-
-        private void menuItemEncodeGreedySearchOnlyCopies_Click(object sender, EventArgs e){
-            OpenFileWithEncoder(new BrotliFileParameters(), new EncodeGreedySearch.OnlyBackReferences(minLength: 4));
-        }
-
-        private void menuItemEncodeGreedySearchOnlyDictionary_Click(object sender, EventArgs e){
-            OpenFileWithEncoder(new BrotliFileParameters(), new EncodeGreedySearch.OnlyDictionary());
-        }
-
-        private void MenuItemEncodeGreedySearchMixed_Click(object sender, EventArgs e){
-            OpenFileWithEncoder(new BrotliFileParameters(), new EncodeGreedySearch.Mixed(minCopyLength: 4));
-        }
+        #region Menu events (Encode / Transform)
 
         private void OpenFileWithEncoder(BrotliFileParameters parameters, IBrotliEncoder encoder){
             if (PromptUnsavedChanges("Would you like to save changes before opening a new file?")){
@@ -540,22 +523,6 @@ namespace BrotliBuilder{
                 fileOriginal.ResetToNothing();
                 fileGenerated.EncodeFile(lastFileName, parameters, encoder);
             }
-        }
-
-        #endregion
-
-        #region Menu events (Transform)
-
-        private void menuItemTransformRebuild_Click(object sender, EventArgs e){
-            TransformCurrentFile(new TransformRebuild());
-        }
-
-        private void menuItemTransformTestDistanceParams_Click(object sender, EventArgs e){
-            TransformCurrentFile(new TransformTestDistanceParameters());
-        }
-
-        private void menuItemTransformSplitInsertCopyLengths_Click(object sender, EventArgs e){
-            TransformCurrentFile(new TransformSplitInsertCopyLengths());
         }
         
         private void TransformCurrentFile(IBrotliTransformer transformer){
