@@ -50,11 +50,8 @@ namespace BrotliCalc{
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine();
-            Console.WriteLine("Type r/repeat to repeat the last command.");
             Console.WriteLine("Type q/quit to close the program.");
             Console.WriteLine();
-
-            string[] lastInput = null;
 
             while(true){
                 Console.ForegroundColor = ConsoleColor.Yellow;
@@ -71,11 +68,7 @@ namespace BrotliCalc{
 
                 string trigger = input[0];
 
-                if ((trigger == "r" || trigger == "repeat") && lastInput != null){
-                    input = lastInput;
-                    trigger = input[0];
-                }
-                else if (trigger == "q" || trigger == "quit"){
+                if (trigger == "q" || trigger == "quit"){
                     break;
                 }
                 
@@ -101,8 +94,6 @@ namespace BrotliCalc{
                     Console.WriteLine();
                     continue;
                 }
-
-                lastInput = input;
 
                 try{
                     Console.ForegroundColor = ConsoleColor.White;
