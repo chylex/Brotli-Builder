@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using BrotliLib.Brotli;
 using BrotliLib.Collections;
+using BrotliLib.Serialization;
 
 namespace BrotliCalc.Helpers{
     class BrotliFileGroup{
@@ -13,7 +14,7 @@ namespace BrotliCalc.Helpers{
             this.Compressed = compressedFiles;
         }
 
-        public int CountBytesAndValidate(BrotliFileStructure bfs){
+        public BitStream SerializeAndValidate(BrotliFileStructure bfs){
             var serialized = bfs.Serialize();
             var output = bfs.GetDecompressionState(serialized, enableMarkers: false);
 
@@ -21,7 +22,11 @@ namespace BrotliCalc.Helpers{
                 throw new InvalidOperationException("Mismatched output bytes.");
             }
 
-            return (7 + serialized.Length) / 8;
+            return serialized;
+        }
+
+        public int CountBytesAndValidate(BrotliFileStructure bfs){
+            return (7 + SerializeAndValidate(bfs).Length) / 8;
         }
     }
 }
