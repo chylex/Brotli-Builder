@@ -18,7 +18,8 @@ namespace BrotliCalc{
             new CmdTestReserializeRebuild(),
             new CmdTestEncoder(),
             new CmdTestTransformer(),
-            new CmdBenchReserializeRebuild()
+            new CmdBenchReserializeRebuild(),
+            new CmdTimeDictionaryIndex()
         };
 
         private static void Main(string[] args){
