@@ -17,18 +17,20 @@ namespace BrotliBuilder.Components{
         private static readonly TextStyle HighlightStyle = new TextStyle(new SolidBrush(Color.White), new SolidBrush(Color.FromArgb(48, 48, 48)), FontStyle.Regular);
 
         public class MarkerUpdateEventArgs : EventArgs{
+            public MarkerRoot MarkerRoot { get; }
             public IList<MarkerNode> MarkerSequence { get; }
             public HashSet<MarkerNode> HighlightedNodes { get; }
             public MarkerNode CaretNode { get; }
 
-            public MarkerUpdateEventArgs(IList<MarkerNode> markerSequence, HashSet<MarkerNode> highlightedNodes, MarkerNode caretNode){
+            public MarkerUpdateEventArgs(MarkerRoot markerRoot, IList<MarkerNode> markerSequence, HashSet<MarkerNode> highlightedNodes, MarkerNode caretNode){
+                this.MarkerRoot = markerRoot;
                 this.MarkerSequence = markerSequence;
                 this.HighlightedNodes = highlightedNodes;
                 this.CaretNode = caretNode;
             }
         }
 
-        public IList<MarkerNode> MarkerSequence => markerSequence;
+        public MarkerRoot MarkerRoot { get; private set; }
 
         public event EventHandler<MarkerUpdateEventArgs> MarkersUpdated;
 
@@ -54,8 +56,9 @@ namespace BrotliBuilder.Components{
             MouseUp += MarkedTextBox_MouseUp;
         }
 
-        public void UpdateMarkers(MarkerNode[] newMarkerSequence){
+        public void UpdateMarkers(MarkerRoot newMarkerRoot, MarkerNode[] newMarkerSequence){
             markerSequence = newMarkerSequence;
+            MarkerRoot = newMarkerRoot;
             RefreshMarkers();
             prevMarkerSequence = newMarkerSequence;
         }
@@ -133,7 +136,7 @@ namespace BrotliBuilder.Components{
             updatingMarkers = false;
             
             markerCaret = newMarkerCaret;
-            MarkersUpdated?.Invoke(this, new MarkerUpdateEventArgs(markerSequence, new HashSet<MarkerNode>(highlightedMarkers), markerCaret));
+            MarkersUpdated?.Invoke(this, new MarkerUpdateEventArgs(MarkerRoot, markerSequence, new HashSet<MarkerNode>(highlightedMarkers), markerCaret));
         }
 
         private void MarkedFastTextBox_SelectionChanged(object sender, EventArgs e){

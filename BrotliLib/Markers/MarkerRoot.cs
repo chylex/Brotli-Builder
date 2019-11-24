@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 
 namespace BrotliLib.Markers{
     public sealed class MarkerRoot : IEnumerable<MarkerNode>{
@@ -7,6 +8,25 @@ namespace BrotliLib.Markers{
 
         internal void AddChild(MarkerNode added){
             children.Add(added);
+        }
+
+        public string BuildText(){
+            var build = new StringBuilder(512);
+
+            foreach(MarkerNode node in this){
+                build.Append('\t', node.Depth);
+
+                var marker = node.Marker;
+                int startIndex = build.Length;
+                marker.Info.ToString(build, marker.Length);
+
+                build.Replace("\r", "\\r", startIndex, build.Length - startIndex);
+                build.Replace("\n", "\\n", startIndex, build.Length - startIndex);
+
+                build.Append('\n');
+            }
+
+            return build.ToString();
         }
 
         public IEnumerator<MarkerNode> GetEnumerator(){

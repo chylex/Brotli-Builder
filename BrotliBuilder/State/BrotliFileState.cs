@@ -50,6 +50,7 @@ namespace BrotliBuilder.State{
 
         public sealed class Loaded : BrotliFileState{
             public BrotliFileStructure File { get; }
+            public MarkerRoot MarkerRoot { get; }
             public MarkerNode[] Markers { get; }
 
             public int TotalCompressedBits { get; }
@@ -57,6 +58,7 @@ namespace BrotliBuilder.State{
 
             public Loaded(BrotliFileStructure file, BitStream bits, BrotliOutputStored output){
                 this.File = file;
+                this.MarkerRoot = output.BitMarkerRoot;
                 this.Markers = output.BitMarkerRoot.ToArray();
 
                 this.TotalCompressedBits = Markers.LastOrDefault()?.Marker?.IndexEnd ?? bits.Length; // use markers to account for padding whenever possible

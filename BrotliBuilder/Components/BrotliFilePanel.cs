@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -25,7 +24,7 @@ namespace BrotliBuilder.Components{
             set => textBoxOutput.WordWrap = value;
         }
 
-        public IList<MarkerNode> MarkerSequence => textBoxBitStream.MarkerSequence;
+        public MarkerRoot MarkerRoot => textBoxBitStream.MarkerRoot;
 
         public event EventHandler<MarkedTextBox.MarkerUpdateEventArgs> MarkersUpdated{
             add => textBoxBitStream.MarkersUpdated += value;
@@ -70,7 +69,7 @@ namespace BrotliBuilder.Components{
 
         public void FinalizeOutput(BrotliFileState.Loaded state){
             UpdateLabels(state.TotalCompressedBits, state.TotalOutputBytes);
-            textBoxBitStream.UpdateMarkers(state.Markers);
+            textBoxBitStream.UpdateMarkers(state.MarkerRoot, state.Markers);
         }
 
         private void UpdateTextBox(FastColoredTextBox tb, string text, Color color){

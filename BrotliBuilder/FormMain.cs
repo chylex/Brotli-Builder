@@ -200,7 +200,7 @@ namespace BrotliBuilder{
                     lastGeneratedFile = loaded.File;
                     menuItemCloneGeneratedToOriginal.Enabled = true;
 
-                    if (brotliFilePanelOriginal.MarkerSequence != null && brotliFilePanelGenerated.MarkerSequence != null){
+                    if (brotliFilePanelOriginal.MarkerRoot != null && brotliFilePanelGenerated.MarkerRoot != null){
                         menuItemCompareMarkers.Enabled = true;
                     }
 
@@ -345,7 +345,7 @@ namespace BrotliBuilder{
         }
         
         private void brotliFilePanel_MarkersUpdated(object sender, MarkedTextBox.MarkerUpdateEventArgs e){
-            brotliMarkerInfoPanel.UpdateMarkers(e.MarkerSequence, e.HighlightedNodes, e.CaretNode);
+            brotliMarkerInfoPanel.UpdateMarkers(e.MarkerRoot, e.MarkerSequence, e.HighlightedNodes, e.CaretNode);
         }
 
         #endregion
@@ -471,13 +471,13 @@ namespace BrotliBuilder{
         }
 
         private void menuItemCompareMarkers_Click(object sender, EventArgs e){
-            if (brotliFilePanelOriginal.MarkerSequence == null || brotliFilePanelGenerated.MarkerSequence == null){
+            if (brotliFilePanelOriginal.MarkerRoot == null || brotliFilePanelGenerated.MarkerRoot == null){
                 MessageBox.Show("No original file opened.", "Compare Markers Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            string originalText = BrotliMarkerInfoPanel.GenerateText(brotliFilePanelOriginal.MarkerSequence);
-            string generatedText = BrotliMarkerInfoPanel.GenerateText(brotliFilePanelGenerated.MarkerSequence);
+            string originalText = brotliFilePanelOriginal.MarkerRoot.BuildText();
+            string generatedText = brotliFilePanelGenerated.MarkerRoot.BuildText();
 
             try{
                 WinMerge.CompareText(originalText, generatedText);

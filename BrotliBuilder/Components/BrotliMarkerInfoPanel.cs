@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using BrotliLib.Markers;
 using BrotliLib.Markers.Types;
@@ -20,25 +19,6 @@ namespace BrotliBuilder.Components{
             { StyleNormalBlack, StyleBoldBlack }
         };
 
-        public static string GenerateText(IList<MarkerNode> markerSequence){
-            StringBuilder build = new StringBuilder(512);
-
-            foreach(MarkerNode node in markerSequence){
-                build.Append('\t', node.Depth);
-
-                var marker = node.Marker;
-                int startIndex = build.Length;
-                marker.Info.ToString(build, marker.Length);
-
-                build.Replace("\r", "\\r", startIndex, build.Length - startIndex);
-                build.Replace("\n", "\\n", startIndex, build.Length - startIndex);
-
-                build.Append('\n');
-            }
-
-            return build.ToString();
-        }
-
         public bool WordWrap{
             set => textBoxContext.WordWrap = value;
         }
@@ -51,7 +31,7 @@ namespace BrotliBuilder.Components{
         private IList<MarkerNode> prevMarkerNodes = null;
         private MarkerNode prevCaretNode = null;
 
-        public void UpdateMarkers(IList<MarkerNode> markerSequence, HashSet<MarkerNode> highlightedNodes, MarkerNode caretNode){
+        public void UpdateMarkers(MarkerRoot markerRoot, IList<MarkerNode> markerSequence, HashSet<MarkerNode> highlightedNodes, MarkerNode caretNode){
             if (ReferenceEquals(prevCaretNode, caretNode)){
                 return;
             }
@@ -63,7 +43,7 @@ namespace BrotliBuilder.Components{
             
             if (!ReferenceEquals(prevMarkerNodes, markerSequence)){
                 prevMarkerNodes = markerSequence;
-                textBoxContext.Text = GenerateText(markerSequence);
+                textBoxContext.Text = markerRoot?.BuildText() ?? string.Empty;
             }
 
             for(int line = 0; line < markerSequence.Count; line++){
@@ -89,7 +69,7 @@ namespace BrotliBuilder.Components{
         }
 
         public void ResetMarkers(){
-            UpdateMarkers(Array.Empty<MarkerNode>(), null, null);
+            UpdateMarkers(null, Array.Empty<MarkerNode>(), null, null);
         }
     }
 }
