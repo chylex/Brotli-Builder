@@ -92,7 +92,7 @@ namespace BrotliBuilder.State{
             UpdateState(token, new BrotliFileState.Loaded(structure, bits, output));
         });
 
-        public void LoadStructure(BrotliFileStructure structure) => StartWorker(token => {
+        public void LoadStructure(BrotliFileStructure structure, byte[] checkAgainst = null) => StartWorker(token => {
             UpdateState(token, new BrotliFileState.Starting());
             UpdateState(token, new BrotliFileState.HasStructure(structure, null));
 
@@ -100,7 +100,7 @@ namespace BrotliBuilder.State{
             UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), stopwatch));
 
             if (!TryGetDecompressionState(token, structure, bits, out BrotliOutputStored output, out Stopwatch swOutput)) return;
-            UpdateState(token, new BrotliFileState.HasOutput(null, output.AsBytes, swOutput));
+            UpdateState(token, new BrotliFileState.HasOutput(checkAgainst, output.AsBytes, swOutput));
 
             UpdateState(token, new BrotliFileState.Loaded(structure, bits, output));
         });

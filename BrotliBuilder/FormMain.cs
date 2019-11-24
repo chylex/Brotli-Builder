@@ -63,6 +63,7 @@ namespace BrotliBuilder{
         private string lastFileName = "compressed";
         private bool isDirty = false;
 
+        private byte[] lastOriginalFileBytes;
         private BrotliFileStructure lastGeneratedFile;
         private bool skipNextBlockRegeneration = false;
         private bool skipNextOriginalToGeneratedFeed = false;
@@ -221,6 +222,8 @@ namespace BrotliBuilder{
 
                     menuItemCompareMarkers.Enabled = false;
                     menuItemCloneOriginalToGenerated.Enabled = false;
+
+                    lastOriginalFileBytes = null;
                     return;
 
                 case BrotliFileState.Starting _:
@@ -247,6 +250,7 @@ namespace BrotliBuilder{
                 case BrotliFileState.HasOutput hasOutput:
                     filePanel.UpdateOutput(hasOutput);
                     CheckOutputMatches(hasOutput);
+                    lastOriginalFileBytes = hasOutput.OutputBytes;
                     break;
 
                 case BrotliFileState.Loaded loaded:
@@ -256,7 +260,7 @@ namespace BrotliBuilder{
                         skipNextOriginalToGeneratedFeed = false;
                     }
                     else{
-                        fileGenerated.LoadStructure(loaded.File);
+                        fileGenerated.LoadStructure(loaded.File, lastOriginalFileBytes);
                     }
 
                     menuItemCloneOriginalToGenerated.Enabled = true;
