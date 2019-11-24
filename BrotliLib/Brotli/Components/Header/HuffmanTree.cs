@@ -90,7 +90,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Context
 
-        public class Context{
+        public sealed class Context{
             public AlphabetSize AlphabetSize { get; }
 
             public Func<int, T> BitsToSymbol { get; }
@@ -107,7 +107,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
             public Context(AlphabetSize alphabetSize, Func<int, T> bitsToSymbol, Func<T, int> symbolToBits) : this(alphabetSize, bitsToSymbol, symbolToBits, -1){}
 
-            public Context ForComplexDeserialization(int skippedComplexCodeLengths){
+            internal Context ForComplexDeserialization(int skippedComplexCodeLengths){
                 return new Context(AlphabetSize, BitsToSymbol, SymbolToBits, skippedComplexCodeLengths);
             }
         }

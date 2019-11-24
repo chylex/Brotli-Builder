@@ -54,11 +54,12 @@ namespace BrotliLib.Collections{
             }
         }
 
-        public static int HashCode<T>(IEnumerable<T> collection){
+        public static int HashCode<T>(IReadOnlyList<T> collection){
             var hash = new HashCode();
 
-            foreach(var element in collection){
-                hash.Add(element);
+            // ReSharper disable once ForCanBeConvertedToForeach
+            for(int index = 0; index < collection.Count; index++){
+                hash.Add(collection[index]);
             }
 
             return hash.ToHashCode();

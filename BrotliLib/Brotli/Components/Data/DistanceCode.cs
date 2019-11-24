@@ -91,7 +91,7 @@ namespace BrotliLib.Brotli.Components.Data{
 
         // Context
 
-        internal class DistanceContext{
+        internal readonly struct DistanceContext{
             private readonly DistanceCode code;
             private readonly BrotliGlobalState state;
 

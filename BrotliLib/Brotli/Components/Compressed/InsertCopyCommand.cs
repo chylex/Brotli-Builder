@@ -63,15 +63,15 @@ namespace BrotliLib.Brotli.Components.Compressed{
                 // Insert&copy lengths
                 
                 int icBlockID = context.NextBlockID(Category.InsertCopy);
-                InsertCopyLengthCode icLengthCode = reader.ReadValue(header.InsertCopyTrees[icBlockID].Root, "length code");
-                InsertCopyLengths icLengthValues = reader.ReadStructure(InsertCopyLengths.Deserialize, icLengthCode, "length values");
+                var icLengthCode = reader.ReadValue(header.InsertCopyTrees[icBlockID].Root, "length code");
+                var icLengthValues = reader.ReadStructure(InsertCopyLengths.Deserialize, icLengthCode, "length values");
 
                 int insertLength = icLengthValues.InsertLength;
                 int copyLength = icLengthValues.CopyLength;
                 
                 // Literals
 
-                Literal[] literals = new Literal[insertLength];
+                Literal[] literals = insertLength == 0 ? Array.Empty<Literal>() : new Literal[insertLength];
                 
                 for(int insertIndex = 0; insertIndex < insertLength; insertIndex++){
                     int blockID = context.NextBlockID(Category.Literal);
@@ -100,7 +100,7 @@ namespace BrotliLib.Brotli.Components.Compressed{
                     int contextID = icLengthValues.DistanceContextID;
                     int treeID = header.DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
-                    DistanceCode distanceCode = reader.ReadValue(header.DistanceTrees[treeID].Root, "distance code");
+                    var distanceCode = reader.ReadValue(header.DistanceTrees[treeID].Root, "distance code");
                     distanceInfo = reader.ReadValue(DistanceCode.Deserialize, distanceCode.MakeContext(state), "distance value");
                 }
 
