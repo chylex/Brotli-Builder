@@ -8,6 +8,8 @@ namespace BrotliCalc.Helpers{
         public string Path { get; }
         public string Name { get; }
 
+        public abstract string FullName { get; }
+
         public byte[] Contents => contentsLazy.Value;
         public int? SizeBytes => sizeBytesLazy.Value;
 
@@ -37,28 +39,26 @@ namespace BrotliCalc.Helpers{
             }, isThreadSafe: false);
         }
 
+        public override string ToString(){
+            return FullName;
+        }
+
         // Types
 
         internal class Uncompressed : BrotliFile{
-            public Uncompressed(string path, string name) : base(path, name){}
+            public override string FullName => Name;
 
-            public override string ToString(){
-                return Name;
-            }
+            public Uncompressed(string path, string name) : base(path, name){}
         }
 
         internal class Compressed : BrotliFile{
             public string Identifier { get; }
 
-            public string FullName => $"{Name}.{Identifier}{Brotli.CompressedFileExtension}";
             public BrotliFileStructure Structure => BrotliFileStructure.FromBytes(Contents);
+            public override string FullName => $"{Name}.{Identifier}{Brotli.CompressedFileExtension}";
 
             public Compressed(string path, string name, string identifier) : base(path, name){
                 this.Identifier = identifier;
-            }
-
-            public override string ToString(){
-                return FullName;
             }
         }
     }
