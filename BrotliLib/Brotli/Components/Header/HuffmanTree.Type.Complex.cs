@@ -275,7 +275,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Serialization
 
-        public static void Write(IBitWriter writer, IDictionary<byte, BitStream> lengthMap){
+        public static void Write(IBitWriter writer, IReadOnlyDictionary<byte, BitStream> lengthMap){
             int skippedAmount;
 
             if (!lengthMap.ContainsKey(Order[0]) && !lengthMap.ContainsKey(Order[1])){
@@ -286,6 +286,14 @@ namespace BrotliLib.Brotli.Components.Header{
             }
 
             writer.WriteChunk(2, skippedAmount);
+
+            if (lengthMap.Count == 1){
+                // if lengthMap has only 1 element, its path length is zero, which would omit the element completely
+                // instead, a length of 3 is chosen because its path is encoded using only 2 bits
+                lengthMap = new Dictionary<byte, BitStream>{
+                    { lengthMap.Keys.First(), new BitStream("000") }
+                };
+            }
             
             for(int index = skippedAmount, bitSpaceRemaining = LengthBitSpace; bitSpaceRemaining > 0 && index < Order.Length; index++){
                 byte code = Order[index];

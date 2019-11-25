@@ -43,7 +43,7 @@ namespace BrotliLib.Brotli.Components.Data{
                     return code.Equals(DistanceCode.Zero);
 
                 default:
-                    return code.CanEncodeValue(state, (int)info);
+                    return code.CanEncodeValue(state, (int)info) && !code.Equals(DistanceCode.Zero);
             }
         }
 
