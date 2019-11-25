@@ -36,6 +36,8 @@ namespace BrotliCalc.Commands.Base{
                     throw new ArgumentException("Output folder does not exist.");
                 }
                 
+                Setup(args);
+
                 var items = SelectFiles(Brotli.ListPath(source)).ToArray();
                 int errors = 0;
 
@@ -60,6 +62,8 @@ namespace BrotliCalc.Commands.Base{
 
                 return $"{WorkDesc} {items.Length} file(s) with {errors} error(s).";
             }
+            
+            protected virtual void Setup(string[] args){}
 
             protected abstract byte[] MapFile(BrotliFileGroup group, T file);
         }
