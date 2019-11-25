@@ -1,7 +1,9 @@
 ﻿using System;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Collections;
+using BrotliLib.Markers;
 using BrotliLib.Markers.Serialization;
+using BrotliLib.Markers.Types;
 using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components{
@@ -34,19 +36,29 @@ namespace BrotliLib.Brotli.Components{
             internal new static readonly BitDeserializer<Uncompressed, Context> Deserialize = MarkedBitDeserializer.Wrap<Uncompressed, Context>(
                 (reader, context) => {
                     byte[] bytes = new byte[context.DataLength.UncompressedBytes];
+                    int length = bytes.Length;
 
-                    if (bytes.Length == 0){
+                    if (length == 0){
                         throw new InvalidOperationException("Uncompressed meta-block must not be empty.");
                     }
 
                     reader.AlignToByteBoundary();
                     reader.MarkStart();
 
-                    for(int index = 0; index < bytes.Length; index++){
-                        bytes[index] = reader.NextAlignedByte("byte");
-                    }
+                    if (reader.MarkerLevel == MarkerLevel.Verbose){
+                        for(int index = 0; index < length; index++){
+                            bytes[index] = reader.NextAlignedByte("byte");
+                        }
 
-                    reader.MarkEndTitle("Uncompressed Bytes");
+                        reader.MarkEndTitle("Uncompressed Bytes");
+                    }
+                    else{
+                        for(int index = 0; index < length; index++){
+                            bytes[index] = reader.NextAlignedByte();
+                        }
+
+                        reader.MarkEnd(new TextMarker("(" + length + " uncompressed byte" + (length == 1 ? ")" : "s)")));
+                    }
 
                     context.State.OutputBytes(bytes);
                     return new Uncompressed(bytes);

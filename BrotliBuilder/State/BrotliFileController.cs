@@ -6,11 +6,12 @@ using BrotliBuilder.Utils;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Output;
+using BrotliLib.Markers;
 using BrotliLib.Serialization;
 
 namespace BrotliBuilder.State{
     sealed class BrotliFileController{
-        public bool EnableBitMarkers { get; set; } = true;
+        public MarkerLevel BitMarkerLevel { get; set; } = MarkerLevel.Verbose;
         
         public event EventHandler<StateChangedEventArgs> StateChanged;
         public BrotliFileStructure CurrentFile => (state as BrotliFileState.Loaded)?.File;
@@ -221,7 +222,7 @@ namespace BrotliBuilder.State{
         private bool TryGetDecompressionState(int token, BrotliFileStructure structure, BitStream bits, out BrotliOutputStored output, out Stopwatch stopwatch){
             try{
                 stopwatch = Stopwatch.StartNew();
-                output = structure.GetDecompressionState(bits, EnableBitMarkers);
+                output = structure.GetDecompressionState(bits, BitMarkerLevel);
                 stopwatch.Stop();
                 return true;
             }catch(Exception ex){

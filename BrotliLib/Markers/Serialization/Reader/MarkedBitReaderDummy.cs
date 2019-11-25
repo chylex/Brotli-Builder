@@ -4,6 +4,7 @@ using BrotliLib.Serialization.Reader;
 namespace BrotliLib.Markers.Serialization.Reader{
     class MarkedBitReaderDummy : IMarkedBitReader{
         public MarkerRoot MarkerRoot { get; } = new MarkerRoot();
+        public MarkerLevel MarkerLevel => MarkerLevel.None;
 
         private readonly IBitReader wrapped;
         

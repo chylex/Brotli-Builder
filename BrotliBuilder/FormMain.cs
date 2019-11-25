@@ -12,6 +12,7 @@ using BrotliBuilder.Utils;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Dictionary.Default;
 using BrotliLib.Brotli.Encode;
+using BrotliLib.Markers;
 
 namespace BrotliBuilder{
     partial class FormMain : Form{
@@ -420,7 +421,7 @@ namespace BrotliBuilder{
             };
 
             if (dialog.ShowDialog() == DialogResult.OK){
-                File.WriteAllBytes(dialog.FileName, currentFile.GetDecompressionState(currentFile.Serialize(), enableMarkers: false).AsBytes);
+                File.WriteAllBytes(dialog.FileName, currentFile.GetDecompressionState(currentFile.Serialize()).AsBytes);
             }
         }
 
@@ -440,8 +441,8 @@ namespace BrotliBuilder{
             bool enable = menuItemMarkerInfo.Toggle();
 
             splitContainerMain.Panel1Collapsed = !enable;
-            fileGenerated.EnableBitMarkers = enable;
-            fileOriginal.EnableBitMarkers = enable;
+            fileGenerated.BitMarkerLevel = enable ? MarkerLevel.Verbose : MarkerLevel.None;
+            fileOriginal.BitMarkerLevel = enable ? MarkerLevel.Verbose : MarkerLevel.None;
 
             if (!enable){
                 brotliMarkerInfoPanel.ResetMarkers();

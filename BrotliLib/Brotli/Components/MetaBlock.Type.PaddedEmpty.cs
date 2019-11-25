@@ -1,7 +1,9 @@
 ﻿using System;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Collections;
+using BrotliLib.Markers;
 using BrotliLib.Markers.Serialization;
+using BrotliLib.Markers.Types;
 using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components{
@@ -72,12 +74,21 @@ namespace BrotliLib.Brotli.Components{
                 
                     reader.AlignToByteBoundary();
                     reader.MarkStart();
-                
-                    for(int index = 0; index < bytes.Length; index++){
-                        bytes[index] = reader.NextAlignedByte("byte");
-                    }
 
-                    reader.MarkEndTitle("Skipped Bytes");
+                    if (reader.MarkerLevel == MarkerLevel.Verbose){
+                        for(int index = 0; index < skipLength; index++){
+                            bytes[index] = reader.NextAlignedByte("byte");
+                        }
+                        
+                        reader.MarkEndTitle("Skipped Bytes");
+                    }
+                    else{
+                        for(int index = 0; index < skipLength; index++){
+                            bytes[index] = reader.NextAlignedByte();
+                        }
+
+                        reader.MarkEnd(new TextMarker("(" + skipLength + " skipped byte" + (skipLength == 1 ? ")" : "s)")));
+                    }
 
                     return new PaddedEmpty(bytes);
                 }

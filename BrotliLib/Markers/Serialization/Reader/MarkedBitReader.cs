@@ -5,14 +5,16 @@ using BrotliLib.Serialization.Reader;
 namespace BrotliLib.Markers.Serialization.Reader{
     class MarkedBitReader : IMarkedBitReader{
         public MarkerRoot MarkerRoot { get; } = new MarkerRoot();
+        public MarkerLevel MarkerLevel { get; }
 
         private readonly IBitReader wrapped;
         
         private readonly Stack<MarkerNode> nodes = new Stack<MarkerNode>();
         private readonly Stack<int> starts = new Stack<int>();
         
-        public MarkedBitReader(IBitReader wrapped){
+        public MarkedBitReader(IBitReader wrapped, MarkerLevel level){
             this.wrapped = wrapped;
+            this.MarkerLevel = level;
         }
 
         // Markers

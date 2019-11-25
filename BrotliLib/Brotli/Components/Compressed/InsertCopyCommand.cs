@@ -4,7 +4,9 @@ using System.Linq;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Collections;
+using BrotliLib.Markers;
 using BrotliLib.Markers.Serialization;
+using BrotliLib.Markers.Types;
 using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components.Compressed{
@@ -71,6 +73,12 @@ namespace BrotliLib.Brotli.Components.Compressed{
                 
                 // Literals
 
+                bool markLiteralsSimple = insertLength > 0 && reader.MarkerLevel == MarkerLevel.Simple;
+
+                if (markLiteralsSimple){
+                    reader.MarkStart();
+                }
+
                 Literal[] literals = insertLength == 0 ? Array.Empty<Literal>() : new Literal[insertLength];
                 
                 for(int insertIndex = 0; insertIndex < insertLength; insertIndex++){
@@ -78,10 +86,21 @@ namespace BrotliLib.Brotli.Components.Compressed{
                     int contextID = state.NextLiteralContextID(header.LiteralCtxModes[blockID]);
                     int treeID = header.LiteralCtxMap.DetermineTreeID(blockID, contextID);
 
-                    Literal literal = reader.ReadValue(header.LiteralTrees[treeID].Root, "literal");
+                    Literal literal;
+
+                    if (reader.MarkerLevel == MarkerLevel.Verbose){
+                        literal = reader.ReadValue(header.LiteralTrees[treeID].Root, "literal");
+                    }
+                    else{
+                        literal = header.LiteralTrees[treeID].Root.LookupValue(reader);
+                    }
 
                     literals[insertIndex] = literal;
                     context.WriteLiteral(in literal);
+                }
+
+                if (markLiteralsSimple){
+                    reader.MarkEnd(new TextMarker("(" + insertLength + " literal" + (insertLength == 1 ? ")" : "s)")));
                 }
 
                 if (!context.NeedsMoreData){
@@ -104,7 +123,12 @@ namespace BrotliLib.Brotli.Components.Compressed{
                     distanceInfo = reader.ReadValue(DistanceCode.Deserialize, distanceCode.MakeContext(state), "distance value");
                 }
 
-                context.WriteCopyWithMarker(reader, copyLength, distanceInfo);
+                if (reader.MarkerLevel == MarkerLevel.Verbose){
+                    context.WriteCopyWithMarker(reader, copyLength, distanceInfo);
+                }
+                else{
+                    context.WriteCopy(copyLength, distanceInfo);
+                }
 
                 return new InsertCopyCommand(literals, copyLength, distanceInfo);
             }

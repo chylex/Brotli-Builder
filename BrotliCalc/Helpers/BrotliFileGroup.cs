@@ -16,7 +16,7 @@ namespace BrotliCalc.Helpers{
 
         public BitStream SerializeAndValidate(BrotliFileStructure bfs){
             var serialized = bfs.Serialize();
-            var output = bfs.GetDecompressionState(serialized, enableMarkers: false);
+            var output = bfs.GetDecompressionState(serialized);
 
             if (!CollectionHelper.Equal(output.AsBytes, Uncompressed.Contents)){
                 throw new InvalidOperationException("Mismatched output bytes.");

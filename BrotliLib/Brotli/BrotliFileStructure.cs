@@ -5,6 +5,7 @@ using BrotliLib.Brotli.Dictionary;
 using BrotliLib.Brotli.Dictionary.Default;
 using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Output;
+using BrotliLib.Markers;
 using BrotliLib.Markers.Serialization.Reader;
 using BrotliLib.Serialization;
 using BrotliLib.Serialization.Writer;
@@ -22,7 +23,7 @@ namespace BrotliLib.Brotli{
         }
 
         public static BrotliFileStructure FromBytes(byte[] bytes){
-            return DoDeserialize(CreateReader(new BitStream(bytes), enableMarkers: false), new FileContext(BrotliDefaultDictionary.Embedded, windowSize => new BrotliOutputWindowed(windowSize)));
+            return DoDeserialize(CreateReader(new BitStream(bytes)), new FileContext(BrotliDefaultDictionary.Embedded, windowSize => new BrotliOutputWindowed(windowSize)));
         }
 
         public static BrotliFileStructure FromEncoder(BrotliFileParameters parameters, IBrotliEncoder encoder, byte[] bytes){
@@ -74,10 +75,10 @@ namespace BrotliLib.Brotli{
             return stream;
         }
 
-        public BrotliOutputStored GetDecompressionState(BitStream bitStream, bool enableMarkers){
+        public BrotliOutputStored GetDecompressionState(BitStream bitStream, MarkerLevel? markerLevel = null){
             var outputState = new BrotliOutputStored();
 
-            IMarkedBitReader reader = CreateReader(bitStream, enableMarkers);
+            IMarkedBitReader reader = CreateReader(bitStream, markerLevel);
             DoDeserialize(reader, new FileContext(Parameters.Dictionary, outputState));
 
             outputState.BitMarkerRoot = reader.MarkerRoot;
@@ -102,8 +103,8 @@ namespace BrotliLib.Brotli{
             public FileContext(BrotliDictionary dictionary, IBrotliOutput outputState) : this(dictionary, _ => outputState){}
         }
 
-        private static IMarkedBitReader CreateReader(BitStream bitStream, bool enableMarkers){
-            return enableMarkers ? new MarkedBitReader(bitStream.GetReader()) : (IMarkedBitReader)new MarkedBitReaderDummy(bitStream.GetReader());
+        private static IMarkedBitReader CreateReader(BitStream bitStream, MarkerLevel? markerLevel = null){
+            return markerLevel.HasValue ? new MarkedBitReader(bitStream.GetReader(), markerLevel.Value) : (IMarkedBitReader)new MarkedBitReaderDummy(bitStream.GetReader());
         }
 
         private static readonly BitDeserializer<BrotliFileStructure, FileContext> DoDeserialize = (reader, context) => {
