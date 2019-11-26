@@ -1,6 +1,7 @@
 ﻿using System;
 using BrotliLib.Brotli.Components.Compressed;
 using BrotliLib.Brotli.Components.Header;
+using BrotliLib.Brotli.Serialization;
 using BrotliLib.Markers.Serialization;
 using BrotliLib.Serialization;
 
@@ -41,8 +42,8 @@ namespace BrotliLib.Brotli.Components{
                 }
             );
 
-            internal new static readonly BitSerializer<Compressed, Context> Serialize = (writer, obj, context) => {
-                MetaBlockCompressionHeader.Serialize(writer, obj.Header, NoContext.Value);
+            internal new static readonly BitSerializer<Compressed, Context, BrotliSerializationParameters> Serialize = (writer, obj, context, parameters) => {
+                MetaBlockCompressionHeader.Serialize(writer, obj.Header, NoContext.Value, parameters);
                 MetaBlockCompressionData.Serialize(writer, obj.Data, new MetaBlockCompressionData.Context(obj.Header, context.DataLength, context.State));
             };
         }

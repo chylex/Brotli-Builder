@@ -12,7 +12,7 @@ namespace BrotliImpl.Transformers{
             for(byte postfixBitCount = 0; postfixBitCount <= DistanceParameters.MaxPostfixBitCount; postfixBitCount++){
                 for(byte directCodeBits = 0; directCodeBits <= DistanceParameters.MaxDirectCodeBits; directCodeBits++){
                     builder.DistanceParameters = new DistanceParameters(postfixBitCount, directCodeBits);
-                    tracker.Test(builder, "[PostfixBitCount = " + postfixBitCount + ", DirectCodeBits = " + directCodeBits + "]");
+                    tracker.Test(builder, debugText: "[PostfixBitCount = " + postfixBitCount + ", DirectCodeBits = " + directCodeBits + "]");
                 }
             }
 

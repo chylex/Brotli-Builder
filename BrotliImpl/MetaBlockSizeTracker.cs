@@ -3,6 +3,7 @@ using System.Diagnostics;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Encode;
+using BrotliLib.Brotli.Serialization;
 using BrotliLib.Serialization.Writer;
 
 namespace BrotliImpl{
@@ -16,8 +17,8 @@ namespace BrotliImpl{
             this.initialState = initialState;
         }
 
-        public void Test(MetaBlock tested, string debugText = null){
-            int testedSize = CountBits(tested, initialState.Clone());
+        public void Test(MetaBlock tested, BrotliSerializationParameters parameters = null, string debugText = null){
+            int testedSize = CountBits(tested, initialState.Clone(), parameters);
 
             if (debugText != null){
                 Debug.Write(debugText + " = " + testedSize + " bits");
@@ -37,15 +38,15 @@ namespace BrotliImpl{
             }
         }
 
-        public void Test(CompressedMetaBlockBuilder builder, string debugText = null){
-            Test(builder.Build().MetaBlock, debugText);
+        public void Test(CompressedMetaBlockBuilder builder, BrotliSerializationParameters parameters = null, string debugText = null){
+            Test(builder.Build().MetaBlock, parameters, debugText);
         }
 
-        public static int CountBits(MetaBlock tested, BrotliGlobalState state){
+        public static int CountBits(MetaBlock tested, BrotliGlobalState state, BrotliSerializationParameters parameters = null){
             var writer = new BitWriterNull();
 
             try{
-                MetaBlock.Serialize(writer, tested, state.Clone());
+                MetaBlock.Serialize(writer, tested, state.Clone(), parameters ?? BrotliSerializationParameters.Default);
                 return writer.Length;
             }catch(Exception ex){
                 Debug.WriteLine(ex.ToString());

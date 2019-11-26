@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BrotliLib.Brotli;
+using BrotliLib.Brotli.Serialization;
 using BrotliLib.Collections;
 using BrotliLib.Serialization;
 
@@ -14,8 +15,8 @@ namespace BrotliCalc.Helpers{
             this.Compressed = compressedFiles;
         }
 
-        public BitStream SerializeAndValidate(BrotliFileStructure bfs){
-            var serialized = bfs.Serialize();
+        public BitStream SerializeAndValidate(BrotliFileStructure bfs, BrotliSerializationParameters parameters = null){
+            var serialized = bfs.Serialize(parameters);
             var output = bfs.GetDecompressionState(serialized);
 
             if (!CollectionHelper.Equal(output.AsBytes, Uncompressed.Contents)){
@@ -25,8 +26,8 @@ namespace BrotliCalc.Helpers{
             return serialized;
         }
 
-        public int CountBytesAndValidate(BrotliFileStructure bfs){
-            return (7 + SerializeAndValidate(bfs).Length) / 8;
+        public int CountBytesAndValidate(BrotliFileStructure bfs, BrotliSerializationParameters parameters = null){
+            return (7 + SerializeAndValidate(bfs, parameters).Length) / 8;
         }
     }
 }

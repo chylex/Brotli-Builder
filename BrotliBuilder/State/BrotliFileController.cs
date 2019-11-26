@@ -6,11 +6,13 @@ using BrotliBuilder.Utils;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Output;
+using BrotliLib.Brotli.Serialization;
 using BrotliLib.Markers;
 using BrotliLib.Serialization;
 
 namespace BrotliBuilder.State{
     sealed class BrotliFileController{
+        public BrotliSerializationParameters SerializationParameters { get; set; } = BrotliSerializationParameters.Default;
         public MarkerLevel BitMarkerLevel { get; set; } = MarkerLevel.Verbose;
         
         public event EventHandler<StateChangedEventArgs> StateChanged;
@@ -125,7 +127,7 @@ namespace BrotliBuilder.State{
         private void TransformInternal(BrotliFileStructure structure, IBrotliTransformer transformer) => StartWorker(token => {
             UpdateState(token, new BrotliFileState.Starting());
 
-            TryGetDecompressionState(token, structure, structure.Serialize(), out BrotliOutputStored prevOutput, out Stopwatch _);
+            TryGetDecompressionState(token, structure, structure.Serialize(SerializationParameters), out BrotliOutputStored prevOutput, out Stopwatch _);
 
             if (!TryTransform(token, structure, transformer, out structure, out Stopwatch swTransform)) return;
             UpdateState(token, new BrotliFileState.HasStructure(structure, swTransform));
@@ -183,7 +185,7 @@ namespace BrotliBuilder.State{
         private bool TrySerialize(int token, BrotliFileStructure structure, out BitStream bits, out Stopwatch stopwatch){
             try{
                 stopwatch = Stopwatch.StartNew();
-                bits = structure.Serialize();
+                bits = structure.Serialize(SerializationParameters);
                 stopwatch.Stop();
                 return true;
             }catch(Exception ex){

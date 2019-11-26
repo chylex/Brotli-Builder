@@ -1,5 +1,6 @@
 ﻿using System;
 using BrotliLib.Brotli.Components.Header;
+using BrotliLib.Brotli.Serialization;
 using BrotliLib.Markers.Serialization;
 using BrotliLib.Serialization;
 
@@ -71,7 +72,7 @@ namespace BrotliLib.Brotli.Components{
             }
         );
 
-        public static readonly BitSerializer<MetaBlock, BrotliGlobalState> Serialize = (writer, obj, context) => {
+        public static readonly BitSerializer<MetaBlock, BrotliGlobalState, BrotliSerializationParameters> Serialize = (writer, obj, context, parameters) => {
             if (obj is LastEmpty){
                 writer.WriteBit(true); // ISLAST
                 writer.WriteBit(true); // ISLASTEMPTY
@@ -109,7 +110,7 @@ namespace BrotliLib.Brotli.Components{
                         writer.WriteBit(false); // ISUNCOMPRESSED
                     }
 
-                    Compressed.Serialize(writer, c, new Context(c.IsLast, c.DataLength, context));
+                    Compressed.Serialize(writer, c, new Context(c.IsLast, c.DataLength, context), parameters);
                     break;
             }
         };

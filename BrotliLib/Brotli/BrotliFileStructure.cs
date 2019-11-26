@@ -5,6 +5,7 @@ using BrotliLib.Brotli.Dictionary;
 using BrotliLib.Brotli.Dictionary.Default;
 using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Output;
+using BrotliLib.Brotli.Serialization;
 using BrotliLib.Markers;
 using BrotliLib.Markers.Serialization.Reader;
 using BrotliLib.Serialization;
@@ -47,7 +48,7 @@ namespace BrotliLib.Brotli{
             this.MetaBlocks = new List<MetaBlock>();
         }
 
-        public BrotliFileStructure Transform(IBrotliTransformer transformer){
+        public BrotliFileStructure Transform(IBrotliTransformer transformer, BrotliSerializationParameters parameters = null){
             var copy = new BrotliFileStructure(Parameters);
             var state = new BrotliGlobalState(Parameters, new BrotliOutputWindowed(Parameters.WindowSize));
             var writer = new BitWriterNull();
@@ -55,7 +56,7 @@ namespace BrotliLib.Brotli{
             foreach(MetaBlock original in MetaBlocks){
                 foreach(MetaBlock transformed in transformer.Transform(original, state)){ // TODO figure out how to handle state
                     copy.MetaBlocks.Add(transformed);
-                    MetaBlock.Serialize(writer, transformed, state);
+                    MetaBlock.Serialize(writer, transformed, state, parameters ?? BrotliSerializationParameters.Default);
                 }
             }
 
@@ -69,9 +70,9 @@ namespace BrotliLib.Brotli{
             }
         }
 
-        public BitStream Serialize(){
+        public BitStream Serialize(BrotliSerializationParameters parameters = null){
             BitStream stream = new BitStream();
-            DoSerialize(stream.GetWriter(), this, new FileContext(Parameters.Dictionary, new BrotliOutputWindowed(Parameters.WindowSize)));
+            DoSerialize(stream.GetWriter(), this, new FileContext(Parameters.Dictionary, new BrotliOutputWindowed(Parameters.WindowSize)), parameters ?? BrotliSerializationParameters.Default);
             return stream;
         }
 
@@ -83,10 +84,6 @@ namespace BrotliLib.Brotli{
 
             outputState.BitMarkerRoot = reader.MarkerRoot;
             return outputState;
-        }
-
-        public override string ToString(){
-            return Serialize().ToString();
         }
 
         // Serialization
@@ -127,16 +124,16 @@ namespace BrotliLib.Brotli{
             return structure;
         };
 
-        private static readonly BitSerializer<BrotliFileStructure, FileContext> DoSerialize = (writer, obj, context) => {
-            var parameters = obj.Parameters;
-            var windowSize = parameters.WindowSize;
+        private static readonly BitSerializer<BrotliFileStructure, FileContext, BrotliSerializationParameters> DoSerialize = (writer, obj, context, parameters) => {
+            var fileParameters = obj.Parameters;
+            var windowSize = fileParameters.WindowSize;
             
             WindowSize.Serialize(writer, windowSize, NoContext.Value);
 
-            var state = new BrotliGlobalState(parameters, context.OutputState(windowSize));
+            var state = new BrotliGlobalState(fileParameters, context.OutputState(windowSize));
 
             foreach(MetaBlock metaBlock in obj.MetaBlocks){
-                MetaBlock.Serialize(writer, metaBlock, state);
+                MetaBlock.Serialize(writer, metaBlock, state, parameters);
             }
         };
     }
