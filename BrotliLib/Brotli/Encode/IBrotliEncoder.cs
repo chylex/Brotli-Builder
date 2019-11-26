@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using BrotliLib.Brotli.Components;
+using BrotliLib.Brotli.Parameters;
 
 namespace BrotliLib.Brotli.Encode{
     /// <summary>

@@ -4,7 +4,7 @@ using System.Linq;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
-using BrotliLib.Brotli.Serialization;
+using BrotliLib.Brotli.Parameters;
 using BrotliLib.Collections;
 using BrotliLib.Markers.Serialization;
 using BrotliLib.Markers.Serialization.Reader;

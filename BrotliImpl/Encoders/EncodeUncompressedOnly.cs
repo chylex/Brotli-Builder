@@ -4,6 +4,7 @@ using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Encode;
+using BrotliLib.Brotli.Parameters;
 using BrotliLib.Collections;
 
 namespace BrotliImpl.Encoders{

@@ -12,6 +12,7 @@ using BrotliBuilder.Utils;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Dictionary.Default;
 using BrotliLib.Brotli.Encode;
+using BrotliLib.Brotli.Parameters;
 using BrotliLib.Markers;
 
 namespace BrotliBuilder{

@@ -3,6 +3,7 @@ using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Output;
+using BrotliLib.Brotli.Parameters;
 using BrotliLib.Collections;
 
 namespace BrotliLib.Brotli{

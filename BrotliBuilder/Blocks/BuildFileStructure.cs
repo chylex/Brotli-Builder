@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using BrotliBuilder.Blocks.Structure;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
+using BrotliLib.Brotli.Parameters;
 
 namespace BrotliBuilder.Blocks{
     partial class BuildFileStructure : UserControl{

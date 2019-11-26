@@ -7,6 +7,7 @@ using BrotliLib.Brotli.Components.Compressed;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Encode;
+using BrotliLib.Brotli.Parameters;
 
 namespace BrotliImpl.Encoders{
     /// <summary>

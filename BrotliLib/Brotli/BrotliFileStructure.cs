@@ -5,7 +5,7 @@ using BrotliLib.Brotli.Dictionary;
 using BrotliLib.Brotli.Dictionary.Default;
 using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Output;
-using BrotliLib.Brotli.Serialization;
+using BrotliLib.Brotli.Parameters;
 using BrotliLib.Markers;
 using BrotliLib.Markers.Serialization.Reader;
 using BrotliLib.Serialization;

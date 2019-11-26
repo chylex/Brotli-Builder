@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BrotliLib.Brotli;
-using BrotliLib.Brotli.Serialization;
+using BrotliLib.Brotli.Parameters;
 using BrotliLib.Collections;
 using BrotliLib.Serialization;
 

@@ -1,6 +1,6 @@
 ﻿using System;
 using BrotliLib.Brotli.Components.Header;
-using BrotliLib.Brotli.Serialization;
+using BrotliLib.Brotli.Parameters;
 using BrotliLib.Markers.Serialization;
 using BrotliLib.Serialization;
 

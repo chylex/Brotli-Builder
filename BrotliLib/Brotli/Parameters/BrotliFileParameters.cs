@@ -2,7 +2,7 @@
 using BrotliLib.Brotli.Dictionary;
 using BrotliLib.Brotli.Dictionary.Default;
 
-namespace BrotliLib.Brotli{
+namespace BrotliLib.Brotli.Parameters{
     public sealed class BrotliFileParameters{
         public WindowSize WindowSize { get; }
         public BrotliDictionary Dictionary { get; }

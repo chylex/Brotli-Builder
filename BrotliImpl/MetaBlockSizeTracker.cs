@@ -3,7 +3,7 @@ using System.Diagnostics;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Encode;
-using BrotliLib.Brotli.Serialization;
+using BrotliLib.Brotli.Parameters;
 using BrotliLib.Serialization.Writer;
 
 namespace BrotliImpl{

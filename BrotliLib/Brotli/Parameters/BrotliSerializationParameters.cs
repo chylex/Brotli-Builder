@@ -1,6 +1,6 @@
 ﻿using BrotliLib.Brotli.Components.Header;
 
-namespace BrotliLib.Brotli.Serialization{
+namespace BrotliLib.Brotli.Parameters{
     public sealed class BrotliSerializationParameters{
         public static BrotliSerializationParameters Default { get; } = new BrotliSerializationParameters();
 

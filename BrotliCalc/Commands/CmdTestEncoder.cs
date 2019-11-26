@@ -5,6 +5,7 @@ using BrotliCalc.Helpers;
 using BrotliImpl.Encoders;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Encode;
+using BrotliLib.Brotli.Parameters;
 
 namespace BrotliCalc.Commands{
     class CmdTestEncoder : CmdAbstractFileTable.Uncompressed{

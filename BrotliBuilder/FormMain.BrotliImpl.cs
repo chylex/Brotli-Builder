@@ -1,6 +1,6 @@
 ﻿using BrotliImpl.Encoders;
 using BrotliImpl.Transformers;
-using BrotliLib.Brotli;
+using BrotliLib.Brotli.Parameters;
 
 namespace BrotliBuilder{
     partial class FormMain{
