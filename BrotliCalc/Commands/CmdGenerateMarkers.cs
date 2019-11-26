@@ -28,7 +28,7 @@ namespace BrotliCalc.Commands{
 
         protected override byte[] MapFile(BrotliFileGroup group, BrotliFile.Compressed file){
             var state = file.Structure.GetDecompressionState(new BitStream(file.Contents), markerLevel);
-            var text = state.BitMarkerRoot.BuildText();
+            var text = state.MarkerRoot.BuildText();
 
             return Encoding.UTF8.GetBytes(text);
         }

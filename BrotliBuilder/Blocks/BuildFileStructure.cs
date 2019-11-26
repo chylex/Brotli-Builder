@@ -35,7 +35,7 @@ namespace BrotliBuilder.Blocks{
             }
         }
 
-        private void context_Notified(object sender, EventArgs e){
+        private void context_Notified(object? sender, EventArgs e){
             if (e is BuildWindowSize.WindowSizeNotifyArgs wsna){
                 brotliFile.Parameters = new BrotliFileParameters(wsna.NewWindowSize, brotliFile.Parameters.Dictionary);
             }
@@ -50,7 +50,7 @@ namespace BrotliBuilder.Blocks{
             listElements.SelectedValueChanged += listElements_SelectedValueChanged;
         }
 
-        private void listElements_SelectedValueChanged(object sender, EventArgs e){
+        private void listElements_SelectedValueChanged(object? sender, EventArgs e){
             object selected = listElements.SelectedItem;
             bool isSelectingMetaBlock = false;
 
@@ -91,15 +91,15 @@ namespace BrotliBuilder.Blocks{
             RegenerateElementList(selectIndex: insertAt + 1, notifyParent: true);
         }
 
-        private void buttonAddMetaBlockCompressed_Click(object sender, EventArgs e){
+        private void buttonAddMetaBlockCompressed_Click(object? sender, EventArgs e){
             // TODO
         }
 
-        private void buttonAddMetaBlockUncompressed_Click(object sender, EventArgs e){
+        private void buttonAddMetaBlockUncompressed_Click(object? sender, EventArgs e){
             AddMetaBlock(new MetaBlock.Uncompressed(Array.Empty<byte>()));
         }
 
-        private void buttonAddMetaBlockEmpty_Click(object sender, EventArgs e){
+        private void buttonAddMetaBlockEmpty_Click(object? sender, EventArgs e){
             if (listElements.SelectedIndex == listElements.Items.Count - 1 && !listElements.Items.OfType<StructureMetaBlockItem>().Any(item => item.Value is MetaBlock.LastEmpty)){
                 AddMetaBlock(new MetaBlock.LastEmpty());
             }
@@ -122,15 +122,15 @@ namespace BrotliBuilder.Blocks{
             }
         }
 
-        private void buttonMoveMetaBlockUp_Click(object sender, EventArgs e){
+        private void buttonMoveMetaBlockUp_Click(object? sender, EventArgs e){
             MoveMetaBlock(true);
         }
 
-        private void buttonMoveMetaBlockDown_Click(object sender, EventArgs e){
+        private void buttonMoveMetaBlockDown_Click(object? sender, EventArgs e){
             MoveMetaBlock(false);
         }
 
-        private void buttonDeleteMetaBlock_Click(object sender, EventArgs e){
+        private void buttonDeleteMetaBlock_Click(object? sender, EventArgs e){
             if (listElements.SelectedItem is StructureMetaBlockItem item &&
                 MessageBox.Show($"Are you sure you want to permanently delete this meta-block?{Environment.NewLine}{item}", "Delete Meta-Block", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes
             ){
@@ -168,7 +168,7 @@ namespace BrotliBuilder.Blocks{
                 brotliFile.MetaBlocks[brotliFile.MetaBlocks.IndexOf(Value)] = Value = newMetaBlock;
             }
 
-            public Func<IBuildingBlockContext, UserControl> CreateStructureBlock(){
+            public Func<IBuildingBlockContext, UserControl>? CreateStructureBlock(){
                 switch(Value){
                     case MetaBlock.PaddedEmpty pe:
                         return ctx => new BuildEmptyMetaBlock(ctx, pe);

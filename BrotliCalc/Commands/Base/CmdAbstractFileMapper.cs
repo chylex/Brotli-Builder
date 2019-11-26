@@ -32,7 +32,7 @@ namespace BrotliCalc.Commands.Base{
                 var source = args[ExtraArgumentCount + 0];
                 var output = args.Length >= ExtraArgumentCount + 2 ? args[ExtraArgumentCount + 1] : File.Exists(source) ? Path.GetDirectoryName(source) : source;
 
-                if (!Directory.Exists(output)){
+                if (output == null || !Directory.Exists(output)){
                     throw new ArgumentException("Output folder does not exist.");
                 }
                 

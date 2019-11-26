@@ -53,10 +53,10 @@ namespace BrotliCalc.Commands.Base{
             protected virtual void Setup(string[] args){}
             protected virtual void Finalize(Table.CSV table){}
 
-            protected abstract IEnumerable<object[]> GenerateRows(BrotliFileGroup group, T file);
+            protected abstract IEnumerable<object?[]> GenerateRows(BrotliFileGroup group, T file);
 
-            protected virtual IEnumerable<object[]> OnError(BrotliFileGroup group, T file, Exception ex){
-                var row = new object[Columns.Length];
+            protected virtual IEnumerable<object?[]> OnError(BrotliFileGroup group, T file, Exception ex){
+                var row = new object?[Columns.Length];
                 row[0] = file.Name;
                 yield return row;
             }

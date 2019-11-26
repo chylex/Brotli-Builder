@@ -1,23 +1,25 @@
-﻿using System;
+﻿using BrotliLib.Markers.Types;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace BrotliLib.Markers{
     public sealed class MarkerNode : IEnumerable<MarkerNode>{
-        public MarkerNode Parent { get; private set; }
+        private static readonly Marker EmptyMarker = new Marker(int.MaxValue, int.MaxValue, new TextMarker("<Invalid>"));
 
         public int Depth { get; set; }
-        public Marker Marker { get; set; }
+        public Marker Marker { get; set; } = EmptyMarker;
 
+        private MarkerNode? parent;
         private readonly List<MarkerNode> children = new List<MarkerNode>(2);
 
         internal void AddChildOrSibling(MarkerNode added){
             if (Depth == added.Depth){
-                added.Parent = Parent;
-                Parent.children.Add(added);
+                added.parent = parent;
+                parent?.children.Add(added);
             }
             else if (Depth < added.Depth){
-                added.Parent = this;
+                added.parent = this;
                 children.Add(added);
             }
             else{
@@ -42,7 +44,7 @@ namespace BrotliLib.Markers{
         }
 
         public override string ToString(){
-            return Marker == null ? "Empty" : "Depth = " + Depth + ", Index = " + Marker.IndexStart + "-" + Marker.IndexEnd;
+            return Marker == EmptyMarker ? "Empty" : "Depth = " + Depth + ", Index = " + Marker.IndexStart + "-" + Marker.IndexEnd;
         }
     }
 }

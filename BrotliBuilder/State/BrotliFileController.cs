@@ -15,8 +15,8 @@ namespace BrotliBuilder.State{
         public BrotliSerializationParameters SerializationParameters { get; set; } = BrotliSerializationParameters.Default;
         public MarkerLevel BitMarkerLevel { get; set; } = MarkerLevel.Verbose;
         
-        public event EventHandler<StateChangedEventArgs> StateChanged;
-        public BrotliFileStructure CurrentFile => (state as BrotliFileState.Loaded)?.File;
+        public event EventHandler<StateChangedEventArgs>? StateChanged;
+        public BrotliFileStructure? CurrentFile => (state as BrotliFileState.Loaded)?.File;
         private BrotliFileState state = new BrotliFileState.NoFile();
 
         private readonly AsyncWorker worker;
@@ -25,7 +25,7 @@ namespace BrotliBuilder.State{
         private readonly List<BrotliFileState> replay = new List<BrotliFileState>();
 
         public BrotliFileController(string name){
-            worker = new AsyncWorker{ Name = name };
+            worker = new AsyncWorker(name);
         }
 
         // State handling
@@ -95,7 +95,7 @@ namespace BrotliBuilder.State{
             UpdateState(token, new BrotliFileState.Loaded(structure, bits, output));
         });
 
-        public void LoadStructure(BrotliFileStructure structure, byte[] checkAgainst = null) => StartWorker(token => {
+        public void LoadStructure(BrotliFileStructure structure, byte[]? checkAgainst = null) => StartWorker(token => {
             UpdateState(token, new BrotliFileState.Starting());
             UpdateState(token, new BrotliFileState.HasStructure(structure, null));
 
@@ -164,7 +164,7 @@ namespace BrotliBuilder.State{
                 bytes = File.ReadAllBytes(path);
                 return true;
             }catch(Exception ex){
-                bytes = null;
+                bytes = null!;
                 return OnError(token, ErrorType.ReadingFile, ex);
             }
         }
@@ -176,8 +176,8 @@ namespace BrotliBuilder.State{
                 stopwatch.Stop();
                 return true;
             }catch(Exception ex){
-                structure = null;
-                stopwatch = null;
+                structure = null!;
+                stopwatch = null!;
                 return OnError(token, ErrorType.DeserializingFile, ex);
             }
         }
@@ -189,8 +189,8 @@ namespace BrotliBuilder.State{
                 stopwatch.Stop();
                 return true;
             }catch(Exception ex){
-                bits = null;
-                stopwatch = null;
+                bits = null!;
+                stopwatch = null!;
                 return OnError(token, ErrorType.SerializingStructure, ex);
             }
         }
@@ -202,8 +202,8 @@ namespace BrotliBuilder.State{
                 stopwatch.Stop();
                 return true;
             }catch(Exception ex){
-                file = null;
-                stopwatch = null;
+                file = null!;
+                stopwatch = null!;
                 return OnError(token, ErrorType.EncodingBytes, ex);
             }
         }
@@ -215,8 +215,8 @@ namespace BrotliBuilder.State{
                 stopwatch.Stop();
                 return true;
             }catch(Exception ex){
-                transformed = null;
-                stopwatch = null;
+                transformed = null!;
+                stopwatch = null!;
                 return OnError(token, ErrorType.TransformingStructure, ex);
             }
         }
@@ -228,8 +228,8 @@ namespace BrotliBuilder.State{
                 stopwatch.Stop();
                 return true;
             }catch(Exception ex){
-                output = null;
-                stopwatch = null;
+                output = null!;
+                stopwatch = null!;
                 return OnError(token, ErrorType.DecompressingStructure, ex);
             }
         }

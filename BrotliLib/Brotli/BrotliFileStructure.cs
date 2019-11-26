@@ -48,7 +48,7 @@ namespace BrotliLib.Brotli{
             this.MetaBlocks = new List<MetaBlock>();
         }
 
-        public BrotliFileStructure Transform(IBrotliTransformer transformer, BrotliSerializationParameters parameters = null){
+        public BrotliFileStructure Transform(IBrotliTransformer transformer, BrotliSerializationParameters? parameters = null){
             var copy = new BrotliFileStructure(Parameters);
             var state = new BrotliGlobalState(Parameters, new BrotliOutputWindowed(Parameters.WindowSize));
             var writer = new BitWriterNull();
@@ -70,20 +70,19 @@ namespace BrotliLib.Brotli{
             }
         }
 
-        public BitStream Serialize(BrotliSerializationParameters parameters = null){
+        public BitStream Serialize(BrotliSerializationParameters? parameters = null){
             BitStream stream = new BitStream();
             DoSerialize(stream.GetWriter(), this, new FileContext(Parameters.Dictionary, new BrotliOutputWindowed(Parameters.WindowSize)), parameters ?? BrotliSerializationParameters.Default);
             return stream;
         }
 
         public BrotliOutputStored GetDecompressionState(BitStream bitStream, MarkerLevel? markerLevel = null){
-            var outputState = new BrotliOutputStored();
-
             IMarkedBitReader reader = CreateReader(bitStream, markerLevel);
-            DoDeserialize(reader, new FileContext(Parameters.Dictionary, outputState));
+            BrotliOutputStored output = new BrotliOutputStored(reader.MarkerRoot);
 
-            outputState.BitMarkerRoot = reader.MarkerRoot;
-            return outputState;
+            DoDeserialize(reader, new FileContext(Parameters.Dictionary, output));
+
+            return output;
         }
 
         // Serialization

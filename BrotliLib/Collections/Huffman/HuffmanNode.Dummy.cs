@@ -11,7 +11,7 @@ namespace BrotliLib.Collections.Huffman{
             public override int SymbolCount => 0;
 
             public override T LookupValue(IBitReader bits){
-                return default;
+                return default!;
             }
 
             protected override IEnumerable<KeyValuePair<T, BitStream>> ListValues(BitStream prefix){

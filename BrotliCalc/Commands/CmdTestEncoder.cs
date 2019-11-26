@@ -25,7 +25,7 @@ namespace BrotliCalc.Commands{
             "File", "Uncompressed Bytes", "Encoded Bytes", "Encoded-Uncompressed"
         };
 
-        private IBrotliEncoder encoder;
+        private IBrotliEncoder? encoder;
 
         protected override void Setup(string[] args){
             if (!Encoders.TryGetValue(args[0], out encoder)){
@@ -33,18 +33,18 @@ namespace BrotliCalc.Commands{
             }
         }
 
-        protected override IEnumerable<object[]> GenerateRows(BrotliFileGroup group, BrotliFile.Uncompressed file){
+        protected override IEnumerable<object?[]> GenerateRows(BrotliFileGroup group, BrotliFile.Uncompressed file){
             int? uncompressedBytes = file.SizeBytes;
-            int encodeBytes = group.CountBytesAndValidate(BrotliFileStructure.FromEncoder(new BrotliFileParameters(), encoder, file.Contents));
+            int encodeBytes = group.CountBytesAndValidate(BrotliFileStructure.FromEncoder(new BrotliFileParameters(), encoder!, file.Contents));
 
-            return new List<object[]>{
-                new object[]{ file.Name, uncompressedBytes, encodeBytes, encodeBytes - uncompressedBytes } // subtraction propagates null
+            return new List<object?[]>{
+                new object?[]{ file.Name, uncompressedBytes, encodeBytes, encodeBytes - uncompressedBytes } // subtraction propagates null
             };
         }
 
-        protected override IEnumerable<object[]> OnError(BrotliFileGroup group, BrotliFile.Uncompressed file, Exception ex){
-            return new List<object[]>{
-                new object[]{ file.Name, file.SizeBytes, null, null }
+        protected override IEnumerable<object?[]> OnError(BrotliFileGroup group, BrotliFile.Uncompressed file, Exception ex){
+            return new List<object?[]>{
+                new object?[]{ file.Name, file.SizeBytes, null, null }
             };
         }
     }

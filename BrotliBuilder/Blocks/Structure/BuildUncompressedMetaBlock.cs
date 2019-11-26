@@ -17,7 +17,7 @@ namespace BrotliBuilder.Blocks.Structure{
             this.textBoxUncompressedText.TextChanged += textBoxUncompressedText_TextChanged;
         }
 
-        private void textBoxUncompressedText_TextChanged(object sender, EventArgs e){
+        private void textBoxUncompressedText_TextChanged(object? sender, EventArgs e){
             context.NotifyParent(new UncompressedBytesNotifyArgs(Encoding.UTF8.GetBytes(textBoxUncompressedText.Text)));
         }
 

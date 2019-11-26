@@ -20,14 +20,7 @@ namespace BrotliCalc.Helpers{
             this.Path = path;
             this.Name = name;
 
-            this.contentsLazy = new Lazy<byte[]>(() => {
-                try{
-                    return File.ReadAllBytes(Path);
-                }catch(Exception ex){
-                    Debug.WriteLine(ex);
-                    return null;
-                }
-            }, isThreadSafe: true);
+            this.contentsLazy = new Lazy<byte[]>(() => File.ReadAllBytes(Path), isThreadSafe: true);
 
             this.sizeBytesLazy = new Lazy<int?>(() => {
                 try{

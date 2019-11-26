@@ -24,7 +24,7 @@ namespace BrotliLib.Collections.Huffman{
                 try{
                     return (bits.NextBit() ? right : left).LookupValue(bits);
                 }catch(IndexOutOfRangeException){
-                    return default;
+                    return default!;
                 }
             }
 

@@ -4,11 +4,15 @@ using System.Threading.Tasks;
 
 namespace BrotliBuilder.Utils{
     sealed class AsyncWorker{
-        public string Name { get; set; }
+        public string Name { get; }
 
         private readonly TaskFactory taskFactory = new TaskFactory(TaskScheduler.FromCurrentSynchronizationContext());
-        private Thread currentThread;
-        
+        private Thread? currentThread;
+
+        public AsyncWorker(string name){
+            this.Name = name;
+        }
+
         public void Start(Action action){
             Abort();
 
@@ -25,7 +29,7 @@ namespace BrotliBuilder.Utils{
         }
 
         public void Abort(){
-            Thread thread = currentThread;
+            Thread? thread = currentThread;
 
             if (thread != null && thread.IsAlive){
                 thread.Abort();

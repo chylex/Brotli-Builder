@@ -5,10 +5,10 @@ namespace BrotliLib.Collections.Trie{
     sealed class MultiTrieBuilder<K, V> where K : IComparable<K> where V : IEquatable<V>{
         private static readonly TupleKeyComparer<K, MutableNode> KeyComparer = new TupleKeyComparer<K, MutableNode>();
 
-        private MutableNode rootNode = new MutableNode();
+        private MutableNode? rootNode = new MutableNode();
 
         public void Insert(IEnumerable<K> key, V value){
-            MutableNode node = rootNode;
+            MutableNode node = rootNode!;
 
             foreach(K ele in key){
                 var children = node.children;
@@ -19,7 +19,7 @@ namespace BrotliLib.Collections.Trie{
                     };
                 }
                 else{
-                    int index = children.BinarySearch((ele, null), KeyComparer);
+                    int index = children.BinarySearch((ele, null!), KeyComparer);
 
                     if (index >= 0){
                         node = children[index].child;
@@ -33,15 +33,15 @@ namespace BrotliLib.Collections.Trie{
             node.AddValue(value);
         }
 
-        public MultiTrie<K, V> Build(MultiTrieCache<K, V> cache = null){
-            var result = new MultiTrie<K, V>(rootNode.Build(cache ?? new MultiTrieCache<K, V>()));
+        public MultiTrie<K, V> Build(MultiTrieCache<K, V>? cache = null){
+            var result = new MultiTrie<K, V>(rootNode!.Build(cache ?? new MultiTrieCache<K, V>()));
             rootNode = null; // prevent accessing the builder again
             return result;
         }
 
         private sealed class MutableNode{
-            public List<(K key, MutableNode child)> children;
-            private V[] values;
+            public List<(K key, MutableNode child)>? children;
+            private V[]? values;
 
             public void AddValue(V value){
                 if (values == null){
@@ -60,10 +60,10 @@ namespace BrotliLib.Collections.Trie{
                     node = new MultiTrie<K, V>.Node();
                 }
                 else if (values.Length == 1){
-                    node = new MultiTrie<K, V>.NodeWithValue{ value = this.values[0] };
+                    node = new MultiTrie<K, V>.NodeWithValue(this.values[0]);
                 }
                 else{
-                    node = new MultiTrie<K, V>.NodeWithValues{ values = this.values };
+                    node = new MultiTrie<K, V>.NodeWithValues(this.values);
                 }
 
                 if (children != null){

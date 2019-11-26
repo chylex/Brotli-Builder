@@ -11,7 +11,7 @@ namespace BrotliBuilder.Components{
     partial class BrotliFilePanel : UserControl{
         public string Title{
             get{
-                return title;
+                return title!;
             }
 
             set{
@@ -24,14 +24,14 @@ namespace BrotliBuilder.Components{
             set => textBoxOutput.WordWrap = value;
         }
 
-        public MarkerRoot MarkerRoot => textBoxBitStream.MarkerRoot;
+        public MarkerRoot? MarkerRoot => textBoxBitStream.MarkerRoot;
 
         public event EventHandler<MarkedTextBox.MarkerUpdateEventArgs> MarkersUpdated{
             add => textBoxBitStream.MarkersUpdated += value;
             remove => textBoxBitStream.MarkersUpdated -= value;
         }
 
-        private string title = null;
+        private string? title;
 
         public BrotliFilePanel(){
             InitializeComponent();
@@ -87,13 +87,13 @@ namespace BrotliBuilder.Components{
         }
 
         private void UpdateLabels(int bitStreamLength, int outputLength){
-            labelBitStream.Text = $"{title} Bit Stream ({bitStreamLength} bits)";
-            labelOutput.Text = $"{title} Output ({outputLength} bytes)";
+            labelBitStream.Text = $"{Title} Bit Stream ({bitStreamLength} bits)";
+            labelOutput.Text = $"{Title} Output ({outputLength} bytes)";
         }
 
         private void ResetLabels(){
-            labelBitStream.Text = $"{title} Bit Stream";
-            labelOutput.Text = $"{title} Output";
+            labelBitStream.Text = $"{Title} Bit Stream";
+            labelOutput.Text = $"{Title} Output";
         }
     }
 }

@@ -9,7 +9,7 @@ namespace BrotliLib.Brotli.Components.Data{
     /// Tracks the current block type. Its subtypes <see cref="Reading"/> and <see cref="Writing"/> allow reading and writing block-switch commands.
     /// </summary>
     public abstract class BlockSwitchTracker{
-        protected readonly BlockSwitchCommand.Context context;
+        protected readonly BlockSwitchCommand.Context? context;
 
         protected int currentID;
         protected int remaining;
@@ -34,7 +34,7 @@ namespace BrotliLib.Brotli.Components.Data{
             /// </summary>
             public int ReadCommand(IBitReader reader){
                 if (remaining == 0){
-                    BlockSwitchCommand nextCommand = BlockSwitchCommand.Deserialize(reader, context);
+                    BlockSwitchCommand nextCommand = BlockSwitchCommand.Deserialize(reader, context!);
                     ReadCommands.Add(nextCommand);
                     UpdateState(nextCommand);
                 }
@@ -57,7 +57,7 @@ namespace BrotliLib.Brotli.Components.Data{
             public int WriteCommand(IBitWriter writer){
                 if (remaining == 0){
                     BlockSwitchCommand nextCommand = queue.Dequeue();
-                    BlockSwitchCommand.Serialize(writer, nextCommand, context);
+                    BlockSwitchCommand.Serialize(writer, nextCommand, context!);
                     UpdateState(nextCommand);
                 }
 

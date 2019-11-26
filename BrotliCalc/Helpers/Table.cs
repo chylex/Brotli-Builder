@@ -11,15 +11,15 @@ namespace BrotliCalc.Helpers{
             this.columns = columns;
         }
 
-        protected IEnumerable<string> ReadRowAsString(object[] values){
+        protected IEnumerable<string> ReadRowAsString(object?[] values){
             if (values.Length != columns.Count){
                 throw new ArgumentException("Amount of entries must match the amount of columns (" + values.Length + " != " + columns.Count + ").", nameof(values));
             }
 
-            return values.Select(value => value == null ? "?" : value.ToString());
+            return values.Select(value => value?.ToString() ?? "?");
         }
 
-        public abstract void AddRow(params object[] values);
+        public abstract void AddRow(params object?[] values);
 
         internal class CSV : Table, IDisposable{
             private readonly StreamWriter writer;
@@ -30,7 +30,7 @@ namespace BrotliCalc.Helpers{
                 this.writer.Flush();
             }
 
-            public override void AddRow(params object[] values){
+            public override void AddRow(params object?[] values){
                 writer.Write('"');
                 writer.Write(string.Join("\",\"", ReadRowAsString(values)));
                 writer.Write('"');

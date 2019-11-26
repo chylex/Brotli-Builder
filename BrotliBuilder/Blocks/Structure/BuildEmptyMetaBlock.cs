@@ -17,7 +17,7 @@ namespace BrotliBuilder.Blocks.Structure{
             this.textBoxHiddenText.TextChanged += textBoxHiddenText_TextChanged;
         }
 
-        private void textBoxHiddenText_TextChanged(object sender, EventArgs e){
+        private void textBoxHiddenText_TextChanged(object? sender, EventArgs e){
             context.NotifyParent(new HiddenBytesNotifyArgs(Encoding.UTF8.GetBytes(textBoxHiddenText.Text)));
         }
 

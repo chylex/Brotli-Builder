@@ -13,21 +13,21 @@ namespace BrotliCalc.Commands{
             "File", "Quality", "Original Bytes", "Reserialize Bytes", "Rebuild Bytes", "Reserialize-Original", "Rebuild-Original"
         };
 
-        protected override IEnumerable<object[]> GenerateRows(BrotliFileGroup group, BrotliFile.Compressed file){
+        protected override IEnumerable<object?[]> GenerateRows(BrotliFileGroup group, BrotliFile.Compressed file){
             var bfs = file.Structure;
 
             int? originalBytes = file.SizeBytes;
             var reserializeBytes = group.CountBytesAndValidate(bfs);
             var rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild()));
 
-            return new List<object[]>{
-                new object[]{ file.Name, file.Identifier, originalBytes, reserializeBytes, rebuildBytes, reserializeBytes - originalBytes, rebuildBytes - originalBytes } // subtraction propagates null
+            return new List<object?[]>{
+                new object?[]{ file.Name, file.Identifier, originalBytes, reserializeBytes, rebuildBytes, reserializeBytes - originalBytes, rebuildBytes - originalBytes } // subtraction propagates null
             };
         }
 
-        protected override IEnumerable<object[]> OnError(BrotliFileGroup group, BrotliFile.Compressed file, Exception ex){
-            return new List<object[]>{
-                new object[]{ file.Name, file.Identifier, file.SizeBytes, null, null, null, null }
+        protected override IEnumerable<object?[]> OnError(BrotliFileGroup group, BrotliFile.Compressed file, Exception ex){
+            return new List<object?[]>{
+                new object?[]{ file.Name, file.Identifier, file.SizeBytes, null, null, null, null }
             };
         }
     }

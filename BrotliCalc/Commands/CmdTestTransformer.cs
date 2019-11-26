@@ -23,7 +23,7 @@ namespace BrotliCalc.Commands{
             "File", "Quality", "Original Bytes", "Rebuild Bytes", "Transformed Bytes", "Transformed-Original", "Transformed-Rebuild"
         };
 
-        private IBrotliTransformer transformer;
+        private IBrotliTransformer? transformer;
 
         protected override void Setup(string[] args){
             if (!Transformers.TryGetValue(args[0], out transformer)){
@@ -31,9 +31,9 @@ namespace BrotliCalc.Commands{
             }
         }
 
-        protected override IEnumerable<object[]> GenerateRows(BrotliFileGroup group, BrotliFile.Compressed file){
+        protected override IEnumerable<object?[]> GenerateRows(BrotliFileGroup group, BrotliFile.Compressed file){
             var bfs = file.Structure;
-            var transformed = bfs.Transform(transformer);
+            var transformed = bfs.Transform(transformer!);
 
             if (transformed.MetaBlocks.SequenceEqual(bfs.MetaBlocks)){ // if the references have not changed, there was no transformation
                 return new List<object[]>();
@@ -43,14 +43,14 @@ namespace BrotliCalc.Commands{
             int rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild()));
             int transformedBytes = group.CountBytesAndValidate(transformed);
 
-            return new List<object[]>{
-                new object[]{ file.Name, file.Identifier, originalBytes, rebuildBytes, transformedBytes, transformedBytes - originalBytes, transformedBytes - rebuildBytes } // subtraction propagates null
+            return new List<object?[]>{
+                new object?[]{ file.Name, file.Identifier, originalBytes, rebuildBytes, transformedBytes, transformedBytes - originalBytes, transformedBytes - rebuildBytes } // subtraction propagates null
             };
         }
 
-        protected override IEnumerable<object[]> OnError(BrotliFileGroup group, BrotliFile.Compressed file, Exception ex){
-            return new List<object[]>{
-                new object[]{ file.Name, file.Identifier, file.SizeBytes, null, null, null, null }
+        protected override IEnumerable<object?[]> OnError(BrotliFileGroup group, BrotliFile.Compressed file, Exception ex){
+            return new List<object?[]>{
+                new object?[]{ file.Name, file.Identifier, file.SizeBytes, null, null, null, null }
             };
         }
     }

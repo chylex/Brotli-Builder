@@ -42,7 +42,7 @@ namespace BrotliLib.Collections{
             return new ReadOnlySpan<byte>(a).SequenceEqual(b);
         }
 
-        public static bool Equal<T>(IReadOnlyList<T> a, IReadOnlyList<T> b){
+        public static bool Equal<T>(IReadOnlyList<T>? a, IReadOnlyList<T>? b){
             if (a == null && b == null){
                 return true;
             }

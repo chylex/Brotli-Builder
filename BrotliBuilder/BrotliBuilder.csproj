@@ -9,6 +9,7 @@
     <Authors>Daniel Chýlek</Authors>
     <Version>1.1.0</Version>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

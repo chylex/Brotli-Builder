@@ -9,13 +9,13 @@ namespace BrotliCalc{
         public static void Read(string[] args){
             for(int index = 0; index < args.Length;){
                 string key = args[index];
-                string value = index + 1 < args.Length ? args[index + 1] : null;
+                string? value = index + 1 < args.Length ? args[index + 1] : null;
 
                 index += ProcessArgument(key, value);
             }
         }
 
-        private static int ProcessArgument(string key, string value){
+        private static int ProcessArgument(string key, string? value){
             switch(key){
                 case "-help":
                     static void Print(string arg, string description){
@@ -52,7 +52,7 @@ namespace BrotliCalc{
 
         // Parsing
 
-        private static int ParseInt(string key, string value, IntRange range = default /* IntRange.Any */){
+        private static int ParseInt(string key, string? value, IntRange range = default /* IntRange.Any */){
             if (value == null){
                 throw new ArgumentException($"Missing value for argument {key}");
             }
@@ -67,7 +67,7 @@ namespace BrotliCalc{
             }
         }
 
-        private static string ParseFolder(string key, string value){
+        private static string ParseFolder(string key, string? value){
             if (value == null || !Directory.Exists(value)){
                 throw new ArgumentException($"Folder specified by argument {key} does not exist: {value ?? "<missing>"}");
             }
@@ -76,7 +76,7 @@ namespace BrotliCalc{
             }
         }
 
-        private static string ParseFile(string key, string value){
+        private static string ParseFile(string key, string? value){
             if (value == null || !File.Exists(value)){
                 throw new ArgumentException($"File specified by argument {key} does not exist: {value ?? "<missing>"}");
             }

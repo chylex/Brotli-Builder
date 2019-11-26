@@ -34,14 +34,14 @@ namespace BrotliBuilder.Dialogs{
 
         // Dictionary loading
 
-        private void FormStaticDictionary_FormClosing(object sender, FormClosingEventArgs e){
+        private void FormStaticDictionary_FormClosing(object? sender, FormClosingEventArgs e){
             if (backgroundWorkerLoading.IsBusy){
                 backgroundWorkerLoading.CancelAsync();
                 e.Cancel = true;
             }
         }
 
-        private void backgroundWorkerLoading_DoWork(object sender, DoWorkEventArgs e){
+        private void backgroundWorkerLoading_DoWork(object? sender, DoWorkEventArgs e){
             BrotliDictionary dict = (BrotliDictionary)e.Argument;
 
             IDictionaryFormat format = dict.Format;
@@ -93,12 +93,12 @@ namespace BrotliBuilder.Dialogs{
             e.Result = table.DefaultView;
         }
 
-        private void backgroundWorkerLoading_ProgressChanged(object sender, ProgressChangedEventArgs e){
+        private void backgroundWorkerLoading_ProgressChanged(object? sender, ProgressChangedEventArgs e){
             progressBarLoading.SetValueInstantly(e.ProgressPercentage);
             labelWordCountValue.Text = ((int)e.UserState).ToString("N0", FormatCounters);
         }
 
-        private void backgroundWorkerLoading_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e){
+        private void backgroundWorkerLoading_RunWorkerCompleted(object? sender, RunWorkerCompletedEventArgs e){
             if (e.Cancelled){
                 Close();
             }
@@ -130,16 +130,16 @@ namespace BrotliBuilder.Dialogs{
 
         // Data filtering
 
-        private void textBoxFilter_TextChanged(object sender, EventArgs e){
+        private void textBoxFilter_TextChanged(object? sender, EventArgs e){
             timerFilterUpdate.Start();
         }
 
-        private void timerFilterUpdate_Tick(object sender, EventArgs e){
+        private void timerFilterUpdate_Tick(object? sender, EventArgs e){
             timerFilterUpdate.Stop();
             UpdateFilter();
         }
 
-        private void checkBoxShowTransforms_CheckedChanged(object sender, EventArgs e){
+        private void checkBoxShowTransforms_CheckedChanged(object? sender, EventArgs e){
             UpdateFilter();
         }
 

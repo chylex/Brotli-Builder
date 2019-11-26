@@ -18,7 +18,7 @@ namespace BrotliBuilder.Blocks.Structure{
             this.listElements.SelectedValueChanged += listElements_SelectedValueChanged;
         }
 
-        private void listElements_SelectedValueChanged(object sender, EventArgs e){
+        private void listElements_SelectedValueChanged(object? sender, EventArgs e){
             WindowSize newWindowSize = ((WindowSizeItem)listElements.SelectedItem).Value;
             context.NotifyParent(new WindowSizeNotifyArgs(newWindowSize));
         }

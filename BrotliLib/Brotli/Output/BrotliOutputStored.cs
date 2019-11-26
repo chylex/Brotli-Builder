@@ -13,15 +13,16 @@ namespace BrotliLib.Brotli.Output{
         public byte[] AsBytes => decompressedStream.ToArray();
         public string AsUTF8 => Encoding.UTF8.GetString(decompressedStream.ToArray());
 
-        public MarkerRoot BitMarkerRoot { get; internal set; }
+        public MarkerRoot MarkerRoot { get; }
 
         private readonly MemoryStream decompressedStream = new MemoryStream();
 
-        public BrotliOutputStored(){}
+        public BrotliOutputStored(MarkerRoot markerRoot){
+            this.MarkerRoot = markerRoot;
+        }
 
-        private BrotliOutputStored(BrotliOutputStored original){
+        private BrotliOutputStored(BrotliOutputStored original) : this(new MarkerRoot()){ // TODO not full clone as it's missing the bit marker
             original.decompressedStream.CopyTo(decompressedStream);
-            // TODO not full clone as it's missing the bit marker
         }
 
         public void Write(byte value){

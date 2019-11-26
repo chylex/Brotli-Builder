@@ -110,7 +110,7 @@ namespace BrotliLib.Brotli.Components.Header{
                 
                 for(int symbolIndex = 0, bitSpaceRemaining = SymbolBitSpace; bitSpaceRemaining > 0 && symbolIndex < symbolCount; symbolIndex++){
                     T symbol = getSymbol(symbolIndex);
-                    BitStream path = obj.FindPathOrNull(symbol);
+                    BitStream? path = obj.FindPathOrNull(symbol);
 
                     byte length = (byte)(path?.Length ?? 0);
                     
@@ -144,7 +144,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
                 int ReplaceSequence(int index, byte code, int removeLength, int insertLength){
                     symbolEntries.RemoveRange(index, removeLength);
-                    symbolEntries.InsertRange(index, Enumerable.Repeat(new HuffmanGenerator<T>.Entry(default, code), insertLength));
+                    symbolEntries.InsertRange(index, Enumerable.Repeat(new HuffmanGenerator<T>.Entry(default!, code), insertLength));
                     return index + insertLength;
                 }
 

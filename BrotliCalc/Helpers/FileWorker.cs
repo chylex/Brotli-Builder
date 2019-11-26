@@ -8,14 +8,14 @@ namespace BrotliCalc.Helpers{
     sealed class FileWorker<T> where T : BrotliFile{
         private const int WriterSleepMillis = 200;
 
-        public delegate IEnumerable<object[]> WorkFunc(BrotliFileGroup group, T file);
-        public delegate IEnumerable<object[]> ErrorFunc(BrotliFileGroup group, T file, Exception ex);
+        public delegate IEnumerable<object?[]> WorkFunc(BrotliFileGroup group, T file);
+        public delegate IEnumerable<object?[]> ErrorFunc(BrotliFileGroup group, T file, Exception ex);
 
-        private static readonly List<object[]> ErrorEntry = new List<object[]>();
+        private static readonly List<object?[]> ErrorEntry = new List<object?[]>();
 
-        public Func<T, string> Name { get; set; }
-        public WorkFunc Work { get; set; }
-        public ErrorFunc Error { get; set; }
+        public Func<T, string>? Name { get; set; }
+        public WorkFunc? Work { get; set; }
+        public ErrorFunc? Error { get; set; }
 
         public Result Start(Table output, IEnumerable<(BrotliFileGroup group, T file)> input){
             int errors = 0;
@@ -27,7 +27,7 @@ namespace BrotliCalc.Helpers{
             var items = input.ToArray();
             var count = items.Length;
 
-            var results = new List<object[]>[count];
+            var results = new List<object?[]>[count];
             using var progress = new Progress(count);
 
             var writerToken = new CancellationTokenSource();
@@ -83,20 +83,20 @@ namespace BrotliCalc.Helpers{
 
         private class ResultWriter{
             public Table Output { get; }
-            public List<object[]>[] Results { get; }
+            public List<object?[]>[] Results { get; }
             public CancellationToken Token { get; }
 
             public List<int> MissingEntries { get; } = new List<int>();
 
-            public ResultWriter(Table output, List<object[]>[] results, CancellationToken token){
+            public ResultWriter(Table output, List<object?[]>[] results, CancellationToken token){
                 this.Output = output;
                 this.Results = results;
                 this.Token = token;
             }
         }
 
-        private void ResultWriterThread(object obj){
-            var info = (ResultWriter)obj;
+        private void ResultWriterThread(object? obj){
+            var info = (ResultWriter)obj!;
             var output = info.Output;
             var results = info.Results;
             var token = info.Token;

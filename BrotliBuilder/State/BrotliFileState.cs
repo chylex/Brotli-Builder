@@ -9,9 +9,9 @@ using BrotliLib.Serialization;
 namespace BrotliBuilder.State{
     abstract class BrotliFileState{
         public abstract class TimedBrotliFileState : BrotliFileState{
-            public Stopwatch Stopwatch { get; }
+            public Stopwatch? Stopwatch { get; }
 
-            protected TimedBrotliFileState(Stopwatch stopwatch){
+            protected TimedBrotliFileState(Stopwatch? stopwatch){
                 this.Stopwatch = stopwatch;
             }
         }
@@ -25,7 +25,7 @@ namespace BrotliBuilder.State{
         public sealed class HasStructure : TimedBrotliFileState{
             public BrotliFileStructure File { get; }
 
-            public HasStructure(BrotliFileStructure file, Stopwatch stopwatch) : base(stopwatch){
+            public HasStructure(BrotliFileStructure file, Stopwatch? stopwatch) : base(stopwatch){
                 this.File = file;
             }
         }
@@ -33,16 +33,16 @@ namespace BrotliBuilder.State{
         public sealed class HasBits : TimedBrotliFileState{
             public string Bits { get; }
 
-            public HasBits(string bits, Stopwatch stopwatch) : base(stopwatch){
+            public HasBits(string bits, Stopwatch? stopwatch) : base(stopwatch){
                 this.Bits = bits;
             }
         }
 
         public sealed class HasOutput : TimedBrotliFileState{
-            public byte[] PreviousBytes { get; }
+            public byte[]? PreviousBytes { get; }
             public byte[] OutputBytes { get; }
 
-            public HasOutput(byte[] previousBytes, byte[] outputBytes, Stopwatch stopwatch) : base(stopwatch){
+            public HasOutput(byte[]? previousBytes, byte[] outputBytes, Stopwatch? stopwatch) : base(stopwatch){
                 this.PreviousBytes = previousBytes;
                 this.OutputBytes = outputBytes;
             }
@@ -58,8 +58,8 @@ namespace BrotliBuilder.State{
 
             public Loaded(BrotliFileStructure file, BitStream bits, BrotliOutputStored output){
                 this.File = file;
-                this.MarkerRoot = output.BitMarkerRoot;
-                this.Markers = output.BitMarkerRoot.ToArray();
+                this.MarkerRoot = output.MarkerRoot;
+                this.Markers = output.MarkerRoot.ToArray();
 
                 this.TotalCompressedBits = Markers.LastOrDefault()?.Marker?.IndexEnd ?? bits.Length; // use markers to account for padding whenever possible
                 this.TotalOutputBytes = output.OutputSize;

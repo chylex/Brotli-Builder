@@ -119,7 +119,7 @@ namespace BrotliLib.Brotli.Encode{
                     icLengthCode = icLengthValues.MakeCode(DistanceCodeZeroStrategy.PreferEnabled); // TODO good strategy?
                 }
                 else{
-                    DistanceCode distanceCode = null;
+                    DistanceCode? distanceCode = null;
                     var distanceCodes = icCommand.CopyDistance.MakeCode(DistanceParameters, state);
                     
                     if (distanceCodes != null){
@@ -132,7 +132,7 @@ namespace BrotliLib.Brotli.Encode{
                     }
 
                     bool isImplicitCodeZero = distanceCode == null;
-                    bool isDistanceCodeZero = isImplicitCodeZero || distanceCode.Equals(DistanceCode.Zero);
+                    bool isDistanceCodeZero = isImplicitCodeZero || distanceCode!.Equals(DistanceCode.Zero);
 
                     icLengthCode = icLengthValues.MakeCode(
                         isImplicitCodeZero ? DistanceCodeZeroStrategy.ForceEnabled :

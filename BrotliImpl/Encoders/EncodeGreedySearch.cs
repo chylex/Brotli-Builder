@@ -13,7 +13,7 @@ namespace BrotliImpl.Encoders{
     /// Encodes bytes into a series of compressed meta-blocks. For each byte, it attempts to find the nearest and longest copy within the sliding window, or dictionary word.
     /// </summary>
     public abstract class EncodeGreedySearch : IBrotliEncoder{
-        private protected abstract Copy FindCopy(BrotliFileParameters parameters, byte[] bytes, int start, int maxLength);
+        private protected abstract Copy? FindCopy(BrotliFileParameters parameters, byte[] bytes, int start, int maxLength);
 
         // Implementations
 
@@ -24,7 +24,7 @@ namespace BrotliImpl.Encoders{
                 this.minLength = Math.Max(minLength, InsertCopyLengths.MinCopyLength);
             }
 
-            private protected override Copy FindCopy(BrotliFileParameters parameters, byte[] bytes, int start, int maxLength){
+            private protected override Copy? FindCopy(BrotliFileParameters parameters, byte[] bytes, int start, int maxLength){
                 int length = bytes.Length;
 
                 if (start < InsertCopyLengths.MinCopyLength || start >= length - InsertCopyLengths.MinCopyLength || maxLength < InsertCopyLengths.MinCopyLength){
@@ -51,7 +51,7 @@ namespace BrotliImpl.Encoders{
         }
 
         public sealed class OnlyDictionary : EncodeGreedySearch{
-            private protected override Copy FindCopy(BrotliFileParameters parameters, byte[] bytes, int start, int maxLength){
+            private protected override Copy? FindCopy(BrotliFileParameters parameters, byte[] bytes, int start, int maxLength){
                 var entries = parameters.Dictionary.Index.Find(bytes, start, maxLength);
 
                 if (entries.Count == 0){
@@ -71,9 +71,9 @@ namespace BrotliImpl.Encoders{
                 this.findDictionary = new OnlyDictionary();
             }
 
-            private protected override Copy FindCopy(BrotliFileParameters parameters, byte[] bytes, int start, int maxLength){
-                Copy found1 = findBackReferences.FindCopy(parameters, bytes, start, maxLength);
-                Copy found2 = findDictionary.FindCopy(parameters, bytes, start, maxLength);
+            private protected override Copy? FindCopy(BrotliFileParameters parameters, byte[] bytes, int start, int maxLength){
+                Copy? found1 = findBackReferences.FindCopy(parameters, bytes, start, maxLength);
+                Copy? found2 = findDictionary.FindCopy(parameters, bytes, start, maxLength);
 
                 return (found1?.OutputLength ?? 0) >= (found2?.OutputLength ?? 0) ? found1 : found2;
             }

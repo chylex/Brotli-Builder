@@ -22,8 +22,8 @@ namespace BrotliLib.Brotli.Components.Header{
         public int Count { get; }
         public int InitialLength { get; }
 
-        public BlockTypeCodeTree TypeCodeTree { get; }
-        public BlockLengthCodeTree LengthCodeTree { get; }
+        public BlockTypeCodeTree? TypeCodeTree { get; }
+        public BlockLengthCodeTree? LengthCodeTree { get; }
 
         private BlockTypeInfo(Category category){
             this.Category = category;
@@ -87,11 +87,11 @@ namespace BrotliLib.Brotli.Components.Header{
                 return;
             }
 
-            BlockTypeCodeTree.Serialize(writer, obj.TypeCodeTree, GetBlockTypeCodeTreeContext(obj.Count));
-            BlockLengthCodeTree.Serialize(writer, obj.LengthCodeTree, BlockLengthCode.TreeContext);
+            BlockTypeCodeTree.Serialize(writer, obj.TypeCodeTree!, GetBlockTypeCodeTreeContext(obj.Count));
+            BlockLengthCodeTree.Serialize(writer, obj.LengthCodeTree!, BlockLengthCode.TreeContext);
 
             var initialLength = obj.InitialLength;
-            var initialLengthCode = obj.LengthCodeTree.FindEntry(code => code.CanEncodeValue(initialLength));
+            var initialLengthCode = obj.LengthCodeTree!.FindEntry(code => code.CanEncodeValue(initialLength));
 
             writer.WriteBits(initialLengthCode.Value);
             BlockLengthCode.Serialize(writer, initialLength, initialLengthCode.Key);

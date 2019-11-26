@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace BrotliBuilder.Utils{
@@ -24,8 +25,8 @@ namespace BrotliBuilder.Utils{
 
         public static void SetChildHeight(this FlowLayoutPanel flowLayoutPanel, int height){
             flowLayoutPanel.SuspendLayout();
-            
-            foreach(Control child in flowLayoutPanel.Controls){
+
+            foreach(Control child in flowLayoutPanel.Controls.Cast<Control>()){
                 child.Height = height;
             }
             

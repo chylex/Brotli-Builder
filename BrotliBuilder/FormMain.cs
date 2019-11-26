@@ -20,21 +20,21 @@ namespace BrotliBuilder{
         #region Building block context
 
         private class BuildingBlockContext : IBuildingBlockContext{
-            public event EventHandler<EventArgs> Notified;
+            public event EventHandler<EventArgs>? Notified;
 
             private readonly FormMain owner;
             private readonly Panel container;
-            private readonly IBuildingBlockContext parent;
+            private readonly IBuildingBlockContext? parent;
             private readonly int depth;
 
-            public BuildingBlockContext(FormMain owner, Panel container, IBuildingBlockContext parent = null, int depth = 0){
+            public BuildingBlockContext(FormMain owner, Panel container, IBuildingBlockContext? parent = null, int depth = 0){
                 this.owner = owner;
                 this.container = container;
                 this.parent = parent;
                 this.depth = depth;
             }
 
-            public void SetChildBlock(Func<IBuildingBlockContext, UserControl> blockFactory){
+            public void SetChildBlock(Func<IBuildingBlockContext, UserControl>? blockFactory){
                 int childDepth = depth + 1;
                 var controls = container.Controls;
                 
@@ -64,8 +64,8 @@ namespace BrotliBuilder{
         private string lastFileName = "compressed";
         private bool isDirty = false;
 
-        private byte[] lastOriginalFileBytes;
-        private BrotliFileStructure lastGeneratedFile;
+        private byte[]? lastOriginalFileBytes;
+        private BrotliFileStructure? lastGeneratedFile;
         private bool skipNextBlockRegeneration = false;
         private bool skipNextOriginalToGeneratedFeed = false;
 
@@ -98,7 +98,7 @@ namespace BrotliBuilder{
             statusBarPanelTimeOutput.Text = text;
         }
 
-        private void UpdateStatusBar(StatusBarPanel bar, string type, Stopwatch sw){
+        private void UpdateStatusBar(StatusBarPanel bar, string type, Stopwatch? sw){
             if (sw != null){
                 bar.Text = "Generated " + type + " in " + sw.ElapsedMilliseconds + " ms.";
             }
@@ -157,7 +157,7 @@ namespace BrotliBuilder{
             }
         }
 
-        private void FileGenerated_StateChanged(object sender, StateChangedEventArgs e){
+        private void FileGenerated_StateChanged(object? sender, StateChangedEventArgs e){
             BrotliFilePanel filePanel = brotliFilePanelGenerated;
 
             switch(e.To){
@@ -213,7 +213,7 @@ namespace BrotliBuilder{
             }
         }
 
-        private void FileOriginal_StateChanged(object sender, StateChangedEventArgs e){
+        private void FileOriginal_StateChanged(object? sender, StateChangedEventArgs e){
             BrotliFilePanel filePanel = brotliFilePanelOriginal;
 
             switch(e.To){
@@ -296,7 +296,7 @@ namespace BrotliBuilder{
             timerRegenerationDelay.Start();
         }
         
-        private void timerRegenerationDelay_Tick(object sender, EventArgs e){
+        private void timerRegenerationDelay_Tick(object? sender, EventArgs e){
             timerRegenerationDelay.Stop();
 
             if (lastGeneratedFile != null){
@@ -329,7 +329,7 @@ namespace BrotliBuilder{
             return false;
         }
 
-        private void FormMain_FormClosing(object sender, FormClosingEventArgs e){
+        private void FormMain_FormClosing(object? sender, FormClosingEventArgs e){
             e.Cancel = PromptUnsavedChanges("Would you like to save changes before exiting?");
         }
 
@@ -337,15 +337,15 @@ namespace BrotliBuilder{
 
         #region Control events
 
-        private void flowPanelBlocks_ControlAdded(object sender, ControlEventArgs e){
+        private void flowPanelBlocks_ControlAdded(object? sender, ControlEventArgs e){
             e.Control.Height = flowPanelBlocks.ClientSize.Height - 8;
         }
 
-        private void flowPanelBlocks_SizeChanged(object sender, EventArgs e){
+        private void flowPanelBlocks_SizeChanged(object? sender, EventArgs e){
             flowPanelBlocks.SetChildHeight(flowPanelBlocks.ClientSize.Height - 8);
         }
         
-        private void brotliFilePanel_MarkersUpdated(object sender, MarkedTextBox.MarkerUpdateEventArgs e){
+        private void brotliFilePanel_MarkersUpdated(object? sender, MarkedTextBox.MarkerUpdateEventArgs e){
             brotliMarkerInfoPanel.UpdateMarkers(e.MarkerRoot, e.MarkerSequence, e.HighlightedNodes, e.CaretNode);
         }
 
@@ -353,7 +353,7 @@ namespace BrotliBuilder{
 
         #region Menu events (File)
 
-        private void menuItemOpenBrotli_Click(object sender, EventArgs e){
+        private void menuItemOpenBrotli_Click(object? sender, EventArgs e){
             if (PromptUnsavedChanges("Would you like to save changes before opening a new file?")){
                 return;
             }
@@ -375,8 +375,8 @@ namespace BrotliBuilder{
             }
         }
 
-        private BrotliFileStructure GetCurrentFileOrShowError(){
-            BrotliFileStructure currentFile = fileGenerated.CurrentFile;
+        private BrotliFileStructure? GetCurrentFileOrShowError(){
+            BrotliFileStructure? currentFile = fileGenerated.CurrentFile;
 
             if (currentFile == null){
                 MessageBox.Show("No structure loaded.", "Save File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -386,8 +386,8 @@ namespace BrotliBuilder{
             return currentFile;
         }
 
-        private void menuItemSaveBrotli_Click(object sender, EventArgs e){
-            BrotliFileStructure currentFile = GetCurrentFileOrShowError();
+        private void menuItemSaveBrotli_Click(object? sender, EventArgs e){
+            BrotliFileStructure? currentFile = GetCurrentFileOrShowError();
 
             if (currentFile == null){
                 return;
@@ -408,8 +408,8 @@ namespace BrotliBuilder{
             }
         }
 
-        private void menuItemSaveOutput_Click(object sender, EventArgs e){
-            BrotliFileStructure currentFile = GetCurrentFileOrShowError();
+        private void menuItemSaveOutput_Click(object? sender, EventArgs e){
+            BrotliFileStructure? currentFile = GetCurrentFileOrShowError();
 
             if (currentFile == null){
                 return;
@@ -425,7 +425,7 @@ namespace BrotliBuilder{
             }
         }
 
-        private void menuItemExit_Click(object sender, EventArgs e){
+        private void menuItemExit_Click(object? sender, EventArgs e){
             Close();
         }
 
@@ -433,11 +433,11 @@ namespace BrotliBuilder{
 
         #region Menu events (View)
 
-        private void menuItemFileStructure_Click(object sender, EventArgs e){
+        private void menuItemFileStructure_Click(object? sender, EventArgs e){
             splitContainerRight.Panel1Collapsed = !menuItemFileStructure.Toggle();
         }
 
-        private void menuItemMarkerInfo_Click(object sender, EventArgs e){
+        private void menuItemMarkerInfo_Click(object? sender, EventArgs e){
             bool enable = menuItemMarkerInfo.Toggle();
 
             splitContainerMain.Panel1Collapsed = !enable;
@@ -449,11 +449,11 @@ namespace BrotliBuilder{
             }
         }
 
-        private void menuItemWrapOutput_Click(object sender, EventArgs e){
+        private void menuItemWrapOutput_Click(object? sender, EventArgs e){
             brotliFilePanelGenerated.WordWrapOutput = brotliFilePanelOriginal.WordWrapOutput = menuItemWrapOutput.Toggle();
         }
 
-        private void menuItemWrapMarkerInfo_Click(object sender, EventArgs e){
+        private void menuItemWrapMarkerInfo_Click(object? sender, EventArgs e){
             brotliMarkerInfoPanel.WordWrap = menuItemWrapMarkerInfo.Toggle();
         }
 
@@ -461,7 +461,7 @@ namespace BrotliBuilder{
         
         #region Menu events (Tools)
 
-        private void menuItemStaticDictionary_Click(object sender, EventArgs e){
+        private void menuItemStaticDictionary_Click(object? sender, EventArgs e){
             try{
                 using FormStaticDictionary form = new FormStaticDictionary(BrotliDefaultDictionary.Embedded);
                 form.ShowDialog();
@@ -471,7 +471,7 @@ namespace BrotliBuilder{
             }
         }
 
-        private void menuItemCompareMarkers_Click(object sender, EventArgs e){
+        private void menuItemCompareMarkers_Click(object? sender, EventArgs e){
             if (brotliFilePanelOriginal.MarkerRoot == null || brotliFilePanelGenerated.MarkerRoot == null){
                 MessageBox.Show("No original file opened.", "Compare Markers Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -497,11 +497,11 @@ namespace BrotliBuilder{
             from.ReplayOver(to);
         }
 
-        private void menuItemCloneGeneratedToOriginal_Click(object sender, EventArgs e){
+        private void menuItemCloneGeneratedToOriginal_Click(object? sender, EventArgs e){
             CloneFileBetweenControllers(fileGenerated, fileOriginal);
         }
 
-        private void menuItemCloneOriginalToGenerated_Click(object sender, EventArgs e){
+        private void menuItemCloneOriginalToGenerated_Click(object? sender, EventArgs e){
             skipNextOriginalToGeneratedFeed = true;
             CloneFileBetweenControllers(fileOriginal, fileGenerated);
         }

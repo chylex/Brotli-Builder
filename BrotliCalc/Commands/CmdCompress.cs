@@ -15,7 +15,7 @@ namespace BrotliCalc.Commands{
         public string ArgumentDesc => "<source-path> <quality|all> [window-size]";
         public IntRange ArgumentCount => new IntRange(2, 3);
 
-        public static string CustomExePath { get; set; }
+        public static string? CustomExePath { get; set; }
 
         private static readonly IntRange QualityRange = new IntRange(0, 11);
         private const int AutoWindowSize = 0;
@@ -66,7 +66,7 @@ namespace BrotliCalc.Commands{
             process.WaitForExit();
         }
 
-        private static bool HasWin32Exception(Exception e, out Win32Exception we){
+        private static bool HasWin32Exception(Exception e, out Win32Exception? we){
             we = e switch{
                 Win32Exception we2 => we2,
                 AggregateException ae => ae.InnerException as Win32Exception,

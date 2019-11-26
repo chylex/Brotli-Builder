@@ -9,6 +9,7 @@
     <RepositoryUrl>https://github.com/chylex/Brotli-Builder</RepositoryUrl>
     <Version>1.1.0</Version>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

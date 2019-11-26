@@ -44,7 +44,7 @@ namespace BrotliLib.Brotli.Components.Header{
         public int MaxDepth => ReverseLookup.Values.Max(stream => stream.Length);
 
         private Dictionary<T, BitStream> ReverseLookup => reverseLookupCached ??= Root.GenerateValueMap();
-        private Dictionary<T, BitStream> reverseLookupCached;
+        private Dictionary<T, BitStream>? reverseLookupCached;
         
         public HuffmanTree(HuffmanNode<T> root){
             this.Root = root;
@@ -54,7 +54,7 @@ namespace BrotliLib.Brotli.Components.Header{
             return ReverseLookup[element];
         }
 
-        public BitStream FindPathOrNull(T element){
+        public BitStream? FindPathOrNull(T element){
             return ReverseLookup.TryGetValue(element, out BitStream path) ? path : null;
         }
 

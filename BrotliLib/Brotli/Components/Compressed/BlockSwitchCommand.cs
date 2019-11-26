@@ -46,10 +46,10 @@ namespace BrotliLib.Brotli.Components.Compressed{
             (reader, context) => {
                 var info = context.Info;
 
-                int typeCode = reader.ReadValue(info.TypeCodeTree.Root, "BTYPE (code)");
+                int typeCode = reader.ReadValue(info.TypeCodeTree!.Root, "BTYPE (code)");
                 int typeValue = reader.MarkValue("BTYPE (value)", () => context.Tracker.FindValue(typeCode));
                 
-                var lengthCode = reader.ReadValue(info.LengthCodeTree.Root, "BLEN (code)");
+                var lengthCode = reader.ReadValue(info.LengthCodeTree!.Root, "BLEN (code)");
                 int lengthValue = reader.ReadValue(BlockLengthCode.Deserialize, lengthCode, "BLEN (value)");
 
                 return new BlockSwitchCommand(typeValue, lengthValue);
@@ -60,10 +60,10 @@ namespace BrotliLib.Brotli.Components.Compressed{
             var info = context.Info;
 
             var typeCodes = context.Tracker.FindCodes(obj.Type);
-            writer.WriteBits(info.TypeCodeTree.FindEntry(typeCodes.Contains).Value);
+            writer.WriteBits(info.TypeCodeTree!.FindEntry(typeCodes.Contains).Value);
 
             int lengthValue = obj.Length;
-            var lengthEntry = info.LengthCodeTree.FindEntry(entry => entry.CanEncodeValue(lengthValue));
+            var lengthEntry = info.LengthCodeTree!.FindEntry(entry => entry.CanEncodeValue(lengthValue));
 
             writer.WriteBits(lengthEntry.Value);
             BlockLengthCode.Serialize(writer, lengthValue, lengthEntry.Key);

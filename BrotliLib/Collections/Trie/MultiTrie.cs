@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace BrotliLib.Collections.Trie{
     public sealed class MultiTrie<K, V> where K : IComparable<K> where V : IEquatable<V>{
-        private static readonly TupleKeyComparer<K, Node> KeyComparer = new TupleKeyComparer<K, Node>();
+        private static readonly TupleKeyComparer<K, Node?> KeyComparer = new TupleKeyComparer<K, Node?>();
 
         private readonly Node rootNode;
 
@@ -14,18 +14,18 @@ namespace BrotliLib.Collections.Trie{
 
         public IReadOnlyList<V> FindLongest(IEnumerable<K> key){
             Node node = rootNode;
-            Node last = null;
+            Node? last = null;
 
             foreach(K ele in key){
                 var children = node.children;
-                int index = children == null ? -1 : Array.BinarySearch(children, (ele, default), KeyComparer);
+                int index = children == null ? -1 : Array.BinarySearch(children!, (ele, default), KeyComparer);
 
                 if (index < 0){
                     break;
                 }
 
                 // ReSharper disable once PossibleNullReferenceException
-                node = children[index].child;
+                node = children![index].child;
 
                 if (node.HasValues){
                     last = node;
@@ -36,10 +36,10 @@ namespace BrotliLib.Collections.Trie{
         }
 
         internal class Node{
-            public (K key, Node child)[] children;
+            public (K key, Node child)[]? children;
 
             public virtual bool HasValues => false;
-            public virtual V[] Values => null;
+            public virtual V[]? Values => null;
 
             private int hashCode = int.MinValue;
 
@@ -101,17 +101,25 @@ namespace BrotliLib.Collections.Trie{
         }
 
         internal sealed class NodeWithValue : Node{
-            public V value;
+            private readonly V value;
+
+            public NodeWithValue(V value){
+                this.value = value;
+            }
 
             public override bool HasValues => true;
-            public override V[] Values => new V[]{ value };
+            public override V[]? Values => new V[]{ value };
         }
 
         internal sealed class NodeWithValues : Node{
-            public V[] values;
+            private readonly V[] values;
+
+            public NodeWithValues(V[] values){
+                this.values = values;
+            }
 
             public override bool HasValues => true;
-            public override V[] Values => values;
+            public override V[]? Values => values;
         }
     }
 }

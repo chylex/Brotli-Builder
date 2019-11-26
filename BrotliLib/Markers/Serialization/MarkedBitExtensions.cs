@@ -20,7 +20,7 @@ namespace BrotliLib.Markers.Serialization{
 
             T result = action();
 
-            reader.MarkEndValue(title, result);
+            reader.MarkEndValue(title, result!);
             return result;
         }
 
@@ -49,7 +49,7 @@ namespace BrotliLib.Markers.Serialization{
 
             T result = mapper(reader.NextChunk(bits));
 
-            reader.MarkEndValue(name, result);
+            reader.MarkEndValue(name, result!);
             return result;
         }
 
@@ -58,7 +58,7 @@ namespace BrotliLib.Markers.Serialization{
 
             T result = mapper(reader.NextChunk(bits), context);
 
-            reader.MarkEndValue(name, result);
+            reader.MarkEndValue(name, result!);
             return result;
         }
 
@@ -78,7 +78,7 @@ namespace BrotliLib.Markers.Serialization{
 
             O result = mapper(deserialize(reader, context));
 
-            reader.MarkEndValue(name, result);
+            reader.MarkEndValue(name, result!);
             return result;
         }
 
@@ -91,7 +91,7 @@ namespace BrotliLib.Markers.Serialization{
 
             O result = mapper(tree.LookupValue(reader));
 
-            reader.MarkEndValue(name, result);
+            reader.MarkEndValue(name, result!);
             return result;
         }
 

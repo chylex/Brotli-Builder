@@ -20,9 +20,9 @@ namespace BrotliBuilder.Components{
             public MarkerRoot MarkerRoot { get; }
             public IList<MarkerNode> MarkerSequence { get; }
             public HashSet<MarkerNode> HighlightedNodes { get; }
-            public MarkerNode CaretNode { get; }
+            public MarkerNode? CaretNode { get; }
 
-            public MarkerUpdateEventArgs(MarkerRoot markerRoot, IList<MarkerNode> markerSequence, HashSet<MarkerNode> highlightedNodes, MarkerNode caretNode){
+            public MarkerUpdateEventArgs(MarkerRoot markerRoot, IList<MarkerNode> markerSequence, HashSet<MarkerNode> highlightedNodes, MarkerNode? caretNode){
                 this.MarkerRoot = markerRoot;
                 this.MarkerSequence = markerSequence;
                 this.HighlightedNodes = highlightedNodes;
@@ -30,17 +30,17 @@ namespace BrotliBuilder.Components{
             }
         }
 
-        public MarkerRoot MarkerRoot { get; private set; }
+        public MarkerRoot? MarkerRoot { get; private set; }
 
-        public event EventHandler<MarkerUpdateEventArgs> MarkersUpdated;
+        public event EventHandler<MarkerUpdateEventArgs>? MarkersUpdated;
 
         private readonly StyleIndex[] mainStyleIndex;
         private readonly StyleIndex highlightStyleIndex;
         
-        private MarkerNode[] markerSequence = null;
-        private MarkerNode[] prevMarkerSequence = null;
+        private MarkerNode[]? markerSequence = null;
+        private MarkerNode[]? prevMarkerSequence = null;
 
-        private MarkerNode markerCaret = null;
+        private MarkerNode? markerCaret = null;
         private bool updatingMarkers = false;
         private bool mouseSelecting = false;
 
@@ -115,7 +115,7 @@ namespace BrotliBuilder.Components{
                 }
             }
 
-            MarkerNode newMarkerCaret = markerCaret;
+            MarkerNode? newMarkerCaret = markerCaret;
 
             if (highlightedMarkers.Count > 0){
                 MarkerNode deepestNode = highlightedMarkers.Last();
@@ -136,27 +136,31 @@ namespace BrotliBuilder.Components{
             updatingMarkers = false;
             
             markerCaret = newMarkerCaret;
-            MarkersUpdated?.Invoke(this, new MarkerUpdateEventArgs(MarkerRoot, markerSequence, new HashSet<MarkerNode>(highlightedMarkers), markerCaret));
+            MarkersUpdated?.Invoke(this, new MarkerUpdateEventArgs(MarkerRoot!, markerSequence, new HashSet<MarkerNode>(highlightedMarkers), markerCaret));
         }
 
-        private void MarkedFastTextBox_SelectionChanged(object sender, EventArgs e){
+        private void MarkedFastTextBox_SelectionChanged(object? sender, EventArgs e){
             if (!updatingMarkers && !mouseSelecting && !ModifierKeys.HasFlag(Keys.Shift)){
                 RefreshMarkers();
             }
         }
         
-        private void MarkedFastTextBox_CustomAction(object sender, CustomActionEventArgs e){
-            Keys key = e.Action == FCTBAction.CustomAction1 ? Keys.Left : e.Action == FCTBAction.CustomAction2 ? Keys.Right : Keys.Escape;
+        private void MarkedFastTextBox_CustomAction(object? sender, CustomActionEventArgs e){
+            Keys key = e.Action switch{
+                FCTBAction.CustomAction1 => Keys.Left,
+                FCTBAction.CustomAction2 => Keys.Right,
+                _ => Keys.Escape
+            };
 
             if ((key == Keys.Left || key == Keys.Right) && markerCaret != null){
                 int caret = SelectionStart;
 
-                int nodeIndex = Array.IndexOf(markerSequence, markerCaret);
-                MarkerNode targetNode = null;
+                int nodeIndex = Array.IndexOf(markerSequence!, markerCaret);
+                MarkerNode? targetNode = null;
                     
                 if (key == Keys.Left){
                     while(--nodeIndex >= 0){
-                        targetNode = markerSequence[nodeIndex];
+                        targetNode = markerSequence![nodeIndex];
 
                         int newCaret = targetNode.Marker.IndexStart;
 
@@ -167,7 +171,7 @@ namespace BrotliBuilder.Components{
                     }
                 }
                 else if (key == Keys.Right){
-                    while(++nodeIndex < markerSequence.Length){
+                    while(++nodeIndex < markerSequence!.Length){
                         targetNode = markerSequence[nodeIndex];
 
                         int newCaret = targetNode.Marker.IndexStart;
@@ -190,13 +194,13 @@ namespace BrotliBuilder.Components{
             }
         }
 
-        private void MarkedTextBox_MouseDown(object sender, MouseEventArgs e){
+        private void MarkedTextBox_MouseDown(object? sender, MouseEventArgs e){
             if (e.Button == MouseButtons.Left){
                 mouseSelecting = true;
             }
         }
 
-        private void MarkedTextBox_MouseUp(object sender, MouseEventArgs e){
+        private void MarkedTextBox_MouseUp(object? sender, MouseEventArgs e){
             if (e.Button == MouseButtons.Left){
                 mouseSelecting = false;
 

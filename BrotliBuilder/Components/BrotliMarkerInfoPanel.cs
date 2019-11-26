@@ -14,7 +14,7 @@ namespace BrotliBuilder.Components{
         private static readonly TextStyle StyleBoldBlack = new TextStyle(new SolidBrush(Color.Black), null, FontStyle.Bold);
         private static readonly TextStyle StyleBoldGray = new TextStyle(new SolidBrush(Color.FromArgb(140, 140, 150)), null, FontStyle.Bold);
 
-        private static readonly TextStyle[,] Styles = {
+        private static readonly TextStyle?[,] Styles = {
             { null /*default*/, StyleBoldGray },
             { StyleNormalBlack, StyleBoldBlack }
         };
@@ -28,10 +28,10 @@ namespace BrotliBuilder.Components{
             textBoxContext.DefaultStyle = StyleNormalGray;
         }
 
-        private IList<MarkerNode> prevMarkerNodes = null;
-        private MarkerNode prevCaretNode = null;
+        private IList<MarkerNode>? prevMarkerNodes = null;
+        private MarkerNode? prevCaretNode = null;
 
-        public void UpdateMarkers(MarkerRoot markerRoot, IList<MarkerNode> markerSequence, HashSet<MarkerNode> highlightedNodes, MarkerNode caretNode){
+        public void UpdateMarkers(MarkerRoot? markerRoot, IList<MarkerNode> markerSequence, HashSet<MarkerNode>? highlightedNodes, MarkerNode? caretNode){
             if (ReferenceEquals(prevCaretNode, caretNode)){
                 return;
             }
@@ -50,10 +50,10 @@ namespace BrotliBuilder.Components{
                 MarkerNode node = markerSequence[line];
                 IMarkerInfo info = node.Marker.Info;
 
-                int indexColor = highlightedNodes.Contains(node) ? 1 : 0;
+                int indexColor = highlightedNodes!.Contains(node) ? 1 : 0;
                 int indexBold = info.IsBold ? 1 : 0;
 
-                TextStyle style = Styles[indexColor, indexBold];
+                TextStyle? style = Styles[indexColor, indexBold];
 
                 if (style != null){
                     textBoxContext.GetLine(line).SetStyle(style);

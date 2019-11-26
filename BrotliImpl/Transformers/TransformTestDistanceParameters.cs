@@ -16,7 +16,7 @@ namespace BrotliImpl.Transformers{
                 }
             }
 
-            yield return tracker.Smallest;
+            yield return tracker.Smallest!;
         }
     }
 }
