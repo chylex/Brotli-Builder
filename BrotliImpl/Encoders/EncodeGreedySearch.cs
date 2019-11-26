@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using BrotliImpl.Encoders.Utils;
-using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Components.Compressed;
 using BrotliLib.Brotli.Components.Data;
@@ -14,7 +13,7 @@ namespace BrotliImpl.Encoders{
     /// Encodes bytes into a series of compressed meta-blocks. For each byte, it attempts to find the nearest and longest copy within the sliding window, or dictionary word.
     /// </summary>
     public abstract class EncodeGreedySearch : IBrotliEncoder{
-        private protected abstract Copy? FindCopy(BrotliFileParameters parameters, byte[] bytes, int start, int maxLength);
+        private protected abstract Copy? FindCopy(BrotliFileParameters parameters, ArraySegment<byte> bytes, int start, int maxLength);
 
         // Implementations
 
@@ -25,8 +24,8 @@ namespace BrotliImpl.Encoders{
                 this.minLength = Math.Max(minLength, InsertCopyLengths.MinCopyLength);
             }
 
-            private protected override Copy? FindCopy(BrotliFileParameters parameters, byte[] bytes, int start, int maxLength){
-                int length = bytes.Length;
+            private protected override Copy? FindCopy(BrotliFileParameters parameters, ArraySegment<byte> bytes, int start, int maxLength){
+                int length = bytes.Count;
 
                 if (start < InsertCopyLengths.MinCopyLength || start >= length - InsertCopyLengths.MinCopyLength || maxLength < InsertCopyLengths.MinCopyLength){
                     return null;
@@ -52,8 +51,8 @@ namespace BrotliImpl.Encoders{
         }
 
         public sealed class OnlyDictionary : EncodeGreedySearch{
-            private protected override Copy? FindCopy(BrotliFileParameters parameters, byte[] bytes, int start, int maxLength){
-                var entries = parameters.Dictionary.Index.Find(bytes, start, maxLength);
+            private protected override Copy? FindCopy(BrotliFileParameters parameters, ArraySegment<byte> bytes, int start, int maxLength){
+                var entries = parameters.Dictionary.Index.Find(bytes.Slice(start), maxLength);
 
                 if (entries.Count == 0){
                     return null;
@@ -72,7 +71,7 @@ namespace BrotliImpl.Encoders{
                 this.findDictionary = new OnlyDictionary();
             }
 
-            private protected override Copy? FindCopy(BrotliFileParameters parameters, byte[] bytes, int start, int maxLength){
+            private protected override Copy? FindCopy(BrotliFileParameters parameters, ArraySegment<byte> bytes, int start, int maxLength){
                 Copy? found1 = findBackReferences.FindCopy(parameters, bytes, start, maxLength);
                 Copy? found2 = findDictionary.FindCopy(parameters, bytes, start, maxLength);
 
@@ -82,14 +81,15 @@ namespace BrotliImpl.Encoders{
 
         // Generation
 
-        public IEnumerable<MetaBlock> GenerateMetaBlocks(BrotliFileParameters parameters, byte[] bytes){
-            var builder = new CompressedMetaBlockBuilder(parameters);
-            int length = bytes.Length;
+        public (MetaBlock, BrotliEncodeInfo) Encode(BrotliEncodeInfo info){
+            var bytes = info.Bytes;
+            int length = bytes.Count;
 
+            var builder = info.NewBuilder();
             var nextLiteralBatch = new List<Literal>();
 
             for(int index = 0; index < length;){
-                var copy = FindCopy(parameters, bytes, index, DataLength.MaxUncompressedBytes - nextLiteralBatch.Count);
+                var copy = FindCopy(info.FileParameters, bytes, index, DataLength.MaxUncompressedBytes - nextLiteralBatch.Count);
                 int mbSize;
 
                 if (copy == null){
@@ -99,15 +99,13 @@ namespace BrotliImpl.Encoders{
                     mbSize = nextLiteralBatch.Count;
                 }
                 else{
-                    index += copy.AddCommand(parameters, builder, nextLiteralBatch);
+                    index += copy.AddCommand(info.FileParameters, builder, nextLiteralBatch);
                     nextLiteralBatch.Clear();
                     mbSize = builder.OutputSize;
                 }
 
                 if (mbSize == DataLength.MaxUncompressedBytes){
-                    var (mb, next) = builder.Build();
-                    builder = next();
-                    yield return mb;
+                    return builder.Build(info);
                 }
             }
 
@@ -115,7 +113,7 @@ namespace BrotliImpl.Encoders{
                 builder.AddInsertCopy(new InsertCopyCommand(nextLiteralBatch));
             }
 
-            yield return builder.Build().MetaBlock;
+            return builder.Build(info);
         }
     }
 }

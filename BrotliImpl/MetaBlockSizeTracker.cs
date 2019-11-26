@@ -2,13 +2,13 @@
 using System.Diagnostics;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
-using BrotliLib.Brotli.Encode;
+using BrotliLib.Brotli.Encode.Build;
 using BrotliLib.Brotli.Parameters;
 using BrotliLib.Serialization.Writer;
 
 namespace BrotliImpl{
     class MetaBlockSizeTracker{
-        public MetaBlock? Smallest { get; private set; } = null;
+        public (MetaBlock, BrotliGlobalState)? Smallest { get; private set; } = null;
         public int SmallestSize { get; private set; } = int.MaxValue;
 
         private readonly BrotliGlobalState initialState;
@@ -18,7 +18,7 @@ namespace BrotliImpl{
         }
 
         public void Test(MetaBlock tested, BrotliSerializationParameters? serializationParameters = null, string? debugText = null){
-            int testedSize = CountBits(tested, initialState.Clone(), serializationParameters);
+            var (testedSize, nextState) = CountBits(tested, initialState.Clone(), serializationParameters) ?? (int.MaxValue, null!);
 
             if (debugText != null){
                 Debug.Write(debugText + " = " + testedSize + " bits");
@@ -29,7 +29,7 @@ namespace BrotliImpl{
                     Debug.Write(" < " + SmallestSize + " bits (new best)");
                 }
 
-                Smallest = tested;
+                Smallest = (tested, nextState);
                 SmallestSize = testedSize;
             }
             
@@ -38,19 +38,20 @@ namespace BrotliImpl{
             }
         }
 
-        public void Test(CompressedMetaBlockBuilder builder, BrotliSerializationParameters? serializationParameters = null, string? debugText = null){
-            Test(builder.Build().MetaBlock, serializationParameters, debugText);
+        public void Test(CompressedMetaBlockBuilder builder, BrotliCompressionParameters compressionParameters, BrotliSerializationParameters? serializationParameters = null, string? debugText = null){
+            Test(builder.Build(compressionParameters).MetaBlock, serializationParameters, debugText);
         }
 
-        public static int CountBits(MetaBlock tested, BrotliGlobalState state, BrotliSerializationParameters? serializationParameters = null){
+        public static (int, BrotliGlobalState)? CountBits(MetaBlock tested, BrotliGlobalState state, BrotliSerializationParameters? serializationParameters = null){
             var writer = new BitWriterNull();
+            var nextState = state.Clone();
 
             try{
-                return writer.Length;
                 MetaBlock.Serialize(writer, tested, nextState, serializationParameters ?? BrotliSerializationParameters.Default);
+                return (writer.Length, nextState);
             }catch(Exception ex){
                 Debug.WriteLine(ex.ToString());
-                return int.MaxValue;
+                return null;
             }
         }
     }

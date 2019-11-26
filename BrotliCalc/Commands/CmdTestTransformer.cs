@@ -33,14 +33,14 @@ namespace BrotliCalc.Commands{
 
         protected override IEnumerable<object?[]> GenerateRows(BrotliFileGroup group, BrotliFile.Compressed file){
             var bfs = file.Structure;
-            var transformed = bfs.Transform(transformer!);
+            var transformed = bfs.Transform(transformer!, Parameters.Compression);
 
             if (transformed.MetaBlocks.SequenceEqual(bfs.MetaBlocks)){ // if the references have not changed, there was no transformation
                 return new List<object[]>();
             }
-                    
+
             int? originalBytes = file.SizeBytes;
-            int rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild()), Parameters.Serialization);
+            int rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild(), Parameters.Compression), Parameters.Serialization);
             int transformedBytes = group.CountBytesAndValidate(transformed, Parameters.Serialization);
 
             return new List<object?[]>{

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using BrotliLib.Brotli.Dictionary.Format;
@@ -45,14 +46,14 @@ namespace BrotliLib.Brotli.Dictionary.Index{
             Debug.WriteLine("Constructed dictionary index in " + sw.ElapsedMilliseconds + " ms.");
         }
 
-        public List<DictionaryIndexEntry> Find(byte[] bytes, int start, int maxLength){
+        public List<DictionaryIndexEntry> Find(ArraySegment<byte> bytes, int maxLength = int.MaxValue){
             var entries = new List<DictionaryIndexEntry>();
 
             // default dictionary guarantees executing 44 identity, 12 ferment first, 12 ferment all transformations
             // TODO longest may not find correct entries w/ suffix, but it seems to work well enough
-            var identityNoPrefixWords     = lookups[TransformType.Identity].FindLongest(CollectionHelper.Skip(bytes, start));
-            var fermentFirstNoPrefixWords = lookups[TransformType.FermentFirst].FindLongest(CollectionHelper.Skip(bytes, start));
-            var fermentAllNoPrefixWords   = lookups[TransformType.FermentAll].FindLongest(CollectionHelper.Skip(bytes, start));
+            var identityNoPrefixWords     = lookups[TransformType.Identity].FindLongest(bytes);
+            var fermentFirstNoPrefixWords = lookups[TransformType.FermentFirst].FindLongest(bytes);
+            var fermentAllNoPrefixWords   = lookups[TransformType.FermentAll].FindLongest(bytes);
 
             IEnumerable<(int, int)> LookupWords(TransformType type, int prefixLength){
                 if (prefixLength == 0){
@@ -63,10 +64,15 @@ namespace BrotliLib.Brotli.Dictionary.Index{
                     }
                 }
 
-                return lookups[type].FindLongest(CollectionHelper.Skip(bytes, start + prefixLength));
+                if (prefixLength <= bytes.Count){
+                    return lookups[type].FindLongest(bytes.Slice(prefixLength));
+                }
+                else{
+                    return Enumerable.Empty<(int, int)>();
+                }
             }
 
-            var transformsMatchingPrefix = transformsNoPrefix.Concat(transformsWithPrefix.Where(index => CollectionHelper.ContainsAt(bytes, start, transforms[index].Prefix)));
+            var transformsMatchingPrefix = transformsNoPrefix.Concat(transformsWithPrefix.Where(index => CollectionHelper.ContainsAt(bytes, 0, transforms[index].Prefix)));
 
             foreach(var transform in transformsMatchingPrefix){
                 var wt = transforms[transform];
@@ -77,7 +83,7 @@ namespace BrotliLib.Brotli.Dictionary.Index{
                 foreach(var (length, word) in LookupWords(type, prefixLength)){
                     var transformedLength = type.GetTransformedLength(length);
 
-                    if (transformedLength <= maxLength && CollectionHelper.ContainsAt(bytes, start + prefixLength + transformedLength, wt.Suffix)){
+                    if (transformedLength <= maxLength && CollectionHelper.ContainsAt(bytes, prefixLength + transformedLength, wt.Suffix)){
                         int packedValue = format.GetPackedValue(length, word, transform);
                         int outputLength = transformedLength + prefixLength + wt.Suffix.Length;
 

@@ -7,7 +7,7 @@ using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Collections;
 
-namespace BrotliLib.Brotli.Encode{
+namespace BrotliLib.Brotli.Encode.Build{
     public sealed class BlockSwitchBuilder{
         public int InitialLength { get; private set; }
         public IEnumerable<BlockSwitchCommand> Commands => commands;

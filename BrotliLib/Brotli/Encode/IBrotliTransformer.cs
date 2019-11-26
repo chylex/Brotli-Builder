@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using BrotliLib.Brotli.Components;
+using BrotliLib.Brotli.Parameters;
 
 namespace BrotliLib.Brotli.Encode{
     public interface IBrotliTransformer{
-        IEnumerable<MetaBlock> Transform(MetaBlock original, BrotliGlobalState initialState);
+        (IList<MetaBlock> MetaBlocks, BrotliGlobalState NextState) Transform(MetaBlock original, BrotliGlobalState state, BrotliCompressionParameters parameters);
     }
 }

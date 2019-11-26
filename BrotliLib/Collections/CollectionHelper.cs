@@ -13,13 +13,17 @@ namespace BrotliLib.Collections{
         public static byte[] Clone(byte[] input){
             return Slice(input, 0, input.Length);
         }
+        
+        public static ArraySegment<byte> SliceAtMost(ArraySegment<byte> input, int count){
+            return input.Slice(0, Math.Min(input.Count, count));
+        }
 
-        public static bool ContainsAt(byte[] input, int start, byte[] contents){
+        public static bool ContainsAt(ArraySegment<byte> input, int start, byte[] contents){
             if (contents.Length == 0){
                 return true;
             }
 
-            if (input.Length - start < contents.Length){
+            if (input.Count - start < contents.Length){
                 return false;
             }
 
@@ -30,12 +34,6 @@ namespace BrotliLib.Collections{
             }
 
             return true;
-        }
-
-        public static IEnumerable<T> Skip<T>(T[] array, int start){
-            for(int index = start; index < array.Length; index++){
-                yield return array[index];
-            }
         }
 
         public static bool Equal(byte[] a, byte[] b){

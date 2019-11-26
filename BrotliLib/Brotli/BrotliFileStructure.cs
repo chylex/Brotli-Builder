@@ -9,7 +9,6 @@ using BrotliLib.Brotli.Parameters;
 using BrotliLib.Markers;
 using BrotliLib.Markers.Serialization.Reader;
 using BrotliLib.Serialization;
-using BrotliLib.Serialization.Writer;
 
 namespace BrotliLib.Brotli{
     /// <summary>
@@ -27,37 +26,29 @@ namespace BrotliLib.Brotli{
             return DoDeserialize(CreateReader(new BitStream(bytes)), new FileContext(BrotliDefaultDictionary.Embedded, windowSize => new BrotliOutputWindowed(windowSize)));
         }
 
-        public static BrotliFileStructure FromEncoder(BrotliFileParameters parameters, IBrotliEncoder encoder, byte[] bytes){
-            var bfs = new BrotliFileStructure(parameters);
-
-            foreach(MetaBlock metaBlock in encoder.GenerateMetaBlocks(parameters, bytes)){
-                bfs.MetaBlocks.Add(metaBlock);
-            }
-
-            bfs.Fixup();
-            return bfs;
+        public static BrotliFileStructure FromEncoder(BrotliFileParameters fileParameters, BrotliCompressionParameters compressionParameters, byte[] bytes, IBrotliEncoder encoder, params IBrotliTransformer[] transformers){
+            return new BrotliEncodePipeline(encoder, transformers).Apply(fileParameters, compressionParameters, bytes);
         }
 
         // Data
 
         public BrotliFileParameters Parameters { get; set; }
-        public IList<MetaBlock> MetaBlocks { get; }
+        public List<MetaBlock> MetaBlocks { get; }
         
         public BrotliFileStructure(BrotliFileParameters parameters){
             this.Parameters = parameters;
             this.MetaBlocks = new List<MetaBlock>();
         }
 
-        public BrotliFileStructure Transform(IBrotliTransformer transformer, BrotliSerializationParameters? parameters = null){
+        public BrotliFileStructure Transform(IBrotliTransformer transformer, BrotliCompressionParameters compressionParameters){
             var copy = new BrotliFileStructure(Parameters);
             var state = new BrotliGlobalState(Parameters, new BrotliOutputWindowed(Parameters.WindowSize));
-            var writer = new BitWriterNull();
 
             foreach(MetaBlock original in MetaBlocks){
-                foreach(MetaBlock transformed in transformer.Transform(original, state)){ // TODO figure out how to handle state
-                    copy.MetaBlocks.Add(transformed);
-                    MetaBlock.Serialize(writer, transformed, state, parameters ?? BrotliSerializationParameters.Default);
-                }
+                var (transformedMetaBlocks, transformedState) = transformer.Transform(original, state, compressionParameters);
+
+                copy.MetaBlocks.AddRange(transformedMetaBlocks);
+                state = transformedState;
             }
 
             copy.Fixup();
@@ -65,6 +56,10 @@ namespace BrotliLib.Brotli{
         }
 
         public void Fixup(){
+            if (MetaBlocks.Count == 0 || MetaBlocks[^1] is MetaBlock.Uncompressed){
+                MetaBlocks.Add(new MetaBlock.LastEmpty());
+            }
+
             for(int index = 0, last = MetaBlocks.Count - 1; index <= last; index++){
                 MetaBlocks[index].IsLast = index == last;
             }

@@ -56,7 +56,7 @@ namespace BrotliCalc.Commands{
                         Stopwatch swRebuild = Stopwatch.StartNew();
 
                         try{
-                            rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild()), Parameters.Serialization);
+                            rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild(), Parameters.Compression), Parameters.Serialization);
                         }catch(Exception e){
                             Debug.WriteLine(e.ToString());
                             ++failedFiles;

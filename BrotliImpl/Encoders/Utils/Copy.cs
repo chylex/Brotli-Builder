@@ -2,7 +2,7 @@
 using BrotliLib.Brotli.Components.Compressed;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Dictionary.Index;
-using BrotliLib.Brotli.Encode;
+using BrotliLib.Brotli.Encode.Build;
 using BrotliLib.Brotli.Parameters;
 
 namespace BrotliImpl.Encoders.Utils{

@@ -11,7 +11,7 @@ using BrotliLib.Brotli.Output;
 using BrotliLib.Brotli.Parameters;
 using BrotliLib.Collections;
 
-namespace BrotliLib.Brotli.Encode{
+namespace BrotliLib.Brotli.Encode.Build{
     public sealed class CompressedMetaBlockBuilder{
         public int OutputSize => intermediateState.OutputSize - initialState.OutputSize;
 
@@ -31,7 +31,7 @@ namespace BrotliLib.Brotli.Encode{
 
         // Construction
 
-        private CompressedMetaBlockBuilder(BrotliGlobalState state){
+        public CompressedMetaBlockBuilder(BrotliGlobalState state){
             this.initialState = state.Clone();
             this.intermediateState = state.Clone();
         }
@@ -83,9 +83,14 @@ namespace BrotliLib.Brotli.Encode{
 
         // Building
 
-        public (MetaBlock MetaBlock, Func<CompressedMetaBlockBuilder> Next) Build(){
-            var state = initialState.Clone();
+        public (MetaBlock MetaBlock, BrotliEncodeInfo NextInfo) Build(BrotliEncodeInfo info){
+            var (metaBlock, nextState) = Build(info.CompressionParameters);
+            return (metaBlock, info.WithProcessedBytes(nextState, OutputSize));
+        }
 
+        public (MetaBlock MetaBlock, BrotliGlobalState NextState) Build(BrotliCompressionParameters parameters){
+            var state = initialState.Clone();
+            
             // Command processing
             
             var bsCommands = BlockTypes.Select<IList<BlockSwitchCommand>>(builder => new List<BlockSwitchCommand>(builder.Commands));
@@ -129,7 +134,7 @@ namespace BrotliLib.Brotli.Encode{
                         int treeID = DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
                         var codeList = distanceCodeFreq[treeID];
-                        codeList.Add(distanceCode = distanceCodes.FirstOrDefault(codeList.Contains) ?? distanceCodes[0]); // TODO figure out a better strategy for picking the code
+                        codeList.Add(distanceCode = distanceCodes.FirstOrDefault(codeList.Contains) ?? distanceCodes[0]); // new CompressedMetaBlockBuildParams().PickDistanceCode(icCommand.CopyDistance, distanceCodes, codeList));
                     }
 
                     bool isImplicitCodeZero = distanceCode == null;
@@ -183,7 +188,7 @@ namespace BrotliLib.Brotli.Encode{
             var data = new MetaBlockCompressionData(icCommandsFinal, bsCommands);
             var dataLength = new DataLength(OutputSize);
 
-            return (new MetaBlock.Compressed(isLast: false, dataLength, header, data), () => new CompressedMetaBlockBuilder(state));
+            return (new MetaBlock.Compressed(isLast: false, dataLength, header, data), state);
         }
 
         // Helpers

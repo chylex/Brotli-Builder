@@ -18,7 +18,7 @@ namespace BrotliCalc.Commands{
 
             int? originalBytes = file.SizeBytes;
             var reserializeBytes = group.CountBytesAndValidate(bfs, Parameters.Serialization);
-            var rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild()), Parameters.Serialization);
+            var rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild(), Parameters.Compression), Parameters.Serialization);
 
             return new List<object?[]>{
                 new object?[]{ file.Name, file.Identifier, originalBytes, reserializeBytes, rebuildBytes, reserializeBytes - originalBytes, rebuildBytes - originalBytes } // subtraction propagates null
