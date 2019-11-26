@@ -8,9 +8,6 @@
     <RepositoryUrl>https://github.com/chylex/Brotli-Builder</RepositoryUrl>
     <Authors>Daniel Chýlek</Authors>
     <Version>1.1.0</Version>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
 

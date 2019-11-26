@@ -10,16 +10,7 @@
     <Copyright>Daniel Chýlek</Copyright>
     <RepositoryUrl>https://github.com/chylex/Brotli-Builder</RepositoryUrl>
     <Version>1.1.0</Version>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
 
   <ItemGroup>
