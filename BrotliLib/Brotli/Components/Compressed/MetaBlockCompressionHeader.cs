@@ -113,10 +113,8 @@ namespace BrotliLib.Brotli.Components.Compressed{
                 LiteralContextModes.Serialize(writer, literalCtxMode, NoContext.Value);
             }
 
-            var contextMapSerialize = ContextMap.MakeSerializer(imtf: true, rle: true);
-
-            contextMapSerialize(writer, obj.LiteralCtxMap, obj.BlockTypes[Category.Literal]);
-            contextMapSerialize(writer, obj.DistanceCtxMap, obj.BlockTypes[Category.Distance]);
+            ContextMap.Serialize(writer, obj.LiteralCtxMap, obj.BlockTypes[Category.Literal], parameters);
+            ContextMap.Serialize(writer, obj.DistanceCtxMap, obj.BlockTypes[Category.Distance], parameters);
             
             foreach(LiteralTree tree in obj.LiteralTrees){
                 LiteralTree.Serialize(writer, tree, Literal.TreeContext);

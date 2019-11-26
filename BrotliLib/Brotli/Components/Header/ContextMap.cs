@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Brotli.Serialization;
 using BrotliLib.Collections;
 using BrotliLib.Markers.Serialization;
 using BrotliLib.Numbers;
@@ -207,73 +208,72 @@ namespace BrotliLib.Brotli.Components.Header{
             }
         );
 
-        public static BitSerializer<ContextMap, BlockTypeInfo> MakeSerializer(bool imtf, bool rle){
-            return (writer, obj, context) => {
-                VariableLength11Code.Serialize(writer, new VariableLength11Code(obj.TreeCount), NoContext.Value);
+        public static BitSerializer<ContextMap, BlockTypeInfo, BrotliSerializationParameters> Serialize = (writer, obj, context, parameters) => {
+            VariableLength11Code.Serialize(writer, new VariableLength11Code(obj.TreeCount), NoContext.Value);
 
-                if (obj.TreeCount > 1){
-                    byte[] contextMap;
+            if (obj.TreeCount > 1){
+                bool imtf = parameters.UseContextMapIMTF(obj);
+                byte[] contextMap;
 
-                    if (imtf){
-                        contextMap = CollectionHelper.Clone(obj.contextMap);
-                        MoveToFront.Encode(contextMap);
-                    }
-                    else{
-                        contextMap = obj.contextMap;
-                    }
+                if (imtf){
+                    contextMap = CollectionHelper.Clone(obj.contextMap);
+                    MoveToFront.Encode(contextMap);
+                }
+                else{
+                    contextMap = obj.contextMap;
+                }
 
-                    byte runLengthCodeCount = rle ? CalculateLargestRunLengthCode(contextMap) : (byte)0;
-                    
-                    if (runLengthCodeCount > 0){
-                        writer.WriteBit(true);
-                        writer.WriteChunk(4, runLengthCodeCount - 1);
-                    }
-                    else{
-                        writer.WriteBit(false);
-                    }
+                byte runLengthCodeCount = parameters.UseContextMapRLE(obj) ? CalculateLargestRunLengthCode(contextMap) : (byte)0;
+                
+                if (runLengthCodeCount > 0){
+                    writer.WriteBit(true);
+                    writer.WriteChunk(4, runLengthCodeCount - 1);
+                }
+                else{
+                    writer.WriteBit(false);
+                }
 
-                    List<int> symbols = new List<int>();
-                    Queue<int> extra = new Queue<int>();
+                List<int> symbols = new List<int>();
+                Queue<int> extra = new Queue<int>();
 
-                    for(int index = 0; index < contextMap.Length; index++){
-                        byte symbol = contextMap[index];
+                for(int index = 0; index < contextMap.Length; index++){
+                    byte symbol = contextMap[index];
 
-                        if (symbol == 0){
-                            int runLength = runLengthCodeCount == 0 ? 0 : FindRunLength(contextMap, index) - 1;
+                    if (symbol == 0){
+                        int runLength = runLengthCodeCount == 0 ? 0 : FindRunLength(contextMap, index) - 1;
 
-                            if (runLength > 0){
-                                byte code = CalculateRunLengthCodeFor(runLength);
+                        if (runLength > 0){
+                            byte code = CalculateRunLengthCodeFor(runLength);
 
-                                symbols.Add(code);
-                                extra.Enqueue(runLength - ((1 << code) - 1));
+                            symbols.Add(code);
+                            extra.Enqueue(runLength - ((1 << code) - 1));
 
-                                index += runLength;
-                            }
-                            else{
-                                symbols.Add(0);
-                            }
+                            index += runLength;
                         }
                         else{
-                            symbols.Add(symbol + runLengthCodeCount);
+                            symbols.Add(0);
                         }
                     }
-
-                    var codeContext = GetCodeTreeContext(obj.TreeCount + runLengthCodeCount);
-                    var codeTree = HuffmanTree<int>.FromSymbols(new FrequencyList<int>(symbols));
-
-                    HuffmanTree<int>.Serialize(writer, codeTree, codeContext);
-
-                    foreach(int symbol in symbols){
-                        writer.WriteBits(codeTree.FindPath(symbol));
-
-                        if (symbol > 0 && symbol <= runLengthCodeCount){
-                            writer.WriteChunk(symbol, extra.Dequeue());
-                        }
+                    else{
+                        symbols.Add(symbol + runLengthCodeCount);
                     }
-
-                    writer.WriteBit(imtf);
                 }
-            };
-        }
+
+                var codeContext = GetCodeTreeContext(obj.TreeCount + runLengthCodeCount);
+                var codeTree = HuffmanTree<int>.FromSymbols(new FrequencyList<int>(symbols));
+
+                HuffmanTree<int>.Serialize(writer, codeTree, codeContext);
+
+                foreach(int symbol in symbols){
+                    writer.WriteBits(codeTree.FindPath(symbol));
+
+                    if (symbol > 0 && symbol <= runLengthCodeCount){
+                        writer.WriteChunk(symbol, extra.Dequeue());
+                    }
+                }
+
+                writer.WriteBit(imtf);
+            }
+        };
     }
 }
