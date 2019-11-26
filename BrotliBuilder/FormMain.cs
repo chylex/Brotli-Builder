@@ -405,7 +405,7 @@ namespace BrotliBuilder{
                 lastFileName = dialog.FileName;
                 isDirty = false;
 
-                File.WriteAllBytes(lastFileName, currentFile.Serialize().ToByteArray());
+                File.WriteAllBytes(lastFileName, currentFile.Serialize(fileGenerated.SerializationParameters).ToByteArray());
             }
         }
 
@@ -422,7 +422,7 @@ namespace BrotliBuilder{
             };
 
             if (dialog.ShowDialog() == DialogResult.OK){
-                File.WriteAllBytes(dialog.FileName, currentFile.GetDecompressionState(currentFile.Serialize()).AsBytes);
+                File.WriteAllBytes(dialog.FileName, currentFile.GetDecompressionState(currentFile.Serialize(fileGenerated.SerializationParameters)).AsBytes);
             }
         }
 

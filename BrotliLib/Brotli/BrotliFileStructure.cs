@@ -43,7 +43,7 @@ namespace BrotliLib.Brotli{
         public BrotliFileParameters Parameters { get; set; }
         public IList<MetaBlock> MetaBlocks { get; }
         
-        private BrotliFileStructure(BrotliFileParameters parameters){
+        public BrotliFileStructure(BrotliFileParameters parameters){
             this.Parameters = parameters;
             this.MetaBlocks = new List<MetaBlock>();
         }
@@ -70,9 +70,9 @@ namespace BrotliLib.Brotli{
             }
         }
 
-        public BitStream Serialize(BrotliSerializationParameters? parameters = null){
+        public BitStream Serialize(BrotliSerializationParameters parameters){
             BitStream stream = new BitStream();
-            DoSerialize(stream.GetWriter(), this, new FileContext(Parameters.Dictionary, new BrotliOutputWindowed(Parameters.WindowSize)), parameters ?? BrotliSerializationParameters.Default);
+            DoSerialize(stream.GetWriter(), this, new FileContext(Parameters.Dictionary, new BrotliOutputWindowed(Parameters.WindowSize)), parameters);
             return stream;
         }
 
@@ -106,9 +106,12 @@ namespace BrotliLib.Brotli{
         private static readonly BitDeserializer<BrotliFileStructure, FileContext> DoDeserialize = (reader, context) => {
             WindowSize windowSize = WindowSize.Deserialize(reader, NoContext.Value);
 
-            var parameters = new BrotliFileParameters(windowSize, context.Dictionary);
-            var structure = new BrotliFileStructure(parameters);
+            var parameters = new BrotliFileParameters{
+                WindowSize = windowSize,
+                Dictionary = context.Dictionary
+            };
 
+            var structure = new BrotliFileStructure(parameters);
             var state = new BrotliGlobalState(parameters, context.OutputState(windowSize));
 
             while(true){

@@ -6,13 +6,14 @@ namespace BrotliBuilder{
     partial class FormMain{
         private void InitializeMenuEncoders(){
             var items = menuItemEncodeFile.MenuItems;
+            var parameters = BrotliFileParameters.Default;
 
-            items.Add("Into Uncompressed Meta-Blocks",   (_, e) => OpenFileWithEncoder(new BrotliFileParameters(), new EncodeUncompressedOnly()));
-            items.Add("Into Literals",                   (_, e) => OpenFileWithEncoder(new BrotliFileParameters(), new EncodeLiterals()));
+            items.Add("Into Uncompressed Meta-Blocks",   (_, e) => OpenFileWithEncoder(parameters, new EncodeUncompressedOnly()));
+            items.Add("Into Literals",                   (_, e) => OpenFileWithEncoder(parameters, new EncodeLiterals()));
             items.Add("-");
-            items.Add("Greedy Search (Only Copies)",     (_, e) => OpenFileWithEncoder(new BrotliFileParameters(), new EncodeGreedySearch.OnlyBackReferences(minLength: 4)));
-            items.Add("Greedy Search (Only Dictionary)", (_, e) => OpenFileWithEncoder(new BrotliFileParameters(), new EncodeGreedySearch.OnlyDictionary()));
-            items.Add("Greedy Search (Only Mixed)",      (_, e) => OpenFileWithEncoder(new BrotliFileParameters(), new EncodeGreedySearch.Mixed(minCopyLength: 4)));
+            items.Add("Greedy Search (Only Copies)",     (_, e) => OpenFileWithEncoder(parameters, new EncodeGreedySearch.OnlyBackReferences(minLength: 4)));
+            items.Add("Greedy Search (Only Dictionary)", (_, e) => OpenFileWithEncoder(parameters, new EncodeGreedySearch.OnlyDictionary()));
+            items.Add("Greedy Search (Only Mixed)",      (_, e) => OpenFileWithEncoder(parameters, new EncodeGreedySearch.Mixed(minCopyLength: 4)));
         }
 
         private void InitializeMenuTransformers(){

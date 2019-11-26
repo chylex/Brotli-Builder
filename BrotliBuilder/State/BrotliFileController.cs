@@ -12,7 +12,7 @@ using BrotliLib.Serialization;
 
 namespace BrotliBuilder.State{
     sealed class BrotliFileController{
-        public BrotliSerializationParameters SerializationParameters { get; set; } = BrotliSerializationParameters.Default;
+        public BrotliSerializationParameters SerializationParameters { get; } = BrotliSerializationParameters.Default;
         public MarkerLevel BitMarkerLevel { get; set; } = MarkerLevel.Verbose;
         
         public event EventHandler<StateChangedEventArgs>? StateChanged;

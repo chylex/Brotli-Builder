@@ -4,7 +4,6 @@ using System.Windows.Forms;
 using BrotliBuilder.Blocks.Structure;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
-using BrotliLib.Brotli.Parameters;
 
 namespace BrotliBuilder.Blocks{
     partial class BuildFileStructure : UserControl{
@@ -38,7 +37,7 @@ namespace BrotliBuilder.Blocks{
 
         private void context_Notified(object? sender, EventArgs e){
             if (e is BuildWindowSize.WindowSizeNotifyArgs wsna){
-                brotliFile.Parameters = new BrotliFileParameters(wsna.NewWindowSize, brotliFile.Parameters.Dictionary);
+                brotliFile.Parameters.WindowSize = wsna.NewWindowSize;
             }
             else if (listElements.SelectedItem is StructureMetaBlockItem smbi){
                 smbi.HandleNotification(e);

@@ -2,11 +2,11 @@
 
 namespace BrotliLib.Brotli.Parameters{
     public sealed class BrotliSerializationParameters{
-        public static BrotliSerializationParameters Default { get; } = new BrotliSerializationParameters();
+        public static BrotliSerializationParameters Default => new BrotliSerializationParameters();
 
         public delegate bool DecideContextMapFeature(ContextMap contextMap);
 
-        public DecideContextMapFeature UseContextMapIMTF = _ => true;
-        public DecideContextMapFeature UseContextMapRLE = _ => true;
+        public DecideContextMapFeature UseContextMapIMTF { get; set; } = _ => true;
+        public DecideContextMapFeature UseContextMapRLE  { get; set; } = _ => true;
     }
 }

@@ -4,15 +4,9 @@ using BrotliLib.Brotli.Dictionary.Default;
 
 namespace BrotliLib.Brotli.Parameters{
     public sealed class BrotliFileParameters{
-        public WindowSize WindowSize { get; }
-        public BrotliDictionary Dictionary { get; }
+        public static BrotliFileParameters Default => new BrotliFileParameters();
 
-        public BrotliFileParameters(WindowSize windowSize, BrotliDictionary dictionary){
-            this.WindowSize = windowSize;
-            this.Dictionary = dictionary;
-        }
-
-        public BrotliFileParameters(WindowSize windowSize) : this(windowSize, BrotliDefaultDictionary.Embedded){}
-        public BrotliFileParameters() : this(WindowSize.Default){}
+        public WindowSize WindowSize { get; set; } = WindowSize.Default;
+        public BrotliDictionary Dictionary { get; set; } = BrotliDefaultDictionary.Embedded;
     }
 }

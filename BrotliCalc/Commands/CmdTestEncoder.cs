@@ -5,7 +5,6 @@ using BrotliCalc.Helpers;
 using BrotliImpl.Encoders;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Encode;
-using BrotliLib.Brotli.Parameters;
 
 namespace BrotliCalc.Commands{
     class CmdTestEncoder : CmdAbstractFileTable.Uncompressed{
@@ -36,7 +35,7 @@ namespace BrotliCalc.Commands{
 
         protected override IEnumerable<object?[]> GenerateRows(BrotliFileGroup group, BrotliFile.Uncompressed file){
             int? uncompressedBytes = file.SizeBytes;
-            int encodeBytes = group.CountBytesAndValidate(BrotliFileStructure.FromEncoder(new BrotliFileParameters(), encoder!, file.Contents));
+            int encodeBytes = group.CountBytesAndValidate(BrotliFileStructure.FromEncoder(Parameters.File, file.Contents, encoder!), Parameters.Serialization);
 
             return new List<object?[]>{
                 new object?[]{ file.Name, uncompressedBytes, encodeBytes, encodeBytes - uncompressedBytes } // subtraction propagates null

@@ -9,7 +9,7 @@ namespace BrotliCalc.Commands{
         protected override string WorkDesc => "Reserialized";
 
         protected override byte[] MapFile(BrotliFileGroup group, BrotliFile.Compressed file){
-            return group.SerializeAndValidate(file.Structure).ToByteArray();
+            return group.SerializeAndValidate(file.Structure, Parameters.Serialization).ToByteArray();
         }
     }
 }
