@@ -71,7 +71,7 @@ namespace BrotliLib.Brotli.Components.Data{
                     return new DistanceCode[]{ DistanceCode.Zero };
 
                 default:
-                    return DistanceCode.ForValue(parameters, state, (int)info);
+                    return DistanceCode.ForValue(parameters, state, (int)info); // allows code zero
             }
         }
     }

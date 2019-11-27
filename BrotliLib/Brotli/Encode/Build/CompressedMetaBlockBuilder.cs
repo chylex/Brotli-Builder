@@ -140,11 +140,8 @@ namespace BrotliLib.Brotli.Encode.Build{
                     bool isImplicitCodeZero = distanceCode == null;
                     bool isDistanceCodeZero = isImplicitCodeZero || distanceCode!.Equals(DistanceCode.Zero);
 
-                    icLengthCode = icLengthValues.MakeCode(
-                        isImplicitCodeZero ? DistanceCodeZeroStrategy.ForceEnabled :
-                        isDistanceCodeZero ? DistanceCodeZeroStrategy.PreferEnabled :
-                                             DistanceCodeZeroStrategy.Disable
-                    );
+                    icLengthCode = icLengthValues.MakeCode(isImplicitCodeZero ? DistanceCodeZeroStrategy.ForceEnabled : DistanceCodeZeroStrategy.Disable);
+                    // TODO not allowed to use implicit code unless defined in the command, as implicit code doesn't advance the distance block tracker and would require lengths to be recalculated
 
                     if (icLengthCode.UseDistanceCodeZero){
                         icCommand = icCommand.WithDistance(DistanceInfo.ImplicitCodeZero);
