@@ -97,7 +97,7 @@ namespace BrotliLib.Brotli{
         }
 
         private static IMarkedBitReader CreateReader(BitStream bitStream, MarkerLevel? markerLevel = null){
-            return markerLevel.HasValue ? new MarkedBitReader(bitStream.GetReader(), markerLevel.Value) : (IMarkedBitReader)new MarkedBitReaderDummy(bitStream.GetReader());
+            return markerLevel.HasValue && markerLevel != MarkerLevel.None ? new MarkedBitReader(bitStream.GetReader(), markerLevel.Value) : (IMarkedBitReader)new MarkedBitReaderDummy(bitStream.GetReader());
         }
 
         private static readonly BitDeserializer<BrotliFileStructure, FileContext> DoDeserialize = (reader, context) => {
