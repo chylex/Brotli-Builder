@@ -41,7 +41,7 @@ namespace BrotliLib.Brotli.Components{
 
             private readonly byte[] hiddenData;
 
-            public PaddedEmpty(byte[] hiddenData) : base(false, DataLength.Empty){
+            public PaddedEmpty(bool isLast, byte[] hiddenData) : base(isLast, DataLength.Empty){
                 if (hiddenData.Length > MaxSkippableBytes){
                     throw new ArgumentOutOfRangeException(nameof(hiddenData), "The hidden data length must be at most " + MaxSkippableBytes + " bytes.");
                 }
@@ -61,7 +61,7 @@ namespace BrotliLib.Brotli.Components{
 
             // Serialization
 
-            internal new static readonly BitDeserializer<PaddedEmpty, NoContext> Deserialize = MarkedBitDeserializer.Wrap<PaddedEmpty, NoContext>(
+            internal new static readonly BitDeserializer<PaddedEmpty, Context> Deserialize = MarkedBitDeserializer.Wrap<PaddedEmpty, Context>(
                 (reader, context) => {
                     if (reader.NextBit("reserved")){
                         throw new InvalidOperationException("Reserved bit in empty meta-block must be 0.");
@@ -90,7 +90,7 @@ namespace BrotliLib.Brotli.Components{
                         reader.MarkEnd(new TextMarker("(" + skipLength + " skipped byte" + (skipLength == 1 ? ")" : "s)")));
                     }
 
-                    return new PaddedEmpty(bytes);
+                    return new PaddedEmpty(context.IsLast, bytes);
                 }
             );
 

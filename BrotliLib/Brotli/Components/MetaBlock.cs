@@ -58,7 +58,7 @@ namespace BrotliLib.Brotli.Components{
                 DataLength dataLength = DataLength.Deserialize(reader, NoContext.Value);
 
                 if (dataLength.UncompressedBytes == 0){
-                    return reader.ReadStructure(PaddedEmpty.Deserialize, NoContext.Value, "Contents");
+                    return reader.ReadStructure(PaddedEmpty.Deserialize, new Context(isLast, DataLength.Empty, context), "Contents");
                 }
                 
                 bool isUncompressed = !isLast && reader.NextBit("ISUNCOMPRESSED");
