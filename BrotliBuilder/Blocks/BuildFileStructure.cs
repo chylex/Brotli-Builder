@@ -17,10 +17,10 @@ namespace BrotliBuilder.Blocks{
             this.context.Notified += context_Notified;
             this.brotliFile = brotliFile;
 
-            RegenerateElementList(selectIndex: -1, notifyParent: false);
+            RegenerateElementList(selectMetaBlock: null, notifyParent: false);
         }
 
-        private void RegenerateElementList(int selectIndex, bool notifyParent){
+        private void RegenerateElementList(MetaBlock? selectMetaBlock, bool notifyParent){
             listElements.Items.Clear();
             listElements.Items.Add(new StructureWindowSizeItem(brotliFile));
 
@@ -28,7 +28,7 @@ namespace BrotliBuilder.Blocks{
                 listElements.Items.Add(new StructureMetaBlockItem(brotliFile, metaBlock));
             }
 
-            listElements.SelectedIndex = selectIndex;
+            listElements.SelectedIndex = selectMetaBlock == null ? -1 : brotliFile.MetaBlocks.IndexOf(selectMetaBlock) + 1;
 
             if (notifyParent){
                 context.NotifyParent(EventArgs.Empty);
@@ -45,9 +45,14 @@ namespace BrotliBuilder.Blocks{
 
             brotliFile.Fixup();
             
-            listElements.SelectedValueChanged -= listElements_SelectedValueChanged;
-            listElements.Items[listElements.SelectedIndex] = listElements.SelectedItem; // update item text
-            listElements.SelectedValueChanged += listElements_SelectedValueChanged;
+            if (listElements.SelectedItem == null){
+                listElements.SelectedItem = listElements.Items[^1];
+            }
+            else{
+                listElements.SelectedValueChanged -= listElements_SelectedValueChanged;
+                listElements.Items[listElements.SelectedIndex] = listElements.SelectedItem; // update item text
+                listElements.SelectedValueChanged += listElements_SelectedValueChanged;
+            }
         }
 
         private void listElements_SelectedValueChanged(object? sender, EventArgs e){
@@ -88,7 +93,7 @@ namespace BrotliBuilder.Blocks{
 
             brotliFile.MetaBlocks.Insert(insertAt, metaBlock);
             brotliFile.Fixup();
-            RegenerateElementList(selectIndex: insertAt + 1, notifyParent: true);
+            RegenerateElementList(selectMetaBlock: metaBlock, notifyParent: true);
         }
 
         private void buttonAddMetaBlockCompressed_Click(object? sender, EventArgs e){
@@ -104,20 +109,21 @@ namespace BrotliBuilder.Blocks{
                 AddMetaBlock(new MetaBlock.LastEmpty());
             }
             else{
-                AddMetaBlock(new MetaBlock.PaddedEmpty(Array.Empty<byte>()));
+                AddMetaBlock(new MetaBlock.PaddedEmpty(isLast: false, Array.Empty<byte>()));
             }
         }
 
         private void MoveMetaBlock(bool up){
             if (listElements.SelectedItem is StructureMetaBlockItem item){
-                int currentIndex = brotliFile.MetaBlocks.IndexOf(item.Value);
+                var metaBlock = item.Value;
+                int currentIndex = brotliFile.MetaBlocks.IndexOf(metaBlock);
                 int newIndex = currentIndex + (up ? -1 : 1);
 
                 if (newIndex >= 0 && newIndex < brotliFile.MetaBlocks.Count){
                     brotliFile.MetaBlocks.RemoveAt(currentIndex);
-                    brotliFile.MetaBlocks.Insert(newIndex, item.Value);
+                    brotliFile.MetaBlocks.Insert(newIndex, metaBlock);
                     brotliFile.Fixup();
-                    RegenerateElementList(selectIndex: newIndex + 1, notifyParent: true);
+                    RegenerateElementList(selectMetaBlock: metaBlock, notifyParent: true);
                 }
             }
         }
@@ -134,9 +140,12 @@ namespace BrotliBuilder.Blocks{
             if (listElements.SelectedItem is StructureMetaBlockItem item &&
                 MessageBox.Show($"Are you sure you want to permanently delete this meta-block?{Environment.NewLine}{item}", "Delete Meta-Block", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes
             ){
+                var metaBlockAbove = listElements.SelectedIndex > 1 ? brotliFile.MetaBlocks[listElements.SelectedIndex - 2] : null;
+
                 brotliFile.MetaBlocks.Remove(item.Value);
                 brotliFile.Fixup();
-                RegenerateElementList(selectIndex: Math.Min(listElements.SelectedIndex, listElements.Items.Count - 2), notifyParent: true);
+
+                RegenerateElementList(selectMetaBlock: metaBlockAbove, notifyParent: true);
             }
         }
 
@@ -187,7 +196,7 @@ namespace BrotliBuilder.Blocks{
             public void HandleNotification(EventArgs args){
                 switch(args){
                     case BuildEmptyMetaBlock.HiddenBytesNotifyArgs hbna:
-                        ReplaceMetaBlock(new MetaBlock.PaddedEmpty(hbna.Bytes));
+                        ReplaceMetaBlock(new MetaBlock.PaddedEmpty(isLast: false, hbna.Bytes));
                         break;
 
                     case BuildUncompressedMetaBlock.UncompressedBytesNotifyArgs ubna:

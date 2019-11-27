@@ -56,6 +56,8 @@ namespace BrotliLib.Brotli{
         }
 
         public void Fixup(){
+            MetaBlocks.RemoveAll(mb => mb is MetaBlock.LastEmpty);
+
             if (MetaBlocks.Count == 0 || MetaBlocks[^1] is MetaBlock.Uncompressed){
                 MetaBlocks.Add(new MetaBlock.LastEmpty());
             }
