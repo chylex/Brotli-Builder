@@ -107,8 +107,8 @@ namespace BrotliLib.Brotli.Components.Header{
 
         public static Builder For(int treeCount, BlockTypeInfo blockTypeInfo){
             return blockTypeInfo.Category switch{
-                Category.Literal => new Literals(treeCount, blockTypeInfo.Count),
-                Category.Distance => new Distances(treeCount, blockTypeInfo.Count),
+                Category.Literal => new Literals(treeCount, blockTypeInfo.TypeCount),
+                Category.Distance => new Distances(treeCount, blockTypeInfo.TypeCount),
                 _ => throw new InvalidOperationException("Context maps can only be created for literals and distances."),
             };
         }

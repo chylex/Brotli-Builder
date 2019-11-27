@@ -12,7 +12,7 @@ namespace BrotliLib.Brotli.Components.Utils{
     }
 
     public static class Categories{
-        public static readonly IList<Category> LID = new Category[]{
+        public static readonly IReadOnlyList<Category> LID = new Category[]{
             Category.Literal, Category.InsertCopy, Category.Distance
         };
 

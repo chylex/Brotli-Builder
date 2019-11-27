@@ -67,7 +67,7 @@ namespace BrotliCalc.Commands{
             row.Add(header.DistanceParameters.DirectCodeCount);
 
             foreach(var category in Categories.LID){
-                row.Add(header.BlockTypes[category].Count);
+                row.Add(header.BlockTypes[category].TypeCount);
             }
 
             row.Add(header.LiteralTrees.Count);

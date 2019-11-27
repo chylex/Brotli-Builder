@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using BrotliLib.Serialization.Reader;
 using BrotliLib.Serialization.Writer;
 
@@ -23,9 +24,9 @@ namespace BrotliLib.Brotli.Components.Data{
 
             public const int CodeCount = 16;
 
-            public static readonly DistanceCode[] Codes = Enumerable.Range(0, CodeCount)
-                                                                    .Select(code => new Last(code))
-                                                                    .ToArray<DistanceCode>();
+            public static readonly IReadOnlyList<DistanceCode> Codes = Enumerable.Range(0, CodeCount)
+                                                                                 .Select(code => new Last(code))
+                                                                                 .ToArray<DistanceCode>();
 
             private readonly byte index;
             private readonly sbyte offset;

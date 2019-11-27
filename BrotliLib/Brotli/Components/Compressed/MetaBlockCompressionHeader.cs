@@ -90,12 +90,12 @@ namespace BrotliLib.Brotli.Components.Compressed{
                 var blockTypes = new CategoryMap<BlockTypeInfo>(category => BlockTypeInfo.Deserialize(reader, category));
                 var distanceParameters = DistanceParameters.Deserialize(reader, NoContext.Value);
                 
-                var literalCtxModes = ReadLiteralContextModes(reader, blockTypes[Category.Literal].Count);
+                var literalCtxModes = ReadLiteralContextModes(reader, blockTypes[Category.Literal].TypeCount);
                 var literalCtxMap   = ReadContextMap(reader, Category.Literal, blockTypes);
                 var distanceCtxMap  = ReadContextMap(reader, Category.Distance, blockTypes);
                 
                 var literalTrees    = ReadHuffmanTrees(reader, Category.Literal, literalCtxMap.TreeCount, Literal.TreeContext);
-                var insertCopyTrees = ReadHuffmanTrees(reader, Category.InsertCopy, blockTypes[Category.InsertCopy].Count, InsertCopyLengthCode.TreeContext);
+                var insertCopyTrees = ReadHuffmanTrees(reader, Category.InsertCopy, blockTypes[Category.InsertCopy].TypeCount, InsertCopyLengthCode.TreeContext);
                 var distanceTrees   = ReadHuffmanTrees(reader, Category.Distance, distanceCtxMap.TreeCount, DistanceCode.GenerateTreeContext(distanceParameters));
                 
                 return new MetaBlockCompressionHeader(blockTypes, distanceParameters, literalCtxModes, literalCtxMap, distanceCtxMap, literalTrees, insertCopyTrees, distanceTrees);

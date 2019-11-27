@@ -16,7 +16,7 @@ namespace BrotliLib.Brotli.Encode.Build{
         public int OutputSize => intermediateState.OutputSize - initialState.OutputSize;
 
         public CategoryMap<BlockSwitchBuilder> BlockTypes { get; } = BlockTypeInfo.Empty.Select(info => new BlockSwitchBuilder(info));
-        public DistanceParameters DistanceParameters { get; set; } = DistanceParameters.NoDirectCodes;
+        public DistanceParameters DistanceParameters { get; set; } = DistanceParameters.Zero;
 
         public LiteralContextMode[] LiteralContextModes { get; set; } = { LiteralContextMode.LSB6 };
         public ContextMap LiteralCtxMap { get; set; } = ContextMap.Literals.Simple;
@@ -99,7 +99,7 @@ namespace BrotliLib.Brotli.Encode.Build{
             var blockTrackers = blockTypeInfo.Select(info => new BlockSwitchTracker.Writing(info, new Queue<BlockSwitchCommand>(bsCommands[info.Category])));
 
             var literalFreq = NewFreqArray<Literal>(LiteralCtxMap.TreeCount);
-            var icLengthCodeFreq = NewFreqArray<InsertCopyLengthCode>(blockTypeInfo[Category.InsertCopy].Count);
+            var icLengthCodeFreq = NewFreqArray<InsertCopyLengthCode>(blockTypeInfo[Category.InsertCopy].TypeCount);
             var distanceCodeFreq = NewFreqArray<DistanceCode>(DistanceCtxMap.TreeCount);
 
             var icCommandCount = icCommands.Count;

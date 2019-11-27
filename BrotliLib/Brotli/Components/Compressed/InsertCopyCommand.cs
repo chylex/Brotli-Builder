@@ -53,6 +53,10 @@ namespace BrotliLib.Brotli.Components.Compressed{
             return HashCode.Combine(CollectionHelper.HashCode(Literals), CopyLength, CopyDistance);
         }
 
+        public override string ToString(){
+            return Lengths + ", CopyDistance = " + CopyDistance;
+        }
+
         // Serialization
 
         internal static readonly BitDeserializer<InsertCopyCommand, MetaBlockCompressionData.DataContext> Deserialize = MarkedBitDeserializer.Title<InsertCopyCommand, MetaBlockCompressionData.DataContext>(

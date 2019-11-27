@@ -103,7 +103,7 @@ namespace BrotliLib.Brotli.Components.Data{
         }
 
         public override string ToString(){
-            return "CompactedCode = " + CompactedCode + " (InsertCode = " + InsertCode + ", CopyCode = " + CopyCode + ", UseDistanceCodeZero = " + UseDistanceCodeZero + ")";
+            return "Code = " + CompactedCode + " (InsertCode = " + InsertCode + ", CopyCode = " + CopyCode + ", DistanceCodeZero = " + UseDistanceCodeZero + ")";
         }
     }
 }

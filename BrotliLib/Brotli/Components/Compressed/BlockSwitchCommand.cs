@@ -26,6 +26,10 @@ namespace BrotliLib.Brotli.Components.Compressed{
             return HashCode.Combine(Type, Length);
         }
 
+        public override string ToString(){
+            return "Type = " + Type + ", Length = " + Length;
+        }
+
         // Context
 
         public sealed class Context{

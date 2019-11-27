@@ -15,7 +15,7 @@ namespace BrotliLib.Brotli.Components.Data{
         protected int remaining;
         
         protected BlockSwitchTracker(BlockTypeInfo info){
-            this.context = info.Count == 1 ? null : new BlockSwitchCommand.Context(info, new BlockTypeTracker(info.Count));
+            this.context = info.TypeCount == 1 ? null : new BlockSwitchCommand.Context(info, new BlockTypeTracker(info.TypeCount));
             this.remaining = info.InitialLength;
         }
         

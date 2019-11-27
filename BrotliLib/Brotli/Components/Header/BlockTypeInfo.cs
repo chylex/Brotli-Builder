@@ -19,7 +19,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
         public Category Category { get; }
 
-        public int Count { get; }
+        public int TypeCount { get; }
         public int InitialLength { get; }
 
         public BlockTypeCodeTree? TypeCodeTree { get; }
@@ -27,13 +27,13 @@ namespace BrotliLib.Brotli.Components.Header{
 
         private BlockTypeInfo(Category category){
             this.Category = category;
-            this.Count = 1;
+            this.TypeCount = 1;
             this.InitialLength = 16777216;
         }
 
-        public BlockTypeInfo(Category category, int count, int initialLength, BlockTypeCodeTree typeCodeTree, BlockLengthCodeTree lengthCodeTree){
+        public BlockTypeInfo(Category category, int typeCount, int initialLength, BlockTypeCodeTree typeCodeTree, BlockLengthCodeTree lengthCodeTree){
             this.Category = category;
-            this.Count = count;
+            this.TypeCount = typeCount;
             this.InitialLength = initialLength;
             this.TypeCodeTree = typeCodeTree;
             this.LengthCodeTree = lengthCodeTree;
@@ -43,14 +43,18 @@ namespace BrotliLib.Brotli.Components.Header{
 
         public override bool Equals(object obj){
             return obj is BlockTypeInfo info &&
-                   Count == info.Count &&
+                   TypeCount == info.TypeCount &&
                    InitialLength == info.InitialLength &&
                    Equals(TypeCodeTree, info.TypeCodeTree) &&
                    Equals(LengthCodeTree, info.LengthCodeTree);
         }
 
         public override int GetHashCode(){
-            return HashCode.Combine(Count, InitialLength, TypeCodeTree, LengthCodeTree);
+            return HashCode.Combine(TypeCount, InitialLength, TypeCodeTree, LengthCodeTree);
+        }
+
+        public override string ToString(){
+            return ReferenceEquals(this, Empty[Category]) ? "Empty" : "TypeCount = " + TypeCount + ", InitialLength = " + InitialLength;
         }
 
         // Serialization
@@ -81,13 +85,13 @@ namespace BrotliLib.Brotli.Components.Header{
         );
 
         public static readonly BitSerializer<BlockTypeInfo, NoContext> Serialize = (writer, obj, context) => {
-            VariableLength11Code.Serialize(writer, new VariableLength11Code(obj.Count), NoContext.Value);
+            VariableLength11Code.Serialize(writer, new VariableLength11Code(obj.TypeCount), NoContext.Value);
 
-            if (obj.Count == 1){
+            if (obj.TypeCount == 1){
                 return;
             }
 
-            BlockTypeCodeTree.Serialize(writer, obj.TypeCodeTree!, GetBlockTypeCodeTreeContext(obj.Count));
+            BlockTypeCodeTree.Serialize(writer, obj.TypeCodeTree!, GetBlockTypeCodeTreeContext(obj.TypeCount));
             BlockLengthCodeTree.Serialize(writer, obj.LengthCodeTree!, BlockLengthCode.TreeContext);
 
             var initialLength = obj.InitialLength;
