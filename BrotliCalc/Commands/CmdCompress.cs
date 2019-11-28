@@ -12,7 +12,7 @@ namespace BrotliCalc.Commands{
         public string FullName => "compress";
         public string ShortName => "c";
 
-        public string ArgumentDesc => "<source-path> <quality|all> [window-size]";
+        public string ArgumentDesc => "<source-path> <quality|0-11|all> [window-size]";
         public IntRange ArgumentCount => new IntRange(2, 3);
 
         public static string? CustomExePath { get; set; }
@@ -23,7 +23,7 @@ namespace BrotliCalc.Commands{
 
         public string Process(string[] args){
             var path = args[0];
-            var qualities = args[1] == "all" ? QualityRange : IntRange.Only(int.Parse(args[1]));
+            var qualities = args[1] == "all" ? QualityRange : ParseQualityRange(args[1]);
             var wbits = args.Length >= 3 ? new WindowSize(int.Parse(args[2])).Bits : AutoWindowSize;
 
             if (!qualities.Values.All(QualityRange.Contains)){
@@ -59,6 +59,21 @@ namespace BrotliCalc.Commands{
             }
 
             return $"Compressed {totalFiles} file(s).";
+        }
+
+        private static IntRange ParseQualityRange(string arg){
+            if (arg.Contains('-')){
+                var split = arg.Split(new char[]{ '-' }, 2);
+
+                if (split.Length < 2){
+                    throw new FormatException("Invalid quality range.");
+                }
+
+                return new IntRange(int.Parse(split[0]), int.Parse(split[1]));
+            }
+            else{
+                return IntRange.Only(int.Parse(arg));
+            }
         }
 
         private static void Compress(int wbits, int quality, string path){
