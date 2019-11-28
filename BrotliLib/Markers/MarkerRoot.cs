@@ -4,13 +4,15 @@ using System.Text;
 
 namespace BrotliLib.Markers{
     public sealed class MarkerRoot : IEnumerable<MarkerNode>{
+        internal const int OmitBitCounts = -1;
+
         private readonly List<MarkerNode> children = new List<MarkerNode>();
 
         internal void AddChild(MarkerNode added){
             children.Add(added);
         }
 
-        public string BuildText(){
+        public string BuildText(bool includeBitCounts){
             var build = new StringBuilder(512);
 
             foreach(MarkerNode node in this){
@@ -18,7 +20,7 @@ namespace BrotliLib.Markers{
 
                 var marker = node.Marker;
                 int startIndex = build.Length;
-                marker.Info.ToString(build, marker.Length);
+                marker.Info.ToString(build, includeBitCounts ? marker.Length : OmitBitCounts);
 
                 build.Replace("\r", "\\r", startIndex, build.Length - startIndex);
                 build.Replace("\n", "\\n", startIndex, build.Length - startIndex);

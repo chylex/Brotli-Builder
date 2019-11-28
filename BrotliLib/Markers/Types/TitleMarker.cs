@@ -11,7 +11,12 @@ namespace BrotliLib.Markers.Types{
         }
 
         public void ToString(StringBuilder build, int length){
-            build.Append('[').Append(title).Append("] · ").Append(length).Append(length == 1 ? " bit" : " bits");
+            if (length == MarkerRoot.OmitBitCounts){
+                build.Append('[').Append(title).Append(']');
+            }
+            else{
+                build.Append('[').Append(title).Append("] · ").Append(length).Append(length == 1 ? " bit" : " bits");
+            }
         }
         
         public override string ToString(){

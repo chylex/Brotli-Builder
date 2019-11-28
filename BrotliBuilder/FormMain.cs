@@ -478,8 +478,8 @@ namespace BrotliBuilder{
                 return;
             }
 
-            string originalText = brotliFilePanelOriginal.MarkerRoot.BuildText();
-            string generatedText = brotliFilePanelGenerated.MarkerRoot.BuildText();
+            string originalText = brotliFilePanelOriginal.MarkerRoot.BuildText(includeBitCounts: false);
+            string generatedText = brotliFilePanelGenerated.MarkerRoot.BuildText(includeBitCounts: false);
 
             try{
                 WinMerge.CompareText(originalText, generatedText);

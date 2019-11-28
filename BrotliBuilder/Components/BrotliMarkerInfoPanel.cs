@@ -43,7 +43,7 @@ namespace BrotliBuilder.Components{
             
             if (!ReferenceEquals(prevMarkerNodes, markerSequence)){
                 prevMarkerNodes = markerSequence;
-                textBoxContext.Text = markerRoot?.BuildText() ?? string.Empty;
+                textBoxContext.Text = markerRoot?.BuildText(includeBitCounts: true) ?? string.Empty;
             }
 
             for(int line = 0; line < markerSequence.Count; line++){
