@@ -117,8 +117,16 @@ namespace BrotliLib.Serialization{
         /// </summary>
         /// <param name="stream">Input stream.</param>
         public void AddAll(BitStream stream){
-            foreach(bool bit in stream){
-                Add(bit);
+            int bitsLeft = stream.Length;
+
+            foreach(ulong bitEntry in stream.entryCollection){
+                for(int bitIndex = 0; bitIndex < BitEntrySize; bitIndex++){
+                    if (--bitsLeft < 0){
+                        return;
+                    }
+
+                    Add((bitEntry & (1UL << bitIndex)) != 0);
+                }
             }
         }
 

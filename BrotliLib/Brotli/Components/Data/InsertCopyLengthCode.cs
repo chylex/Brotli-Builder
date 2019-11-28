@@ -26,6 +26,20 @@ namespace BrotliLib.Brotli.Components.Data{
 
         private static readonly (IntRange i, IntRange c)[] PairedCellOffsets = InsertCellOffsets.Zip(CopyCellOffsets, (i, c) => (new IntRange(i, i + 7), new IntRange(c, c + 7))).ToArray();
 
+        private static int DetermineCellIndex(int insertCode, int copyCode, bool useDistanceCodeZero){
+            int startCellIndex = useDistanceCodeZero ? 0 : 2;
+
+            for(int index = startCellIndex; index < PairedCellOffsets.Length; index++){
+                var (i, c) = PairedCellOffsets[index];
+
+                if (i.Contains(insertCode) && c.Contains(copyCode)){
+                    return index;
+                }
+            }
+
+            throw new ArgumentException("Could not determine cell index of insert&copy length code.");
+        }
+
         // Data
 
         /// <summary>
@@ -78,8 +92,7 @@ namespace BrotliLib.Brotli.Components.Data{
 
             bool useDistanceCodeZero = dczStrategy.Determine(insertCode, copyCode);
 
-            int startCellIndex = useDistanceCodeZero ? 0 : 2;
-            int cell = Array.FindIndex(PairedCellOffsets, startCellIndex, pair => pair.i.Contains(insertCode) && pair.c.Contains(copyCode));
+            int cell = DetermineCellIndex(insertCode, copyCode, useDistanceCodeZero);
 
             this.CompactedCode = (64 * cell) + ((insertCode & 0b111) << 3) | (copyCode & 0b111);
             this.InsertCode = insertCode;

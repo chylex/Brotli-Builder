@@ -95,7 +95,7 @@ namespace BrotliLib.Brotli.Components.Header{
             BlockLengthCodeTree.Serialize(writer, obj.LengthCodeTree!, BlockLengthCode.TreeContext);
 
             var initialLength = obj.InitialLength;
-            var initialLengthCode = obj.LengthCodeTree!.FindEntry(code => code.CanEncodeValue(initialLength));
+            var initialLengthCode = obj.LengthCodeTree!.FindShortest(initialLength, (code, length) => code.CanEncodeValue(length));
 
             writer.WriteBits(initialLengthCode.Value);
             BlockLengthCode.Serialize(writer, initialLength, initialLengthCode.Key);

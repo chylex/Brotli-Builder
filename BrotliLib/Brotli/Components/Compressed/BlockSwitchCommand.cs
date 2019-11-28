@@ -64,10 +64,10 @@ namespace BrotliLib.Brotli.Components.Compressed{
             var info = context.Info;
 
             var typeCodes = context.Tracker.FindCodes(obj.Type);
-            writer.WriteBits(info.TypeCodeTree!.FindEntry(typeCodes.Contains).Value);
+            writer.WriteBits(info.TypeCodeTree!.FindShortest(typeCodes, (code, available) => available.Contains(code)).Value);
 
             int lengthValue = obj.Length;
-            var lengthEntry = info.LengthCodeTree!.FindEntry(entry => entry.CanEncodeValue(lengthValue));
+            var lengthEntry = info.LengthCodeTree!.FindShortest(lengthValue, (code, value) => code.CanEncodeValue(value));
 
             writer.WriteBits(lengthEntry.Value);
             BlockLengthCode.Serialize(writer, lengthValue, lengthEntry.Key);

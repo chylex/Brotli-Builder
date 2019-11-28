@@ -147,17 +147,20 @@ namespace BrotliLib.Brotli.Components.Compressed{
 
             // Insert&copy lengths
 
-            InsertCopyLengths icLengthValues = obj.Lengths;
+            InsertCopyLengths icLengths = obj.Lengths;
             int icBlockID = context.NextBlockID(Category.InsertCopy);
-            var icLengthEntry = header.InsertCopyTrees[icBlockID].FindEntry(code => icLengthValues.CanEncodeUsing(code) && (implicitDistanceCodeZero == code.UseDistanceCodeZero || endsAfterLiterals));
-            var icLengthCode = icLengthEntry.Key;
+
+            var icLengthEntry = endsAfterLiterals ? header.InsertCopyTrees[icBlockID].FindShortest(icLengths, (code, lengths) => lengths.CanEncodeUsing(code)) 
+                                                  : header.InsertCopyTrees[icBlockID].FindShortest(icLengths, implicitDistanceCodeZero, (code, lengths, dcz) => dcz == code.UseDistanceCodeZero && lengths.CanEncodeUsing(code));
 
             writer.WriteBits(icLengthEntry.Value);
-            InsertCopyLengths.Serialize(writer, icLengthValues, icLengthCode);
+            InsertCopyLengths.Serialize(writer, icLengths, icLengthEntry.Key);
             
             // Literals
             
-            foreach(Literal literal in obj.Literals){
+            for(int insertIndex = 0; insertIndex < icLengths.InsertLength; insertIndex++){
+                var literal = obj.Literals[insertIndex];
+
                 int blockID = context.NextBlockID(Category.Literal);
                 int contextID = state.NextLiteralContextID(header.LiteralCtxModes[blockID]);
                 int treeID = header.LiteralCtxMap.DetermineTreeID(blockID, contextID);
@@ -176,17 +179,17 @@ namespace BrotliLib.Brotli.Components.Compressed{
             
             if (distanceInfo != DistanceInfo.ImplicitCodeZero){
                 int blockID = context.NextBlockID(Category.Distance);
-                int contextID = icLengthValues.DistanceContextID;
+                int contextID = icLengths.DistanceContextID;
                 int treeID = header.DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
-                var distanceEntry = header.DistanceTrees[treeID].Where(kvp => distanceInfo.CanEncodeUsing(kvp.Key, state)).OrderBy(kvp => kvp.Value.Length + kvp.Key.ExtraBits).First();
+                var distanceEntry = header.DistanceTrees[treeID].FindShortest(distanceInfo, state, (code, dist, st) => dist.CanEncodeUsing(code, st), code => code.ExtraBits);
                 var distanceCode = distanceEntry.Key;
 
                 writer.WriteBits(distanceEntry.Value);
                 DistanceCode.Serialize(writer, distanceInfo, distanceCode.MakeContext(state));
             }
             
-            context.WriteCopy(icLengthValues.CopyLength, distanceInfo);
+            context.WriteCopy(icLengths.CopyLength, distanceInfo);
         };
     }
 }

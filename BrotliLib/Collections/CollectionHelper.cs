@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using BrotliLib.Numbers;
 
 namespace BrotliLib.Collections{
     public static class CollectionHelper{
@@ -12,6 +13,16 @@ namespace BrotliLib.Collections{
 
         public static byte[] Clone(byte[] input){
             return Slice(input, 0, input.Length);
+        }
+
+        public static int FindRangeIndex(IntRange[] ranges, int value){
+            for(int index = 0; index < ranges.Length; index++){
+                if (ranges[index].Contains(value)){
+                    return index;
+                }
+            }
+
+            return -1;
         }
         
         public static ArraySegment<byte> SliceAtMost(ArraySegment<byte> input, int count){

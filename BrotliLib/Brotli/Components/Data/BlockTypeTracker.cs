@@ -17,7 +17,7 @@ namespace BrotliLib.Brotli.Components.Data{
             this.last = new RingBuffer<int>(1, 0);
         }
 
-        public IList<int> FindCodes(int value){
+        public List<int> FindCodes(int value){
             List<int> list = new List<int>(3);
 
             if (value == Code0Value){

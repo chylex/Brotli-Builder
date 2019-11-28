@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Collections;
 using BrotliLib.Markers.Serialization;
 using BrotliLib.Numbers;
 using BrotliLib.Serialization;
@@ -96,8 +97,8 @@ namespace BrotliLib.Brotli.Components.Data{
             int insertLength = InsertLength;
             int copyLength = CopyLength;
 
-            int insertCode = Array.FindIndex(InsertCodeRanges, range => range.Contains(insertLength));
-            int copyCode = Array.FindIndex(CopyCodeRanges, range => range.Contains(copyLength));
+            int insertCode = CollectionHelper.FindRangeIndex(InsertCodeRanges, insertLength);
+            int copyCode = CollectionHelper.FindRangeIndex(CopyCodeRanges, copyLength);
 
             return new InsertCopyLengthCode(insertCode, copyCode, dczStrategy);
         }

@@ -66,8 +66,8 @@ namespace BrotliLib.Brotli.Encode.Build{
         public CompressedMetaBlockBuilder AddInsertCopy(InsertCopyCommand command){
             icCommands.Add(command);
 
-            foreach(Literal literal in command.Literals){
-                intermediateState.OutputLiteral(literal);
+            for(int index = 0; index < command.Literals.Count; index++){
+                intermediateState.OutputLiteral(command.Literals[index]);
             }
 
             if (command.CopyDistance != DistanceInfo.EndsAfterLiterals){
@@ -105,11 +105,13 @@ namespace BrotliLib.Brotli.Encode.Build{
             var icCommandCount = icCommands.Count;
             var icCommandsFinal = new List<InsertCopyCommand>(icCommandCount);
 
-            for(int index = 0; index < icCommandCount; index++){
-                var icCommand = icCommands[index];
+            for(int icCommandIndex = 0; icCommandIndex < icCommandCount; icCommandIndex++){
+                var icCommand = icCommands[icCommandIndex];
                 int icBlockID = blockTrackers[Category.InsertCopy].SimulateCommand();
 
-                foreach(Literal literal in icCommand.Literals){
+                for(int literalIndex = 0; literalIndex < icCommand.Literals.Count; literalIndex++){
+                    var literal = icCommand.Literals[literalIndex];
+
                     int blockID = blockTrackers[Category.Literal].SimulateCommand();
                     int contextID = state.NextLiteralContextID(LiteralContextModes[blockID]);
                     int treeID = LiteralCtxMap.DetermineTreeID(blockID, contextID);

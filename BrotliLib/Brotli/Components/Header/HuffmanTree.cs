@@ -50,6 +50,8 @@ namespace BrotliLib.Brotli.Components.Header{
             this.Root = root;
         }
 
+        // Search
+
         public BitStream FindPath(T element){
             return ReverseLookup[element];
         }
@@ -58,9 +60,45 @@ namespace BrotliLib.Brotli.Components.Header{
             return ReverseLookup.TryGetValue(element, out BitStream path) ? path : null;
         }
 
-        public KeyValuePair<T, BitStream> FindEntry(Predicate<T> predicate){
-            return ReverseLookup.First(kvp => predicate(kvp.Key));
+        public KeyValuePair<T, BitStream> FindShortest<A>(A param1, Func<T, A, bool> predicate){
+            foreach(var kvp in ReverseLookup){
+                if (predicate(kvp.Key, param1)){
+                    return kvp;
+                }
+            }
+
+            throw new InvalidOperationException("No suitable entry found.");
         }
+
+        public KeyValuePair<T, BitStream> FindShortest<A, B>(A param1, B param2, Func<T, A, B, bool> predicate){
+            foreach(var kvp in ReverseLookup){
+                if (predicate(kvp.Key, param1, param2)){
+                    return kvp;
+                }
+            }
+
+            throw new InvalidOperationException("No suitable entry found.");
+        }
+
+        public KeyValuePair<T, BitStream> FindShortest<A, B>(A param1, B param2, Func<T, A, B, bool> predicate, Func<T, int> extraLength){
+            KeyValuePair<T, BitStream>? bestEntry = null;
+            int bestBits = int.MaxValue;
+
+            foreach(var kvp in ReverseLookup){
+                if (predicate(kvp.Key, param1, param2)){
+                    int bits = kvp.Value.Length + extraLength(kvp.Key);
+
+                    if (bits < bestBits){
+                        bestEntry = kvp;
+                        bestBits = bits;
+                    }
+                }
+            }
+
+            return bestEntry ?? throw new InvalidOperationException("No suitable entry found.");
+        }
+
+        // Enumerator
 
         public IEnumerator<KeyValuePair<T, BitStream>> GetEnumerator(){
             return ReverseLookup.GetEnumerator();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using BrotliLib.Brotli.Components.Header;
+using BrotliLib.Collections;
 using BrotliLib.Numbers;
 using BrotliLib.Serialization;
 using BrotliLib.Serialization.Reader;
@@ -36,7 +37,7 @@ namespace BrotliLib.Brotli.Components.Data{
         private static readonly IntRange[] BlockLengthRanges = BlockLengthOffsets.Zip(BlockLengthExtraBits, IntRange.FromOffsetBitPair).ToArray();
 
         public static BlockLengthCode MakeCode(int length){
-            return new BlockLengthCode(Array.FindIndex(BlockLengthRanges, range => range.Contains(length)));
+            return new BlockLengthCode(CollectionHelper.FindRangeIndex(BlockLengthRanges, length));
         }
 
         // Data

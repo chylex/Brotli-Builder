@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Serialization;
 using BrotliLib.Serialization.Reader;
@@ -59,10 +58,14 @@ namespace BrotliLib.Brotli.Components.Data{
 
         // Types
 
-        public static IList<DistanceCode> ForValue(in DistanceParameters parameters, BrotliGlobalState state, int value){
-            List<DistanceCode> valid = new List<DistanceCode>(2);
+        public static List<DistanceCode> ForValue(in DistanceParameters parameters, BrotliGlobalState state, int value){
+            List<DistanceCode> valid = new List<DistanceCode>(3);
 
-            valid.AddRange(Last.Codes.Where(code => code.CanEncodeValue(state, value)));
+            for(int code = 0; code < Last.CodeCount; code++){
+                if (Last.Codes[code].CanEncodeValue(state, value)){
+                    valid.Add(Last.Codes[code]);
+                }
+            }
 
             if (value <= parameters.DirectCodeCount){
                 valid.Add(new Direct(value + DirectCodeOffset));
