@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using BrotliLib.Markers;
 
 namespace BrotliLib.Brotli.Output{
     /// <summary>
@@ -13,15 +12,11 @@ namespace BrotliLib.Brotli.Output{
         public byte[] AsBytes => decompressedStream.ToArray();
         public string AsUTF8 => Encoding.UTF8.GetString(decompressedStream.ToArray());
 
-        public MarkerRoot MarkerRoot { get; }
-
         private readonly MemoryStream decompressedStream = new MemoryStream();
 
-        public BrotliOutputStored(MarkerRoot markerRoot){
-            this.MarkerRoot = markerRoot;
-        }
+        public BrotliOutputStored(){}
 
-        private BrotliOutputStored(BrotliOutputStored original) : this(new MarkerRoot()){ // TODO not full clone as it's missing the bit marker
+        private BrotliOutputStored(BrotliOutputStored original){
             original.decompressedStream.CopyTo(decompressedStream);
         }
 

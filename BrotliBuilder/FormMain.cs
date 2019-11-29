@@ -190,6 +190,10 @@ namespace BrotliBuilder{
                     UpdateStatusBar(statusBarPanelTimeBits, "bits", hasBits.Stopwatch);
                     break;
 
+                case BrotliFileState.HasMarkers hasMarkers:
+                    filePanel.UpdateMarkers(hasMarkers);
+                    break;
+
                 case BrotliFileState.HasOutput hasOutput:
                     filePanel.UpdateOutput(hasOutput);
                     UpdateStatusBar(statusBarPanelTimeOutput, "output", hasOutput.Stopwatch);
@@ -247,6 +251,10 @@ namespace BrotliBuilder{
 
                 case BrotliFileState.HasBits hasBits:
                     filePanel.UpdateBits(hasBits);
+                    break;
+
+                case BrotliFileState.HasMarkers hasMarkers:
+                    filePanel.UpdateMarkers(hasMarkers);
                     break;
 
                 case BrotliFileState.HasOutput hasOutput:
@@ -422,7 +430,7 @@ namespace BrotliBuilder{
             };
 
             if (dialog.ShowDialog() == DialogResult.OK){
-                File.WriteAllBytes(dialog.FileName, currentFile.GetDecompressionState(currentFile.Serialize(fileGenerated.SerializationParameters)).AsBytes);
+                File.WriteAllBytes(dialog.FileName, currentFile.Decompress().AsBytes);
             }
         }
 

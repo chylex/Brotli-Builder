@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using BrotliLib.Brotli;
+using BrotliLib.Markers;
 
 namespace BrotliCalc.Helpers{
     abstract class BrotliFile{
@@ -47,11 +48,15 @@ namespace BrotliCalc.Helpers{
         internal class Compressed : BrotliFile{
             public string Identifier { get; }
 
-            public BrotliFileStructure Structure => BrotliFileStructure.FromBytes(Contents);
+            public BrotliFileStructure Structure => BrotliFileStructure.FromBytes(Contents, MarkerLevel.None).Structure;
             public override string FullName => $"{Name}.{Identifier}{Brotli.CompressedFileExtension}";
 
             public Compressed(string path, string name, string identifier) : base(path, name){
                 this.Identifier = identifier;
+            }
+
+            public (BrotliFileStructure Structure, MarkerRoot MarkerRoot) GetStructureWithMarkers(MarkerLevel markerLevel){
+                return BrotliFileStructure.FromBytes(Contents, markerLevel);
             }
         }
     }

@@ -9,6 +9,8 @@ namespace BrotliLib.Brotli.Components{
         public class LastEmpty : MetaBlock{
             public LastEmpty() : base(true, DataLength.Empty){}
 
+            public override void Decompress(BrotliGlobalState state){}
+
             public override bool Equals(object obj){
                 return obj is LastEmpty;
             }

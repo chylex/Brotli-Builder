@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Parameters;
 using BrotliLib.Collections;
+using BrotliLib.Markers;
 using BrotliLib.Serialization;
 
 namespace BrotliCalc.Helpers{
@@ -17,7 +18,7 @@ namespace BrotliCalc.Helpers{
 
         public BitStream SerializeAndValidate(BrotliFileStructure bfs, BrotliSerializationParameters parameters){
             var serialized = bfs.Serialize(parameters);
-            var output = bfs.GetDecompressionState(serialized);
+            var output = BrotliFileStructure.FromBytes(serialized, MarkerLevel.None).Structure.Decompress();
 
             if (!CollectionHelper.Equal(output.AsBytes, Uncompressed.Contents)){
                 throw new InvalidOperationException("Mismatched output bytes.");

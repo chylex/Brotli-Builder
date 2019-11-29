@@ -59,6 +59,10 @@ namespace BrotliBuilder.Components{
             UpdateTextBox(textBoxBitStream, state.Bits);
         }
 
+        public void UpdateMarkers(BrotliFileState.HasMarkers state){
+            textBoxBitStream.UpdateMarkers(state.MarkerRoot, state.Markers);
+        }
+
         public void UpdateOutput(Exception ex){
             UpdateTextBox(textBoxOutput, ex);
         }
@@ -69,7 +73,6 @@ namespace BrotliBuilder.Components{
 
         public void FinalizeOutput(BrotliFileState.Loaded state){
             UpdateLabels(state.TotalCompressedBits, state.TotalOutputBytes);
-            textBoxBitStream.UpdateMarkers(state.MarkerRoot, state.Markers);
         }
 
         private void UpdateTextBox(FastColoredTextBox tb, string text, Color color){

@@ -88,26 +88,30 @@ namespace BrotliBuilder.State{
             BitStream bits = new BitStream(bytes);
             UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), null));
 
-            if (!TryDeserialize(token, bytes, out BrotliFileStructure structure, out Stopwatch swDeserialize)) return;
+            if (!TryDeserialize(token, new BitStream(bytes), out BrotliFileStructure structure, out MarkerRoot markerRoot, out Stopwatch swDeserialize)) return;
+            UpdateState(token, new BrotliFileState.HasMarkers(markerRoot));
             UpdateState(token, new BrotliFileState.HasStructure(structure, swDeserialize));
 
-            if (!TryGetDecompressionState(token, structure, bits, out BrotliOutputStored output, out Stopwatch swOutput)) return;
+            if (!TryDecompress(token, structure, out BrotliOutputStored output, out Stopwatch swOutput)) return;
             UpdateState(token, new BrotliFileState.HasOutput(null, output.AsBytes, swOutput));
 
-            UpdateState(token, new BrotliFileState.Loaded(structure, bits, output));
+            UpdateState(token, new BrotliFileState.Loaded(structure, bits, output, markerRoot));
         });
 
         public void LoadStructure(BrotliFileStructure structure, byte[]? checkAgainst = null) => StartWorker(token => {
             UpdateState(token, new BrotliFileState.Starting());
             UpdateState(token, new BrotliFileState.HasStructure(structure, null));
 
-            if (!TrySerialize(token, structure, out BitStream bits, out Stopwatch stopwatch)) return;
-            UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), stopwatch));
+            if (!TrySerialize(token, structure, out BitStream bits, out Stopwatch swSerialization)) return;
+            UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), swSerialization));
 
-            if (!TryGetDecompressionState(token, structure, bits, out BrotliOutputStored output, out Stopwatch swOutput)) return;
+            if (!TryDeserialize(token, bits, out BrotliFileStructure _, out MarkerRoot markerRoot, out Stopwatch _)) return;
+            UpdateState(token, new BrotliFileState.HasMarkers(markerRoot));
+
+            if (!TryDecompress(token, structure, out BrotliOutputStored output, out Stopwatch swOutput)) return;
             UpdateState(token, new BrotliFileState.HasOutput(checkAgainst, output.AsBytes, swOutput));
 
-            UpdateState(token, new BrotliFileState.Loaded(structure, bits, output));
+            UpdateState(token, new BrotliFileState.Loaded(structure, bits, output, markerRoot));
         });
 
         public void EncodeFile(string path, BrotliFileParameters parameters, IBrotliEncoder encoder) => StartWorker(token => {
@@ -119,28 +123,34 @@ namespace BrotliBuilder.State{
 
             if (!TrySerialize(token, structure, out BitStream bits, out Stopwatch swSerialization)) return;
             UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), swSerialization));
+            
+            if (!TryDeserialize(token, bits, out BrotliFileStructure _, out MarkerRoot markerRoot, out Stopwatch _)) return;
+            UpdateState(token, new BrotliFileState.HasMarkers(markerRoot));
 
-            if (!TryGetDecompressionState(token, structure, bits, out BrotliOutputStored output, out Stopwatch swOutput)) return;
+            if (!TryDecompress(token, structure, out BrotliOutputStored output, out Stopwatch swOutput)) return;
             UpdateState(token, new BrotliFileState.HasOutput(bytes, output.AsBytes, swOutput));
 
-            UpdateState(token, new BrotliFileState.Loaded(structure, bits, output));
+            UpdateState(token, new BrotliFileState.Loaded(structure, bits, output, markerRoot));
         });
 
         private void TransformInternal(BrotliFileStructure structure, IBrotliTransformer transformer) => StartWorker(token => {
             UpdateState(token, new BrotliFileState.Starting());
 
-            TryGetDecompressionState(token, structure, structure.Serialize(SerializationParameters), out BrotliOutputStored prevOutput, out Stopwatch _);
+            TryDecompress(token, structure, out BrotliOutputStored prevOutput, out Stopwatch _);
 
             if (!TryTransform(token, structure, transformer, out structure, out Stopwatch swTransform)) return;
             UpdateState(token, new BrotliFileState.HasStructure(structure, swTransform));
 
             if (!TrySerialize(token, structure, out BitStream bits, out Stopwatch swSerialization)) return;
             UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), swSerialization));
+            
+            if (!TryDeserialize(token, bits, out BrotliFileStructure _, out MarkerRoot markerRoot, out Stopwatch _)) return;
+            UpdateState(token, new BrotliFileState.HasMarkers(markerRoot));
 
-            if (!TryGetDecompressionState(token, structure, bits, out BrotliOutputStored output, out Stopwatch swOutput)) return;
+            if (!TryDecompress(token, structure, out BrotliOutputStored output, out Stopwatch swOutput)) return;
             UpdateState(token, new BrotliFileState.HasOutput(prevOutput?.AsBytes ?? Array.Empty<byte>(), output.AsBytes, swOutput));
 
-            UpdateState(token, new BrotliFileState.Loaded(structure, bits, output));
+            UpdateState(token, new BrotliFileState.Loaded(structure, bits, output, markerRoot));
         });
 
         #pragma warning restore IDE0011 // Add braces
@@ -171,14 +181,15 @@ namespace BrotliBuilder.State{
             }
         }
 
-        private bool TryDeserialize(int token, byte[] bytes, out BrotliFileStructure structure, out Stopwatch stopwatch){
+        private bool TryDeserialize(int token, BitStream bits, out BrotliFileStructure structure, out MarkerRoot markerRoot, out Stopwatch stopwatch){
             try{
                 stopwatch = Stopwatch.StartNew();
-                structure = BrotliFileStructure.FromBytes(bytes);
+                (structure, markerRoot) = BrotliFileStructure.FromBytes(bits, BitMarkerLevel);
                 stopwatch.Stop();
                 return true;
             }catch(Exception ex){
                 structure = null!;
+                markerRoot = null!;
                 stopwatch = null!;
                 return OnError(token, ErrorType.DeserializingFile, ex);
             }
@@ -223,10 +234,10 @@ namespace BrotliBuilder.State{
             }
         }
 
-        private bool TryGetDecompressionState(int token, BrotliFileStructure structure, BitStream bits, out BrotliOutputStored output, out Stopwatch stopwatch){
+        private bool TryDecompress(int token, BrotliFileStructure structure, out BrotliOutputStored output, out Stopwatch stopwatch){
             try{
                 stopwatch = Stopwatch.StartNew();
-                output = structure.GetDecompressionState(bits, BitMarkerLevel);
+                output = structure.Decompress();
                 stopwatch.Stop();
                 return true;
             }catch(Exception ex){

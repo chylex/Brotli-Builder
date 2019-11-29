@@ -3,7 +3,6 @@ using System.Text;
 using BrotliCalc.Commands.Base;
 using BrotliCalc.Helpers;
 using BrotliLib.Markers;
-using BrotliLib.Serialization;
 
 namespace BrotliCalc.Commands{
     class CmdGenerateMarkers : CmdAbstractFileMapper.Compressed{
@@ -34,8 +33,8 @@ namespace BrotliCalc.Commands{
         }
 
         protected override byte[] MapFile(BrotliFileGroup group, BrotliFile.Compressed file){
-            var state = file.Structure.GetDecompressionState(new BitStream(file.Contents), markerLevel);
-            var text = state.MarkerRoot.BuildText(includeBitCounts);
+            var (_, markerRoot) = file.GetStructureWithMarkers(markerLevel);
+            var text = markerRoot.BuildText(includeBitCounts);
 
             return Encoding.UTF8.GetBytes(text);
         }

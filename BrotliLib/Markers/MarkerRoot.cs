@@ -6,6 +6,8 @@ namespace BrotliLib.Markers{
     public sealed class MarkerRoot : IEnumerable<MarkerNode>{
         internal const int OmitBitCounts = -1;
 
+        public int TotalBits => children.Count == 0 ? 0 : children[^1].Marker.IndexEnd;
+
         private readonly List<MarkerNode> children = new List<MarkerNode>();
 
         internal void AddChild(MarkerNode added){

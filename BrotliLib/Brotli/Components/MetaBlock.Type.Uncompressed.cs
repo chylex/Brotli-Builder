@@ -20,6 +20,10 @@ namespace BrotliLib.Brotli.Components{
             public Uncompressed(byte[] uncompressedData) : base(false, new DataLength(uncompressedData.Length)){
                 this.uncompressedData = CollectionHelper.Clone(uncompressedData);
             }
+
+            public override void Decompress(BrotliGlobalState state){
+                state.OutputBytes(uncompressedData);
+            }
             
             public override bool Equals(object obj){
                 return obj is Uncompressed other &&

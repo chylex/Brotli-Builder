@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BrotliLib.Brotli.Components;
-using BrotliLib.Brotli.Components.Compressed;
 using BrotliLib.Brotli.Parameters;
-using BrotliLib.Serialization.Writer;
 
 namespace BrotliLib.Brotli.Encode{
     public abstract class BrotliTransformerBase : IBrotliTransformer{
@@ -18,20 +16,22 @@ namespace BrotliLib.Brotli.Encode{
         }
 
         protected virtual (IList<MetaBlock>, BrotliGlobalState) TransformLastEmpty(MetaBlock.LastEmpty original, BrotliGlobalState state, BrotliCompressionParameters parameters){
+            original.Decompress(state);
             return (Array.Empty<MetaBlock>(), state);
         }
 
         protected virtual (IList<MetaBlock>, BrotliGlobalState) TransformPaddedEmpty(MetaBlock.PaddedEmpty original, BrotliGlobalState state, BrotliCompressionParameters parameters){
+            original.Decompress(state);
             return (new MetaBlock[]{ original }, state);
         }
 
         protected virtual (IList<MetaBlock>, BrotliGlobalState) TransformUncompressed(MetaBlock.Uncompressed original, BrotliGlobalState state, BrotliCompressionParameters parameters){
-            state.OutputBytes(original.UncompressedData);
+            original.Decompress(state);
             return (new MetaBlock[]{ original }, state);
         }
 
         protected virtual (IList<MetaBlock>, BrotliGlobalState) TransformCompressed(MetaBlock.Compressed original, BrotliGlobalState state, BrotliCompressionParameters parameters){
-            MetaBlockCompressionData.Serialize(new BitWriterNull(), original.Data, new MetaBlockCompressionData.Context(original.Header, original.DataLength, state));
+            original.Decompress(state);
             return (new MetaBlock[]{ original }, state);
         }
     }

@@ -33,6 +33,8 @@ namespace BrotliLib.Brotli.Components{
             this.DataLength = dataLength;
         }
 
+        public abstract void Decompress(BrotliGlobalState state);
+
         protected bool Equals(MetaBlock other){
             return IsLast == other.IsLast &&
                    DataLength.Equals(other.DataLength);

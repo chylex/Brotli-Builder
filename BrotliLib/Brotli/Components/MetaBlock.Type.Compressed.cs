@@ -1,5 +1,6 @@
 ﻿using System;
 using BrotliLib.Brotli.Components.Compressed;
+using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Parameters;
 using BrotliLib.Markers.Serialization;
@@ -18,6 +19,20 @@ namespace BrotliLib.Brotli.Components{
             public Compressed(bool isLast, DataLength dataLength, MetaBlockCompressionHeader header, MetaBlockCompressionData data) : base(isLast, dataLength){
                 this.Header = header;
                 this.Data = data;
+            }
+
+            public override void Decompress(BrotliGlobalState state){
+                foreach(InsertCopyCommand icCommand in Data.InsertCopyCommands){
+                    var literals = icCommand.Literals;
+
+                    for(int literalIndex = 0; literalIndex < literals.Count; literalIndex++){
+                        state.OutputLiteral(literals[literalIndex]);
+                    }
+
+                    if (icCommand.CopyDistance != DistanceInfo.EndsAfterLiterals){
+                        state.OutputCopy(icCommand.CopyLength, icCommand.CopyDistance);
+                    }
+                }
             }
 
             public override bool Equals(object obj){

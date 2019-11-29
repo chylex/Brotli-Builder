@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Dictionary;
 using BrotliLib.Brotli.Dictionary.Default;
@@ -22,8 +21,15 @@ namespace BrotliLib.Brotli{
             return bfs;
         }
 
-        public static BrotliFileStructure FromBytes(byte[] bytes){
-            return DoDeserialize(CreateReader(new BitStream(bytes)), new FileContext(BrotliDefaultDictionary.Embedded, windowSize => new BrotliOutputWindowed(windowSize)));
+        public static (BrotliFileStructure Structure, MarkerRoot MarkerRoot) FromBytes(byte[] bytes, MarkerLevel markerLevel){
+            return FromBytes(new BitStream(bytes), markerLevel);
+        }
+
+        public static (BrotliFileStructure Structure, MarkerRoot MarkerRoot) FromBytes(BitStream bits, MarkerLevel markerLevel){
+            var reader = CreateReader(bits, markerLevel);
+            var structure = DoDeserialize(reader, BrotliDefaultDictionary.Embedded);
+
+            return (structure, reader.MarkerRoot);
         }
 
         public static BrotliFileStructure FromEncoder(BrotliFileParameters fileParameters, BrotliCompressionParameters compressionParameters, byte[] bytes, IBrotliEncoder encoder, params IBrotliTransformer[] transformers){
@@ -67,49 +73,39 @@ namespace BrotliLib.Brotli{
             }
         }
 
-        public BitStream Serialize(BrotliSerializationParameters parameters){
-            BitStream stream = new BitStream();
-            DoSerialize(stream.GetWriter(), this, new FileContext(Parameters.Dictionary, new BrotliOutputWindowed(Parameters.WindowSize)), parameters);
-            return stream;
-        }
+        public BrotliOutputStored Decompress(){
+            var output = new BrotliOutputStored();
+            var state = new BrotliGlobalState(Parameters, output);
 
-        public BrotliOutputStored GetDecompressionState(BitStream bitStream, MarkerLevel? markerLevel = null){
-            IMarkedBitReader reader = CreateReader(bitStream, markerLevel);
-            BrotliOutputStored output = new BrotliOutputStored(reader.MarkerRoot);
-
-            DoDeserialize(reader, new FileContext(Parameters.Dictionary, output));
+            foreach(var metaBlock in MetaBlocks){
+                metaBlock.Decompress(state);
+            }
 
             return output;
         }
 
-        // Serialization
-
-        private class FileContext{
-            public BrotliDictionary Dictionary { get; }
-            public Func<WindowSize, IBrotliOutput> OutputState { get; }
-
-            public FileContext(BrotliDictionary dictionary, Func<WindowSize, IBrotliOutput> outputState){
-                Dictionary = dictionary;
-                OutputState = outputState;
-            }
-
-            public FileContext(BrotliDictionary dictionary, IBrotliOutput outputState) : this(dictionary, _ => outputState){}
+        public BitStream Serialize(BrotliSerializationParameters parameters){
+            BitStream stream = new BitStream();
+            DoSerialize(stream.GetWriter(), this, NoContext.Value, parameters);
+            return stream;
         }
+
+        // Serialization
 
         private static IMarkedBitReader CreateReader(BitStream bitStream, MarkerLevel? markerLevel = null){
             return markerLevel.HasValue && markerLevel != MarkerLevel.None ? new MarkedBitReader(bitStream.GetReader(), markerLevel.Value) : (IMarkedBitReader)new MarkedBitReaderDummy(bitStream.GetReader());
         }
 
-        private static readonly BitDeserializer<BrotliFileStructure, FileContext> DoDeserialize = (reader, context) => {
+        private static readonly BitDeserializer<BrotliFileStructure, BrotliDictionary> DoDeserialize = (reader, context) => {
             WindowSize windowSize = WindowSize.Deserialize(reader, NoContext.Value);
 
             var parameters = new BrotliFileParameters{
                 WindowSize = windowSize,
-                Dictionary = context.Dictionary
+                Dictionary = context
             };
 
             var structure = new BrotliFileStructure(parameters);
-            var state = new BrotliGlobalState(parameters, context.OutputState(windowSize));
+            var state = new BrotliGlobalState(parameters, new BrotliOutputWindowed(windowSize));
 
             while(true){
                 MetaBlock metaBlock = MetaBlock.Deserialize(reader, state);
@@ -123,13 +119,13 @@ namespace BrotliLib.Brotli{
             return structure;
         };
 
-        private static readonly BitSerializer<BrotliFileStructure, FileContext, BrotliSerializationParameters> DoSerialize = (writer, obj, context, parameters) => {
+        private static readonly BitSerializer<BrotliFileStructure, NoContext, BrotliSerializationParameters> DoSerialize = (writer, obj, context, parameters) => {
             var fileParameters = obj.Parameters;
             var windowSize = fileParameters.WindowSize;
             
             WindowSize.Serialize(writer, windowSize, NoContext.Value);
 
-            var state = new BrotliGlobalState(fileParameters, context.OutputState(windowSize));
+            var state = new BrotliGlobalState(fileParameters, new BrotliOutputWindowed(windowSize));
 
             foreach(MetaBlock metaBlock in obj.MetaBlocks){
                 MetaBlock.Serialize(writer, metaBlock, state, parameters);

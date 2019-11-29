@@ -48,6 +48,8 @@ namespace BrotliLib.Brotli.Components{
 
                 this.hiddenData = CollectionHelper.Clone(hiddenData);
             }
+
+            public override void Decompress(BrotliGlobalState state){}
             
             public override bool Equals(object obj){
                 return obj is PaddedEmpty other &&
