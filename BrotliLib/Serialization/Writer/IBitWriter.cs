@@ -1,4 +1,5 @@
 ﻿using System;
+using BrotliLib.Collections.Huffman;
 
 namespace BrotliLib.Serialization.Writer{
     /// <summary>
@@ -16,6 +17,12 @@ namespace BrotliLib.Serialization.Writer{
         /// </summary>
         /// <param name="bits">Input bit stream.</param>
         void WriteBits(BitStream bits);
+        
+        /// <summary>
+        /// Writes all bits from the provided bit path.
+        /// </summary>
+        /// <param name="bits">Input bit path.</param>
+        void WriteBits(in BitPath bits);
 
         /// <summary>
         /// Writes a sequence of the specified amount of bits, using the least significant bits from the provided value.

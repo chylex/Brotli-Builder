@@ -13,7 +13,7 @@ namespace BrotliLib.Brotli.Components.Header{
     /// Represents a Huffman tree with symbols from various alphabets in the Brotli format. Provides helper methods for iteration and lookups.
     /// https://tools.ietf.org/html/rfc7932#section-3.2
     /// </summary>
-    public sealed partial class HuffmanTree<T> : IEnumerable<KeyValuePair<T, BitStream>> where T : IComparable<T>{
+    public sealed partial class HuffmanTree<T> : IEnumerable<KeyValuePair<T, BitPath>> where T : IComparable<T>{
         public const int DefaultMaxDepth = 15;
 
         /// <summary>
@@ -43,8 +43,11 @@ namespace BrotliLib.Brotli.Components.Header{
         /// </summary>
         public int MaxDepth => ReverseLookup.Values.Max(stream => stream.Length);
 
-        private Dictionary<T, BitStream> ReverseLookup => reverseLookupCached ??= Root.GenerateValueMap();
-        private Dictionary<T, BitStream>? reverseLookupCached;
+        private Dictionary<T, BitPath> ReverseLookup => reverseLookupCached ??= Root.GenerateValueMapOptimized();
+        private Dictionary<T, BitPath>? reverseLookupCached;
+
+        private T[] ValueList => valueListCached ??= ReverseLookup.Keys.ToArray();
+        private T[]? valueListCached;
         
         public HuffmanTree(HuffmanNode<T> root){
             this.Root = root;
@@ -52,44 +55,45 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Search
 
-        public BitStream FindPath(T element){
+        public BitPath FindPath(T element){
             return ReverseLookup[element];
         }
 
-        public BitStream? FindPathOrNull(T element){
-            return ReverseLookup.TryGetValue(element, out BitStream path) ? path : null;
+        public BitPath? FindPathOrNull(T element){
+            return ReverseLookup.TryGetValue(element, out BitPath path) ? path : (BitPath?)null;
         }
 
-        public KeyValuePair<T, BitStream> FindShortest<A>(A param1, Func<T, A, bool> predicate){
-            foreach(var kvp in ReverseLookup){
-                if (predicate(kvp.Key, param1)){
-                    return kvp;
+        public KeyValuePair<T, BitPath> FindShortest<A>(A param1, Func<T, A, bool> predicate){
+            foreach(var key in ValueList){
+                if (predicate(key, param1)){
+                    return new KeyValuePair<T, BitPath>(key, ReverseLookup[key]);
                 }
             }
 
             throw new InvalidOperationException("No suitable entry found.");
         }
 
-        public KeyValuePair<T, BitStream> FindShortest<A, B>(A param1, B param2, Func<T, A, B, bool> predicate){
-            foreach(var kvp in ReverseLookup){
-                if (predicate(kvp.Key, param1, param2)){
-                    return kvp;
+        public KeyValuePair<T, BitPath> FindShortest<A, B>(A param1, B param2, Func<T, A, B, bool> predicate){
+            foreach(var key in ValueList){
+                if (predicate(key, param1, param2)){
+                    return new KeyValuePair<T, BitPath>(key, ReverseLookup[key]);
                 }
             }
 
             throw new InvalidOperationException("No suitable entry found.");
         }
 
-        public KeyValuePair<T, BitStream> FindShortest<A, B>(A param1, B param2, Func<T, A, B, bool> predicate, Func<T, int> extraLength){
-            KeyValuePair<T, BitStream>? bestEntry = null;
+        public KeyValuePair<T, BitPath> FindShortest<A, B>(A param1, B param2, Func<T, A, B, bool> predicate, Func<T, int> extraLength){
+            KeyValuePair<T, BitPath>? bestEntry = null;
             int bestBits = int.MaxValue;
 
-            foreach(var kvp in ReverseLookup){
-                if (predicate(kvp.Key, param1, param2)){
-                    int bits = kvp.Value.Length + extraLength(kvp.Key);
+            foreach(var key in ValueList){
+                if (predicate(key, param1, param2)){
+                    var path = ReverseLookup[key];
+                    int bits = path.Length + extraLength(key);
 
                     if (bits < bestBits){
-                        bestEntry = kvp;
+                        bestEntry = new KeyValuePair<T, BitPath>(key, path);
                         bestBits = bits;
                     }
                 }
@@ -100,7 +104,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Enumerator
 
-        public IEnumerator<KeyValuePair<T, BitStream>> GetEnumerator(){
+        public IEnumerator<KeyValuePair<T, BitPath>> GetEnumerator(){
             return ReverseLookup.GetEnumerator();
         }
 
@@ -118,7 +122,7 @@ namespace BrotliLib.Brotli.Components.Header{
         public override int GetHashCode(){
             int hash = ReverseLookup.Count * 17;
 
-            foreach(KeyValuePair<T, BitStream> kvp in this){
+            foreach(KeyValuePair<T, BitPath> kvp in this){
                 hash = unchecked((hash * 31) + kvp.Key.GetHashCode());
                 hash = unchecked((hash * 31) + kvp.Value.GetHashCode());
             }

@@ -1,4 +1,6 @@
-﻿namespace BrotliLib.Serialization.Writer{
+﻿using BrotliLib.Collections.Huffman;
+
+namespace BrotliLib.Serialization.Writer{
     public class BitWriterNull : IBitWriter{
         private const int ByteSize = 8;
 
@@ -9,6 +11,10 @@
         }
 
         public void WriteBits(BitStream bits){
+            Length += bits.Length;
+        }
+
+        public void WriteBits(in BitPath bits){
             Length += bits.Length;
         }
 

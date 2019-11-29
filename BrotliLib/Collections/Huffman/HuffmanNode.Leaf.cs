@@ -23,6 +23,10 @@ namespace BrotliLib.Collections.Huffman{
             protected override IEnumerable<KeyValuePair<T, BitStream>> ListValues(BitStream prefix){
                 yield return new KeyValuePair<T, BitStream>(value, prefix);
             }
+
+            protected override IEnumerable<KeyValuePair<T, BitPath>> ListValues(BitPath prefix){
+                yield return new KeyValuePair<T, BitPath>(value, prefix);
+            }
         }
     }
 }

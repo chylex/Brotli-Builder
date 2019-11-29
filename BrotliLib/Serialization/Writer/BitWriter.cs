@@ -1,4 +1,5 @@
 ﻿using System;
+using BrotliLib.Collections.Huffman;
 
 namespace BrotliLib.Serialization.Writer{
     public class BitWriter : IBitWriter{
@@ -21,6 +22,12 @@ namespace BrotliLib.Serialization.Writer{
         
         public void WriteBits(BitStream bits){
             stream.AddAll(bits);
+        }
+
+        public void WriteBits(in BitPath bits){
+            for(int index = 0; index < bits.Length; index++){
+                stream.Add(bits[index]);
+            }
         }
 
         public void WriteChunk(int count, int value){

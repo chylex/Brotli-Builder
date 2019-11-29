@@ -43,6 +43,16 @@ namespace BrotliLib.Collections.Huffman{
                     yield return kvp;
                 }
             }
+
+            protected override IEnumerable<KeyValuePair<T, BitPath>> ListValues(BitPath prefix){
+                foreach(KeyValuePair<T, BitPath> kvp in left.ListValues(prefix.Add(false))){
+                    yield return kvp;
+                }
+                
+                foreach(KeyValuePair<T, BitPath> kvp in right.ListValues(prefix.Add(true))){
+                    yield return kvp;
+                }
+            }
         }
     }
 }

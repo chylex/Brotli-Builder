@@ -110,9 +110,9 @@ namespace BrotliLib.Brotli.Components.Header{
                 
                 for(int symbolIndex = 0, bitSpaceRemaining = SymbolBitSpace; bitSpaceRemaining > 0 && symbolIndex < symbolCount; symbolIndex++){
                     T symbol = getSymbol(symbolIndex);
-                    BitStream? path = obj.FindPathOrNull(symbol);
+                    BitPath? path = obj.FindPathOrNull(symbol);
 
-                    byte length = (byte)(path?.Length ?? 0);
+                    byte length = path?.Length ?? 0;
                     
                     if (length > 0){
                         bitSpaceRemaining -= SymbolBitSpace >> length;
@@ -180,7 +180,7 @@ namespace BrotliLib.Brotli.Components.Header{
                 }
                 
                 var lengthEntries = symbolEntries.GroupBy(kvp => kvp.Bits).Select(group => new HuffmanGenerator<byte>.SymbolFreq(group.Key, group.Count())).ToArray();
-                var lengthMap = HuffmanGenerator<byte>.FromFrequenciesCanonical(lengthEntries, ComplexLengthCode.LengthMaxDepth).GenerateValueMap();
+                var lengthMap = HuffmanGenerator<byte>.FromFrequenciesCanonical(lengthEntries, ComplexLengthCode.LengthMaxDepth).GenerateValueMapOptimized();
                 
                 ComplexLengthCode.Write(writer, lengthMap);
                 
@@ -237,7 +237,7 @@ namespace BrotliLib.Brotli.Components.Header{
             )
         );
 
-        private static readonly Dictionary<byte, BitStream> LengthLookup = Lengths.GenerateValueMap();
+        private static readonly Dictionary<byte, BitPath> LengthLookup = Lengths.GenerateValueMapOptimized();
         
         public const byte LengthMaxDepth = 5;
         private const int LengthBitSpace = 1 << LengthMaxDepth;
@@ -275,7 +275,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Serialization
 
-        public static void Write(IBitWriter writer, IReadOnlyDictionary<byte, BitStream> lengthMap){
+        public static void Write(IBitWriter writer, IReadOnlyDictionary<byte, BitPath> lengthMap){
             int skippedAmount;
 
             if (!lengthMap.ContainsKey(Order[0]) && !lengthMap.ContainsKey(Order[1])){
@@ -290,14 +290,14 @@ namespace BrotliLib.Brotli.Components.Header{
             if (lengthMap.Count == 1){
                 // if lengthMap has only 1 element, its path length is zero, which would omit the element completely
                 // instead, a length of 3 is chosen because its path is encoded using only 2 bits
-                lengthMap = new Dictionary<byte, BitStream>{
-                    { lengthMap.Keys.First(), new BitStream("000") }
+                lengthMap = new Dictionary<byte, BitPath>{
+                    { lengthMap.Keys.First(), new BitPath(0, 3) }
                 };
             }
             
             for(int index = skippedAmount, bitSpaceRemaining = LengthBitSpace; bitSpaceRemaining > 0 && index < Order.Length; index++){
                 byte code = Order[index];
-                byte length = (byte)(lengthMap.TryGetValue(code, out BitStream stream) ? stream.Length : 0);
+                byte length = lengthMap.TryGetValue(code, out BitPath path) ? path.Length : (byte)0;
 
                 writer.WriteBits(LengthLookup[length]);
 

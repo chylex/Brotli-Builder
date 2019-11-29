@@ -91,7 +91,7 @@ namespace BrotliLib.Collections.Huffman{
             int longestBranch = paths.Select(path => (int)path.Key.Length).DefaultIfEmpty(0).Max();
             int totalLeaves = 0;
 
-            HuffmanNode<T> GenerateNodeBranch(BitPath prefix, bool nextBit){
+            HuffmanNode<T> GenerateNodeBranch(in BitPath prefix, bool nextBit){
                 BitPath branch = prefix.Add(nextBit);
 
                 if (paths.TryGetValue(branch, out T symbol)){
@@ -106,7 +106,7 @@ namespace BrotliLib.Collections.Huffman{
                 }
             }
 
-            HuffmanNode<T> GenerateNode(BitPath stream){
+            HuffmanNode<T> GenerateNode(in BitPath stream){
                 return new HuffmanNode<T>.Path(GenerateNodeBranch(stream, false), GenerateNodeBranch(stream, true));
             }
 
