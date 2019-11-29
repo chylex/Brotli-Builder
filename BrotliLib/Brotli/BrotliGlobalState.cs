@@ -49,33 +49,33 @@ namespace BrotliLib.Brotli{
             return mode.DetermineContextID(LiteralBuffer.Front, LiteralBuffer.Back);
         }
 
+        private void UpdateLiteralBuffer(){
+            int length = OutputSize;
+
+            if (length >= 1){
+                if (length >= 2){
+                    LiteralBuffer.Push(outputState.GetByte(2));
+                }
+
+                LiteralBuffer.Push(outputState.GetByte(1));
+            }
+        }
+
         // Output handling
 
         internal byte GetOutput(int distance){
             return outputState.GetByte(distance);
         }
-
-        private void WriteByte(byte value){
-            outputState.Write(value);
-            LiteralBuffer.Push(value);
-        }
         
         public void OutputBytes(byte[] bytes){
             outputState.Write(bytes);
-
-            int length = bytes.Length;
-
-            if (length >= 2){
-                LiteralBuffer.Push(bytes[length - 2]);
-            }
-
-            if (length >= 1){
-                LiteralBuffer.Push(bytes[length - 1]);
-            }
+            UpdateLiteralBuffer();
         }
 
         public void OutputLiteral(in Literal literal){
-            WriteByte(literal.Value);
+            var value = literal.Value;
+            outputState.Write(value);
+            LiteralBuffer.Push(value);
         }
         
         public CopyOutputInfo OutputCopy(int length, DistanceInfo distance){
@@ -88,9 +88,10 @@ namespace BrotliLib.Brotli{
                 }
 
                 for(int index = 0; index < length; index++){
-                    WriteByte(outputState.GetByte(distanceValue));
+                    outputState.Write(outputState.GetByte(distanceValue));
                 }
 
+                UpdateLiteralBuffer();
                 return new CopyOutputInfo(length, isBackReference: true);
             }
             else{
