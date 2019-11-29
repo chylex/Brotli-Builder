@@ -66,6 +66,7 @@ namespace BrotliBuilder.Components{
         public void RemoveMarkers(){
             markerSequence = null;
             markerCaret = null;
+            prevMarkerSequence = null;
             ClearStyle(StyleIndex.All);
         }
 

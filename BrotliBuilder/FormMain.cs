@@ -499,11 +499,11 @@ namespace BrotliBuilder{
         }
 
         private void menuItemCloneGeneratedToOriginal_Click(object? sender, EventArgs e){
+            skipNextOriginalToGeneratedFeed = true;
             CloneFileBetweenControllers(fileGenerated, fileOriginal);
         }
 
         private void menuItemCloneOriginalToGenerated_Click(object? sender, EventArgs e){
-            skipNextOriginalToGeneratedFeed = true;
             CloneFileBetweenControllers(fileOriginal, fileGenerated);
         }
 
