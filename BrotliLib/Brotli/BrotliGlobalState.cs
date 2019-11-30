@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Components.Utils;
@@ -66,16 +67,24 @@ namespace BrotliLib.Brotli{
         internal byte GetOutput(int distance){
             return outputState.GetByte(distance);
         }
-        
-        public void OutputBytes(byte[] bytes){
-            outputState.Write(bytes);
-            UpdateLiteralBuffer();
-        }
 
         public void OutputLiteral(in Literal literal){
             var value = literal.Value;
             outputState.Write(value);
             LiteralBuffer.Push(value);
+        }
+
+        public void OutputLiterals(IReadOnlyList<Literal> literals){
+            for(int index = 0; index < literals.Count; index++){
+                outputState.Write(literals[index].Value);
+            }
+
+            UpdateLiteralBuffer();
+        }
+        
+        public void OutputBytes(byte[] bytes){
+            outputState.Write(bytes);
+            UpdateLiteralBuffer();
         }
         
         public CopyOutputInfo OutputCopy(int length, DistanceInfo distance){

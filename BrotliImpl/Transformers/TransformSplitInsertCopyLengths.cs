@@ -13,11 +13,11 @@ namespace BrotliImpl.Transformers{
             var builder = new CompressedMetaBlockBuilder(original, state);
             var blockTypes = builder.BlockTypes[Category.InsertCopy];
 
-            if (blockTypes.Commands.Any()){
+            if (blockTypes.Commands.Count > 0){
                 return (original, state);
             }
 
-            var icCommands = builder.InsertCopyCommands.Count();
+            var icCommands = builder.InsertCopyCommands.Count;
             var icSwitchAt = icCommands / 2;
 
             if (icCommands <= 1){

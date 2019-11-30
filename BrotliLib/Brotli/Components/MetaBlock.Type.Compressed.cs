@@ -23,11 +23,7 @@ namespace BrotliLib.Brotli.Components{
 
             public override void Decompress(BrotliGlobalState state){
                 foreach(InsertCopyCommand icCommand in Data.InsertCopyCommands){
-                    var literals = icCommand.Literals;
-
-                    for(int literalIndex = 0; literalIndex < literals.Count; literalIndex++){
-                        state.OutputLiteral(literals[literalIndex]);
-                    }
+                    state.OutputLiterals(icCommand.Literals);
 
                     if (icCommand.CopyDistance != DistanceInfo.EndsAfterLiterals){
                         state.OutputCopy(icCommand.CopyLength, icCommand.CopyDistance);

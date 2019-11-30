@@ -22,9 +22,9 @@ namespace BrotliLib.Brotli.Encode.Build{
         public ContextMap LiteralCtxMap { get; set; } = ContextMap.Literals.Simple;
         public ContextMap DistanceCtxMap { get; set; } = ContextMap.Distances.Simple;
 
-        public IEnumerable<InsertCopyCommand> InsertCopyCommands => icCommands;
+        public IReadOnlyList<InsertCopyCommand> InsertCopyCommands => icCommands;
 
-        private readonly IList<InsertCopyCommand> icCommands = new List<InsertCopyCommand>();
+        private readonly List<InsertCopyCommand> icCommands = new List<InsertCopyCommand>();
         
         private readonly BrotliGlobalState initialState;
         private readonly BrotliGlobalState intermediateState;
@@ -66,9 +66,7 @@ namespace BrotliLib.Brotli.Encode.Build{
         public CompressedMetaBlockBuilder AddInsertCopy(InsertCopyCommand command){
             icCommands.Add(command);
 
-            for(int index = 0; index < command.Literals.Count; index++){
-                intermediateState.OutputLiteral(command.Literals[index]);
-            }
+            intermediateState.OutputLiterals(command.Literals);
 
             if (command.CopyDistance != DistanceInfo.EndsAfterLiterals){
                 intermediateState.OutputCopy(command.CopyLength, command.CopyDistance);
@@ -90,8 +88,8 @@ namespace BrotliLib.Brotli.Encode.Build{
 
         public (MetaBlock MetaBlock, BrotliGlobalState NextState) Build(BrotliCompressionParameters parameters){
             var state = initialState.Clone();
-            
-            // Command processing
+
+            // Setup
             
             var bsCommands = BlockTypes.Select<IList<BlockSwitchCommand>>(builder => new List<BlockSwitchCommand>(builder.Commands));
 
@@ -101,9 +99,11 @@ namespace BrotliLib.Brotli.Encode.Build{
             var literalFreq = NewFreqArray<Literal>(LiteralCtxMap.TreeCount);
             var icLengthCodeFreq = NewFreqArray<InsertCopyLengthCode>(blockTypeInfo[Category.InsertCopy].TypeCount);
             var distanceCodeFreq = NewFreqArray<DistanceCode>(DistanceCtxMap.TreeCount);
+            
+            // Command processing
 
             var icCommandCount = icCommands.Count;
-            var icCommandsFinal = new List<InsertCopyCommand>(icCommandCount);
+            var icCommandsFinal = new InsertCopyCommand[icCommandCount];
 
             for(int icCommandIndex = 0; icCommandIndex < icCommandCount; icCommandIndex++){
                 var icCommand = icCommands[icCommandIndex];
@@ -156,7 +156,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                 }
 
                 icLengthCodeFreq[icBlockID].Add(icLengthCode);
-                icCommandsFinal.Add(icCommand);
+                icCommandsFinal[icCommandIndex] = icCommand;
             }
 
             // Finalize
@@ -193,7 +193,13 @@ namespace BrotliLib.Brotli.Encode.Build{
         // Helpers
 
         private static FrequencyList<T>[] NewFreqArray<T>(int arraySize) where T : IComparable<T>{
-            return Enumerable.Range(0, arraySize).Select(_ => new FrequencyList<T>()).ToArray();
+            FrequencyList<T>[] array = new FrequencyList<T>[arraySize];
+
+            for(int index = 0; index < arraySize; index++){
+                array[index] = new FrequencyList<T>();
+            }
+
+            return array;
         }
 
         private static HuffmanTree<T>[] ConstructHuffmanTrees<T>(FrequencyList<T>[] source) where T : IComparable<T>{

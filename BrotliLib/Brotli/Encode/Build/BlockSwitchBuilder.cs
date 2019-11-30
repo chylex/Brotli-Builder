@@ -10,10 +10,10 @@ using BrotliLib.Collections;
 namespace BrotliLib.Brotli.Encode.Build{
     public sealed class BlockSwitchBuilder{
         public int InitialLength { get; private set; }
-        public IEnumerable<BlockSwitchCommand> Commands => commands;
+        public IReadOnlyList<BlockSwitchCommand> Commands => commands;
 
         private readonly Category category;
-        private readonly IList<BlockSwitchCommand> commands = new List<BlockSwitchCommand>();
+        private readonly List<BlockSwitchCommand> commands = new List<BlockSwitchCommand>();
 
         public BlockSwitchBuilder(BlockTypeInfo info){
             this.category = info.Category;

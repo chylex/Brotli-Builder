@@ -6,7 +6,7 @@ namespace BrotliLib.Brotli.Components.Header{
     /// Lists functions for context modeling of literals.
     /// https://tools.ietf.org/html/rfc7932#section-7.1
     /// </summary>
-    public enum LiteralContextMode{
+    public enum LiteralContextMode : byte{
         LSB6   = 0b00,
         MSB6   = 0b01,
         UTF8   = 0b10,
