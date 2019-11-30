@@ -34,24 +34,6 @@ module Helper =
     )
 
 
-module Count =
-    [<Fact>]
-    let ``a leaf node has 1 symbol`` () =
-        Assert.Equal(1, Helper.leaf.SymbolCount)
-        
-    [<Fact>]
-    let ``a path of depth 1 has 2 symbols`` () =
-        Assert.Equal(2, Helper.depth1.SymbolCount)
-        
-    [<Fact>]
-    let ``a path of depth 2 with 3 symbols returns correct value`` () =
-        Assert.Equal(3, Helper.depth2count3.SymbolCount)
-        
-    [<Fact>]
-    let ``a path of depth 2 with 4 symbols returns correct value`` () =
-        Assert.Equal(4, Helper.depth2count4.SymbolCount)
-
-
 module Traversal =
     [<Fact>]
     let ``a leaf node returns its value without consuming any bits`` () =

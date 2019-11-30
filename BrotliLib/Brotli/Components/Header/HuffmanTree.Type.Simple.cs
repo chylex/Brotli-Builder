@@ -27,13 +27,13 @@ namespace BrotliLib.Brotli.Components.Header{
             public static readonly BitSerializer<HuffmanTree<T>, Context> Serialize = (writer, obj, context) => {
                 int bitsPerSymbol = context.AlphabetSize.BitsPerSymbol;
 
-                writer.WriteChunk(2, obj.Root.SymbolCount - 1);
+                writer.WriteChunk(2, obj.SymbolCount - 1);
 
                 foreach(T symbol in obj.OrderBy(kvp => kvp.Value.Length).Select(kvp => kvp.Key)){
                     writer.WriteChunk(bitsPerSymbol, context.SymbolToBits(symbol));
                 }
 
-                if (obj.Root.SymbolCount == 4){
+                if (obj.SymbolCount == 4){
                     writer.WriteBit(obj.MaxDepth > 2);
                 }
             };

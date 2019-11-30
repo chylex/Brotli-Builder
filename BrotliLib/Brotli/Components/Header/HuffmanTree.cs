@@ -39,6 +39,11 @@ namespace BrotliLib.Brotli.Components.Header{
         public HuffmanNode<T> Root { get; }
 
         /// <summary>
+        /// Total amount of symbols in the tree.
+        /// </summary>
+        public int SymbolCount => ReverseLookup.Count;
+
+        /// <summary>
         /// Length of the longest path in the tree.
         /// </summary>
         public int MaxDepth => ReverseLookup.Values.Max(stream => stream.Length);
@@ -177,7 +182,7 @@ namespace BrotliLib.Brotli.Components.Header{
         );
 
         public static readonly BitSerializer<HuffmanTree<T>, Context> Serialize = (writer, obj, context) => {
-            if (obj.Root.SymbolCount <= 4){
+            if (obj.SymbolCount <= 4){
                 writer.WriteChunk(2, 0b01);
                 Simple.Serialize(writer, obj, context);
             }

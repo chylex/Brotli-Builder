@@ -9,15 +9,11 @@ namespace BrotliLib.Collections.Huffman{
         /// Path node with exactly two child nodes. When traversing through the tree, a 0 bit indicates going <see cref="left"/> while a 1 bit indicates going <see cref="right"/>.
         /// </summary>
         public sealed class Path : HuffmanNode<T>{
-            public override int SymbolCount => symbolCount;
-
             private readonly HuffmanNode<T> left, right;
-            private readonly int symbolCount;
 
             public Path(HuffmanNode<T> left, HuffmanNode<T> right){
                 this.left = left;
                 this.right = right;
-                this.symbolCount = left.SymbolCount + right.SymbolCount;
             }
 
             public override T LookupValue(IBitReader bits){

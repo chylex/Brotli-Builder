@@ -8,8 +8,6 @@ namespace BrotliLib.Collections.Huffman{
         /// Leaf node that contains a <see cref="value"/> of type <code>T</code>.
         /// </summary>
         public sealed class Leaf : HuffmanNode<T>{
-            public override int SymbolCount => 1;
-
             private readonly T value;
             
             public Leaf(T value){
