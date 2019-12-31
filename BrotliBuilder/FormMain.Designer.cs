@@ -39,10 +39,12 @@
             this.menuItemStaticDictionary = new System.Windows.Forms.MenuItem();
             this.menuItemCompareMarkers = new System.Windows.Forms.MenuItem();
             this.menuItemSeparatorT1 = new System.Windows.Forms.MenuItem();
+            this.menuItemSeparatorT2 = new System.Windows.Forms.MenuItem();
             this.menuItemCloneGeneratedToOriginal = new System.Windows.Forms.MenuItem();
             this.menuItemCloneOriginalToGenerated = new System.Windows.Forms.MenuItem();
             this.menuItemEncodeFile = new System.Windows.Forms.MenuItem();
             this.menuItemTransform = new System.Windows.Forms.MenuItem();
+            this.menuItemConfigureSerializationParameters = new System.Windows.Forms.MenuItem();
             this.flowPanelBlocks = new System.Windows.Forms.FlowLayoutPanel();
             this.statusBar = new System.Windows.Forms.StatusBar();
             this.statusBarPanelPadding1 = new System.Windows.Forms.StatusBarPanel();
@@ -164,16 +166,25 @@
             // 
             this.menuItemTools.Index = 2;
             this.menuItemTools.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuItemConfigureSerializationParameters,
+            this.menuItemSeparatorT1,
             this.menuItemStaticDictionary,
             this.menuItemCompareMarkers,
-            this.menuItemSeparatorT1,
+            this.menuItemSeparatorT2,
             this.menuItemCloneGeneratedToOriginal,
             this.menuItemCloneOriginalToGenerated});
             this.menuItemTools.Text = "&Tools";
+            //
+            // menuItemConfigureParameters
+            //
+            this.menuItemConfigureSerializationParameters.Index = 0;
+            this.menuItemConfigureSerializationParameters.Shortcut = System.Windows.Forms.Shortcut.CtrlP;
+            this.menuItemConfigureSerializationParameters.Text = "Configure Serialization Parameters";
+            this.menuItemConfigureSerializationParameters.Click += new System.EventHandler(this.menuItemConfigureSerializationParameters_Click);
             // 
             // menuItemStaticDictionary
             // 
-            this.menuItemStaticDictionary.Index = 0;
+            this.menuItemStaticDictionary.Index = 2;
             this.menuItemStaticDictionary.Shortcut = System.Windows.Forms.Shortcut.CtrlD;
             this.menuItemStaticDictionary.Text = "Static Dictionary";
             this.menuItemStaticDictionary.Click += new System.EventHandler(this.menuItemStaticDictionary_Click);
@@ -181,27 +192,32 @@
             // menuItemCompareMarkers
             // 
             this.menuItemCompareMarkers.Enabled = false;
-            this.menuItemCompareMarkers.Index = 1;
+            this.menuItemCompareMarkers.Index = 3;
             this.menuItemCompareMarkers.Shortcut = System.Windows.Forms.Shortcut.CtrlM;
             this.menuItemCompareMarkers.Text = "Compare Markers";
             this.menuItemCompareMarkers.Click += new System.EventHandler(this.menuItemCompareMarkers_Click);
             // 
             // menuItemSeparatorT1
             // 
-            this.menuItemSeparatorT1.Index = 2;
+            this.menuItemSeparatorT1.Index = 1;
             this.menuItemSeparatorT1.Text = "-";
+            // 
+            // menuItemSeparatorT2
+            // 
+            this.menuItemSeparatorT2.Index = 4;
+            this.menuItemSeparatorT2.Text = "-";
             // 
             // menuItemCloneGeneratedToOriginal
             // 
             this.menuItemCloneGeneratedToOriginal.Enabled = false;
-            this.menuItemCloneGeneratedToOriginal.Index = 3;
+            this.menuItemCloneGeneratedToOriginal.Index = 5;
             this.menuItemCloneGeneratedToOriginal.Text = "Generated >> Original";
             this.menuItemCloneGeneratedToOriginal.Click += new System.EventHandler(this.menuItemCloneGeneratedToOriginal_Click);
             // 
             // menuItemCloneOriginalToGenerated
             // 
             this.menuItemCloneOriginalToGenerated.Enabled = false;
-            this.menuItemCloneOriginalToGenerated.Index = 4;
+            this.menuItemCloneOriginalToGenerated.Index = 6;
             this.menuItemCloneOriginalToGenerated.Text = "Generated << Original";
             this.menuItemCloneOriginalToGenerated.Click += new System.EventHandler(this.menuItemCloneOriginalToGenerated_Click);
             // 
@@ -476,7 +492,9 @@
         private System.Windows.Forms.StatusBarPanel statusBarPanelPadding3;
         private System.Windows.Forms.MenuItem menuItemSaveOutput;
         private System.Windows.Forms.MenuItem menuItemSeparatorT1;
+        private System.Windows.Forms.MenuItem menuItemSeparatorT2;
         private System.Windows.Forms.MenuItem menuItemCloneGeneratedToOriginal;
         private System.Windows.Forms.MenuItem menuItemCloneOriginalToGenerated;
+        private System.Windows.Forms.MenuItem menuItemConfigureSerializationParameters;
     }
 }

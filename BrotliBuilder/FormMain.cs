@@ -480,6 +480,21 @@ namespace BrotliBuilder{
             }
         }
 
+        private void menuItemConfigureSerializationParameters_Click(object? sender, EventArgs e){
+            using FormSerializationParameters form = new FormSerializationParameters(fileGenerated.SerializationParameters);
+            form.Reserialize += fileGenerated_Reserialize;
+            form.ShowDialog();
+        }
+
+        private void fileGenerated_Reserialize(object? sender, EventArgs e){
+            if (lastGeneratedFile == null){
+                MessageBox.Show("No previously generated file available.", "Reserialize Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else{
+                fileGenerated.LoadStructure(lastGeneratedFile, lastOriginalFileBytes);
+            }
+        }
+
         private void menuItemCompareMarkers_Click(object? sender, EventArgs e){
             if (brotliFilePanelOriginal.MarkerRoot == null || brotliFilePanelGenerated.MarkerRoot == null){
                 MessageBox.Show("No original file opened.", "Compare Markers Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
