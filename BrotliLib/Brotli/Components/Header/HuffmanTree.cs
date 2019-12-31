@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using BrotliLib.Brotli.Parameters;
 using BrotliLib.Collections;
 using BrotliLib.Collections.Huffman;
 using BrotliLib.Markers.Serialization;
@@ -181,14 +182,14 @@ namespace BrotliLib.Brotli.Components.Header{
             }
         );
 
-        public static readonly BitSerializer<HuffmanTree<T>, Context> Serialize = (writer, obj, context) => {
+        public static readonly BitSerializer<HuffmanTree<T>, Context, BrotliSerializationParameters> Serialize = (writer, obj, context, parameters) => {
             if (obj.SymbolCount <= 4){
                 writer.WriteChunk(2, 0b01);
                 Simple.Serialize(writer, obj, context);
             }
             else{
                 // type identifier is written by the serializer
-                Complex.Serialize(writer, obj, context);
+                Complex.Serialize(writer, obj, context, parameters);
             }
         };
     }

@@ -4,6 +4,7 @@ using BrotliLib.Numbers;
 using BlockTypeCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<int>;
 using BlockLengthCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.BlockLengthCode>;
 using System;
+using BrotliLib.Brotli.Parameters;
 using BrotliLib.Markers.Serialization;
 using BrotliLib.Serialization;
 
@@ -84,15 +85,15 @@ namespace BrotliLib.Brotli.Components.Header{
             }
         );
 
-        public static readonly BitSerializer<BlockTypeInfo, NoContext> Serialize = (writer, obj, context) => {
+        public static readonly BitSerializer<BlockTypeInfo, NoContext, BrotliSerializationParameters> Serialize = (writer, obj, context, parameters) => {
             VariableLength11Code.Serialize(writer, new VariableLength11Code(obj.TypeCount), NoContext.Value);
 
             if (obj.TypeCount == 1){
                 return;
             }
 
-            BlockTypeCodeTree.Serialize(writer, obj.TypeCodeTree!, GetBlockTypeCodeTreeContext(obj.TypeCount));
-            BlockLengthCodeTree.Serialize(writer, obj.LengthCodeTree!, BlockLengthCode.TreeContext);
+            BlockTypeCodeTree.Serialize(writer, obj.TypeCodeTree!, GetBlockTypeCodeTreeContext(obj.TypeCount), parameters);
+            BlockLengthCodeTree.Serialize(writer, obj.LengthCodeTree!, BlockLengthCode.TreeContext, parameters);
 
             var initialLength = obj.InitialLength;
             var initialLengthCode = obj.LengthCodeTree!.FindShortest(initialLength, (code, length) => code.CanEncodeValue(length));

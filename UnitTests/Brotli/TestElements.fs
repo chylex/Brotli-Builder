@@ -6,6 +6,7 @@ open BrotliLib.Brotli.Components
 open BrotliLib.Brotli.Components.Data
 open BrotliLib.Brotli.Components.Header
 open BrotliLib.Brotli.Components.Utils
+open BrotliLib.Brotli.Parameters
 open BrotliLib.Collections.Huffman
 open BrotliLib.Numbers
 open BrotliLib.Serialization
@@ -15,6 +16,12 @@ module Helper =
     let convert (obj: 'a) (context: 'b) (serializer: BitSerializer<'a, 'b>) (deserializer: BitDeserializer<'a, 'b>) =
         let stream = BitStream()
         serializer.Invoke(stream.GetWriter(), obj, context)
+        deserializer.Invoke(stream.GetReader(), context)
+
+    let convertP (obj: 'a) (context: 'b) (serializer: BitSerializer<'a, 'b, BrotliSerializationParameters>) (deserializer: BitDeserializer<'a, 'b>) =
+        let stream = BitStream()
+        let parameters = BrotliSerializationParameters.Default
+        serializer.Invoke(stream.GetWriter(), obj, context, parameters)
         deserializer.Invoke(stream.GetReader(), context)
 
     let cartesian a b = [for va in a do for vb in b -> (va, vb)]
@@ -173,12 +180,12 @@ module HuffmanTree =
     [<Theory>]
     [<MemberData("simple")>]
     let ``converting to and from bits yields same object (simple)`` (tree: HuffmanTree<char>) =
-        Assert.Equal<HuffmanTree<_>>(tree, Helper.convert tree context HuffmanTree<_>.Serialize HuffmanTree<_>.Deserialize)
+        Assert.Equal<HuffmanTree<_>>(tree, Helper.convertP tree context HuffmanTree<_>.Serialize HuffmanTree<_>.Deserialize)
 
     [<Theory>]
     [<MemberData("complex")>]
     let ``converting to and from bits yields same object (complex)`` (tree: HuffmanTree<char>) =
-        Assert.Equal<HuffmanTree<_>>(tree, Helper.convert tree context HuffmanTree<_>.Serialize HuffmanTree<_>.Deserialize)
+        Assert.Equal<HuffmanTree<_>>(tree, Helper.convertP tree context HuffmanTree<_>.Serialize HuffmanTree<_>.Deserialize)
 
 
 module LiteralContextMode =

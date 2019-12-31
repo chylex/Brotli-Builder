@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using BrotliLib.Brotli.Parameters;
 using BrotliLib.Collections.Huffman;
 using BrotliLib.Markers.Serialization;
 using BrotliLib.Markers.Serialization.Reader;
@@ -100,7 +101,7 @@ namespace BrotliLib.Brotli.Components.Header{
                 }
             );
 
-            public static readonly BitSerializer<HuffmanTree<T>, Context> Serialize = (writer, obj, context) => {
+            public static readonly BitSerializer<HuffmanTree<T>, Context, BrotliSerializationParameters> Serialize = (writer, obj, context, parameters) => {
                 Func<int, T> getSymbol = context.BitsToSymbol;
                 
                 int symbolCount = context.AlphabetSize.SymbolCount;
@@ -124,6 +125,10 @@ namespace BrotliLib.Brotli.Components.Header{
 
                     symbolEntries.Add(new HuffmanGenerator<T>.Entry(symbol, length));
                 }
+
+                var symbolBits = symbolEntries.Select(entry => entry.Bits).ToArray();
+                bool enableSkipCode = parameters.UseComplexTreeSkipCode(symbolBits);
+                bool enableRepeatCode = parameters.UseComplexTreeRepeatCode(symbolBits);
 
                 int ProcessRepetitions(int length, int multiplier){
                     Stack<byte> newExtra = new Stack<byte>();
@@ -149,6 +154,10 @@ namespace BrotliLib.Brotli.Components.Header{
                 }
 
                 int ReplaceSequenceWithRepetition(int index, byte code, int length, int multiplier){
+                    if ((code == ComplexLengthCode.Skip && !enableSkipCode) || (code == ComplexLengthCode.Repeat && !enableRepeatCode)){
+                        return index + length;
+                    }
+
                     if (length - 3 == multiplier){
                         // when the amount of repetitions equals the first value that requires a second repetition code to encode, it's more efficient to write it as 1 literal code and 1 repetition code
                         // TODO official compressor (and this) only works for the first value that crosses the boundary... potential point for improvement?
@@ -158,24 +167,38 @@ namespace BrotliLib.Brotli.Components.Header{
 
                     return ReplaceSequence(index, code, length, ProcessRepetitions(length, multiplier));
                 }
+
+                byte FindLastNonRepetitionNonZeroCode(int startIndex){
+                    for(int index = startIndex; index >= 0; index--){
+                        byte bits = symbolEntries[index].Bits;
+
+                        if (bits != 0 && bits != ComplexLengthCode.Skip && bits != ComplexLengthCode.Repeat){
+                            return bits;
+                        }
+                    }
+
+                    return 0;
+                }
                 
-                for(int entryIndex = 0, lastRepeatStartIndex = 0, lastRepeatCode = ComplexLengthCode.DefaultRepeatCode; entryIndex < symbolEntries.Count + 1; entryIndex++){
-                    int nextCode = entryIndex < symbolEntries.Count ? symbolEntries[entryIndex].Bits : -1;
+                if (enableSkipCode || enableRepeatCode){
+                    for(int entryIndex = 0, lastRepeatStartIndex = 1, lastRepeatCode = ComplexLengthCode.DefaultRepeatCode; entryIndex < symbolEntries.Count + 1; entryIndex++){
+                        int nextCode = entryIndex < symbolEntries.Count ? symbolEntries[entryIndex].Bits : -1;
 
-                    if (nextCode != lastRepeatCode){
-                        if (lastRepeatCode == 0){
-                            --lastRepeatStartIndex;
+                        if (nextCode != lastRepeatCode){
+                            if (lastRepeatCode == 0 || lastRepeatCode == FindLastNonRepetitionNonZeroCode(lastRepeatStartIndex - 2)){
+                                --lastRepeatStartIndex;
+                            }
+
+                            int skipLength = entryIndex - lastRepeatStartIndex;
+
+                            if (skipLength >= 3){
+                                entryIndex = lastRepeatCode == 0 ? ReplaceSequenceWithRepetition(lastRepeatStartIndex, ComplexLengthCode.Skip, skipLength, 8)
+                                                                 : ReplaceSequenceWithRepetition(lastRepeatStartIndex, ComplexLengthCode.Repeat, skipLength, 4);
+                            }
+                            
+                            lastRepeatCode = nextCode;
+                            lastRepeatStartIndex = entryIndex + 1;
                         }
-
-                        int skipLength = entryIndex - lastRepeatStartIndex;
-
-                        if (skipLength >= 3){
-                            entryIndex = lastRepeatCode == 0 ? ReplaceSequenceWithRepetition(lastRepeatStartIndex, ComplexLengthCode.Skip, skipLength, 8)
-                                                             : ReplaceSequenceWithRepetition(lastRepeatStartIndex, ComplexLengthCode.Repeat, skipLength, 4);
-                        }
-                        
-                        lastRepeatCode = nextCode;
-                        lastRepeatStartIndex = entryIndex + 1;
                     }
                 }
                 

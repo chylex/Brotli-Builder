@@ -104,7 +104,7 @@ namespace BrotliLib.Brotli.Components.Compressed{
 
         public static readonly BitSerializer<MetaBlockCompressionHeader, NoContext, BrotliSerializationParameters> Serialize = (writer, obj, context, parameters) => {
             foreach(BlockTypeInfo blockTypeInfo in obj.BlockTypes.Values){
-                BlockTypeInfo.Serialize(writer, blockTypeInfo, NoContext.Value);
+                BlockTypeInfo.Serialize(writer, blockTypeInfo, NoContext.Value, parameters);
             }
 
             DistanceParameters.Serialize(writer, obj.DistanceParameters, NoContext.Value);
@@ -117,15 +117,15 @@ namespace BrotliLib.Brotli.Components.Compressed{
             ContextMap.Serialize(writer, obj.DistanceCtxMap, obj.BlockTypes[Category.Distance], parameters);
             
             foreach(LiteralTree tree in obj.LiteralTrees){
-                LiteralTree.Serialize(writer, tree, Literal.TreeContext);
+                LiteralTree.Serialize(writer, tree, Literal.TreeContext, parameters);
             }
 
             foreach(InsertCopyTree tree in obj.InsertCopyTrees){
-                InsertCopyTree.Serialize(writer, tree, InsertCopyLengthCode.TreeContext);
+                InsertCopyTree.Serialize(writer, tree, InsertCopyLengthCode.TreeContext, parameters);
             }
 
             foreach(DistanceTree tree in obj.DistanceTrees){
-                DistanceTree.Serialize(writer, tree, DistanceCode.GenerateTreeContext(obj.DistanceParameters));
+                DistanceTree.Serialize(writer, tree, DistanceCode.GenerateTreeContext(obj.DistanceParameters), parameters);
             }
         };
     }
