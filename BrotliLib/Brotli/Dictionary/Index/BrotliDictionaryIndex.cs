@@ -5,7 +5,6 @@ using System.Linq;
 using BrotliLib.Brotli.Dictionary.Format;
 using BrotliLib.Brotli.Dictionary.Transform;
 using BrotliLib.Collections;
-using BrotliLib.Collections.Trie;
 
 namespace BrotliLib.Brotli.Dictionary.Index{
     public sealed class BrotliDictionaryIndex{
@@ -13,7 +12,7 @@ namespace BrotliLib.Brotli.Dictionary.Index{
 
         private readonly IDictionaryFormat format;
         private readonly IReadOnlyList<WordTransform> transforms;
-        private readonly Dictionary<TransformType, MultiTrie<byte, (int, int)>> lookups;
+        private readonly Dictionary<TransformType, PatriciaTree<(int, int)>> lookups;
 
         private readonly List<int> transformsNoPrefix;
         private readonly List<int> transformsWithPrefix;
@@ -24,19 +23,17 @@ namespace BrotliLib.Brotli.Dictionary.Index{
 
             Stopwatch sw = Stopwatch.StartNew();
 
-            MultiTrieCache<byte, (int, int)> cache = new MultiTrieCache<byte, (int, int)>();
-
             this.lookups = TransformTypes.All.ToDictionary(type => type, type => {
-                var builder = new MultiTrieBuilder<byte, (int, int)>();
+                var tree = new PatriciaTree<(int, int)>();
 
                 foreach(var length in format.WordLengths.Where(length => type.GetTransformedLength(length) >= MinEntryLength)){
                     for(int word = 0, count = format.WordCount(length); word < count; word++){
                         byte[] bytes = type.Process(dictionary.ReadRaw(length, word));
-                        builder.Insert(bytes, (length, word));
+                        tree.Insert(bytes, (length, word));
                     }
                 }
 
-                return builder.Build(cache);
+                return tree;
             });
 
             this.transformsNoPrefix = Enumerable.Range(0, transforms.Count).Where(index => transforms[index].Prefix.Length == 0).ToList();
