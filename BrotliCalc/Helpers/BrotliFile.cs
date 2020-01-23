@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using BrotliLib.Brotli;
+using BrotliLib.Brotli.Encode;
 using BrotliLib.Markers;
 
 namespace BrotliCalc.Helpers{
@@ -43,20 +44,30 @@ namespace BrotliCalc.Helpers{
             public override string FullName => Name;
 
             public Uncompressed(string path, string name) : base(path, name){}
+
+            public BrotliFileStructure Encode(IBrotliEncoder encoder){
+                return BrotliFileStructure.FromEncoder(Parameters.File, Parameters.Compression, Contents, encoder);
+            }
         }
 
         internal class Compressed : BrotliFile{
             public string Identifier { get; }
-
-            public BrotliFileStructure Structure => BrotliFileStructure.FromBytes(Contents, MarkerLevel.None).Structure;
             public override string FullName => $"{Name}.{Identifier}{Brotli.CompressedFileExtension}";
+
+            public BrotliFileStructure Structure => structureLazy.Value;
+            private readonly Lazy<BrotliFileStructure> structureLazy;
 
             public Compressed(string path, string name, string identifier) : base(path, name){
                 this.Identifier = identifier;
+                this.structureLazy = new Lazy<BrotliFileStructure>(() => BrotliFileStructure.FromBytes(Contents, MarkerLevel.None, Parameters.File.Dictionary).Structure, isThreadSafe: true);
+            }
+
+            public BrotliFileStructure Transform(IBrotliTransformer transformer){
+                return Structure.Transform(transformer, Parameters.Compression);
             }
 
             public (BrotliFileStructure Structure, MarkerRoot MarkerRoot) GetStructureWithMarkers(MarkerLevel markerLevel){
-                return BrotliFileStructure.FromBytes(Contents, markerLevel);
+                return BrotliFileStructure.FromBytes(Contents, markerLevel, Parameters.File.Dictionary);
             }
         }
     }

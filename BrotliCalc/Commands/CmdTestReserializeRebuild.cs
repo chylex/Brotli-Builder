@@ -14,11 +14,9 @@ namespace BrotliCalc.Commands{
         };
 
         protected override IEnumerable<object?[]> GenerateRows(BrotliFileGroup group, BrotliFile.Compressed file){
-            var bfs = file.Structure;
-
             int? originalBytes = file.SizeBytes;
-            var reserializeBytes = group.CountBytesAndValidate(bfs, Parameters.Serialization);
-            var rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild(), Parameters.Compression), Parameters.Serialization);
+            var reserializeBytes = group.CountBytesAndValidate(file.Structure);
+            var rebuildBytes = group.CountBytesAndValidate(file.Transform(new TransformRebuild()));
 
             return new List<object?[]>{
                 new object?[]{ file.Name, file.Identifier, originalBytes, reserializeBytes, rebuildBytes, reserializeBytes - originalBytes, rebuildBytes - originalBytes } // subtraction propagates null

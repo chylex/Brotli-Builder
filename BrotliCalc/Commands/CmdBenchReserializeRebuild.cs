@@ -30,8 +30,6 @@ namespace BrotliCalc.Commands{
                 foreach(var (group, file) in items){
                     progress.Post($"Processing {file}...");
 
-                    var bfs = file.Structure;
-
                     int? originalBytes = file.SizeBytes;
                     int? reserializeBytes = null;
                     int? rebuildBytes = null;
@@ -42,7 +40,7 @@ namespace BrotliCalc.Commands{
                         Stopwatch swReserialize = Stopwatch.StartNew();
 
                         try{
-                            reserializeBytes = group.CountBytesAndValidate(bfs, Parameters.Serialization);
+                            reserializeBytes = group.CountBytesAndValidate(file.Structure);
                         }catch(Exception e){
                             Debug.WriteLine(e.ToString());
                             ++failedFiles;
@@ -56,7 +54,7 @@ namespace BrotliCalc.Commands{
                         Stopwatch swRebuild = Stopwatch.StartNew();
 
                         try{
-                            rebuildBytes = group.CountBytesAndValidate(bfs.Transform(new TransformRebuild(), Parameters.Compression), Parameters.Serialization);
+                            rebuildBytes = group.CountBytesAndValidate(file.Transform(new TransformRebuild()));
                         }catch(Exception e){
                             Debug.WriteLine(e.ToString());
                             ++failedFiles;
