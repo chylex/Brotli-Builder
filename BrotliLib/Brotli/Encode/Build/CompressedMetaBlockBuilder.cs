@@ -36,7 +36,7 @@ namespace BrotliLib.Brotli.Encode.Build{
             this.intermediateState = state.Clone();
         }
 
-        public CompressedMetaBlockBuilder(BrotliFileParameters parameters) : this(new BrotliGlobalState(parameters, new BrotliOutputWindowed(parameters.WindowSize))){}
+        public CompressedMetaBlockBuilder(BrotliFileParameters parameters) : this(new BrotliGlobalState(parameters)){}
 
         public CompressedMetaBlockBuilder(MetaBlock.Compressed metaBlock, BrotliGlobalState state) : this(state){
             var header = metaBlock.Header;

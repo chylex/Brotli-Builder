@@ -26,7 +26,7 @@ namespace BrotliLib.Brotli.Encode{
         public BrotliEncodeInfo(BrotliFileParameters fileParameters, BrotliCompressionParameters compressionParameters, byte[] bytes) : this(
             fileParameters,
             compressionParameters,
-            new BrotliGlobalState(fileParameters, new BrotliOutputWindowed(fileParameters.WindowSize)),
+            new BrotliGlobalState(fileParameters),
             new ArraySegment<byte>(bytes)
         ){}
 

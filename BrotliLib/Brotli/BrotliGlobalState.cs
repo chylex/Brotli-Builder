@@ -32,6 +32,8 @@ namespace BrotliLib.Brotli{
             this.DistanceBuffer = new RingBuffer<int>(16, 15, 11, 4);
         }
 
+        public BrotliGlobalState(BrotliFileParameters parameters) : this(parameters, new BrotliOutputWindowed(parameters.WindowSize)){}
+
         private BrotliGlobalState(BrotliGlobalState original){
             this.Parameters = original.Parameters;
             this.outputState = original.outputState.Clone();

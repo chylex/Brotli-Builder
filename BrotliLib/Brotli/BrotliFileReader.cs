@@ -37,7 +37,7 @@ namespace BrotliLib.Brotli{
                 Dictionary = dictionary
             };
 
-            this.State = new BrotliGlobalState(Parameters, new BrotliOutputWindowed(Parameters.WindowSize));
+            this.State = new BrotliGlobalState(Parameters);
         }
 
         // Reader

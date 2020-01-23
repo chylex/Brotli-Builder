@@ -52,7 +52,7 @@ namespace BrotliLib.Brotli{
 
         public BrotliFileStructure Transform(IBrotliTransformer transformer, BrotliCompressionParameters compressionParameters){
             var copy = new BrotliFileStructure(Parameters);
-            var state = new BrotliGlobalState(Parameters, new BrotliOutputWindowed(Parameters.WindowSize));
+            var state = new BrotliGlobalState(Parameters);
 
             foreach(MetaBlock original in MetaBlocks){
                 var (transformedMetaBlocks, transformedState) = transformer.Transform(original, state, compressionParameters);
@@ -92,7 +92,7 @@ namespace BrotliLib.Brotli{
             var stream = new BitStream();
             var writer = stream.GetWriter();
 
-            var state = new BrotliGlobalState(Parameters, new BrotliOutputWindowed(Parameters.WindowSize));
+            var state = new BrotliGlobalState(Parameters);
 
             WindowSize.Serialize(writer, Parameters.WindowSize, NoContext.Value);
 
