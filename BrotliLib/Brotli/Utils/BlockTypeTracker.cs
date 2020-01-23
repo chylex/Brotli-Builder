@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using BrotliLib.Collections;
 
-namespace BrotliLib.Brotli.Components.Data{
+namespace BrotliLib.Brotli.Utils{
     /// <summary>
     /// Tracks the current block type, and allows converting between type codes and type values.
     /// </summary>

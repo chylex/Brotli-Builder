@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
-using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Output;
 using BrotliLib.Brotli.Parameters;
+using BrotliLib.Brotli.Utils;
 using BrotliLib.Collections;
 
 namespace BrotliLib.Brotli{

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using BrotliLib.Brotli.Components.Header;
-using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Brotli.Utils;
 using BrotliLib.Numbers;
 using InsertCopyTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.InsertCopyLengthCode>;
 

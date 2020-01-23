@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using BrotliLib.Collections;
 
-namespace BrotliLib.Brotli.Components.Utils{
+namespace BrotliLib.Brotli.Utils{
     /// <summary>
     /// Utility class to map values of type <typeparamref name="T"/> to the categories.
     /// </summary>

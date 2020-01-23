@@ -1,11 +1,10 @@
-﻿using System.Linq;
-using BrotliLib.Brotli;
+﻿using BrotliLib.Brotli;
 using BrotliLib.Brotli.Components;
-using BrotliLib.Brotli.Components.Compressed;
-using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Encode.Build;
 using BrotliLib.Brotli.Parameters;
+using BrotliLib.Brotli.Utils;
 
 namespace BrotliImpl.Transformers{
     public class TransformSplitInsertCopyLengths : BrotliTransformerCompressed{

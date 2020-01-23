@@ -1,4 +1,4 @@
-﻿namespace BrotliLib.Brotli.Components.Utils{
+﻿namespace BrotliLib.Brotli.Utils{
     public readonly struct CopyOutputInfo{
         public int BytesWritten { get; }
         public bool IsBackReference { get; }

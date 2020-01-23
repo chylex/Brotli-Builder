@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Parameters;
+using BrotliLib.Brotli.Utils;
 using BrotliLib.Collections;
 using BrotliLib.Markers.Serialization;
 using BrotliLib.Numbers;

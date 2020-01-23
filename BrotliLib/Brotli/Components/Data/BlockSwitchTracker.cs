@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using BrotliLib.Brotli.Components.Compressed;
 using BrotliLib.Brotli.Components.Header;
+using BrotliLib.Brotli.Utils;
 using BrotliLib.Serialization.Reader;
 using BrotliLib.Serialization.Writer;
 

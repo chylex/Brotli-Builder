@@ -13,10 +13,10 @@ namespace BrotliLib.Brotli.Components{
         /// <code>ISLAST = ?, MLEN > 0, ISUNCOMPRESSED = 0</code>
         /// </summary>
         public class Compressed : MetaBlock{
-            public MetaBlockCompressionHeader Header { get; }
-            public MetaBlockCompressionData Data { get; }
+            public CompressedHeader Header { get; }
+            public CompressedData Data { get; }
 
-            public Compressed(bool isLast, DataLength dataLength, MetaBlockCompressionHeader header, MetaBlockCompressionData data) : base(isLast, dataLength){
+            public Compressed(bool isLast, DataLength dataLength, CompressedHeader header, CompressedData data) : base(isLast, dataLength){
                 this.Header = header;
                 this.Data = data;
             }
@@ -46,16 +46,16 @@ namespace BrotliLib.Brotli.Components{
         
             internal new static readonly BitDeserializer<Compressed, Context> Deserialize = MarkedBitDeserializer.Wrap<Compressed, Context>(
                 (reader, context) => {
-                    var header = reader.ReadStructure(MetaBlockCompressionHeader.Deserialize, NoContext.Value, "Compression Header");
-                    var data = reader.ReadStructure(MetaBlockCompressionData.Deserialize, new MetaBlockCompressionData.Context(header, context.DataLength, context.State), "Compression Data");
+                    var header = reader.ReadStructure(CompressedHeader.Deserialize, NoContext.Value, "Compression Header");
+                    var data = reader.ReadStructure(CompressedData.Deserialize, new CompressedData.Context(header, context.DataLength, context.State), "Compression Data");
 
                     return new Compressed(context.IsLast, context.DataLength, header, data);
                 }
             );
 
             internal new static readonly BitSerializer<Compressed, Context, BrotliSerializationParameters> Serialize = (writer, obj, context, parameters) => {
-                MetaBlockCompressionHeader.Serialize(writer, obj.Header, NoContext.Value, parameters);
-                MetaBlockCompressionData.Serialize(writer, obj.Data, new MetaBlockCompressionData.Context(obj.Header, context.DataLength, context.State));
+                CompressedHeader.Serialize(writer, obj.Header, NoContext.Value, parameters);
+                CompressedData.Serialize(writer, obj.Data, new CompressedData.Context(obj.Header, context.DataLength, context.State));
             };
         }
     }

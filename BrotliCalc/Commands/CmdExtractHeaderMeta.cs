@@ -3,7 +3,7 @@ using BrotliCalc.Commands.Base;
 using BrotliCalc.Helpers;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Components.Compressed;
-using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Brotli.Utils;
 
 namespace BrotliCalc.Commands{
     class CmdExtractHeaderMeta : CmdAbstractFileTable.Compressed{
@@ -64,7 +64,7 @@ namespace BrotliCalc.Commands{
             }
         }
 
-        private static void ExtractMetadata(List<object> row, MetaBlockCompressionHeader header, MetaBlockCompressionData data){
+        private static void ExtractMetadata(List<object> row, CompressedHeader header, CompressedData data){
             row.Add(header.DistanceParameters.PostfixBitCount);
             row.Add(header.DistanceParameters.DirectCodeCount);
 

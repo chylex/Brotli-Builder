@@ -1,7 +1,7 @@
 ﻿using System;
 using BrotliLib.Brotli.Components.Data;
 
-namespace BrotliLib.Brotli.Components.Utils{
+namespace BrotliLib.Brotli.Utils{
     /// <summary>
     /// Determines how to set <see cref="InsertCopyLengthCode.UseDistanceCodeZero"/> during construction.
     /// </summary>

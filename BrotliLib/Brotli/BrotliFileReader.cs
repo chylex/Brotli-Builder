@@ -1,6 +1,5 @@
 ﻿using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Dictionary;
-using BrotliLib.Brotli.Output;
 using BrotliLib.Brotli.Parameters;
 using BrotliLib.Markers;
 using BrotliLib.Markers.Serialization.Reader;

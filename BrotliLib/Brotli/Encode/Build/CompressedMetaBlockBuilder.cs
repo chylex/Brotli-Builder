@@ -5,10 +5,9 @@ using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Components.Compressed;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
-using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Dictionary.Index;
-using BrotliLib.Brotli.Output;
 using BrotliLib.Brotli.Parameters;
+using BrotliLib.Brotli.Utils;
 using BrotliLib.Collections;
 
 namespace BrotliLib.Brotli.Encode.Build{
@@ -173,7 +172,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                 }
             }
 
-            var header = new MetaBlockCompressionHeader(
+            var header = new CompressedHeader(
                 blockTypeInfo,
                 DistanceParameters,
                 LiteralContextModes,
@@ -184,7 +183,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                 ConstructHuffmanTrees(distanceCodeFreq)
             );
 
-            var data = new MetaBlockCompressionData(icCommandsFinal, bsCommands);
+            var data = new CompressedData(icCommandsFinal, bsCommands);
             var dataLength = new DataLength(OutputSize);
 
             return (new MetaBlock.Compressed(isLast: false, dataLength, header, data), state);

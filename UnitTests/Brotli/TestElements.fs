@@ -5,8 +5,8 @@ open System
 open BrotliLib.Brotli.Components
 open BrotliLib.Brotli.Components.Data
 open BrotliLib.Brotli.Components.Header
-open BrotliLib.Brotli.Components.Utils
 open BrotliLib.Brotli.Parameters
+open BrotliLib.Brotli.Utils
 open BrotliLib.Collections.Huffman
 open BrotliLib.Numbers
 open BrotliLib.Serialization

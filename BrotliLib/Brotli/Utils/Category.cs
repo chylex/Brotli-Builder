@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BrotliLib.Brotli.Components.Utils{
+namespace BrotliLib.Brotli.Utils{
     /// <summary>
     /// Three main types of codes in the insert&amp;copy command whose symbols are represented by Huffman coding trees.
     /// </summary>

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using BrotliImpl.Encoders.Utils;
 using BrotliLib.Brotli.Components;
-using BrotliLib.Brotli.Components.Compressed;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Encode;

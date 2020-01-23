@@ -1,6 +1,5 @@
 ﻿using System;
 using BrotliLib.Brotli.Encode.Build;
-using BrotliLib.Brotli.Output;
 using BrotliLib.Brotli.Parameters;
 
 namespace BrotliLib.Brotli.Encode{

@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BrotliLib.Brotli.Components.Data;
-using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Brotli.Components.Compressed;
+using BrotliLib.Brotli.Utils;
 using BrotliLib.Collections;
 using BrotliLib.Markers;
 using BrotliLib.Markers.Serialization;
 using BrotliLib.Markers.Types;
 using BrotliLib.Serialization;
 
-namespace BrotliLib.Brotli.Components.Compressed{
+namespace BrotliLib.Brotli.Components.Data{
     public sealed class InsertCopyCommand{
         public IReadOnlyList<Literal> Literals { get; }
 
@@ -59,11 +59,11 @@ namespace BrotliLib.Brotli.Components.Compressed{
 
         // Serialization
 
-        internal static readonly BitDeserializer<InsertCopyCommand, MetaBlockCompressionData.DataContext> Deserialize = MarkedBitDeserializer.Title<InsertCopyCommand, MetaBlockCompressionData.DataContext>(
+        internal static readonly BitDeserializer<InsertCopyCommand, CompressedData.DataContext> Deserialize = MarkedBitDeserializer.Title<InsertCopyCommand, CompressedData.DataContext>(
             "Insert & Copy Command",
 
             (reader, context) => {
-                MetaBlockCompressionHeader header = context.Header;
+                CompressedHeader header = context.Header;
                 BrotliGlobalState state = context.State;
                 
                 // Insert&copy lengths
@@ -138,8 +138,8 @@ namespace BrotliLib.Brotli.Components.Compressed{
             }
         );
 
-        internal static readonly BitSerializer<InsertCopyCommand, MetaBlockCompressionData.DataContext> Serialize = (writer, obj, context) => {
-            MetaBlockCompressionHeader header = context.Header;
+        internal static readonly BitSerializer<InsertCopyCommand, CompressedData.DataContext> Serialize = (writer, obj, context) => {
+            CompressedHeader header = context.Header;
             BrotliGlobalState state = context.State;
             
             bool endsAfterLiterals = obj.CopyDistance == DistanceInfo.EndsAfterLiterals;

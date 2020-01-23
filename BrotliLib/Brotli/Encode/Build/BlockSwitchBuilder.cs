@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BrotliLib.Brotli.Components.Compressed;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
-using BrotliLib.Brotli.Components.Utils;
+using BrotliLib.Brotli.Utils;
 using BrotliLib.Collections;
 
 namespace BrotliLib.Brotli.Encode.Build{
