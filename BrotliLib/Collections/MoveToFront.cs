@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace BrotliLib.Brotli.Components.Utils{
+namespace BrotliLib.Collections{
     public static class MoveToFront{
         /// <summary>
         /// Performs an in-place move-to-front transformation on the input byte array.

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using BrotliLib.Brotli.Components.Utils;
 using BrotliLib.Brotli.Parameters;
 using BrotliLib.Collections;
@@ -49,34 +50,129 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Types
 
+        public sealed class Literals : Builder{
+            public const int TreesPerBlockType = 64;
+            public static readonly ContextMap Simple = new Literals(1).Build();
+
+            public Literals(int blockTypeCount) : base(Category.Literal, TreesPerBlockType, blockTypeCount){}
+        }
+
+        public sealed class Distances : Builder{
+            public const int TreesPerBlockType = 4;
+            public static readonly ContextMap Simple = new Distances(1).Build();
+
+            public Distances(int blockTypeCount) : base(Category.Distance, TreesPerBlockType, blockTypeCount){}
+        }
+
+        public static Builder For(BlockTypeInfo blockTypeInfo){
+            return blockTypeInfo.Category switch{
+                Category.Literal => new Literals(blockTypeInfo.TypeCount),
+                Category.Distance => new Distances(blockTypeInfo.TypeCount),
+                _ => throw new InvalidOperationException("Context maps can only be created for literals and distances."),
+            };
+        }
+
+        // Builder
+
         public abstract class Builder{
             private readonly Category category;
-            private readonly int treeCount;
             private readonly int treesPerBlockType;
+            private readonly int blockTypeCount;
             private readonly byte[] contextMap;
 
             public int Length => contextMap.Length;
+            public int TreeCount => 1 + contextMap.Max();
 
             public byte this[int index]{
                 get => contextMap[index];
                 set => contextMap[index] = value;
             }
 
-            private protected Builder(Category category, int treeCount, int treesPerBlockType, int blockTypeCount){
+            private protected Builder(Category category, int treesPerBlockType, int blockTypeCount){
                 this.category = category;
-                this.treeCount = treeCount;
                 this.treesPerBlockType = treesPerBlockType;
+                this.blockTypeCount = blockTypeCount;
                 this.contextMap = new byte[blockTypeCount * treesPerBlockType];
             }
 
-            public Builder Set(int index, byte value){
-                contextMap[index] = value;
+            private void CheckBlockType(int blockType){
+                if (blockType < 0 || blockType >= blockTypeCount){
+                    throw new ArgumentOutOfRangeException(nameof(blockType));
+                }
+            }
+
+            private void CheckIndexRange(IntRange range){
+                if (range.First < 0 || range.Last >= treesPerBlockType){
+                    throw new ArgumentOutOfRangeException(nameof(range));
+                }
+            }
+
+            /// <summary>
+            /// Sets the tree ID for a particular <paramref name="blockType"/> and <paramref name="index"/>.
+            /// </summary>
+            public Builder Set(int blockType, int index, byte value){
+                CheckBlockType(blockType);
+                CheckIndexRange(IntRange.Only(index));
+
+                contextMap[blockType * treesPerBlockType + index] = value;
                 return this;
             }
 
-            public Builder Set(IntRange range, byte value){
+            /// <summary>
+            /// Sets the tree ID for a particular <paramref name="blockType"/> and a <paramref name="range"/> of indices.
+            /// </summary>
+            public Builder Set(int blockType, IntRange range, byte value){
+                CheckBlockType(blockType);
+                CheckIndexRange(range);
+
+                int blockOffset = blockType * treesPerBlockType;
+
                 for(int index = range.First; index <= range.Last; index++){
-                    contextMap[index] = value;
+                    contextMap[blockOffset + index] = value;
+                }
+
+                return this;
+            }
+
+            /// <summary>
+            /// Sets all tree IDs for a particular <paramref name="blockType"/>.
+            /// </summary>
+            public Builder Set(int blockType, byte[] values){
+                CheckBlockType(blockType);
+
+                if (values.Length != treesPerBlockType){
+                    throw new ArgumentException("Context map definition has the wrong size (" + values.Length + " != " + treesPerBlockType + ").", nameof(values));
+                }
+
+                Buffer.BlockCopy(values, 0, contextMap, blockType * treesPerBlockType, treesPerBlockType);
+                return this;
+            }
+
+            /// <summary>
+            /// Copies the first block type over all other block types.
+            /// </summary>
+            /// <remarks>metablock.c (MapStaticContexts)</remarks>
+            /// <param name="separateTreesPerBlockType">When true, each block type gets its own separate tree IDs. When false, the context map from first block type is copied over verbatim.</param>
+            public Builder RepeatFirstBlockType(bool separateTreesPerBlockType){
+                for(int blockType = 1; blockType < blockTypeCount; blockType++){
+                    Buffer.BlockCopy(contextMap, 0, contextMap, blockType * treesPerBlockType, treesPerBlockType);
+                }
+
+                if (separateTreesPerBlockType){
+                    int totalContexts = 1 + contextMap.Take(treesPerBlockType).Max();
+
+                    if (totalContexts * blockTypeCount > 256){
+                        throw new InvalidOperationException("Cannot define separate trees per block type, not enough space (" + (totalContexts * blockTypeCount) + " > 256).");
+                    }
+
+                    for(int blockType = 1; blockType < blockTypeCount; blockType++){
+                        int blockOffset = blockType * treesPerBlockType;
+                        byte treeOffset = (byte)(blockType * totalContexts);
+
+                        for(int index = 0; index < treesPerBlockType; index++){
+                            contextMap[blockOffset + index] += treeOffset;
+                        }
+                    }
                 }
 
                 return this;
@@ -87,30 +183,8 @@ namespace BrotliLib.Brotli.Components.Header{
             }
 
             public ContextMap Build(){
-                return new ContextMap(category, treeCount, treesPerBlockType, CollectionHelper.Clone(contextMap));
+                return new ContextMap(category, TreeCount, treesPerBlockType, CollectionHelper.Clone(contextMap));
             }
-        }
-
-        public sealed class Literals : Builder{
-            public const int TreesPerBlockType = 64;
-            public static readonly ContextMap Simple = new Literals(1, 1).Build();
-
-            public Literals(int treeCount, int blockTypeCount) : base(Category.Literal, treeCount, TreesPerBlockType, blockTypeCount){}
-        }
-
-        public sealed class Distances : Builder{
-            public const int TreesPerBlockType = 4;
-            public static readonly ContextMap Simple = new Distances(1, 1).Build();
-
-            public Distances(int treeCount, int blockTypeCount) : base(Category.Distance, treeCount, TreesPerBlockType, blockTypeCount){}
-        }
-
-        public static Builder For(int treeCount, BlockTypeInfo blockTypeInfo){
-            return blockTypeInfo.Category switch{
-                Category.Literal => new Literals(treeCount, blockTypeInfo.TypeCount),
-                Category.Distance => new Distances(treeCount, blockTypeInfo.TypeCount),
-                _ => throw new InvalidOperationException("Context maps can only be created for literals and distances."),
-            };
         }
         
         // Helpers
@@ -171,7 +245,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
             (reader, context) => {
                 int treeCount = reader.ReadValue(VariableLength11Code.Deserialize, NoContext.Value, "NTREES", value => value.Value);
-                var contextMap = For(treeCount, context);
+                var contextMap = For(context);
 
                 if (treeCount > 1){
                     byte runLengthCodeCount = (byte)reader.MarkValue("RLEMAX", () => reader.NextBit() ? 1 + reader.NextChunk(4) : 0);
@@ -262,7 +336,7 @@ namespace BrotliLib.Brotli.Components.Header{
                 var codeContext = GetCodeTreeContext(obj.TreeCount + runLengthCodeCount);
                 var codeTree = HuffmanTree<int>.FromSymbols(new FrequencyList<int>(symbols));
 
-                HuffmanTree<int>.Serialize(writer, codeTree, codeContext);
+                HuffmanTree<int>.Serialize(writer, codeTree, codeContext, parameters);
 
                 foreach(int symbol in symbols){
                     writer.WriteBits(codeTree.FindPath(symbol));

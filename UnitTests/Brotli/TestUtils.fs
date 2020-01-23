@@ -3,7 +3,7 @@
 open Xunit
 open System
 open System.Collections.Generic
-open BrotliLib.Brotli.Components.Utils
+open BrotliLib.Collections
 
 
 module MoveToFront =
