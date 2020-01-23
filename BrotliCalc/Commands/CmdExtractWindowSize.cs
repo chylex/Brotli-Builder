@@ -20,7 +20,7 @@ namespace BrotliCalc.Commands{
 
             foreach(var compressed in group.Compressed){
                 if (int.TryParse(compressed.Identifier, out int level) && level >= 0 && level <= 11){
-                    sizes[level + 1] = compressed.Structure.Parameters.WindowSize.Bits;
+                    sizes[level + 1] = compressed.Reader.Parameters.WindowSize.Bits;
                 }
             }
 

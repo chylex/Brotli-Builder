@@ -33,7 +33,7 @@ namespace BrotliCalc.Commands{
         }
 
         protected override byte[] MapFile(BrotliFileGroup group, BrotliFile.Compressed file){
-            var (_, markerRoot) = file.GetStructureWithMarkers(markerLevel);
+            var markerRoot = file.GenerateMarkers(markerLevel);
             var text = markerRoot.BuildText(includeBitCounts);
 
             return Encoding.UTF8.GetBytes(text);

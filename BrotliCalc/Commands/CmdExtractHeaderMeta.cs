@@ -23,11 +23,13 @@ namespace BrotliCalc.Commands{
 
         protected override IEnumerable<object[]> GenerateRows(BrotliFileGroup group, BrotliFile.Compressed file){
             var quality = file.Identifier;
-            var metaBlocks = file.Structure.MetaBlocks;
+            var reader = file.Reader;
 
-            for(int index = 0; index < metaBlocks.Count; index++){
-                var metaBlock = metaBlocks[index];
-                var row = new List<object>{ file, quality, index, GetMetaBlockType(metaBlock), metaBlock.DataLength.UncompressedBytes };
+            MetaBlock? metaBlock;
+            int index = 0;
+
+            while((metaBlock = reader.NextMetaBlock()) != null){
+                var row = new List<object>{ file, quality, index++, GetMetaBlockType(metaBlock), metaBlock.DataLength.UncompressedBytes };
 
                 if (metaBlock is MetaBlock.Compressed c){
                     ExtractMetadata(row, c.Header, c.Data);

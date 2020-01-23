@@ -55,6 +55,8 @@ namespace BrotliCalc.Helpers{
             public override string FullName => $"{Name}.{Identifier}{Brotli.CompressedFileExtension}";
 
             public BrotliFileStructure Structure => structureLazy.Value;
+            public BrotliFileReader Reader => BrotliFileReader.FromBytes(Contents, MarkerLevel.None);
+
             private readonly Lazy<BrotliFileStructure> structureLazy;
 
             public Compressed(string path, string name, string identifier) : base(path, name){
@@ -66,8 +68,10 @@ namespace BrotliCalc.Helpers{
                 return Structure.Transform(transformer, Parameters.Compression);
             }
 
-            public (BrotliFileStructure Structure, MarkerRoot MarkerRoot) GetStructureWithMarkers(MarkerLevel markerLevel){
-                return BrotliFileStructure.FromBytes(Contents, markerLevel, Parameters.File.Dictionary);
+            public MarkerRoot GenerateMarkers(MarkerLevel markerLevel){
+                var reader = BrotliFileReader.FromBytes(Contents, markerLevel, Parameters.File.Dictionary);
+                while(reader.NextMetaBlock() != null){}
+                return reader.MarkerRoot;
             }
         }
     }
