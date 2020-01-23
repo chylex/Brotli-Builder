@@ -90,8 +90,14 @@ namespace BrotliBuilder.Components{
         }
 
         private void UpdateLabels(int bitStreamLength, int outputLength){
-            labelBitStream.Text = $"{Title} Bit Stream ({bitStreamLength} bits)";
-            labelOutput.Text = $"{Title} Output ({outputLength} bytes)";
+            int bitStreamBytes = (7 + bitStreamLength) / 8;
+
+            static string Number(int n){
+                return n.ToString("N0", Program.Culture);
+            }
+
+            labelBitStream.Text = $"{Title} Bit Stream ({Number(bitStreamLength)} bit{(bitStreamLength == 1 ? "" : "s")} / {Number(bitStreamBytes)} byte{(bitStreamBytes == 1 ? "" : "s")})";
+            labelOutput.Text = $"{Title} Output ({Number(outputLength)} bytes)";
         }
 
         private void ResetLabels(){

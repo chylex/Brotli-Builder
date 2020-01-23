@@ -206,6 +206,10 @@ namespace BrotliBuilder.Blocks{
             }
 
             public override string ToString(){
+                static string Number(int n){
+                    return n.ToString("N0", Program.Culture);
+                }
+
                 string detail;
 
                 switch(Value){
@@ -215,15 +219,15 @@ namespace BrotliBuilder.Blocks{
 
                     case MetaBlock.PaddedEmpty pe:
                         int length = pe.HiddenData.Length;
-                        detail = length == 0 ? "Empty, Padded" : $"Empty, Skip {length} B";
+                        detail = length == 0 ? "Empty, Padded" : $"Empty, Skip {Number(length)} B";
                         break;
 
                     case MetaBlock.Uncompressed u:
-                        detail = $"Uncompressed, {u.DataLength.UncompressedBytes} B";
+                        detail = $"Uncompressed, {Number(u.DataLength.UncompressedBytes)} B";
                         break;
 
                     case MetaBlock.Compressed c:
-                        detail = $"Compressed, {c.DataLength.UncompressedBytes} B";
+                        detail = $"Compressed, {Number(c.DataLength.UncompressedBytes)} B";
                         break;
 
                     default:
