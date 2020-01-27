@@ -355,7 +355,7 @@ namespace BrotliBuilder{
         }
         
         private void brotliFilePanel_MarkersUpdated(object? sender, MarkedTextBox.MarkerUpdateEventArgs e){
-            brotliMarkerInfoPanel.UpdateMarkers(e.MarkerRoot, e.MarkerSequence, e.HighlightedNodes, e.CaretNode);
+            brotliMarkerInfoPanel.UpdateMarkers(e.Title, e.MarkerRoot, e.MarkerSequence, e.HighlightedNodes, e.CaretNode);
         }
 
         #endregion

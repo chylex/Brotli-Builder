@@ -387,7 +387,7 @@
             this.labelFileStructure.Name = "labelFileStructure";
             this.labelFileStructure.Size = new System.Drawing.Size(76, 15);
             this.labelFileStructure.TabIndex = 0;
-            this.labelFileStructure.Text = "File Structure";
+            this.labelFileStructure.Text = "File Structure (Generated)";
             // 
             // splitContainerMain
             // 

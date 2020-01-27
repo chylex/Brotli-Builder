@@ -16,6 +16,7 @@ namespace BrotliBuilder.Components{
 
             set{
                 title = value;
+                textBoxBitStream.MarkerTitle = value;
                 ResetLabels();
             }
         }

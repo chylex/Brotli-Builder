@@ -71,11 +71,14 @@
             // 
             // labelMarkerInfo
             // 
-            this.labelMarkerInfo.AutoSize = true;
+            this.labelMarkerInfo.AutoSize = false;
+            this.textBoxContext.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.labelMarkerInfo.Location = new System.Drawing.Point(9, 2);
             this.labelMarkerInfo.Margin = new System.Windows.Forms.Padding(3, 2, 3, 0);
             this.labelMarkerInfo.Name = "labelMarkerInfo";
-            this.labelMarkerInfo.Size = new System.Drawing.Size(61, 13);
+            this.labelMarkerInfo.Size = new System.Drawing.Size(588, 13);
             this.labelMarkerInfo.TabIndex = 2;
             this.labelMarkerInfo.Text = "Marker Info";
             // 

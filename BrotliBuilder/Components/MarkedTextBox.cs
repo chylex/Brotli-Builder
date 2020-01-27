@@ -17,12 +17,14 @@ namespace BrotliBuilder.Components{
         private static readonly TextStyle HighlightStyle = new TextStyle(new SolidBrush(Color.White), new SolidBrush(Color.FromArgb(48, 48, 48)), FontStyle.Regular);
 
         public class MarkerUpdateEventArgs : EventArgs{
+            public string Title { get; }
             public MarkerRoot MarkerRoot { get; }
             public IList<MarkerNode> MarkerSequence { get; }
             public HashSet<MarkerNode> HighlightedNodes { get; }
             public MarkerNode? CaretNode { get; }
 
-            public MarkerUpdateEventArgs(MarkerRoot markerRoot, IList<MarkerNode> markerSequence, HashSet<MarkerNode> highlightedNodes, MarkerNode? caretNode){
+            public MarkerUpdateEventArgs(string title, MarkerRoot markerRoot, IList<MarkerNode> markerSequence, HashSet<MarkerNode> highlightedNodes, MarkerNode? caretNode){
+                this.Title = title;
                 this.MarkerRoot = markerRoot;
                 this.MarkerSequence = markerSequence;
                 this.HighlightedNodes = highlightedNodes;
@@ -30,6 +32,7 @@ namespace BrotliBuilder.Components{
             }
         }
 
+        public string MarkerTitle { get; set; }
         public MarkerRoot? MarkerRoot { get; private set; }
 
         public event EventHandler<MarkerUpdateEventArgs>? MarkersUpdated;
@@ -137,7 +140,7 @@ namespace BrotliBuilder.Components{
             updatingMarkers = false;
             
             markerCaret = newMarkerCaret;
-            MarkersUpdated?.Invoke(this, new MarkerUpdateEventArgs(MarkerRoot!, markerSequence, new HashSet<MarkerNode>(highlightedMarkers), markerCaret));
+            MarkersUpdated?.Invoke(this, new MarkerUpdateEventArgs(MarkerTitle, MarkerRoot!, markerSequence, new HashSet<MarkerNode>(highlightedMarkers), markerCaret));
         }
 
         private void MarkedFastTextBox_SelectionChanged(object? sender, EventArgs e){

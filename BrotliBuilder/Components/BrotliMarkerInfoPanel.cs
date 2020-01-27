@@ -23,21 +23,25 @@ namespace BrotliBuilder.Components{
             set => textBoxContext.WordWrap = value;
         }
 
+        private readonly string originalTitle;
+
         public BrotliMarkerInfoPanel(){
             InitializeComponent();
+            originalTitle = labelMarkerInfo.Text;
             textBoxContext.DefaultStyle = StyleNormalGray;
         }
 
         private IList<MarkerNode>? prevMarkerNodes = null;
         private MarkerNode? prevCaretNode = null;
 
-        public void UpdateMarkers(MarkerRoot? markerRoot, IList<MarkerNode> markerSequence, HashSet<MarkerNode>? highlightedNodes, MarkerNode? caretNode){
+        public void UpdateMarkers(string? title, MarkerRoot? markerRoot, IList<MarkerNode> markerSequence, HashSet<MarkerNode>? highlightedNodes, MarkerNode? caretNode){
             if (ReferenceEquals(prevCaretNode, caretNode)){
                 return;
             }
 
             prevCaretNode = caretNode;
-
+            
+            labelMarkerInfo.Text = title == null ? originalTitle : $"{originalTitle} ({title})";
             textBoxContext.Selection.BeginUpdate();
             textBoxContext.ClearStyle(StyleIndex.All);
             
@@ -69,7 +73,7 @@ namespace BrotliBuilder.Components{
         }
 
         public void ResetMarkers(){
-            UpdateMarkers(null, Array.Empty<MarkerNode>(), null, null);
+            UpdateMarkers(null, null, Array.Empty<MarkerNode>(), null, null);
         }
     }
 }
