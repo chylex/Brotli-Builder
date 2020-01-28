@@ -13,8 +13,20 @@ namespace BrotliLib.Brotli.Components.Data{
         public static readonly AlphabetSize AlphabetSize = new AlphabetSize(256);
         public static readonly LiteralTree.Context TreeContext = new LiteralTree.Context(AlphabetSize, value => new Literal((byte)value), symbol => symbol.Value);
         
+        // Conversions
+
         public static IList<Literal> FromBytes(byte[] bytes){
             return Array.ConvertAll(bytes, b => new Literal(b));
+        }
+
+        public static IList<Literal> FromBytes(byte[] bytes, int start, int count){
+            Literal[] literals = new Literal[count];
+
+            for(int offset = 0; offset < count; offset++){
+                literals[offset] = new Literal(bytes[start + offset]);
+            }
+
+            return literals;
         }
 
         // Data

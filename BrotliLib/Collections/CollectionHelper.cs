@@ -5,9 +5,9 @@ using BrotliLib.Numbers;
 
 namespace BrotliLib.Collections{
     public static class CollectionHelper{
-        public static byte[] Slice(byte[] input, int index, int count){
+        public static byte[] Slice(byte[] input, int start, int count){
             byte[] slice = new byte[count];
-            Buffer.BlockCopy(input, index, slice, 0, count);
+            Buffer.BlockCopy(input, start, slice, 0, count);
             return slice;
         }
 

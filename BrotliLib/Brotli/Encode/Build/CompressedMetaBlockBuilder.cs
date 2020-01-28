@@ -24,6 +24,7 @@ namespace BrotliLib.Brotli.Encode.Build{
         public IReadOnlyList<InsertCopyCommand> InsertCopyCommands => icCommands;
 
         private readonly List<InsertCopyCommand> icCommands = new List<InsertCopyCommand>();
+        private DistanceCodeZeroStrategy? finalInsertDistanceCodeZeroStrategy;
         
         private readonly BrotliGlobalState initialState;
         private readonly BrotliGlobalState intermediateState;
@@ -62,7 +63,7 @@ namespace BrotliLib.Brotli.Encode.Build{
 
         // Commands
 
-        public CompressedMetaBlockBuilder AddInsertCopy(InsertCopyCommand command){
+        private CompressedMetaBlockBuilder AddInsertCopy(InsertCopyCommand command){
             icCommands.Add(command);
 
             intermediateState.OutputLiterals(command.Literals);
@@ -74,14 +75,53 @@ namespace BrotliLib.Brotli.Encode.Build{
             return this;
         }
 
+        public CompressedMetaBlockBuilder AddInsertFinal(IList<Literal> literals, DistanceCodeZeroStrategy dczStrategy = DistanceCodeZeroStrategy.PreferEnabled){
+            finalInsertDistanceCodeZeroStrategy = dczStrategy;
+            return AddInsertCopy(new InsertCopyCommand(literals));
+        }
+
+        public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, int copyLength, int copyDistance){
+            return AddInsertCopy(new InsertCopyCommand(literals, copyLength, copyDistance));
+        }
+
+        public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, int copyLength, DistanceInfo copyDistance){
+            return AddInsertCopy(new InsertCopyCommand(literals, copyLength, copyDistance));
+        }
+
+        public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, int copyLength, DistanceCodeZeroStrategy dczStrategy){
+            var useImplicitCodeZero = new InsertCopyLengths(literals.Count, copyLength).MakeCode(dczStrategy).UseDistanceCodeZero;
+            var distanceInfo = useImplicitCodeZero ? DistanceInfo.ImplicitCodeZero : DistanceInfo.ExplicitCodeZero;
+
+            return AddInsertCopy(literals, copyLength, distanceInfo);
+        }
+
         public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, DictionaryIndexEntry dictionaryEntry){
-            return AddInsertCopy(new InsertCopyCommand(literals, dictionaryEntry.CopyLength, 1 + dictionaryEntry.Packed + Math.Min(intermediateState.Parameters.WindowSize.Bytes, intermediateState.OutputSize + literals.Count)));
+            var startDistance = 1 + Math.Min(intermediateState.Parameters.WindowSize.Bytes, intermediateState.OutputSize + literals.Count);
+            var entryDistance = dictionaryEntry.Packed + startDistance;
+
+            return AddInsertCopy(literals, dictionaryEntry.CopyLength, entryDistance);
+        }
+
+        public CompressedMetaBlockBuilder AddCopy(int copyLength, int copyDistance){
+            return AddInsertCopy(Array.Empty<Literal>(), copyLength, copyDistance);
+        }
+        
+        public CompressedMetaBlockBuilder AddCopy(int copyLength, DistanceInfo copyDistance){
+            return AddInsertCopy(Array.Empty<Literal>(), copyLength, copyDistance);
+        }
+        
+        public CompressedMetaBlockBuilder AddCopy(int copyLength, DistanceCodeZeroStrategy dczStrategy){
+            return AddInsertCopy(Array.Empty<Literal>(), copyLength, dczStrategy);
+        }
+
+        public CompressedMetaBlockBuilder AddCopy(DictionaryIndexEntry dictionaryEntry){
+            return AddInsertCopy(Array.Empty<Literal>(), dictionaryEntry);
         }
 
         // Building
 
-        public (MetaBlock MetaBlock, BrotliEncodeInfo NextInfo) Build(BrotliEncodeInfo info){
-            var (metaBlock, nextState) = Build(info.CompressionParameters);
+        public (MetaBlock MetaBlock, BrotliEncodeInfo NextInfo) Build(BrotliEncodeInfo info, BrotliCompressionParameters? parameters = null){
+            var (metaBlock, nextState) = Build(parameters ?? info.CompressionParameters);
             return (metaBlock, info.WithProcessedBytes(nextState, OutputSize));
         }
 
@@ -123,7 +163,11 @@ namespace BrotliLib.Brotli.Encode.Build{
                 InsertCopyLengthCode icLengthCode;
 
                 if (icCommand.CopyDistance == DistanceInfo.EndsAfterLiterals){
-                    icLengthCode = icLengthValues.MakeCode(DistanceCodeZeroStrategy.PreferEnabled); // TODO good strategy?
+                    if (icCommandIndex != icCommandCount - 1){
+                        throw new InvalidOperationException("Insert&copy command that ends after literals must be the last.");
+                    }
+
+                    icLengthCode = icLengthValues.MakeCode(finalInsertDistanceCodeZeroStrategy ?? throw new InvalidOperationException());
                 }
                 else{
                     DistanceCode? distanceCode = null;
@@ -178,9 +222,9 @@ namespace BrotliLib.Brotli.Encode.Build{
                 LiteralContextModes,
                 LiteralCtxMap,
                 DistanceCtxMap,
-                ConstructHuffmanTrees(literalFreq),
-                ConstructHuffmanTrees(icLengthCodeFreq),
-                ConstructHuffmanTrees(distanceCodeFreq)
+                ConstructHuffmanTrees(literalFreq, parameters.GenerateLiteralTree),
+                ConstructHuffmanTrees(icLengthCodeFreq, parameters.GenerateLengthCodeTree),
+                ConstructHuffmanTrees(distanceCodeFreq, parameters.GenerateDistanceCodeTree)
             );
 
             var data = new CompressedData(icCommandsFinal, bsCommands);
@@ -201,8 +245,14 @@ namespace BrotliLib.Brotli.Encode.Build{
             return array;
         }
 
-        private static HuffmanTree<T>[] ConstructHuffmanTrees<T>(FrequencyList<T>[] source) where T : IComparable<T>{
-            return source.Select(list => HuffmanTree<T>.FromSymbols(list)).ToArray();
+        private static HuffmanTree<T>[] ConstructHuffmanTrees<T>(FrequencyList<T>[] source, BrotliCompressionParameters.GenerateHuffmanTree<T> generator) where T : IComparable<T>{
+            HuffmanTree<T>[] array = new HuffmanTree<T>[source.Length];
+
+            for(int index = 0; index < array.Length; index++){
+                array[index] = generator(source[index]);
+            }
+
+            return array;
         }
     }
 }

@@ -21,11 +21,12 @@ namespace BrotliLib.Brotli{
         // Instance
 
         public BrotliFileParameters Parameters { get; }
-        public BrotliGlobalState State { get; }
 
+        public BrotliGlobalState State => state.Clone();
         public MarkerRoot MarkerRoot => reader.MarkerRoot;
 
         private readonly IMarkedBitReader reader;
+        private readonly BrotliGlobalState state;
         private bool isAtEnd = false;
 
         private BrotliFileReader(BitStream bits, MarkerLevel markerLevel, BrotliDictionary dictionary){
@@ -36,7 +37,7 @@ namespace BrotliLib.Brotli{
                 Dictionary = dictionary
             }.Build();
 
-            this.State = new BrotliGlobalState(Parameters);
+            this.state = new BrotliGlobalState(Parameters);
         }
 
         // Reader
@@ -50,7 +51,7 @@ namespace BrotliLib.Brotli{
                 return null;
             }
 
-            MetaBlock metaBlock = MetaBlock.Deserialize(reader, State);
+            MetaBlock metaBlock = MetaBlock.Deserialize(reader, state);
             isAtEnd = metaBlock.IsLast;
             return metaBlock;
         }

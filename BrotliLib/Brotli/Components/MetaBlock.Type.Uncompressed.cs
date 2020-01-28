@@ -21,6 +21,10 @@ namespace BrotliLib.Brotli.Components{
                 this.uncompressedData = CollectionHelper.Clone(uncompressedData);
             }
 
+            public Uncompressed(byte[] uncompressedData, int start, int count) : base(false, new DataLength(count)){
+                this.uncompressedData = CollectionHelper.Slice(uncompressedData, start, count);
+            }
+
             public override void Decompress(BrotliGlobalState state){
                 state.OutputBytes(uncompressedData);
             }
@@ -76,7 +80,7 @@ namespace BrotliLib.Brotli.Components{
                     throw new InvalidOperationException("Uncompressed meta-block must not be empty.");
                 }
                 else if (bytes.Length != context.DataLength.UncompressedBytes){
-                    throw new InvalidOperationException("Uncompressed meta-block has invalid data length (" + bytes.Length + " != " + context.DataLength.UncompressedBytes + ")");
+                    throw new InvalidOperationException("Uncompressed meta-block has invalid data length (" + bytes.Length + " != " + context.DataLength.UncompressedBytes + ").");
                 }
 
                 writer.AlignToByteBoundary();

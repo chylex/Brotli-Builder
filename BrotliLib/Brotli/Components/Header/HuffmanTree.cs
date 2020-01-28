@@ -18,9 +18,16 @@ namespace BrotliLib.Brotli.Components.Header{
         public const int DefaultMaxDepth = 15;
 
         /// <summary>
+        /// Generates a canonical depth-limited Huffman tree using the provided <paramref name="symbolFrequencies"/>, and default depth limit of 15.
+        /// </summary>
+        public static HuffmanTree<T> FromSymbols(FrequencyList<T> symbolFrequencies){
+            return FromSymbols(symbolFrequencies, DefaultMaxDepth);
+        }
+
+        /// <summary>
         /// Generates a canonical depth-limited Huffman tree using the provided <paramref name="symbolFrequencies"/>.
         /// </summary>
-        public static HuffmanTree<T> FromSymbols(FrequencyList<T> symbolFrequencies, byte maxDepth = DefaultMaxDepth){
+        public static HuffmanTree<T> FromSymbols(FrequencyList<T> symbolFrequencies, byte maxDepth){
             if (symbolFrequencies.Count == 0){
                 throw new ArgumentOutOfRangeException(nameof(symbolFrequencies), "Cannot generate a tree with no symbols.");
             }

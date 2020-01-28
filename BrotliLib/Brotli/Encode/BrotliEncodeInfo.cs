@@ -1,4 +1,5 @@
 ﻿using System;
+using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Encode.Build;
 using BrotliLib.Brotli.Parameters;
 
@@ -39,6 +40,12 @@ namespace BrotliLib.Brotli.Encode{
 
         public BrotliEncodeInfo WithProcessedBytes(BrotliGlobalState newState, int processedBytes){
             return new BrotliEncodeInfo(FileParameters, CompressionParameters, newState, Bytes.Slice(processedBytes));
+        }
+
+        public BrotliEncodeInfo WithOutputtedMetaBock(MetaBlock metaBlock){
+            var newState = State;
+            metaBlock.Decompress(newState);
+            return WithProcessedBytes(newState, metaBlock.DataLength.UncompressedBytes);
         }
     }
 }

@@ -12,13 +12,15 @@ namespace BrotliLib.Brotli.Components{
         public const int MinBits = 10;
         public const int MaxBits = 24;
 
+        public const int MarginBytes = 16;
+
         public static readonly IntRange BitsRange = new IntRange(MinBits, MaxBits);
 
         public static WindowSize Default => new WindowSize(16);
 
         // Data
         
-        public int Bytes => (1 << Bits) - 16;
+        public int Bytes => (1 << Bits) - MarginBytes;
         public int Bits { get; }
 
         public WindowSize(int wbits){

@@ -105,7 +105,7 @@ namespace BrotliImpl.Encoders{
             }
 
             if (nextLiteralBatch.Count > 0){
-                builder.AddInsertCopy(new InsertCopyCommand(nextLiteralBatch));
+                builder.AddInsertFinal(nextLiteralBatch);
             }
 
             return builder.Build(info);

@@ -37,7 +37,7 @@ namespace BrotliLib.Brotli{
         }
 
         public static BrotliFileStructure FromEncoder(BrotliFileParameters fileParameters, BrotliCompressionParameters compressionParameters, byte[] bytes, IBrotliEncoder encoder, params IBrotliTransformer[] transformers){
-            return new BrotliEncodePipeline(encoder, transformers).Apply(fileParameters, compressionParameters, bytes);
+            return new BrotliEncodePipeline.Simple(fileParameters.WindowSize, compressionParameters, encoder, transformers).Apply(bytes, fileParameters.Dictionary);
         }
 
         // Instance

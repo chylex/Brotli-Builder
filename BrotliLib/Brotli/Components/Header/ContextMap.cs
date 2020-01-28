@@ -150,8 +150,8 @@ namespace BrotliLib.Brotli.Components.Header{
 
             /// <summary>
             /// Copies the first block type over all other block types.
+            /// Adapted from https://github.com/google/brotli/blob/master/c/enc/metablock.c (MapStaticContexts).
             /// </summary>
-            /// <remarks>metablock.c (MapStaticContexts)</remarks>
             /// <param name="separateTreesPerBlockType">When true, each block type gets its own separate tree IDs. When false, the context map from first block type is copied over verbatim.</param>
             public Builder RepeatFirstBlockType(bool separateTreesPerBlockType){
                 for(int blockType = 1; blockType < blockTypeCount; blockType++){

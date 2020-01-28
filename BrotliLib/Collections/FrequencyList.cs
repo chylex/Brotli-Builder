@@ -11,6 +11,11 @@ namespace BrotliLib.Collections{
     public sealed class FrequencyList<T> : IReadOnlyCollection<T> where T : IComparable<T>{
         public int Count => frequencies.Count;
 
+        public int this[T symbol]{
+            get => frequencies.TryGetValue(symbol, out int count) ? count : 0;
+            set => frequencies[symbol] = value;
+        }
+
         public IList<HuffmanGenerator<T>.SymbolFreq> HuffmanFreq{
             get{
                 return frequencies.Select(kvp => new HuffmanGenerator<T>.SymbolFreq(kvp.Key, kvp.Value)).ToArray();
