@@ -14,7 +14,7 @@ namespace BrotliLib.Brotli{
     /// </summary>
     public sealed class BrotliFileStructure{
         public static BrotliFileStructure NewEmpty(){
-            var bfs = new BrotliFileStructure(new BrotliFileParameters());
+            var bfs = new BrotliFileStructure(BrotliFileParameters.Default);
             bfs.MetaBlocks.Add(new MetaBlock.LastEmpty());
             return bfs;
         }

@@ -12,8 +12,8 @@ using BrotliLib.Serialization;
 
 namespace BrotliBuilder.State{
     sealed class BrotliFileController{
-        public BrotliSerializationParameters SerializationParameters { get; } = BrotliSerializationParameters.Default;
-        public BrotliCompressionParameters CompressionParameters { get; } = BrotliCompressionParameters.Default;
+        public BrotliSerializationParameters SerializationParameters { get; set; } = BrotliSerializationParameters.Default;
+        public BrotliCompressionParameters CompressionParameters { get; set; } = BrotliCompressionParameters.Default;
 
         public MarkerLevel BitMarkerLevel { get; set; } = MarkerLevel.Verbose;
         

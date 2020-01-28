@@ -482,8 +482,13 @@ namespace BrotliBuilder{
 
         private void menuItemConfigureSerializationParameters_Click(object? sender, EventArgs e){
             using FormSerializationParameters form = new FormSerializationParameters(fileGenerated.SerializationParameters);
+            form.Updated += fileGenerated_SerializationParametersUpdated;
             form.Reserialize += fileGenerated_Reserialize;
             form.ShowDialog();
+        }
+
+        private void fileGenerated_SerializationParametersUpdated(object? sender, BrotliSerializationParameters newParameters){
+            fileGenerated.SerializationParameters = newParameters;
         }
 
         private void fileGenerated_Reserialize(object? sender, EventArgs e){

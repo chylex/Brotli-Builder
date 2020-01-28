@@ -31,10 +31,10 @@ namespace BrotliLib.Brotli{
         private BrotliFileReader(BitStream bits, MarkerLevel markerLevel, BrotliDictionary dictionary){
             this.reader = markerLevel.CreateBitReader(bits);
 
-            this.Parameters = new BrotliFileParameters{
+            this.Parameters = new BrotliFileParameters.Builder{
                 WindowSize = ReadHeader(),
                 Dictionary = dictionary
-            };
+            }.Build();
 
             this.State = new BrotliGlobalState(Parameters);
         }

@@ -6,14 +6,15 @@ using DecideContextMapFeature = BrotliLib.Brotli.Parameters.BrotliSerializationP
 
 namespace BrotliBuilder.Dialogs{
     public partial class FormSerializationParameters : Form{
+        public event EventHandler<BrotliSerializationParameters>? Updated;
         public event EventHandler? Reserialize;
 
-        private readonly BrotliSerializationParameters parameters;
+        private readonly BrotliSerializationParameters.Builder parameters;
 
         public FormSerializationParameters(BrotliSerializationParameters parameters){
             InitializeComponent();
 
-            this.parameters = parameters;
+            this.parameters = new BrotliSerializationParameters.Builder(parameters);
             this.Disposed += FormParameters_Disposed;
 
             LoadOptions();
@@ -58,6 +59,8 @@ namespace BrotliBuilder.Dialogs{
 
             parameters.UseContextMapIMTF = checkBoxContextMapIMTF.Checked ? ContextMapFeatureEnable : ContextMapFeatureDisable;
             parameters.UseContextMapRLE  = checkBoxContextMapRLE.Checked  ? ContextMapFeatureEnable : ContextMapFeatureDisable;
+
+            Updated?.Invoke(this, parameters.Build());
         }
     }
 }
