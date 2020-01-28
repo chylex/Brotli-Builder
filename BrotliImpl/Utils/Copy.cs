@@ -4,10 +4,10 @@ using BrotliLib.Brotli.Dictionary.Index;
 using BrotliLib.Brotli.Encode.Build;
 using BrotliLib.Brotli.Parameters;
 
-namespace BrotliImpl.Encoders.Utils{
+namespace BrotliImpl.Utils{
     abstract class Copy{
         internal abstract int OutputLength { get; }
-        internal abstract int AddCommand(BrotliFileParameters parameters, CompressedMetaBlockBuilder builder, IList<Literal> literals);
+        internal abstract int AddCommand(CompressedMetaBlockBuilder builder, IList<Literal> literals);
 
         internal class BackReference : Copy{
             internal override int OutputLength => length;
@@ -20,8 +20,8 @@ namespace BrotliImpl.Encoders.Utils{
                 this.distance = distance;
             }
 
-            internal override int AddCommand(BrotliFileParameters parameters, CompressedMetaBlockBuilder builder, IList<Literal> literals){
-                builder.AddInsertCopy(new InsertCopyCommand(literals, length, distance));
+            internal override int AddCommand(CompressedMetaBlockBuilder builder, IList<Literal> literals){
+                builder.AddInsertCopy(literals, length, distance);
                 return length;
             }
         }
@@ -35,7 +35,7 @@ namespace BrotliImpl.Encoders.Utils{
                 this.entry = entry;
             }
 
-            internal override int AddCommand(BrotliFileParameters parameters, CompressedMetaBlockBuilder builder, IList<Literal> literals){
+            internal override int AddCommand(CompressedMetaBlockBuilder builder, IList<Literal> literals){
                 builder.AddInsertCopy(literals, entry);
                 return entry.OutputLength;
             }

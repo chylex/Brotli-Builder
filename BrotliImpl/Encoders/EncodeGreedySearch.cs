@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using BrotliImpl.Encoders.Utils;
+using BrotliImpl.Utils;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
@@ -34,11 +34,7 @@ namespace BrotliImpl.Encoders{
                 int maxDistance = Math.Min(start, parameters.WindowSize.Bytes);
 
                 for(int distance = 1; distance <= maxDistance; distance++){
-                    int match = 0;
-
-                    while(match < maxLength && start + match < length && bytes[start + match] == bytes[start + match - distance]){
-                        ++match;
-                    }
+                    int match = Match.DetermineLength(bytes, start, start - distance, maxLength);
 
                     if (match >= minLength){
                         return new Copy.BackReference(match, distance);
@@ -98,7 +94,7 @@ namespace BrotliImpl.Encoders{
                     mbSize = nextLiteralBatch.Count;
                 }
                 else{
-                    index += copy.AddCommand(info.FileParameters, builder, nextLiteralBatch);
+                    index += copy.AddCommand(builder, nextLiteralBatch);
                     nextLiteralBatch.Clear();
                     mbSize = builder.OutputSize;
                 }
