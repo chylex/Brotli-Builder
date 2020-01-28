@@ -7,6 +7,15 @@ using BrotliLib.Markers;
 
 namespace BrotliCalc.Helpers{
     abstract class BrotliFile{
+        private static int? TryGetFileSize(string path){
+            try{
+                return (int)new FileInfo(path).Length;
+            }catch(Exception ex){
+                Debug.WriteLine(ex);
+                return null;
+            }
+        }
+
         public string Path { get; }
         public string Name { get; }
 
@@ -23,15 +32,7 @@ namespace BrotliCalc.Helpers{
             this.Name = name;
 
             this.contentsLazy = new Lazy<byte[]>(() => File.ReadAllBytes(Path), isThreadSafe: true);
-
-            this.sizeBytesLazy = new Lazy<int?>(() => {
-                try{
-                    return (int)new FileInfo(Path).Length;
-                }catch(Exception ex){
-                    Debug.WriteLine(ex);
-                    return null;
-                }
-            }, isThreadSafe: false);
+            this.sizeBytesLazy = new Lazy<int?>(() => TryGetFileSize(Path), isThreadSafe: true);
         }
 
         public override string ToString(){

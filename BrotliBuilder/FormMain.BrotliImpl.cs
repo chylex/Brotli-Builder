@@ -13,7 +13,7 @@ namespace BrotliBuilder{
             items.Add("-");
             items.Add("Greedy Search (Only Copies)",     (_, e) => OpenFileWithEncoder(parameters, new EncodeGreedySearch.OnlyBackReferences(minLength: 4)));
             items.Add("Greedy Search (Only Dictionary)", (_, e) => OpenFileWithEncoder(parameters, new EncodeGreedySearch.OnlyDictionary()));
-            items.Add("Greedy Search (Only Mixed)",      (_, e) => OpenFileWithEncoder(parameters, new EncodeGreedySearch.Mixed(minCopyLength: 4)));
+            items.Add("Greedy Search (Mixed)",           (_, e) => OpenFileWithEncoder(parameters, new EncodeGreedySearch.Mixed(minCopyLength: 4)));
         }
 
         private void InitializeMenuTransformers(){

@@ -17,13 +17,13 @@ namespace BrotliBuilder.Components{
         private static readonly TextStyle HighlightStyle = new TextStyle(new SolidBrush(Color.White), new SolidBrush(Color.FromArgb(48, 48, 48)), FontStyle.Regular);
 
         public class MarkerUpdateEventArgs : EventArgs{
-            public string Title { get; }
+            public string? Title { get; }
             public MarkerRoot MarkerRoot { get; }
             public IList<MarkerNode> MarkerSequence { get; }
             public HashSet<MarkerNode> HighlightedNodes { get; }
             public MarkerNode? CaretNode { get; }
 
-            public MarkerUpdateEventArgs(string title, MarkerRoot markerRoot, IList<MarkerNode> markerSequence, HashSet<MarkerNode> highlightedNodes, MarkerNode? caretNode){
+            public MarkerUpdateEventArgs(string? title, MarkerRoot markerRoot, IList<MarkerNode> markerSequence, HashSet<MarkerNode> highlightedNodes, MarkerNode? caretNode){
                 this.Title = title;
                 this.MarkerRoot = markerRoot;
                 this.MarkerSequence = markerSequence;
@@ -32,7 +32,7 @@ namespace BrotliBuilder.Components{
             }
         }
 
-        public string MarkerTitle { get; set; }
+        public string? MarkerTitle { get; set; }
         public MarkerRoot? MarkerRoot { get; private set; }
 
         public event EventHandler<MarkerUpdateEventArgs>? MarkersUpdated;
