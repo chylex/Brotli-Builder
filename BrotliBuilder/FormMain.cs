@@ -10,6 +10,7 @@ using BrotliBuilder.Dialogs;
 using BrotliBuilder.State;
 using BrotliBuilder.Utils;
 using BrotliLib.Brotli;
+using BrotliLib.Brotli.Dictionary;
 using BrotliLib.Brotli.Dictionary.Default;
 using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Parameters;
@@ -226,6 +227,7 @@ namespace BrotliBuilder{
                     filePanel.ResetPanel();
                     splitContainerRightBottom.Panel2Collapsed = true;
 
+                    menuItemCloseOriginal.Enabled = false;
                     menuItemCompareMarkers.Enabled = false;
                     menuItemCloneOriginalToGenerated.Enabled = false;
 
@@ -272,7 +274,8 @@ namespace BrotliBuilder{
                     else{
                         fileGenerated.LoadStructure(loaded.File, lastOriginalFileBytes);
                     }
-
+                    
+                    menuItemCloseOriginal.Enabled = true;
                     menuItemCloneOriginalToGenerated.Enabled = true;
                     break;
 
@@ -434,6 +437,10 @@ namespace BrotliBuilder{
             }
         }
 
+        private void menuItemCloseOriginal_Click(object? sender, EventArgs e){
+            fileOriginal.ResetToNothing();
+        }
+
         private void menuItemExit_Click(object? sender, EventArgs e){
             Close();
         }
@@ -539,13 +546,13 @@ namespace BrotliBuilder{
 
         #region Menu events (Encode / Transform)
 
-        private void OpenFileWithEncoder(BrotliFileParameters parameters, IBrotliEncoder encoder){
+        private void OpenFileWith(string title, Action<string> callback){
             if (PromptUnsavedChanges("Would you like to save changes before opening a new file?")){
                 return;
             }
 
             using OpenFileDialog dialog = new OpenFileDialog{
-                Title = "Open File to Encode",
+                Title = title,
                 Filter = "All Files (*.*)|*.*",
                 FileName = Path.GetFileName(lastFileName)
             };
@@ -553,10 +560,16 @@ namespace BrotliBuilder{
             if (dialog.ShowDialog() == DialogResult.OK){
                 lastFileName = dialog.FileName;
                 skipNextBlockRegeneration = false;
-
-                fileOriginal.ResetToNothing();
-                fileGenerated.EncodeFile(lastFileName, parameters, encoder);
+                callback(lastFileName);
             }
+        }
+
+        private void OpenFileWithEncoder(BrotliFileParameters parameters, IBrotliEncoder encoder){
+            OpenFileWith("Open File to Encode", fileName => fileGenerated.EncodeFile(fileName, parameters, encoder));
+        }
+        
+        private void OpenFileWithPipeline(BrotliDictionary dictionary, BrotliEncodePipeline pipeline){
+            OpenFileWith("Open File to Encode", fileName => fileGenerated.EncodeFile(fileName, pipeline, dictionary));
         }
         
         private void TransformCurrentFile(IBrotliTransformer transformer){

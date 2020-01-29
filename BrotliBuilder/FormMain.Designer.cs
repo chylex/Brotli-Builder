@@ -30,6 +30,7 @@
             this.menuItemSaveBrotli = new System.Windows.Forms.MenuItem();
             this.menuItemSaveOutput = new System.Windows.Forms.MenuItem();
             this.menuItemExit = new System.Windows.Forms.MenuItem();
+            this.menuItemCloseOriginal = new System.Windows.Forms.MenuItem();
             this.menuItemView = new System.Windows.Forms.MenuItem();
             this.menuItemFileStructure = new System.Windows.Forms.MenuItem();
             this.menuItemMarkerInfo = new System.Windows.Forms.MenuItem();
@@ -38,6 +39,8 @@
             this.menuItemTools = new System.Windows.Forms.MenuItem();
             this.menuItemStaticDictionary = new System.Windows.Forms.MenuItem();
             this.menuItemCompareMarkers = new System.Windows.Forms.MenuItem();
+            this.menuItemSeparatorF1 = new System.Windows.Forms.MenuItem();
+            this.menuItemSeparatorF2 = new System.Windows.Forms.MenuItem();
             this.menuItemSeparatorT1 = new System.Windows.Forms.MenuItem();
             this.menuItemSeparatorT2 = new System.Windows.Forms.MenuItem();
             this.menuItemCloneGeneratedToOriginal = new System.Windows.Forms.MenuItem();
@@ -97,6 +100,9 @@
             this.menuItemOpenBrotli,
             this.menuItemSaveBrotli,
             this.menuItemSaveOutput,
+            this.menuItemSeparatorF1,
+            this.menuItemCloseOriginal,
+            this.menuItemSeparatorF2,
             this.menuItemExit});
             this.menuItemFile.Text = "&File";
             // 
@@ -120,11 +126,27 @@
             this.menuItemSaveOutput.Text = "Save Output";
             this.menuItemSaveOutput.Click += new System.EventHandler(this.menuItemSaveOutput_Click);
             // 
+            // menuItemCloseOriginal
+            // 
+            this.menuItemCloseOriginal.Index = 4;
+            this.menuItemCloseOriginal.Text = "Close Original File";
+            this.menuItemCloseOriginal.Click += new System.EventHandler(this.menuItemCloseOriginal_Click);
+            // 
             // menuItemExit
             // 
-            this.menuItemExit.Index = 3;
+            this.menuItemExit.Index = 6;
             this.menuItemExit.Text = "Exit";
             this.menuItemExit.Click += new System.EventHandler(this.menuItemExit_Click);
+            // 
+            // menuItemSeparatorF1
+            // 
+            this.menuItemSeparatorF1.Index = 3;
+            this.menuItemSeparatorF1.Text = "-";
+            // 
+            // menuItemSeparatorF2
+            // 
+            this.menuItemSeparatorF2.Index = 5;
+            this.menuItemSeparatorF2.Text = "-";
             // 
             // menuItemView
             // 
@@ -462,6 +484,7 @@
         private System.Windows.Forms.MainMenu mainMenu;
         private System.Windows.Forms.MenuItem menuItemFile;
         private System.Windows.Forms.MenuItem menuItemExit;
+        private System.Windows.Forms.MenuItem menuItemCloseOriginal;
         private System.Windows.Forms.FlowLayoutPanel flowPanelBlocks;
         private System.Windows.Forms.MenuItem menuItemSaveBrotli;
         private System.Windows.Forms.MenuItem menuItemOpenBrotli;
@@ -491,6 +514,8 @@
         private System.Windows.Forms.StatusBarPanel statusBarPanelTimeStructure;
         private System.Windows.Forms.StatusBarPanel statusBarPanelPadding3;
         private System.Windows.Forms.MenuItem menuItemSaveOutput;
+        private System.Windows.Forms.MenuItem menuItemSeparatorF1;
+        private System.Windows.Forms.MenuItem menuItemSeparatorF2;
         private System.Windows.Forms.MenuItem menuItemSeparatorT1;
         private System.Windows.Forms.MenuItem menuItemSeparatorT2;
         private System.Windows.Forms.MenuItem menuItemCloneGeneratedToOriginal;

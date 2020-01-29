@@ -7,6 +7,7 @@ namespace BrotliBuilder{
         private void InitializeMenuEncoders(){
             var items = menuItemEncodeFile.MenuItems;
             var parameters = BrotliFileParameters.Default;
+            var dictionary = parameters.Dictionary;
 
             items.Add("Into Uncompressed Meta-Blocks",   (_, e) => OpenFileWithEncoder(parameters, new EncodeUncompressedOnly()));
             items.Add("Into Literals",                   (_, e) => OpenFileWithEncoder(parameters, new EncodeLiterals()));

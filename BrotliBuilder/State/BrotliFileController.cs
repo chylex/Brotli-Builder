@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using BrotliBuilder.Utils;
 using BrotliLib.Brotli;
+using BrotliLib.Brotli.Dictionary;
 using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Output;
 using BrotliLib.Brotli.Parameters;
@@ -114,11 +115,11 @@ namespace BrotliBuilder.State{
             UpdateState(token, new BrotliFileState.Loaded(structure, bits, output, markerRoot));
         });
 
-        public void EncodeFile(string path, BrotliFileParameters parameters, IBrotliEncoder encoder) => StartWorker(token => {
+        private void EncodeInternal(string path, Func<byte[], BrotliFileStructure> structureGenerator) => StartWorker(token => {
             UpdateState(token, new BrotliFileState.Starting());
 
             if (!TryReadFile(token, path, out byte[] bytes)) return;
-            if (!TryEncode(token, bytes, parameters, encoder, out BrotliFileStructure structure, out Stopwatch swEncode)) return;
+            if (!TryEncode(token, bytes, structureGenerator, out BrotliFileStructure structure, out Stopwatch swEncode)) return;
             UpdateState(token, new BrotliFileState.HasStructure(structure, swEncode));
 
             if (!TrySerialize(token, structure, out BitStream bits, out Stopwatch swSerialization)) return;
@@ -132,6 +133,14 @@ namespace BrotliBuilder.State{
 
             UpdateState(token, new BrotliFileState.Loaded(structure, bits, output, markerRoot));
         });
+
+        public void EncodeFile(string path, BrotliFileParameters parameters, IBrotliEncoder encoder){
+            EncodeInternal(path, bytes => BrotliFileStructure.FromEncoder(parameters, CompressionParameters, bytes, encoder));
+        }
+
+        public void EncodeFile(string path, BrotliEncodePipeline pipeline, BrotliDictionary dictionary){
+            EncodeInternal(path, bytes => pipeline.Apply(bytes, dictionary));
+        }
 
         private void TransformInternal(BrotliFileStructure structure, IBrotliTransformer transformer) => StartWorker(token => {
             UpdateState(token, new BrotliFileState.Starting());
@@ -208,10 +217,10 @@ namespace BrotliBuilder.State{
             }
         }
 
-        private bool TryEncode(int token, byte[] bytes, BrotliFileParameters parameters, IBrotliEncoder encoder, out BrotliFileStructure file, out Stopwatch stopwatch){
+        private bool TryEncode(int token, byte[] bytes, Func<byte[], BrotliFileStructure> structureGenerator, out BrotliFileStructure file, out Stopwatch stopwatch){
             try{
                 stopwatch = Stopwatch.StartNew();
-                file = BrotliFileStructure.FromEncoder(parameters, CompressionParameters, bytes, encoder);
+                file = structureGenerator(bytes);
                 stopwatch.Stop();
                 return true;
             }catch(Exception ex){
