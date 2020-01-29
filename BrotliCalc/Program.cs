@@ -21,6 +21,7 @@ namespace BrotliCalc{
             new CmdTestReserializeRebuild(),
             new CmdTestEncoder(),
             new CmdTestTransformer(),
+            new CmdValidateCompression(),
             new CmdBenchReserializeRebuild(),
             new CmdTimeDictionaryIndex()
         };
