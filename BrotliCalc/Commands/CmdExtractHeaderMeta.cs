@@ -29,7 +29,7 @@ namespace BrotliCalc.Commands{
             int index = 0;
 
             while((metaBlock = reader.NextMetaBlock()) != null){
-                var row = new List<object>{ file, quality, index++, GetMetaBlockType(metaBlock), metaBlock.DataLength.UncompressedBytes };
+                var row = new List<object>{ file.Name, quality, index++, GetMetaBlockType(metaBlock), metaBlock.DataLength.UncompressedBytes };
 
                 if (metaBlock is MetaBlock.Compressed c){
                     ExtractMetadata(row, c.Header, c.Data);

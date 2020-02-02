@@ -2,7 +2,6 @@
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Dictionary.Index;
 using BrotliLib.Brotli.Encode.Build;
-using BrotliLib.Brotli.Parameters;
 
 namespace BrotliImpl.Utils{
     abstract class Copy{

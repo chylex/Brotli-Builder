@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Windows.Forms;
 using BrotliLib.Brotli.Parameters;
-using DecideComplexTreeFeature = BrotliLib.Brotli.Parameters.BrotliSerializationParameters.DecideComplexTreeFeature;
-using DecideContextMapFeature = BrotliLib.Brotli.Parameters.BrotliSerializationParameters.DecideContextMapFeature;
+using static BrotliLib.Brotli.Parameters.BrotliSerializationParameters;
 
 namespace BrotliBuilder.Dialogs{
     public partial class FormSerializationParameters : Form{
         public event EventHandler<BrotliSerializationParameters>? Updated;
         public event EventHandler? Reserialize;
 
-        private readonly BrotliSerializationParameters.Builder parameters;
+        private readonly Builder parameters;
 
         public FormSerializationParameters(BrotliSerializationParameters parameters){
             InitializeComponent();
 
-            this.parameters = new BrotliSerializationParameters.Builder(parameters);
+            this.parameters = new Builder(parameters);
             this.Disposed += FormParameters_Disposed;
 
             LoadOptions();
