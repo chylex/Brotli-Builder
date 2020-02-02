@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using BrotliLib.Markers.Serialization;
 using BrotliLib.Numbers;
 using BrotliLib.Serialization;
@@ -17,6 +18,10 @@ namespace BrotliLib.Brotli.Components{
         public static readonly IntRange BitsRange = new IntRange(MinBits, MaxBits);
 
         public static WindowSize Default => new WindowSize(16);
+
+        public static WindowSize ForFileSize(int fileBytes){
+            return BitsRange.Values.Select(bits => new WindowSize(bits)).FirstOrDefault(ws => ws.Bytes >= fileBytes) ?? new WindowSize(MaxBits);
+        }
 
         // Data
         

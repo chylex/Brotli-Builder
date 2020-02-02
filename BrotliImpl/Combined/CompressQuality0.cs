@@ -7,7 +7,6 @@ using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Encode.Build;
 using BrotliLib.Brotli.Parameters;
-using BrotliLib.Brotli.Utils;
 using BrotliLib.Collections;
 
 namespace BrotliImpl.Combined{
@@ -219,7 +218,7 @@ namespace BrotliImpl.Combined{
                         lastDistance = distance;
                     }
 
-                    builder.AddCopy(matched - 2, DistanceCodeZeroStrategy.PreferEnabled);
+                    builder.AddCopy(matched - 2, distance);
 
                     nextEmit = ip;
 

@@ -13,6 +13,7 @@ using BrotliLib.Collections;
 namespace BrotliLib.Brotli.Encode.Build{
     public sealed class CompressedMetaBlockBuilder{
         public int OutputSize => intermediateState.OutputSize - initialState.OutputSize;
+        public int LastDistance => intermediateState.DistanceBuffer.Front;
 
         public CategoryMap<BlockSwitchBuilder> BlockTypes { get; } = BlockTypeInfo.Empty.Select(info => new BlockSwitchBuilder(info));
         public DistanceParameters DistanceParameters { get; set; } = DistanceParameters.Zero;
@@ -80,38 +81,42 @@ namespace BrotliLib.Brotli.Encode.Build{
             return AddInsertCopy(new InsertCopyCommand(literals));
         }
 
-        public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, int copyLength, int copyDistance){
-            return AddInsertCopy(new InsertCopyCommand(literals, copyLength, copyDistance));
-        }
-
         public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, int copyLength, DistanceInfo copyDistance){
             return AddInsertCopy(new InsertCopyCommand(literals, copyLength, copyDistance));
         }
 
-        public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, int copyLength, DistanceCodeZeroStrategy dczStrategy){
-            var useImplicitCodeZero = new InsertCopyLengths(literals.Count, copyLength).MakeCode(dczStrategy).UseDistanceCodeZero;
-            var distanceInfo = useImplicitCodeZero ? DistanceInfo.ImplicitCodeZero : DistanceInfo.ExplicitCodeZero;
+        public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, int copyLength, int copyDistance, DistanceCodeZeroStrategy dczStrategy = DistanceCodeZeroStrategy.PreferEnabled){
+            if (copyDistance == LastDistance){
+                switch(dczStrategy){
+                    case DistanceCodeZeroStrategy.ForceEnabled:
+                        return AddInsertCopy(literals, copyLength, DistanceInfo.ImplicitCodeZero);
 
-            return AddInsertCopy(literals, copyLength, distanceInfo);
+                    case DistanceCodeZeroStrategy.PreferEnabled:
+                        return AddInsertCopy(literals, copyLength, InsertCopyLengths.CanUseImplicitDCZ(literals.Count, copyLength) ? DistanceInfo.ImplicitCodeZero : DistanceInfo.ExplicitCodeZero);
+
+                    case DistanceCodeZeroStrategy.Disable:
+                        // Returns the copy distance verbatim, however note that this still allows the
+                        // distance picker to pick an explicit code zero during the building process.
+                        break;
+                }
+            }
+
+            return AddInsertCopy(new InsertCopyCommand(literals, copyLength, copyDistance));
         }
 
         public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, DictionaryIndexEntry dictionaryEntry){
             var startDistance = 1 + Math.Min(intermediateState.Parameters.WindowSize.Bytes, intermediateState.OutputSize + literals.Count);
             var entryDistance = dictionaryEntry.Packed + startDistance;
 
-            return AddInsertCopy(literals, dictionaryEntry.CopyLength, entryDistance);
+            return AddInsertCopy(literals, dictionaryEntry.CopyLength, entryDistance, DistanceCodeZeroStrategy.Disable);
         }
 
-        public CompressedMetaBlockBuilder AddCopy(int copyLength, int copyDistance){
-            return AddInsertCopy(Array.Empty<Literal>(), copyLength, copyDistance);
+        public CompressedMetaBlockBuilder AddCopy(int copyLength, int copyDistance, DistanceCodeZeroStrategy dczStrategy = DistanceCodeZeroStrategy.PreferEnabled){
+            return AddInsertCopy(Array.Empty<Literal>(), copyLength, copyDistance, dczStrategy);
         }
         
         public CompressedMetaBlockBuilder AddCopy(int copyLength, DistanceInfo copyDistance){
             return AddInsertCopy(Array.Empty<Literal>(), copyLength, copyDistance);
-        }
-        
-        public CompressedMetaBlockBuilder AddCopy(int copyLength, DistanceCodeZeroStrategy dczStrategy){
-            return AddInsertCopy(Array.Empty<Literal>(), copyLength, dczStrategy);
         }
 
         public CompressedMetaBlockBuilder AddCopy(DictionaryIndexEntry dictionaryEntry){
@@ -179,7 +184,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                         int treeID = DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
                         var codeList = distanceCodeFreq[treeID];
-                        codeList.Add(distanceCode = distanceCodes.FirstOrDefault(codeList.Contains) ?? distanceCodes[0]); // new CompressedMetaBlockBuildParams().PickDistanceCode(icCommand.CopyDistance, distanceCodes, codeList));
+                        codeList.Add(distanceCode = parameters.DistanceCodePicker(distanceCodes, codeList));
                     }
 
                     bool isImplicitCodeZero = distanceCode == null;

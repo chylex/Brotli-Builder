@@ -31,6 +31,10 @@ namespace BrotliLib.Brotli.Components.Data{
             }
         }
 
+        public static bool CanUseImplicitDCZ(int insertLength, int copyLength){
+            return new InsertCopyLengths(insertLength, copyLength).MakeCode(DistanceCodeZeroStrategy.PreferEnabled).UseDistanceCodeZero;
+        }
+
         // Insert code tables
 
         private static readonly int[] InsertCodeExtraBits = {
