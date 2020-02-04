@@ -9,19 +9,17 @@ namespace BrotliImpl.Utils{
         internal abstract int AddCommand(CompressedMetaBlockBuilder builder, IList<Literal> literals);
 
         internal class BackReference : Copy{
-            internal override int OutputLength => length;
-
-            private readonly int length;
-            private readonly int distance;
+            internal override int OutputLength { get; }
+            internal int Distance { get; }
 
             public BackReference(int length, int distance){
-                this.length = length;
-                this.distance = distance;
+                this.OutputLength = length;
+                this.Distance = distance;
             }
 
             internal override int AddCommand(CompressedMetaBlockBuilder builder, IList<Literal> literals){
-                builder.AddInsertCopy(literals, length, distance);
-                return length;
+                builder.AddInsertCopy(literals, OutputLength, Distance);
+                return OutputLength;
             }
         }
 
