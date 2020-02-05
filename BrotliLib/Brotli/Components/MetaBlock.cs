@@ -60,16 +60,16 @@ namespace BrotliLib.Brotli.Components{
                 DataLength dataLength = DataLength.Deserialize(reader, NoContext.Value);
 
                 if (dataLength.UncompressedBytes == 0){
-                    return reader.ReadStructure(PaddedEmpty.Deserialize, new Context(isLast, DataLength.Empty, context), "Contents");
+                    return PaddedEmpty.Deserialize(reader, new Context(isLast, DataLength.Empty, context));
                 }
                 
                 bool isUncompressed = !isLast && reader.NextBit("ISUNCOMPRESSED");
 
                 if (isUncompressed){
-                    return reader.ReadStructure(Uncompressed.Deserialize, new Context(isLast: false, dataLength, context), "Contents");
+                    return Uncompressed.Deserialize(reader, new Context(isLast: false, dataLength, context));
                 }
                 else{
-                    return reader.ReadStructure(Compressed.Deserialize, new Context(isLast, dataLength, context), "Contents");
+                    return Compressed.Deserialize(reader, new Context(isLast, dataLength, context));
                 }
             }
         );

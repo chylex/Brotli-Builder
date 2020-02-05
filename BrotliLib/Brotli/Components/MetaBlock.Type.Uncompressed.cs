@@ -41,7 +41,9 @@ namespace BrotliLib.Brotli.Components{
 
             // Serialization
         
-            internal new static readonly BitDeserializer<Uncompressed, Context> Deserialize = MarkedBitDeserializer.Wrap<Uncompressed, Context>(
+            internal new static readonly BitDeserializer<Uncompressed, Context> Deserialize = MarkedBitDeserializer.Title<Uncompressed, Context>(
+                "Contents",
+
                 (reader, context) => {
                     byte[] bytes = new byte[context.DataLength.UncompressedBytes];
                     int length = bytes.Length;

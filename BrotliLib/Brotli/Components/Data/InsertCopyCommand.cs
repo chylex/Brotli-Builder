@@ -70,18 +70,12 @@ namespace BrotliLib.Brotli.Components.Data{
                 
                 int icBlockID = context.NextBlockID(Category.InsertCopy);
                 var icLengthCode = reader.ReadValue(header.InsertCopyTrees[icBlockID].Root, "length code");
-                var icLengthValues = reader.ReadStructure(InsertCopyLengths.Deserialize, icLengthCode, "length values");
+                var icLengthValues = reader.ReadValue(InsertCopyLengths.Deserialize, icLengthCode, "length values");
 
                 int insertLength = icLengthValues.InsertLength;
                 int copyLength = icLengthValues.CopyLength;
                 
                 // Literals
-
-                bool markLiteralsSimple = insertLength > 0 && reader.MarkerLevel == MarkerLevel.Simple;
-
-                if (markLiteralsSimple){
-                    reader.MarkStart();
-                }
 
                 Literal[] literals = insertLength == 0 ? Array.Empty<Literal>() : new Literal[insertLength];
                 
@@ -101,10 +95,6 @@ namespace BrotliLib.Brotli.Components.Data{
 
                     literals[insertIndex] = literal;
                     context.WriteLiteral(in literal);
-                }
-
-                if (markLiteralsSimple){
-                    reader.MarkEnd(new TextMarker("(" + insertLength + " literal" + (insertLength == 1 ? ")" : "s)")));
                 }
 
                 if (!context.NeedsMoreData){

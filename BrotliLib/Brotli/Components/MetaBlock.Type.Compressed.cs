@@ -46,8 +46,8 @@ namespace BrotliLib.Brotli.Components{
         
             internal new static readonly BitDeserializer<Compressed, Context> Deserialize = MarkedBitDeserializer.Wrap<Compressed, Context>(
                 (reader, context) => {
-                    var header = reader.ReadStructure(CompressedHeader.Deserialize, NoContext.Value, "Compression Header");
-                    var data = reader.ReadStructure(CompressedData.Deserialize, new CompressedData.Context(header, context.DataLength, context.State), "Compression Data");
+                    var header = reader.ReadStructure(CompressedHeader.Deserialize, NoContext.Value, "Header");
+                    var data = reader.ReadStructure(CompressedData.Deserialize, new CompressedData.Context(header, context.DataLength, context.State), "Data");
 
                     return new Compressed(context.IsLast, context.DataLength, header, data);
                 }

@@ -116,7 +116,7 @@ namespace BrotliLib.Brotli.Components.Data{
         }
 
         public override string ToString(){
-            return "Code = " + CompactedCode + " (InsertCode = " + InsertCode + ", CopyCode = " + CopyCode + ", DistanceCodeZero = " + UseDistanceCodeZero + ")";
+            return "Code = " + CompactedCode + " (InsertCode = " + InsertCode + ", CopyCode = " + CopyCode + (UseDistanceCodeZero ? ", DistanceCodeZero" : "") + ")";
         }
     }
 }

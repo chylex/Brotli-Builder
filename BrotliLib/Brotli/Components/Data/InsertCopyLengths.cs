@@ -2,7 +2,6 @@
 using System.Linq;
 using BrotliLib.Brotli.Utils;
 using BrotliLib.Collections;
-using BrotliLib.Markers.Serialization;
 using BrotliLib.Numbers;
 using BrotliLib.Serialization;
 
@@ -135,17 +134,15 @@ namespace BrotliLib.Brotli.Components.Data{
 
         // Serialization
 
-        public static readonly BitDeserializer<InsertCopyLengths, InsertCopyLengthCode> Deserialize = MarkedBitDeserializer.Wrap<InsertCopyLengths, InsertCopyLengthCode>(
-            (reader, context) => {
-                int insertCode = context.InsertCode;
-                int copyCode = context.CopyCode;
+        public static readonly BitDeserializer<InsertCopyLengths, InsertCopyLengthCode> Deserialize = (reader, context) => {
+            int insertCode = context.InsertCode;
+            int copyCode = context.CopyCode;
 
-                int insertLength = reader.NextChunk(InsertCodeExtraBits[insertCode], "ILEN", insertCode, (value, index) => InsertCodeValueOffsets[index] + value);
-                int copyLength = reader.NextChunk(CopyCodeExtraBits[copyCode], "CLEN", copyCode, (value, index) => CopyCodeValueOffsets[index] + value);
+            int insertLength = InsertCodeValueOffsets[insertCode] + reader.NextChunk(InsertCodeExtraBits[insertCode]);
+            int copyLength = CopyCodeValueOffsets[copyCode] + reader.NextChunk(CopyCodeExtraBits[copyCode]);
 
-                return new InsertCopyLengths(insertLength, copyLength);
-            }
-        );
+            return new InsertCopyLengths(insertLength, copyLength);
+        };
 
         public static readonly BitSerializer<InsertCopyLengths, InsertCopyLengthCode> Serialize = (writer, obj, context) => {
             int insertCode = context.InsertCode;

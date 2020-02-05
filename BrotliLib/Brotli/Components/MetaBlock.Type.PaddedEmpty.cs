@@ -63,7 +63,9 @@ namespace BrotliLib.Brotli.Components{
 
             // Serialization
 
-            internal new static readonly BitDeserializer<PaddedEmpty, Context> Deserialize = MarkedBitDeserializer.Wrap<PaddedEmpty, Context>(
+            internal new static readonly BitDeserializer<PaddedEmpty, Context> Deserialize = MarkedBitDeserializer.Title<PaddedEmpty, Context>(
+                "Contents",
+
                 (reader, context) => {
                     if (reader.NextBit("reserved")){
                         throw new InvalidOperationException("Reserved bit in empty meta-block must be 0.");
