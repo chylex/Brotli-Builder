@@ -46,9 +46,7 @@ namespace BrotliCalc.Helpers{
                         text = text.PadRight(width, ' ');
                     }
 
-                    Console.Write(text);
-                    Console.CursorTop--;
-                    Console.CursorLeft = 0;
+                    WriteAndJumpBack(text);
                 }
             }
         }
@@ -59,11 +57,17 @@ namespace BrotliCalc.Helpers{
                     Console.WriteLine();
                 }
                 else{
-                    Console.Write(new string(' ', Console.BufferWidth));
-                    Console.CursorTop--;
-                    Console.CursorLeft = 0;
+                    WriteAndJumpBack(new string(' ', Console.BufferWidth));
                 }
             }
+        }
+
+        private void WriteAndJumpBack(string text){
+            int prevTop = Console.CursorTop;
+
+            Console.Write(text);
+            Console.CursorTop = prevTop;
+            Console.CursorLeft = 0;
         }
     }
 }
