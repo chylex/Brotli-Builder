@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace BrotliLib.Markers{
@@ -15,9 +16,19 @@ namespace BrotliLib.Markers{
         }
 
         public string BuildText(bool includeBitCounts){
-            var build = new StringBuilder(512);
+            using var writer = new StringWriter{
+                NewLine = "\n"
+            };
+
+            WriteText(writer, includeBitCounts);
+            return writer.ToString();
+        }
+
+        public void WriteText(TextWriter writer, bool includeBitCounts){
+            var build = new StringBuilder(256);
 
             foreach(MarkerNode node in this){
+                build.Clear();
                 build.Append('\t', node.Depth);
 
                 var marker = node.Marker;
@@ -26,11 +37,9 @@ namespace BrotliLib.Markers{
 
                 build.Replace("\r", "\\r", startIndex, build.Length - startIndex);
                 build.Replace("\n", "\\n", startIndex, build.Length - startIndex);
-
-                build.Append('\n');
+                writer.WriteLine(build.ToString());
+                // TODO there is an overload for StringBuilder, which is officially documented for .NET Core 3.0, but the compiler finds sweet FA
             }
-
-            return build.ToString();
         }
 
         public IEnumerator<MarkerNode> GetEnumerator(){

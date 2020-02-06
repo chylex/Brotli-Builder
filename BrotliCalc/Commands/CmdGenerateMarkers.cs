@@ -35,8 +35,12 @@ namespace BrotliCalc.Commands{
 
         protected override void MapFile(BrotliFileGroup group, BrotliFile.Compressed file, FileStream output){
             var markerRoot = file.GenerateMarkers(markerLevel);
-            output.Write(Encoding.UTF8.GetBytes(markerRoot.BuildText(includeBitCounts)));
 
+            using var stream = new StreamWriter(output, Encoding.UTF8){
+                NewLine = "\n"
+            };
+
+            markerRoot.WriteText(stream, includeBitCounts);
         }
     }
 }
