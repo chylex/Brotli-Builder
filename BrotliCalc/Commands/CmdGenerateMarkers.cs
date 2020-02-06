@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text;
 using BrotliCalc.Commands.Base;
 using BrotliCalc.Helpers;
@@ -32,11 +33,10 @@ namespace BrotliCalc.Commands{
             };
         }
 
-        protected override byte[] MapFile(BrotliFileGroup group, BrotliFile.Compressed file){
+        protected override void MapFile(BrotliFileGroup group, BrotliFile.Compressed file, FileStream output){
             var markerRoot = file.GenerateMarkers(markerLevel);
-            var text = markerRoot.BuildText(includeBitCounts);
+            output.Write(Encoding.UTF8.GetBytes(markerRoot.BuildText(includeBitCounts)));
 
-            return Encoding.UTF8.GetBytes(text);
         }
     }
 }

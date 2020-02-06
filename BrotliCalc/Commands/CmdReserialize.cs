@@ -1,4 +1,5 @@
-﻿using BrotliCalc.Commands.Base;
+﻿using System.IO;
+using BrotliCalc.Commands.Base;
 using BrotliCalc.Helpers;
 
 namespace BrotliCalc.Commands{
@@ -8,8 +9,8 @@ namespace BrotliCalc.Commands{
 
         protected override string WorkDesc => "Reserialized";
 
-        protected override byte[] MapFile(BrotliFileGroup group, BrotliFile.Compressed file){
-            return group.SerializeAndValidate(file.Structure).ToByteArray();
+        protected override void MapFile(BrotliFileGroup group, BrotliFile.Compressed file, FileStream output){
+            output.Write(group.SerializeAndValidate(file.Structure).ToByteArray());
         }
     }
 }

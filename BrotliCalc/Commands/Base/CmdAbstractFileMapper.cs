@@ -44,11 +44,14 @@ namespace BrotliCalc.Commands.Base{
                 using(var progress = new Progress(items.Length)){
                     items.Parallelize().ForAll(item => {
                         var (group, file) = item;
-                        string markerFile = Path.Combine(output, file.FullName + AppendFileName);
+                        string outputFile = Path.Combine(output, file.FullName + AppendFileName);
 
                         try{
-                            Directory.CreateDirectory(Path.GetDirectoryName(markerFile));
-                            File.WriteAllBytes(markerFile, MapFile(group, file));
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
+
+                            using(var stream = new FileStream(outputFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read)){
+                                MapFile(group, file, stream);
+                            }
 
                             progress.Post($"Finished {file}");
                         }catch(Exception e){
@@ -65,7 +68,7 @@ namespace BrotliCalc.Commands.Base{
             
             protected virtual void Setup(string[] args){}
 
-            protected abstract byte[] MapFile(BrotliFileGroup group, T file);
+            protected abstract void MapFile(BrotliFileGroup group, T file, FileStream output);
         }
 
         // Types

@@ -1,4 +1,5 @@
-﻿using BrotliCalc.Commands.Base;
+﻿using System.IO;
+using BrotliCalc.Commands.Base;
 using BrotliCalc.Helpers;
 
 namespace BrotliCalc.Commands{
@@ -8,8 +9,8 @@ namespace BrotliCalc.Commands{
 
         protected override string WorkDesc => "Copied";
 
-        protected override byte[] MapFile(BrotliFileGroup group, BrotliFile.Uncompressed file){
-            return file.Contents;
+        protected override void MapFile(BrotliFileGroup group, BrotliFile.Uncompressed file, FileStream output){
+            output.Write(file.Contents);
         }
     }
 }
