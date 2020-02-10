@@ -78,6 +78,7 @@ namespace BrotliBuilder{
             InitializeComponent();
 
             SuspendLayout();
+            InitializeMenuView();
             InitializeMenuEncoders();
             InitializeMenuTransformers();
             ResumeLayout(true);
@@ -449,28 +450,14 @@ namespace BrotliBuilder{
 
         #region Menu events (View)
 
-        private void menuItemFileStructure_Click(object? sender, EventArgs e){
-            splitContainerRight.Panel1Collapsed = !menuItemFileStructure.Toggle();
-        }
+        private void ShowMarkerInfoPanel(bool show){
+            splitContainerMain.Panel1Collapsed = !show;
+            fileGenerated.BitMarkerLevel = show ? MarkerLevel.Verbose : MarkerLevel.None;
+            fileOriginal.BitMarkerLevel = show ? MarkerLevel.Verbose : MarkerLevel.None;
 
-        private void menuItemMarkerInfo_Click(object? sender, EventArgs e){
-            bool enable = menuItemMarkerInfo.Toggle();
-
-            splitContainerMain.Panel1Collapsed = !enable;
-            fileGenerated.BitMarkerLevel = enable ? MarkerLevel.Verbose : MarkerLevel.None;
-            fileOriginal.BitMarkerLevel = enable ? MarkerLevel.Verbose : MarkerLevel.None;
-
-            if (!enable){
+            if (!show){
                 brotliMarkerInfoPanel.ResetMarkers();
             }
-        }
-
-        private void menuItemWrapOutput_Click(object? sender, EventArgs e){
-            brotliFilePanelGenerated.WordWrapOutput = brotliFilePanelOriginal.WordWrapOutput = menuItemWrapOutput.Toggle();
-        }
-
-        private void menuItemWrapMarkerInfo_Click(object? sender, EventArgs e){
-            brotliMarkerInfoPanel.WordWrap = menuItemWrapMarkerInfo.Toggle();
         }
 
         #endregion

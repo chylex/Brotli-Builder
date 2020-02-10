@@ -32,10 +32,6 @@
             this.menuItemExit = new System.Windows.Forms.MenuItem();
             this.menuItemCloseOriginal = new System.Windows.Forms.MenuItem();
             this.menuItemView = new System.Windows.Forms.MenuItem();
-            this.menuItemFileStructure = new System.Windows.Forms.MenuItem();
-            this.menuItemMarkerInfo = new System.Windows.Forms.MenuItem();
-            this.menuItemWrapOutput = new System.Windows.Forms.MenuItem();
-            this.menuItemWrapMarkerInfo = new System.Windows.Forms.MenuItem();
             this.menuItemTools = new System.Windows.Forms.MenuItem();
             this.menuItemStaticDictionary = new System.Windows.Forms.MenuItem();
             this.menuItemCompareMarkers = new System.Windows.Forms.MenuItem();
@@ -151,38 +147,7 @@
             // menuItemView
             // 
             this.menuItemView.Index = 1;
-            this.menuItemView.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItemFileStructure,
-            this.menuItemMarkerInfo,
-            this.menuItemWrapOutput,
-            this.menuItemWrapMarkerInfo});
             this.menuItemView.Text = "&View";
-            // 
-            // menuItemFileStructure
-            // 
-            this.menuItemFileStructure.Checked = true;
-            this.menuItemFileStructure.Index = 0;
-            this.menuItemFileStructure.Text = "File Structure Panel";
-            this.menuItemFileStructure.Click += new System.EventHandler(this.menuItemFileStructure_Click);
-            // 
-            // menuItemMarkerInfo
-            // 
-            this.menuItemMarkerInfo.Checked = true;
-            this.menuItemMarkerInfo.Index = 1;
-            this.menuItemMarkerInfo.Text = "Marker Info Panel";
-            this.menuItemMarkerInfo.Click += new System.EventHandler(this.menuItemMarkerInfo_Click);
-            // 
-            // menuItemWrapOutput
-            // 
-            this.menuItemWrapOutput.Index = 2;
-            this.menuItemWrapOutput.Text = "Wrap Output";
-            this.menuItemWrapOutput.Click += new System.EventHandler(this.menuItemWrapOutput_Click);
-            // 
-            // menuItemWrapMarkerInfo
-            // 
-            this.menuItemWrapMarkerInfo.Index = 3;
-            this.menuItemWrapMarkerInfo.Text = "Wrap Marker Info";
-            this.menuItemWrapMarkerInfo.Click += new System.EventHandler(this.menuItemWrapMarkerInfo_Click);
             // 
             // menuItemTools
             // 
@@ -499,17 +464,13 @@
         private System.Windows.Forms.MenuItem menuItemView;
         private System.Windows.Forms.MenuItem menuItemStaticDictionary;
         private System.Windows.Forms.SplitContainer splitContainerRightBottom;
-        private System.Windows.Forms.MenuItem menuItemWrapOutput;
         private Components.BrotliFilePanel brotliFilePanelGenerated;
         private Components.BrotliFilePanel brotliFilePanelOriginal;
         private System.Windows.Forms.SplitContainer splitContainerRight;
-        private System.Windows.Forms.MenuItem menuItemFileStructure;
         private System.Windows.Forms.MenuItem menuItemTransform;
         private System.Windows.Forms.SplitContainer splitContainerMain;
         private Components.BrotliMarkerInfoPanel brotliMarkerInfoPanel;
         private System.Windows.Forms.Label labelFileStructure;
-        private System.Windows.Forms.MenuItem menuItemMarkerInfo;
-        private System.Windows.Forms.MenuItem menuItemWrapMarkerInfo;
         private System.Windows.Forms.MenuItem menuItemCompareMarkers;
         private System.Windows.Forms.StatusBarPanel statusBarPanelTimeStructure;
         private System.Windows.Forms.StatusBarPanel statusBarPanelPadding3;
