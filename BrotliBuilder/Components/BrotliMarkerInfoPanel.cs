@@ -23,6 +23,28 @@ namespace BrotliBuilder.Components{
             set => textBoxContext.WordWrap = value;
         }
 
+        public int TabSize{
+            set{
+                textBoxContext.TabLength = value;
+                RefreshMarkers();
+            }
+        }
+
+        public Orientation Orientation{
+            set{
+                if (value == Orientation.Horizontal){
+                    textBoxContext.Margin = new Padding(12, 5, 12, 0);
+                    textBoxContext.Width -= 12;
+                    textBoxContext.Height += 8;
+                }
+                else{
+                    textBoxContext.Margin = new Padding(12, 5, 0, 8);
+                    textBoxContext.Width += 12;
+                    textBoxContext.Height -= 8;
+                }
+            }
+        }
+
         private readonly string originalTitle;
 
         public BrotliMarkerInfoPanel(){
@@ -31,22 +53,34 @@ namespace BrotliBuilder.Components{
             textBoxContext.DefaultStyle = StyleNormalGray;
         }
 
-        private IList<MarkerNode>? prevMarkerNodes = null;
-        private MarkerNode? prevCaretNode = null;
+        private LastCall? prev = null;
+
+        private class LastCall{
+            public string? Title { get; }
+            public MarkerRoot MarkerRoot { get; }
+            public IList<MarkerNode> MarkerSequence { get; }
+            public HashSet<MarkerNode> HighlightedNodes { get; }
+            public MarkerNode? CaretNode { get; }
+
+            public LastCall(string? title, MarkerRoot markerRoot, IList<MarkerNode> markerSequence, HashSet<MarkerNode> highlightedNodes, MarkerNode? caretNode){
+                Title = title;
+                MarkerRoot = markerRoot;
+                MarkerSequence = markerSequence;
+                HighlightedNodes = highlightedNodes;
+                CaretNode = caretNode;
+            }
+        }
 
         public void UpdateMarkers(string? title, MarkerRoot? markerRoot, IList<MarkerNode> markerSequence, HashSet<MarkerNode>? highlightedNodes, MarkerNode? caretNode){
-            if (ReferenceEquals(prevCaretNode, caretNode)){
+            if (ReferenceEquals(prev?.CaretNode, caretNode)){
                 return;
             }
 
-            prevCaretNode = caretNode;
-            
             labelMarkerInfo.Text = title == null ? originalTitle : $"{originalTitle} ({title})";
             textBoxContext.Selection.BeginUpdate();
             textBoxContext.ClearStyle(StyleIndex.All);
             
-            if (!ReferenceEquals(prevMarkerNodes, markerSequence)){
-                prevMarkerNodes = markerSequence;
+            if (!ReferenceEquals(prev?.MarkerSequence, markerSequence)){
                 textBoxContext.Text = markerRoot?.BuildText(includeBitCounts: true) ?? string.Empty;
             }
 
@@ -70,10 +104,21 @@ namespace BrotliBuilder.Components{
             }
             
             textBoxContext.Selection.EndUpdate();
+            prev = markerRoot == null ? null : new LastCall(title, markerRoot, markerSequence, highlightedNodes!, caretNode);
         }
 
         public void ResetMarkers(){
             UpdateMarkers(null, null, Array.Empty<MarkerNode>(), null, null);
+        }
+
+        public void RefreshMarkers(){
+            LastCall? restore = prev;
+
+            ResetMarkers();
+
+            if (restore != null){
+                UpdateMarkers(restore.Title, restore.MarkerRoot, restore.MarkerSequence, restore.HighlightedNodes, restore.CaretNode);
+            }
         }
     }
 }

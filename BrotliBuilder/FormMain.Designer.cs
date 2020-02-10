@@ -355,12 +355,12 @@
             // 
             this.splitContainerRight.Panel1.Controls.Add(this.labelFileStructure);
             this.splitContainerRight.Panel1.Controls.Add(this.flowPanelBlocks);
-            this.splitContainerRight.Panel1MinSize = 200;
+            this.splitContainerRight.Panel1MinSize = 175;
             // 
             // splitContainerRight.Panel2
             // 
             this.splitContainerRight.Panel2.Controls.Add(this.splitContainerRightBottom);
-            this.splitContainerRight.Panel2MinSize = 200;
+            this.splitContainerRight.Panel2MinSize = 50;
             this.splitContainerRight.Size = new System.Drawing.Size(884, 580);
             this.splitContainerRight.SplitterDistance = 208;
             this.splitContainerRight.SplitterWidth = 2;
@@ -390,7 +390,7 @@
             // splitContainerMain.Panel2
             // 
             this.splitContainerMain.Panel2.Controls.Add(this.splitContainerRight);
-            this.splitContainerMain.Panel2MinSize = 250;
+            this.splitContainerMain.Panel2MinSize = 275;
             this.splitContainerMain.Size = new System.Drawing.Size(1264, 580);
             this.splitContainerMain.SplitterDistance = 376;
             this.splitContainerMain.TabIndex = 0;
@@ -416,9 +416,10 @@
             this.Controls.Add(this.statusBar);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.Menu = this.mainMenu;
-            this.MinimumSize = new System.Drawing.Size(640, 320);
+            this.MinimumSize = new System.Drawing.Size(480, 320);
             this.Name = "FormMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Resize += new System.EventHandler(this.FormMain_Resize);
             this.Text = "Brotli Builder";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMain_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelPadding1)).EndInit();

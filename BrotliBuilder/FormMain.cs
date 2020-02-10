@@ -346,6 +346,14 @@ namespace BrotliBuilder{
             e.Cancel = PromptUnsavedChanges("Would you like to save changes before exiting?");
         }
 
+        private void FormMain_Resize(object? sender, EventArgs e){
+            int statusBarPanelWidth = Width < 645 ? 200 - Math.Min(100, (645 - Width) / 3) : 200;
+
+            statusBarPanelTimeStructure.Width = statusBarPanelWidth;
+            statusBarPanelTimeBits.Width = statusBarPanelWidth;
+            statusBarPanelTimeOutput.Width = statusBarPanelWidth;
+        }
+
         #endregion
 
         #region Control events
@@ -450,6 +458,11 @@ namespace BrotliBuilder{
 
         #region Menu events (View)
 
+        private void ShowFileStructurePanel(bool show){
+            splitContainerRight.Panel1Collapsed = !show;
+            splitContainerRight.Panel1MinSize = show ? 175 : 0;
+        }
+
         private void ShowMarkerInfoPanel(bool show){
             splitContainerMain.Panel1Collapsed = !show;
             fileGenerated.BitMarkerLevel = show ? MarkerLevel.Verbose : MarkerLevel.None;
@@ -458,6 +471,23 @@ namespace BrotliBuilder{
             if (!show){
                 brotliMarkerInfoPanel.ResetMarkers();
             }
+        }
+
+        private void SetMarkerInfoPanelOrientation(Orientation orientation){
+            SuspendLayout();
+            brotliMarkerInfoPanel.Orientation = orientation;
+            splitContainerMain.Orientation = orientation;
+
+            if (orientation == Orientation.Horizontal){
+                splitContainerMain.SplitterDistance /= 2;
+                splitContainerMain.Panel2MinSize = 125;
+            }
+            else{
+                splitContainerMain.SplitterDistance *= 2;
+                splitContainerMain.Panel2MinSize = 275;
+            }
+
+            ResumeLayout(true);
         }
 
         #endregion
