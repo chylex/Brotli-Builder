@@ -20,7 +20,7 @@ namespace BrotliLib.Brotli.Components.Header{
                 LiteralContextMode.MSB6 => mostRecentByte >> 2,
                 LiteralContextMode.UTF8 => LUT0[mostRecentByte] | LUT1[secondRecentByte],
                 LiteralContextMode.Signed => (LUT2[mostRecentByte] << 3) | LUT2[secondRecentByte],
-                _ => throw new InvalidOperationException("Invalid literal context mode: " + mode),
+                _ => throw new InvalidOperationException("Invalid literal context mode: " + mode)
             };
         }
 

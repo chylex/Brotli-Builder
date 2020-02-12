@@ -1,12 +1,11 @@
 ﻿using BrotliLib.Brotli.Components.Data;
-using BrotliLib.Numbers;
-using BlockTypeCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<int>;
-using BlockLengthCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.BlockLengthCode>;
 using System;
 using BrotliLib.Brotli.Parameters;
 using BrotliLib.Brotli.Utils;
 using BrotliLib.Markers.Serialization;
 using BrotliLib.Serialization;
+using BlockTypeCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.BlockTypeCode>;
+using BlockLengthCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.BlockLengthCode>;
 
 namespace BrotliLib.Brotli.Components.Header{
     /// <summary>
@@ -60,10 +59,6 @@ namespace BrotliLib.Brotli.Components.Header{
 
         // Serialization
 
-        private static BlockTypeCodeTree.Context GetBlockTypeCodeTreeContext(int count){
-            return new BlockTypeCodeTree.Context(new AlphabetSize(count + 2), value => value, symbol => symbol);
-        }
-
         public static readonly BitDeserializer<BlockTypeInfo, Category> Deserialize = MarkedBitDeserializer.Title<BlockTypeInfo, Category>(
             context => "Block Type Info (" + context + ")",
 
@@ -75,7 +70,7 @@ namespace BrotliLib.Brotli.Components.Header{
                     return Empty[context];
                 }
                 
-                var blockTypeCode = reader.ReadStructure(BlockTypeCodeTree.Deserialize, GetBlockTypeCodeTreeContext(count), "HTREE_BTYPE_" + cid);
+                var blockTypeCode = reader.ReadStructure(BlockTypeCodeTree.Deserialize, BlockTypeCode.GetTreeContext(count), "HTREE_BTYPE_" + cid);
                 var blockLengthCode = reader.ReadStructure(BlockLengthCodeTree.Deserialize, BlockLengthCode.TreeContext, "HTREE_BLEN_" + cid);
                 
                 var initialLengthCode = reader.ReadValue(blockLengthCode.Root, "BLEN_" + cid + " (code)");
@@ -92,7 +87,7 @@ namespace BrotliLib.Brotli.Components.Header{
                 return;
             }
 
-            BlockTypeCodeTree.Serialize(writer, obj.TypeCodeTree!, GetBlockTypeCodeTreeContext(obj.TypeCount), parameters);
+            BlockTypeCodeTree.Serialize(writer, obj.TypeCodeTree!, BlockTypeCode.GetTreeContext(obj.TypeCount), parameters);
             BlockLengthCodeTree.Serialize(writer, obj.LengthCodeTree!, BlockLengthCode.TreeContext, parameters);
 
             var initialLength = obj.InitialLength;

@@ -3,63 +3,107 @@ using System.Collections.Generic;
 using System.Linq;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
+using BrotliLib.Brotli.Parameters;
 using BrotliLib.Brotli.Utils;
 using BrotliLib.Collections;
 
 namespace BrotliLib.Brotli.Encode.Build{
     public sealed class BlockSwitchBuilder{
-        public int InitialLength { get; private set; }
-        public IReadOnlyList<BlockSwitchCommand> Commands => commands;
+        private const int FinalBlockSwitchLengthPlaceholder = -1;
 
-        private readonly Category category;
+        public Category Category { get; }
+        public int InitialLength { get; private set; }
+
+        public int TypeCount => 1 + commands.Max(command => command.Type);
+
         private readonly List<BlockSwitchCommand> commands = new List<BlockSwitchCommand>();
 
         public BlockSwitchBuilder(BlockTypeInfo info){
-            this.category = info.Category;
+            this.Category = info.Category;
             this.InitialLength = info.InitialLength;
         }
+
+        public BlockSwitchBuilder(BlockTypeInfo info, IReadOnlyList<BlockSwitchCommand> commands) : this(info){
+            this.commands.AddRange(commands);
+        }
+
+        // Commands
 
         public BlockSwitchBuilder SetInitialLength(int initialLength){
             InitialLength = initialLength;
             return this;
         }
 
-        public BlockSwitchBuilder AddBlockSwitch(BlockSwitchCommand command){
-            commands.Add(command);
+        public BlockSwitchBuilder AddBlockSwitch(int type, int length){
+            commands.Add(new BlockSwitchCommand(type, length));
             return this;
         }
 
-        public BlockTypeInfo Build(){
+        public BlockSwitchBuilder AddFinalBlockSwitch(int type){
+            commands.Add(new BlockSwitchCommand(type, FinalBlockSwitchLengthPlaceholder));
+            return this;
+        }
+
+        // Building
+
+        public (BlockTypeInfo Info, IReadOnlyList<BlockSwitchCommand> Commands) Build(int totalLength, BrotliCompressionParameters parameters){
             if (commands.Count == 0){
-                return BlockTypeInfo.Empty[category];
+                return (BlockTypeInfo.Empty[Category], Array.Empty<BlockSwitchCommand>());
             }
 
-            int count = 1 + commands.Max(command => command.Type);
+            int typeCount = TypeCount;
 
-            if (count <= 1){
+            if (typeCount <= 1){
                 throw new InvalidOperationException("Cannot generate block-switch chain that only refers to 1 block type.");
             }
 
-            var tracker = new BlockTypeTracker(count);
+            var commandsFinal = commands;
 
-            var typeCodeList = new FrequencyList<int>();
+            var tracker = new BlockTypeTracker(typeCount);
+            int remainingLength = totalLength - InitialLength;
+
+            var typeCodeList = new FrequencyList<BlockTypeCode>();
             var lengthCodeList = new FrequencyList<BlockLengthCode>{ BlockLengthCode.MakeCode(InitialLength) };
 
-            foreach(var command in commands){
+            for(int index = 0; index < commands.Count; index++){
+                var command = commands[index];
+
                 var codes = tracker.FindCodes(command.Type);
-                var code = codes.First(); // TODO good strategy?
+                var code = parameters.BlockTypeCodePicker(codes, typeCodeList);
 
                 typeCodeList.Add(code);
-                lengthCodeList.Add(BlockLengthCode.MakeCode(command.Length));
+
+                int length;
+
+                if (command.Length == FinalBlockSwitchLengthPlaceholder){
+                    if (index != commands.Count - 1){
+                        throw new InvalidOperationException("Block-switch command that is marked as final must be the last.");
+                    }
+
+                    length = remainingLength;
+                    
+                    commandsFinal = new List<BlockSwitchCommand>(commands);
+                    commandsFinal[^1] = new BlockSwitchCommand(command.Type, length); // replace the last command with one that has proper length
+                }
+                else{
+                    length = command.Length;
+                }
+
+                lengthCodeList.Add(BlockLengthCode.MakeCode(length));
+                remainingLength -= length;
             }
 
-            return new BlockTypeInfo(
-                category,
-                count,
+            if (remainingLength > 0){
+                throw new InvalidOperationException("Block-switch command lengths do not cover the entire " + Category + " category (covered " + (totalLength - remainingLength) + ", remaining " + remainingLength + ").");
+            }
+
+            return (new BlockTypeInfo(
+                Category,
+                typeCount,
                 InitialLength,
-                HuffmanTree<int>.FromSymbols(typeCodeList),
+                HuffmanTree<BlockTypeCode>.FromSymbols(typeCodeList),
                 HuffmanTree<BlockLengthCode>.FromSymbols(lengthCodeList)
-            );
+            ), commandsFinal);
         }
     }
 }

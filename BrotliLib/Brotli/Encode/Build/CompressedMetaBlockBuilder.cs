@@ -12,9 +12,6 @@ using BrotliLib.Collections;
 
 namespace BrotliLib.Brotli.Encode.Build{
     public sealed class CompressedMetaBlockBuilder{
-        public int OutputSize => intermediateState.OutputSize - initialState.OutputSize;
-        public int LastDistance => intermediateState.DistanceBuffer.Front;
-
         public CategoryMap<BlockSwitchBuilder> BlockTypes { get; } = BlockTypeInfo.Empty.Select(info => new BlockSwitchBuilder(info));
         public DistanceParameters DistanceParameters { get; set; } = DistanceParameters.Zero;
 
@@ -24,7 +21,14 @@ namespace BrotliLib.Brotli.Encode.Build{
 
         public IReadOnlyList<InsertCopyCommand> InsertCopyCommands => icCommands;
 
+        public int OutputSize => intermediateState.OutputSize - initialState.OutputSize;
+        public int LastDistance => intermediateState.DistanceBuffer.Front;
+
+        // Fields
+
         private readonly List<InsertCopyCommand> icCommands = new List<InsertCopyCommand>();
+        private int totalLiterals;
+        private int totalExplicitDistances;
         private DistanceCodeZeroStrategy? finalInsertDistanceCodeZeroStrategy;
         
         private readonly BrotliGlobalState initialState;
@@ -43,7 +47,7 @@ namespace BrotliLib.Brotli.Encode.Build{
             var header = metaBlock.Header;
             var data = metaBlock.Data;
             
-            this.BlockTypes = header.BlockTypes.Select(info => new BlockSwitchBuilder(info));
+            this.BlockTypes = header.BlockTypes.Select(info => new BlockSwitchBuilder(info, data.BlockSwitchCommands[info.Category]));
             this.DistanceParameters = header.DistanceParameters;
             this.LiteralContextModes = header.LiteralCtxModes.ToArray();
             this.LiteralCtxMap = header.LiteralCtxMap;
@@ -52,14 +56,17 @@ namespace BrotliLib.Brotli.Encode.Build{
             foreach(InsertCopyCommand command in data.InsertCopyCommands){
                 AddInsertCopy(command);
             }
+        }
 
-            foreach(Category category in Categories.LID){
-                var bsBuilder = BlockTypes[category];
+        // Data
 
-                foreach(BlockSwitchCommand command in data.BlockSwitchCommands[category]){
-                    bsBuilder.AddBlockSwitch(command);
-                }
-            }
+        public int GetTotalBlockLength(Category category){
+            return category switch{
+                Category.Literal    => totalLiterals,
+                Category.InsertCopy => icCommands.Count,
+                Category.Distance   => totalExplicitDistances,
+                _ => throw new InvalidOperationException("Invalid category: " + category)
+            };
         }
 
         // Commands
@@ -67,12 +74,20 @@ namespace BrotliLib.Brotli.Encode.Build{
         private CompressedMetaBlockBuilder AddInsertCopy(InsertCopyCommand command){
             icCommands.Add(command);
 
-            intermediateState.OutputLiterals(command.Literals);
+            var literals = command.Literals;
+            var distance = command.CopyDistance;
 
-            if (command.CopyDistance != DistanceInfo.EndsAfterLiterals){
-                intermediateState.OutputCopy(command.CopyLength, command.CopyDistance);
+            intermediateState.OutputLiterals(literals);
+
+            if (distance != DistanceInfo.EndsAfterLiterals){
+                intermediateState.OutputCopy(command.CopyLength, distance);
+
+                if (distance != DistanceInfo.ImplicitCodeZero){
+                    totalExplicitDistances++;
+                }
             }
 
+            totalLiterals += literals.Count;
             return this;
         }
 
@@ -135,22 +150,38 @@ namespace BrotliLib.Brotli.Encode.Build{
 
             // Setup
             
-            var bsCommands = BlockTypes.Select<IList<BlockSwitchCommand>>(builder => new List<BlockSwitchCommand>(builder.Commands));
-
-            var blockTypeInfo = BlockTypes.Select(builder => builder.Build());
-            var blockTrackers = blockTypeInfo.Select(info => new BlockSwitchTracker.Writing(info, new Queue<BlockSwitchCommand>(bsCommands[info.Category])));
+            var blockTypes = BlockTypes.Select(builder => builder.Build(GetTotalBlockLength(builder.Category), parameters));
+            var blockTrackers = blockTypes.Select(built => new BlockSwitchTracker.Writing(built.Info, new Queue<BlockSwitchCommand>(built.Commands)));
 
             var literalFreq = NewFreqArray<Literal>(LiteralCtxMap.TreeCount);
-            var icLengthCodeFreq = NewFreqArray<InsertCopyLengthCode>(blockTypeInfo[Category.InsertCopy].TypeCount);
+            var icLengthCodeFreq = NewFreqArray<InsertCopyLengthCode>(blockTypes[Category.InsertCopy].Info.TypeCount);
             var distanceCodeFreq = NewFreqArray<DistanceCode>(DistanceCtxMap.TreeCount);
-            
-            // Command processing
 
             var icCommandCount = icCommands.Count;
             var icCommandsFinal = new InsertCopyCommand[icCommandCount];
 
-            for(int icCommandIndex = 0; icCommandIndex < icCommandCount; icCommandIndex++){
-                var icCommand = icCommands[icCommandIndex];
+            // Early validation
+
+            if (icCommands.Count == 0){
+                throw new InvalidOperationException("Cannot build a compressed meta-block with no insert&copy commands.");
+            }
+
+            if (LiteralContextModes.Length != blockTypes[Category.Literal].Info.TypeCount){
+                throw new InvalidOperationException("Literal context mode array size must match the amount of literal block types (" + LiteralContextModes.Length + " != " + blockTypes[Category.Literal].Info.TypeCount + ").");
+            }
+
+            if (LiteralCtxMap.BlockTypes != blockTypes[Category.Literal].Info.TypeCount){
+                throw new InvalidOperationException("Literal context map size is incorrect for the amount of literal block types.");
+            }
+            
+            if (DistanceCtxMap.BlockTypes != blockTypes[Category.Distance].Info.TypeCount){
+                throw new InvalidOperationException("Distance context map size is incorrect for the amount of distance block types.");
+            }
+            
+            // Command processing
+
+            for(int icIndex = 0; icIndex < icCommandCount; icIndex++){
+                var icCommand = icCommands[icIndex];
                 int icBlockID = blockTrackers[Category.InsertCopy].SimulateCommand();
 
                 for(int literalIndex = 0; literalIndex < icCommand.Literals.Count; literalIndex++){
@@ -168,7 +199,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                 InsertCopyLengthCode icLengthCode;
 
                 if (icCommand.CopyDistance == DistanceInfo.EndsAfterLiterals){
-                    if (icCommandIndex != icCommandCount - 1){
+                    if (icIndex != icCommandCount - 1){
                         throw new InvalidOperationException("Insert&copy command that ends after literals must be the last.");
                     }
 
@@ -204,7 +235,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                 }
 
                 icLengthCodeFreq[icBlockID].Add(icLengthCode);
-                icCommandsFinal[icCommandIndex] = icCommand;
+                icCommandsFinal[icIndex] = icCommand;
             }
 
             // Finalize
@@ -222,7 +253,7 @@ namespace BrotliLib.Brotli.Encode.Build{
             }
 
             var header = new CompressedHeader(
-                blockTypeInfo,
+                blockTypes.Select(built => built.Info),
                 DistanceParameters,
                 LiteralContextModes,
                 LiteralCtxMap,
@@ -232,7 +263,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                 ConstructHuffmanTrees(distanceCodeFreq, parameters.GenerateDistanceCodeTree)
             );
 
-            var data = new CompressedData(icCommandsFinal, bsCommands);
+            var data = new CompressedData(icCommandsFinal, blockTypes.Select(built => built.Commands));
             var dataLength = new DataLength(OutputSize);
 
             return (new MetaBlock.Compressed(isLast: false, dataLength, header, data), state);

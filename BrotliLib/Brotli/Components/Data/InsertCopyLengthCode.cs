@@ -7,7 +7,7 @@ using InsertCopyTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.
 
 namespace BrotliLib.Brotli.Components.Data{
     /// <summary>
-    /// Describes a <see cref="HuffmanTree{T}"/> entry used to calculate lengths of an insert&amp;copy code.
+    /// Describes a <see cref="HuffmanTree{T}"/> symbol used to calculate lengths of an insert&amp;copy code.
     /// https://tools.ietf.org/html/rfc7932#section-5
     /// </summary>
     public sealed class InsertCopyLengthCode : IComparable<InsertCopyLengthCode>{

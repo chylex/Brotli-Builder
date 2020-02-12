@@ -6,7 +6,7 @@ using LiteralTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Bro
 
 namespace BrotliLib.Brotli.Components.Data{
     /// <summary>
-    /// Describes a <see cref="HuffmanTree{T}"/> entry that represents a single byte.
+    /// Describes a <see cref="HuffmanTree{T}"/> symbol that represents a single byte.
     /// https://tools.ietf.org/html/rfc7932#section-5
     /// </summary>
     public readonly struct Literal : IComparable<Literal>{

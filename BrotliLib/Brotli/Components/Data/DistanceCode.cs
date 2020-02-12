@@ -8,11 +8,11 @@ using DistanceTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Br
 
 namespace BrotliLib.Brotli.Components.Data{
     /// <summary>
-    /// Describes a <see cref="HuffmanTree{T}"/> entry used to calculate the distance in an insert&amp;copy command.
+    /// Describes a <see cref="HuffmanTree{T}"/> symbol used to calculate the distance in an insert&amp;copy command.
     /// https://tools.ietf.org/html/rfc7932#section-4
     /// </summary>
     public abstract partial class DistanceCode : IComparable<DistanceCode>{
-        public static DistanceTree.Context GenerateTreeContext(DistanceParameters parameters){
+        public static DistanceTree.Context GetTreeContext(DistanceParameters parameters){
             return new DistanceTree.Context(parameters.AlphabetSize, value => Create(parameters, value), symbol => symbol.Code);
         }
 
@@ -113,7 +113,7 @@ namespace BrotliLib.Brotli.Components.Data{
             }
 
             internal void Write(IBitWriter writer, DistanceInfo info){
-                if (info != DistanceInfo.ExplicitCodeZero){
+                if (info >= DistanceInfo.FirstExactValue){
                     code.WriteValue(state, info.GetValue(state), writer);
                 }
             }

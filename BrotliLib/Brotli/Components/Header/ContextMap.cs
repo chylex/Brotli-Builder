@@ -16,6 +16,8 @@ namespace BrotliLib.Brotli.Components.Header{
     public sealed class ContextMap{
         public Category Category { get; }
         public int TreeCount { get; }
+
+        public int BlockTypes => contextMap.Length / treesPerBlockType;
         
         private readonly int treesPerBlockType;
         private readonly byte[] contextMap;

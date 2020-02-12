@@ -50,8 +50,8 @@ namespace BrotliLib.Brotli.Components.Data{
             (reader, context) => {
                 var info = context.Info;
 
-                int typeCode = reader.ReadValue(info.TypeCodeTree!.Root, "BTYPE (code)");
-                int typeValue = reader.MarkValue("BTYPE (value)", () => context.Tracker.FindValue(typeCode));
+                var typeCode = reader.ReadValue(info.TypeCodeTree!.Root, "BTYPE (code)");
+                int typeValue = reader.MarkValue("BTYPE (value)", () => context.Tracker.NextType(typeCode));
                 
                 var lengthCode = reader.ReadValue(info.LengthCodeTree!.Root, "BLEN (code)");
                 int lengthValue = reader.ReadValue(BlockLengthCode.Deserialize, lengthCode, "BLEN (value)");

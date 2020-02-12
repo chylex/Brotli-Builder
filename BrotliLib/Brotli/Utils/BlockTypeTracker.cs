@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Collections;
 
 namespace BrotliLib.Brotli.Utils{
@@ -6,6 +7,9 @@ namespace BrotliLib.Brotli.Utils{
     /// Tracks the current block type, and allows converting between type codes and type values.
     /// </summary>
     public sealed class BlockTypeTracker{
+        private static readonly BlockTypeCode Code0 = new BlockTypeCode(0);
+        private static readonly BlockTypeCode Code1 = new BlockTypeCode(1);
+
         private int Code0Value => last.Back;
         private int Code1Value => (1 + last.Front) % count;
 
@@ -17,27 +21,28 @@ namespace BrotliLib.Brotli.Utils{
             this.last = new RingBuffer<int>(1, 0);
         }
 
-        public List<int> FindCodes(int value){
-            List<int> list = new List<int>(3);
+        public List<BlockTypeCode> FindCodes(int value){
+            var list = new List<BlockTypeCode>(3);
 
             if (value == Code0Value){
-                list.Add(0);
+                list.Add(Code0);
             }
 
             if (value == Code1Value){
-                list.Add(1);
+                list.Add(Code1);
             }
 
-            list.Add(2 + value);
+            list.Add(new BlockTypeCode(2 + value));
             last.Push(value);
             return list;
         }
 
-        public int FindValue(int code){
-            int value = code switch{
+        public int NextType(BlockTypeCode code){
+            int id = code.Code;
+            int value = id switch{
                 0 => Code0Value,
                 1 => Code1Value,
-                _ => code - 2,
+                _ => id - 2,
             };
 
             last.Push(value);

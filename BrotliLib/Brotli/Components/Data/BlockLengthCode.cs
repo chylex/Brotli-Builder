@@ -10,7 +10,7 @@ using BlockLengthCodeTree = BrotliLib.Brotli.Components.Header.HuffmanTree<Brotl
 
 namespace BrotliLib.Brotli.Components.Data{
     /// <summary>
-    /// Describes a <see cref="HuffmanTree{T}"/> entry used to calculate the length of a block in a block-switch command.
+    /// Describes a <see cref="HuffmanTree{T}"/> symbol used to calculate the length of a block in a block-switch command.
     /// https://tools.ietf.org/html/rfc7932#section-6
     /// </summary>
     public sealed class BlockLengthCode : IComparable<BlockLengthCode>{

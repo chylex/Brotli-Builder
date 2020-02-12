@@ -96,7 +96,7 @@ namespace BrotliLib.Brotli.Components.Compressed{
                 
                 var literalTrees    = ReadHuffmanTrees(reader, Category.Literal, literalCtxMap.TreeCount, Literal.TreeContext);
                 var insertCopyTrees = ReadHuffmanTrees(reader, Category.InsertCopy, blockTypes[Category.InsertCopy].TypeCount, InsertCopyLengthCode.TreeContext);
-                var distanceTrees   = ReadHuffmanTrees(reader, Category.Distance, distanceCtxMap.TreeCount, DistanceCode.GenerateTreeContext(distanceParameters));
+                var distanceTrees   = ReadHuffmanTrees(reader, Category.Distance, distanceCtxMap.TreeCount, DistanceCode.GetTreeContext(distanceParameters));
                 
                 return new CompressedHeader(blockTypes, distanceParameters, literalCtxModes, literalCtxMap, distanceCtxMap, literalTrees, insertCopyTrees, distanceTrees);
             }
@@ -125,7 +125,7 @@ namespace BrotliLib.Brotli.Components.Compressed{
             }
 
             foreach(DistanceTree tree in obj.DistanceTrees){
-                DistanceTree.Serialize(writer, tree, DistanceCode.GenerateTreeContext(obj.DistanceParameters), parameters);
+                DistanceTree.Serialize(writer, tree, DistanceCode.GetTreeContext(obj.DistanceParameters), parameters);
             }
         };
     }

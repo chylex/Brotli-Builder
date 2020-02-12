@@ -6,7 +6,6 @@ using BrotliLib.Brotli.Utils;
 using BrotliLib.Collections;
 using BrotliLib.Markers;
 using BrotliLib.Markers.Serialization;
-using BrotliLib.Markers.Types;
 using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components.Data{
