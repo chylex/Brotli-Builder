@@ -1,4 +1,5 @@
-﻿using BrotliLib.Numbers;
+﻿using BrotliImpl.Combined.Hashers;
+using BrotliLib.Numbers;
 
 namespace BrotliImpl.Combined{
     partial class CompressQuality0{
@@ -31,25 +32,12 @@ namespace BrotliImpl.Combined{
 
                 return new int[size];
             }
-
-            /// <summary>
-            /// Adapted from https://github.com/google/brotli/blob/master/c/enc/platform.h (BROTLI_UNALIGNED_LOAD64LE).
-            /// </summary>
-            private static ulong Load64LE(byte[] bytes, int start){
-                ulong n = 0L;
-
-                for(int offset = 0; offset < sizeof(ulong); offset++){
-                    n |= (ulong)bytes[start + offset] << (8 * offset);
-                }
-
-                return n;
-            }
             
             /// <summary>
             /// Adapted from https://github.com/google/brotli/blob/master/c/enc/compress_fragment.c (Hash).
             /// </summary>
             private static uint Hash(byte[] bytes, int index, int shift){
-                ulong h = unchecked((Load64LE(bytes, index) << 24) * HashMul32);
+                ulong h = unchecked((HasherCommon.Load64LE(bytes, index) << 24) * HashMul32);
                 return (uint)(h >> shift);
             }
             
@@ -88,7 +76,7 @@ namespace BrotliImpl.Combined{
             /// Adapted from https://github.com/google/brotli/blob/master/c/enc/compress_fragment.c (BrotliCompressFragmentFastImpl, two occurrences).
             /// </summary>
             public int UpdateAndGetCandidate(int ip, int baseIp){
-                ulong inputBytes = Load64LE(input, ip - 3);
+                ulong inputBytes = HasherCommon.Load64LE(input, ip - 3);
                 uint prevHash = HashBytesAtOffset(inputBytes, 0, shift);
                 uint curHash = HashBytesAtOffset(inputBytes, 3, shift);
 

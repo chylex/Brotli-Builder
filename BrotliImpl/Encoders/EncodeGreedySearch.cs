@@ -34,7 +34,7 @@ namespace BrotliImpl.Encoders{
                 int maxDistance = Math.Min(start, parameters.WindowSize.Bytes);
 
                 for(int distance = 1; distance <= maxDistance; distance++){
-                    int match = Match.DetermineLength(bytes, start, start - distance, maxLength);
+                    int match = Match.DetermineLength(bytes, start, start - distance, Math.Min(maxLength, length - start));
 
                     if (match >= minLength){
                         return new Copy.BackReference(match, distance);
