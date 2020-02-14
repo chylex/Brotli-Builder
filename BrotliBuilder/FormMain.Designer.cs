@@ -26,24 +26,10 @@
             this.components = new System.ComponentModel.Container();
             this.mainMenu = new System.Windows.Forms.MainMenu(this.components);
             this.menuItemFile = new System.Windows.Forms.MenuItem();
-            this.menuItemOpenBrotli = new System.Windows.Forms.MenuItem();
-            this.menuItemSaveBrotli = new System.Windows.Forms.MenuItem();
-            this.menuItemSaveOutput = new System.Windows.Forms.MenuItem();
-            this.menuItemExit = new System.Windows.Forms.MenuItem();
-            this.menuItemCloseOriginal = new System.Windows.Forms.MenuItem();
             this.menuItemView = new System.Windows.Forms.MenuItem();
             this.menuItemTools = new System.Windows.Forms.MenuItem();
-            this.menuItemStaticDictionary = new System.Windows.Forms.MenuItem();
-            this.menuItemCompareMarkers = new System.Windows.Forms.MenuItem();
-            this.menuItemSeparatorF1 = new System.Windows.Forms.MenuItem();
-            this.menuItemSeparatorF2 = new System.Windows.Forms.MenuItem();
-            this.menuItemSeparatorT1 = new System.Windows.Forms.MenuItem();
-            this.menuItemSeparatorT2 = new System.Windows.Forms.MenuItem();
-            this.menuItemCloneGeneratedToOriginal = new System.Windows.Forms.MenuItem();
-            this.menuItemCloneOriginalToGenerated = new System.Windows.Forms.MenuItem();
-            this.menuItemEncodeFile = new System.Windows.Forms.MenuItem();
+            this.menuItemEncode = new System.Windows.Forms.MenuItem();
             this.menuItemTransform = new System.Windows.Forms.MenuItem();
-            this.menuItemConfigureSerializationParameters = new System.Windows.Forms.MenuItem();
             this.flowPanelBlocks = new System.Windows.Forms.FlowLayoutPanel();
             this.statusBar = new System.Windows.Forms.StatusBar();
             this.statusBarPanelPadding1 = new System.Windows.Forms.StatusBarPanel();
@@ -86,63 +72,13 @@
             this.menuItemFile,
             this.menuItemView,
             this.menuItemTools,
-            this.menuItemEncodeFile,
+            this.menuItemEncode,
             this.menuItemTransform});
             // 
             // menuItemFile
             // 
             this.menuItemFile.Index = 0;
-            this.menuItemFile.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItemOpenBrotli,
-            this.menuItemSaveBrotli,
-            this.menuItemSaveOutput,
-            this.menuItemSeparatorF1,
-            this.menuItemCloseOriginal,
-            this.menuItemSeparatorF2,
-            this.menuItemExit});
             this.menuItemFile.Text = "&File";
-            // 
-            // menuItemOpenBrotli
-            // 
-            this.menuItemOpenBrotli.Index = 0;
-            this.menuItemOpenBrotli.Shortcut = System.Windows.Forms.Shortcut.CtrlO;
-            this.menuItemOpenBrotli.Text = "Open Brotli";
-            this.menuItemOpenBrotli.Click += new System.EventHandler(this.menuItemOpenBrotli_Click);
-            // 
-            // menuItemSaveBrotli
-            // 
-            this.menuItemSaveBrotli.Index = 1;
-            this.menuItemSaveBrotli.Shortcut = System.Windows.Forms.Shortcut.CtrlS;
-            this.menuItemSaveBrotli.Text = "Save Brotli";
-            this.menuItemSaveBrotli.Click += new System.EventHandler(this.menuItemSaveBrotli_Click);
-            // 
-            // menuItemSaveOutput
-            // 
-            this.menuItemSaveOutput.Index = 2;
-            this.menuItemSaveOutput.Text = "Save Output";
-            this.menuItemSaveOutput.Click += new System.EventHandler(this.menuItemSaveOutput_Click);
-            // 
-            // menuItemCloseOriginal
-            // 
-            this.menuItemCloseOriginal.Index = 4;
-            this.menuItemCloseOriginal.Text = "Close Original File";
-            this.menuItemCloseOriginal.Click += new System.EventHandler(this.menuItemCloseOriginal_Click);
-            // 
-            // menuItemExit
-            // 
-            this.menuItemExit.Index = 6;
-            this.menuItemExit.Text = "Exit";
-            this.menuItemExit.Click += new System.EventHandler(this.menuItemExit_Click);
-            // 
-            // menuItemSeparatorF1
-            // 
-            this.menuItemSeparatorF1.Index = 3;
-            this.menuItemSeparatorF1.Text = "-";
-            // 
-            // menuItemSeparatorF2
-            // 
-            this.menuItemSeparatorF2.Index = 5;
-            this.menuItemSeparatorF2.Text = "-";
             // 
             // menuItemView
             // 
@@ -152,66 +88,12 @@
             // menuItemTools
             // 
             this.menuItemTools.Index = 2;
-            this.menuItemTools.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItemConfigureSerializationParameters,
-            this.menuItemSeparatorT1,
-            this.menuItemStaticDictionary,
-            this.menuItemCompareMarkers,
-            this.menuItemSeparatorT2,
-            this.menuItemCloneGeneratedToOriginal,
-            this.menuItemCloneOriginalToGenerated});
             this.menuItemTools.Text = "&Tools";
-            //
-            // menuItemConfigureParameters
-            //
-            this.menuItemConfigureSerializationParameters.Index = 0;
-            this.menuItemConfigureSerializationParameters.Shortcut = System.Windows.Forms.Shortcut.CtrlP;
-            this.menuItemConfigureSerializationParameters.Text = "Configure Serialization Parameters";
-            this.menuItemConfigureSerializationParameters.Click += new System.EventHandler(this.menuItemConfigureSerializationParameters_Click);
-            // 
-            // menuItemStaticDictionary
-            // 
-            this.menuItemStaticDictionary.Index = 2;
-            this.menuItemStaticDictionary.Shortcut = System.Windows.Forms.Shortcut.CtrlD;
-            this.menuItemStaticDictionary.Text = "Static Dictionary";
-            this.menuItemStaticDictionary.Click += new System.EventHandler(this.menuItemStaticDictionary_Click);
-            // 
-            // menuItemCompareMarkers
-            // 
-            this.menuItemCompareMarkers.Enabled = false;
-            this.menuItemCompareMarkers.Index = 3;
-            this.menuItemCompareMarkers.Shortcut = System.Windows.Forms.Shortcut.CtrlM;
-            this.menuItemCompareMarkers.Text = "Compare Markers";
-            this.menuItemCompareMarkers.Click += new System.EventHandler(this.menuItemCompareMarkers_Click);
-            // 
-            // menuItemSeparatorT1
-            // 
-            this.menuItemSeparatorT1.Index = 1;
-            this.menuItemSeparatorT1.Text = "-";
-            // 
-            // menuItemSeparatorT2
-            // 
-            this.menuItemSeparatorT2.Index = 4;
-            this.menuItemSeparatorT2.Text = "-";
-            // 
-            // menuItemCloneGeneratedToOriginal
-            // 
-            this.menuItemCloneGeneratedToOriginal.Enabled = false;
-            this.menuItemCloneGeneratedToOriginal.Index = 5;
-            this.menuItemCloneGeneratedToOriginal.Text = "Generated >> Original";
-            this.menuItemCloneGeneratedToOriginal.Click += new System.EventHandler(this.menuItemCloneGeneratedToOriginal_Click);
-            // 
-            // menuItemCloneOriginalToGenerated
-            // 
-            this.menuItemCloneOriginalToGenerated.Enabled = false;
-            this.menuItemCloneOriginalToGenerated.Index = 6;
-            this.menuItemCloneOriginalToGenerated.Text = "Generated << Original";
-            this.menuItemCloneOriginalToGenerated.Click += new System.EventHandler(this.menuItemCloneOriginalToGenerated_Click);
             // 
             // menuItemEncodeFile
             // 
-            this.menuItemEncodeFile.Index = 3;
-            this.menuItemEncodeFile.Text = "&Encode";
+            this.menuItemEncode.Index = 3;
+            this.menuItemEncode.Text = "&Encode";
             // 
             // menuItemTransform
             // 
@@ -449,11 +331,7 @@
 
         private System.Windows.Forms.MainMenu mainMenu;
         private System.Windows.Forms.MenuItem menuItemFile;
-        private System.Windows.Forms.MenuItem menuItemExit;
-        private System.Windows.Forms.MenuItem menuItemCloseOriginal;
         private System.Windows.Forms.FlowLayoutPanel flowPanelBlocks;
-        private System.Windows.Forms.MenuItem menuItemSaveBrotli;
-        private System.Windows.Forms.MenuItem menuItemOpenBrotli;
         private System.Windows.Forms.StatusBar statusBar;
         private System.Windows.Forms.StatusBarPanel statusBarPanelTimeBits;
         private System.Windows.Forms.StatusBarPanel statusBarPanelTimeOutput;
@@ -461,9 +339,8 @@
         private System.Windows.Forms.StatusBarPanel statusBarPanelPadding2;
         private System.Windows.Forms.Timer timerRegenerationDelay;
         private System.Windows.Forms.MenuItem menuItemTools;
-        private System.Windows.Forms.MenuItem menuItemEncodeFile;
+        private System.Windows.Forms.MenuItem menuItemEncode;
         private System.Windows.Forms.MenuItem menuItemView;
-        private System.Windows.Forms.MenuItem menuItemStaticDictionary;
         private System.Windows.Forms.SplitContainer splitContainerRightBottom;
         private Components.BrotliFilePanel brotliFilePanelGenerated;
         private Components.BrotliFilePanel brotliFilePanelOriginal;
@@ -472,16 +349,7 @@
         private System.Windows.Forms.SplitContainer splitContainerMain;
         private Components.BrotliMarkerInfoPanel brotliMarkerInfoPanel;
         private System.Windows.Forms.Label labelFileStructure;
-        private System.Windows.Forms.MenuItem menuItemCompareMarkers;
         private System.Windows.Forms.StatusBarPanel statusBarPanelTimeStructure;
         private System.Windows.Forms.StatusBarPanel statusBarPanelPadding3;
-        private System.Windows.Forms.MenuItem menuItemSaveOutput;
-        private System.Windows.Forms.MenuItem menuItemSeparatorF1;
-        private System.Windows.Forms.MenuItem menuItemSeparatorF2;
-        private System.Windows.Forms.MenuItem menuItemSeparatorT1;
-        private System.Windows.Forms.MenuItem menuItemSeparatorT2;
-        private System.Windows.Forms.MenuItem menuItemCloneGeneratedToOriginal;
-        private System.Windows.Forms.MenuItem menuItemCloneOriginalToGenerated;
-        private System.Windows.Forms.MenuItem menuItemConfigureSerializationParameters;
     }
 }

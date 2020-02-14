@@ -1,68 +1,16 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using BrotliBuilder.Blocks;
 using BrotliBuilder.Components;
-using BrotliBuilder.Dialogs;
 using BrotliBuilder.State;
 using BrotliBuilder.Utils;
 using BrotliLib.Brotli;
-using BrotliLib.Brotli.Dictionary;
-using BrotliLib.Brotli.Dictionary.Default;
-using BrotliLib.Brotli.Encode;
-using BrotliLib.Brotli.Parameters;
-using BrotliLib.Markers;
 
 namespace BrotliBuilder{
     partial class FormMain : Form{
-
-        #region Building block context
-
-        private class BuildingBlockContext : IBuildingBlockContext{
-            public event EventHandler<EventArgs>? Notified;
-
-            private readonly FormMain owner;
-            private readonly Panel container;
-            private readonly IBuildingBlockContext? parent;
-            private readonly int depth;
-
-            public BuildingBlockContext(FormMain owner, Panel container, IBuildingBlockContext? parent = null, int depth = 0){
-                this.owner = owner;
-                this.container = container;
-                this.parent = parent;
-                this.depth = depth;
-            }
-
-            public void SetChildBlock(Func<IBuildingBlockContext, UserControl>? blockFactory){
-                int childDepth = depth + 1;
-                var controls = container.Controls;
-                
-                while(childDepth < controls.Count){
-                    controls.RemoveAt(childDepth);
-                }
-
-                if (blockFactory != null){
-                    controls.Add(blockFactory(new BuildingBlockContext(owner, container, this, childDepth)));
-                }
-            }
-
-            public void NotifyParent(EventArgs args){
-                Notified?.Invoke(container.Controls[depth], args);
-
-                if (parent == null){
-                    owner.RegenerateBrotliStream();
-                }
-                else{
-                    parent.NotifyParent(args);
-                }
-            }
-        }
-
-        #endregion
-
         private string lastFileName = "compressed";
         private bool isDirty = false;
 
@@ -78,7 +26,9 @@ namespace BrotliBuilder{
             InitializeComponent();
 
             SuspendLayout();
+            InitializeMenuFile();
             InitializeMenuView();
+            InitializeMenuTools();
             InitializeMenuEncoders();
             InitializeMenuTransformers();
             ResumeLayout(true);
@@ -93,7 +43,7 @@ namespace BrotliBuilder{
             fileOriginal.ResetToNothing();
         }
 
-        #region File state handling
+        // Status bars
 
         private void ResetStatusBars(string text){
             statusBarPanelTimeStructure.Text = text;
@@ -109,6 +59,8 @@ namespace BrotliBuilder{
                 bar.Text = "Loaded " + type + ".";
             }
         }
+
+        // File handling
 
         private void HandleFileError(BrotliFileState.Error error, BrotliFilePanel panel){
             Exception ex = error.Exception;
@@ -165,8 +117,8 @@ namespace BrotliBuilder{
 
             switch(e.To){
                 case BrotliFileState.NoFile _:
-                    menuItemCompareMarkers.Enabled = false;
-                    menuItemCloneGeneratedToOriginal.Enabled = false;
+                    menuItemCompareMarkers!.Enabled = false;
+                    menuItemCloneGeneratedToOriginal!.Enabled = false;
                     break;
 
                 case BrotliFileState.Starting _:
@@ -206,10 +158,10 @@ namespace BrotliBuilder{
                     filePanel.FinalizeOutput(loaded);
 
                     lastGeneratedFile = loaded.File;
-                    menuItemCloneGeneratedToOriginal.Enabled = true;
+                    menuItemCloneGeneratedToOriginal!.Enabled = true;
 
                     if (brotliFilePanelOriginal.MarkerRoot != null && brotliFilePanelGenerated.MarkerRoot != null){
-                        menuItemCompareMarkers.Enabled = true;
+                        menuItemCompareMarkers!.Enabled = true;
                     }
 
                     break;
@@ -228,9 +180,9 @@ namespace BrotliBuilder{
                     filePanel.ResetPanel();
                     splitContainerRightBottom.Panel2Collapsed = true;
 
-                    menuItemCloseOriginal.Enabled = false;
-                    menuItemCompareMarkers.Enabled = false;
-                    menuItemCloneOriginalToGenerated.Enabled = false;
+                    menuItemCloseOriginal!.Enabled = false;
+                    menuItemCompareMarkers!.Enabled = false;
+                    menuItemCloneOriginalToGenerated!.Enabled = false;
 
                     lastOriginalFileBytes = null;
                     return;
@@ -276,8 +228,8 @@ namespace BrotliBuilder{
                         fileGenerated.LoadStructure(loaded.File, lastOriginalFileBytes);
                     }
                     
-                    menuItemCloseOriginal.Enabled = true;
-                    menuItemCloneOriginalToGenerated.Enabled = true;
+                    menuItemCloseOriginal!.Enabled = true;
+                    menuItemCloneOriginalToGenerated!.Enabled = true;
                     break;
 
                 case BrotliFileState.Error error:
@@ -288,9 +240,54 @@ namespace BrotliBuilder{
             splitContainerRightBottom.Panel2Collapsed = false; // skipped for State.NoFile
         }
 
-        #endregion
+        private bool PromptUnsavedChanges(string message){
+            if (!isDirty){
+                return false;
+            }
 
-        #region Building blocks
+            DialogResult result = MessageBox.Show(message, "Unsaved Changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+            if (result == DialogResult.Cancel){
+                return true;
+            }
+            else if (result == DialogResult.Yes){
+                SaveBrotli(); // sets isDirty to false on success
+
+                if (isDirty){
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // Main events
+
+        private void FormMain_FormClosing(object? sender, FormClosingEventArgs e){
+            e.Cancel = PromptUnsavedChanges("Would you like to save changes before exiting?");
+        }
+
+        private void FormMain_Resize(object? sender, EventArgs e){
+            int statusBarPanelWidth = Width < 645 ? 200 - Math.Min(100, (645 - Width) / 3) : 200;
+
+            statusBarPanelTimeStructure.Width = statusBarPanelWidth;
+            statusBarPanelTimeBits.Width = statusBarPanelWidth;
+            statusBarPanelTimeOutput.Width = statusBarPanelWidth;
+        }
+
+        private void flowPanelBlocks_ControlAdded(object? sender, ControlEventArgs e){
+            e.Control.Height = flowPanelBlocks.ClientSize.Height - 8;
+        }
+
+        private void flowPanelBlocks_SizeChanged(object? sender, EventArgs e){
+            flowPanelBlocks.SetChildHeight(flowPanelBlocks.ClientSize.Height - 8);
+        }
+        
+        private void brotliFilePanel_MarkersUpdated(object? sender, MarkedTextBox.MarkerUpdateEventArgs e){
+            brotliMarkerInfoPanel.UpdateMarkers(e.Title, e.MarkerRoot, e.MarkerSequence, e.HighlightedNodes, e.CaretNode);
+        }
+
+        // Building blocks
 
         private void RegenerateBuildingBlocks(BrotliFileStructure file){
             if (skipNextBlockRegeneration){
@@ -317,287 +314,44 @@ namespace BrotliBuilder{
             }
         }
 
-        #endregion
+        private class BuildingBlockContext : IBuildingBlockContext{
+            public event EventHandler<EventArgs>? Notified;
 
-        #region Form events
+            private readonly FormMain owner;
+            private readonly Panel container;
+            private readonly IBuildingBlockContext? parent;
+            private readonly int depth;
 
-        private bool PromptUnsavedChanges(string message){
-            if (!isDirty){
-                return false;
+            public BuildingBlockContext(FormMain owner, Panel container, IBuildingBlockContext? parent = null, int depth = 0){
+                this.owner = owner;
+                this.container = container;
+                this.parent = parent;
+                this.depth = depth;
             }
 
-            DialogResult result = MessageBox.Show(message, "Unsaved Changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            public void SetChildBlock(Func<IBuildingBlockContext, UserControl>? blockFactory){
+                int childDepth = depth + 1;
+                var controls = container.Controls;
+                
+                while(childDepth < controls.Count){
+                    controls.RemoveAt(childDepth);
+                }
 
-            if (result == DialogResult.Cancel){
-                return true;
-            }
-            else if (result == DialogResult.Yes){
-                menuItemSaveBrotli_Click(null, EventArgs.Empty); // sets isDirty to false on success
-
-                if (isDirty){
-                    return true;
+                if (blockFactory != null){
+                    controls.Add(blockFactory(new BuildingBlockContext(owner, container, this, childDepth)));
                 }
             }
 
-            return false;
-        }
+            public void NotifyParent(EventArgs args){
+                Notified?.Invoke(container.Controls[depth], args);
 
-        private void FormMain_FormClosing(object? sender, FormClosingEventArgs e){
-            e.Cancel = PromptUnsavedChanges("Would you like to save changes before exiting?");
-        }
-
-        private void FormMain_Resize(object? sender, EventArgs e){
-            int statusBarPanelWidth = Width < 645 ? 200 - Math.Min(100, (645 - Width) / 3) : 200;
-
-            statusBarPanelTimeStructure.Width = statusBarPanelWidth;
-            statusBarPanelTimeBits.Width = statusBarPanelWidth;
-            statusBarPanelTimeOutput.Width = statusBarPanelWidth;
-        }
-
-        #endregion
-
-        #region Control events
-
-        private void flowPanelBlocks_ControlAdded(object? sender, ControlEventArgs e){
-            e.Control.Height = flowPanelBlocks.ClientSize.Height - 8;
-        }
-
-        private void flowPanelBlocks_SizeChanged(object? sender, EventArgs e){
-            flowPanelBlocks.SetChildHeight(flowPanelBlocks.ClientSize.Height - 8);
-        }
-        
-        private void brotliFilePanel_MarkersUpdated(object? sender, MarkedTextBox.MarkerUpdateEventArgs e){
-            brotliMarkerInfoPanel.UpdateMarkers(e.Title, e.MarkerRoot, e.MarkerSequence, e.HighlightedNodes, e.CaretNode);
-        }
-
-        #endregion
-
-        #region Menu events (File)
-
-        private void menuItemOpenBrotli_Click(object? sender, EventArgs e){
-            if (PromptUnsavedChanges("Would you like to save changes before opening a new file?")){
-                return;
-            }
-
-            using OpenFileDialog dialog = new OpenFileDialog{
-                Title = "Open Compressed File",
-                Filter = "Brotli (*.br)|*.br|All Files (*.*)|*.*",
-                FileName = Path.GetFileName(lastFileName),
-                DefaultExt = "br"
-            };
-
-            if (dialog.ShowDialog() == DialogResult.OK){
-                lastFileName = dialog.FileName;
-                isDirty = false;
-                skipNextBlockRegeneration = false;
-                skipNextOriginalToGeneratedFeed = false;
-
-                fileOriginal.LoadFile(lastFileName);
+                if (parent == null){
+                    owner.RegenerateBrotliStream();
+                }
+                else{
+                    parent.NotifyParent(args);
+                }
             }
         }
-
-        private BrotliFileStructure? GetCurrentFileOrShowError(){
-            BrotliFileStructure? currentFile = fileGenerated.CurrentFile;
-
-            if (currentFile == null){
-                MessageBox.Show("No structure loaded.", "Save File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
-
-            return currentFile;
-        }
-
-        private void menuItemSaveBrotli_Click(object? sender, EventArgs e){
-            BrotliFileStructure? currentFile = GetCurrentFileOrShowError();
-
-            if (currentFile == null){
-                return;
-            }
-
-            using SaveFileDialog dialog = new SaveFileDialog{
-                Title = "Save Brotli",
-                Filter = "Brotli (*.br)|*.br|All Files (*.*)|*.*",
-                FileName = Path.GetFileName(lastFileName),
-                DefaultExt = "br"
-            };
-
-            if (dialog.ShowDialog() == DialogResult.OK){
-                lastFileName = dialog.FileName;
-                isDirty = false;
-
-                File.WriteAllBytes(lastFileName, currentFile.Serialize(fileGenerated.SerializationParameters).ToByteArray());
-            }
-        }
-
-        private void menuItemSaveOutput_Click(object? sender, EventArgs e){
-            BrotliFileStructure? currentFile = GetCurrentFileOrShowError();
-
-            if (currentFile == null){
-                return;
-            }
-
-            using SaveFileDialog dialog = new SaveFileDialog{
-                Title = "Save Output",
-                Filter = "All Files (*.*)|*.*"
-            };
-
-            if (dialog.ShowDialog() == DialogResult.OK){
-                File.WriteAllBytes(dialog.FileName, currentFile.Decompress().AsBytes);
-            }
-        }
-
-        private void menuItemCloseOriginal_Click(object? sender, EventArgs e){
-            fileOriginal.ResetToNothing();
-        }
-
-        private void menuItemExit_Click(object? sender, EventArgs e){
-            Close();
-        }
-
-        #endregion
-
-        #region Menu events (View)
-
-        private void ShowFileStructurePanel(bool show){
-            splitContainerRight.Panel1Collapsed = !show;
-            splitContainerRight.Panel1MinSize = show ? 175 : 0;
-        }
-
-        private void ShowMarkerInfoPanel(bool show){
-            splitContainerMain.Panel1Collapsed = !show;
-            fileGenerated.BitMarkerLevel = show ? MarkerLevel.Verbose : MarkerLevel.None;
-            fileOriginal.BitMarkerLevel = show ? MarkerLevel.Verbose : MarkerLevel.None;
-
-            if (!show){
-                brotliMarkerInfoPanel.ResetMarkers();
-            }
-        }
-
-        private void SetMarkerInfoPanelOrientation(Orientation orientation){
-            SuspendLayout();
-            brotliMarkerInfoPanel.Orientation = orientation;
-            splitContainerMain.Orientation = orientation;
-
-            if (orientation == Orientation.Horizontal){
-                splitContainerMain.SplitterDistance /= 2;
-                splitContainerMain.Panel2MinSize = 125;
-            }
-            else{
-                splitContainerMain.SplitterDistance *= 2;
-                splitContainerMain.Panel2MinSize = 275;
-            }
-
-            ResumeLayout(true);
-        }
-
-        #endregion
-        
-        #region Menu events (Tools)
-
-        private void menuItemStaticDictionary_Click(object? sender, EventArgs e){
-            try{
-                using FormStaticDictionary form = new FormStaticDictionary(BrotliDefaultDictionary.Embedded);
-                form.ShowDialog();
-            }catch(Exception ex){
-                Debug.WriteLine(ex.ToString());
-                MessageBox.Show(ex.Message, "Static Dictionary Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void menuItemConfigureSerializationParameters_Click(object? sender, EventArgs e){
-            using FormSerializationParameters form = new FormSerializationParameters(fileGenerated.SerializationParameters);
-            form.Updated += fileGenerated_SerializationParametersUpdated;
-            form.Reserialize += fileGenerated_Reserialize;
-            form.ShowDialog();
-        }
-
-        private void fileGenerated_SerializationParametersUpdated(object? sender, BrotliSerializationParameters newParameters){
-            fileGenerated.SerializationParameters = newParameters;
-        }
-
-        private void fileGenerated_Reserialize(object? sender, EventArgs e){
-            if (lastGeneratedFile == null){
-                MessageBox.Show("No previously generated file available.", "Reserialize Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            else{
-                fileGenerated.LoadStructure(lastGeneratedFile, lastOriginalFileBytes);
-            }
-        }
-
-        private void menuItemCompareMarkers_Click(object? sender, EventArgs e){
-            if (brotliFilePanelOriginal.MarkerRoot == null || brotliFilePanelGenerated.MarkerRoot == null){
-                MessageBox.Show("No original file opened.", "Compare Markers Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            string originalText = brotliFilePanelOriginal.MarkerRoot.BuildText(includeBitCounts: false);
-            string generatedText = brotliFilePanelGenerated.MarkerRoot.BuildText(includeBitCounts: false);
-
-            try{
-                WinMerge.CompareText(originalText, generatedText);
-            }catch(Exception ex){
-                Debug.WriteLine(ex.ToString());
-                MessageBox.Show(ex.Message, "Compare Markers Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void CloneFileBetweenControllers(BrotliFileController from, BrotliFileController to){
-            if (from.CurrentFile == null){
-                MessageBox.Show("No structure loaded.", "Clone File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            from.ReplayOver(to);
-        }
-
-        private void menuItemCloneGeneratedToOriginal_Click(object? sender, EventArgs e){
-            skipNextOriginalToGeneratedFeed = true;
-            CloneFileBetweenControllers(fileGenerated, fileOriginal);
-        }
-
-        private void menuItemCloneOriginalToGenerated_Click(object? sender, EventArgs e){
-            CloneFileBetweenControllers(fileOriginal, fileGenerated);
-        }
-
-        #endregion
-
-        #region Menu events (Encode / Transform)
-
-        private void OpenFileWith(string title, Action<string> callback){
-            if (PromptUnsavedChanges("Would you like to save changes before opening a new file?")){
-                return;
-            }
-
-            using OpenFileDialog dialog = new OpenFileDialog{
-                Title = title,
-                Filter = "All Files (*.*)|*.*",
-                FileName = Path.GetFileName(lastFileName)
-            };
-
-            if (dialog.ShowDialog() == DialogResult.OK){
-                lastFileName = dialog.FileName;
-                skipNextBlockRegeneration = false;
-                callback(lastFileName);
-            }
-        }
-
-        private void OpenFileWithEncoder(BrotliFileParameters parameters, IBrotliEncoder encoder){
-            OpenFileWith("Open File to Encode", fileName => fileGenerated.EncodeFile(fileName, parameters, encoder));
-        }
-        
-        private void OpenFileWithPipeline(BrotliDictionary dictionary, BrotliEncodePipeline pipeline){
-            OpenFileWith("Open File to Encode", fileName => fileGenerated.EncodeFile(fileName, pipeline, dictionary));
-        }
-        
-        private void TransformCurrentFile(IBrotliTransformer transformer){
-            skipNextBlockRegeneration = false;
-
-            if (!fileGenerated.Transform(transformer)){
-                MessageBox.Show("No structure loaded.", "Transform Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        #endregion
-
     }
 }
