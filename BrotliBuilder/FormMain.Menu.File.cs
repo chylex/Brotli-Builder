@@ -92,7 +92,7 @@ namespace BrotliBuilder{
         }
 
         private void CloseOriginal(){
-            fileOriginal.ResetToNothing(); // TODO for some reason changes marker source
+            fileOriginal.ResetToNothing();
         }
     }
 }

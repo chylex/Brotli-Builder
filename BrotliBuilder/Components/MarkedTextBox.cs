@@ -32,6 +32,17 @@ namespace BrotliBuilder.Components{
             }
         }
 
+        public override string Text{
+            get{
+                return base.Text;
+            }
+            set{
+                updatingText = true;
+                base.Text = value;
+                updatingText = false;
+            }
+        }
+
         public string? MarkerTitle { get; set; }
         public MarkerRoot? MarkerRoot { get; private set; }
 
@@ -44,6 +55,7 @@ namespace BrotliBuilder.Components{
         private MarkerNode[]? prevMarkerSequence = null;
 
         private MarkerNode? markerCaret = null;
+        private bool updatingText = false;
         private bool updatingMarkers = false;
         private bool mouseSelecting = false;
 
@@ -144,7 +156,7 @@ namespace BrotliBuilder.Components{
         }
 
         private void MarkedFastTextBox_SelectionChanged(object? sender, EventArgs e){
-            if (!updatingMarkers && !mouseSelecting && !ModifierKeys.HasFlag(Keys.Shift)){
+            if (!updatingText && !updatingMarkers && !mouseSelecting && !ModifierKeys.HasFlag(Keys.Shift)){
                 RefreshMarkers();
             }
         }

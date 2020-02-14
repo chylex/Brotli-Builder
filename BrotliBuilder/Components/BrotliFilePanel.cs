@@ -79,7 +79,6 @@ namespace BrotliBuilder.Components{
         private void UpdateTextBox(FastColoredTextBox tb, string text, Color color){
             tb.ForeColor = color;
             tb.Text = text;
-            tb.Navigate(0);
         }
         
         private void UpdateTextBox(FastColoredTextBox tb, string text){
