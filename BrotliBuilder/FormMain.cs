@@ -22,6 +22,11 @@ namespace BrotliBuilder{
 
         private readonly BrotliFileController fileGenerated;
         private readonly BrotliFileController fileOriginal;
+
+        private readonly StatusBarBase statusBar;
+        private readonly StatusBarBase.Panel statusBarPanelTimeStructure;
+        private readonly StatusBarBase.Panel statusBarPanelTimeBits;
+        private readonly StatusBarBase.Panel statusBarPanelTimeOutput;
         
         public FormMain(){
             InitializeComponent();
@@ -39,6 +44,14 @@ namespace BrotliBuilder{
             InitializeMenuTools(menuItemTools);
             InitializeMenuEncoders(menuItemEncode);
             InitializeMenuTransformers(menuItemTransform);
+
+            statusBar = DeprecatedControls.CreateStatusBar(this);
+            statusBar.AddPadding(12);
+            statusBarPanelTimeStructure = statusBar.AddPanel(200);
+            statusBar.AddPadding(9);
+            statusBarPanelTimeBits = statusBar.AddPanel(200);
+            statusBar.AddPadding(9);
+            statusBarPanelTimeOutput = statusBar.AddPanel(200);
 
             ResumeLayout(true);
 
@@ -60,12 +73,12 @@ namespace BrotliBuilder{
             statusBarPanelTimeOutput.Text = text;
         }
 
-        private void UpdateStatusBar(StatusBarPanel bar, string type, Stopwatch? sw){
+        private void UpdateStatusBar(StatusBarBase.Panel panel, string type, Stopwatch? sw){
             if (sw != null){
-                bar.Text = "Generated " + type + " in " + sw.ElapsedMilliseconds + " ms.";
+                panel.Text = "Generated " + type + " in " + sw.ElapsedMilliseconds + " ms.";
             }
             else{
-                bar.Text = "Loaded " + type + ".";
+                panel.Text = "Loaded " + type + ".";
             }
         }
 
