@@ -1,15 +1,13 @@
 ﻿using System.IO;
 using System.Windows.Forms;
-using BrotliBuilder.Utils;
+using BrotliBuilder.Utils.Compat;
 using BrotliLib.Brotli;
 
 namespace BrotliBuilder{
     partial class FormMain{
-        private MenuItem? menuItemCloseOriginal;
+        private MainMenuBase.Item? menuItemCloseOriginal;
 
-        private void InitializeMenuFile(){
-            var menu = menuItemFile;
-
+        private void InitializeMenuFile(MainMenuBase.Item menu){
             menu.Add("Open Brotli", OpenBrotli, Shortcut.CtrlO);
             menu.Add("Save Brotli", SaveBrotli, Shortcut.CtrlS);
             menu.Add("Save Output", SaveOutput);

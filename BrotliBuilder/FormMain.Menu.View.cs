@@ -1,12 +1,10 @@
 ﻿using System.Windows.Forms;
-using BrotliBuilder.Utils;
+using BrotliBuilder.Utils.Compat;
 using BrotliLib.Markers;
 
 namespace BrotliBuilder{
     partial class FormMain{
-        private void InitializeMenuView(){
-            var menu = menuItemView;
-
+        private void InitializeMenuView(MainMenuBase.Item menu){
             menu.AddCheckBox("File Structure Panel", true, ShowFileStructurePanel);
             menu.AddCheckBox("Status Bar",           true, state => statusBar.Visible = state);
 

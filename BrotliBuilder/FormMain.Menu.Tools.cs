@@ -4,18 +4,17 @@ using System.Windows.Forms;
 using BrotliBuilder.Dialogs;
 using BrotliBuilder.State;
 using BrotliBuilder.Utils;
+using BrotliBuilder.Utils.Compat;
 using BrotliLib.Brotli.Dictionary.Default;
 using BrotliLib.Brotli.Parameters;
 
 namespace BrotliBuilder{
     partial class FormMain{
-        private MenuItem? menuItemCompareMarkers;
-        private MenuItem? menuItemCloneGeneratedToOriginal;
-        private MenuItem? menuItemCloneOriginalToGenerated;
+        private MainMenuBase.Item? menuItemCompareMarkers;
+        private MainMenuBase.Item? menuItemCloneGeneratedToOriginal;
+        private MainMenuBase.Item? menuItemCloneOriginalToGenerated;
 
-        private void InitializeMenuTools(){
-            var menu = menuItemTools;
-
+        private void InitializeMenuTools(MainMenuBase.Item menu){
             menu.Add("Configure Serialization Parameters", OpenSerializationParametersDialog, Shortcut.CtrlP);
             menu.AddSeparator();
             menuItemCompareMarkers = menu.Add("Compare Markers", CompareMarkers, Shortcut.CtrlM, isEnabled: false);

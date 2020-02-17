@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
-using BrotliBuilder.Utils;
+using BrotliBuilder.Utils.Compat;
 using BrotliImpl.Combined;
 using BrotliImpl.Encoders;
 using BrotliImpl.Transformers;
@@ -11,9 +11,7 @@ using BrotliLib.Brotli.Parameters;
 
 namespace BrotliBuilder{
     partial class FormMain{
-        private void InitializeMenuEncoders(){
-            var menu = menuItemEncode;
-
+        private void InitializeMenuEncoders(MainMenuBase.Item menu){
             var parameters = BrotliFileParameters.Default;
             var dictionary = parameters.Dictionary;
 
@@ -33,9 +31,7 @@ namespace BrotliBuilder{
             menu.Add("Quality 3", () => OpenFileWithPipeline(dictionary, new CompressQuality3()));
         }
 
-        private void InitializeMenuTransformers(){
-            var menu = menuItemTransform;
-
+        private void InitializeMenuTransformers(MainMenuBase.Item menu){
             menu.Add("Rebuild",                   () => TransformCurrentFile(new TransformRebuild()));
             menu.Add("Test Distance Parameters",  () => TransformCurrentFile(new TransformTestDistanceParameters()));
             menu.Add("Split Insert Copy Lengths", () => TransformCurrentFile(new TransformSplitInsertCopyLengths()));

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 
@@ -32,44 +31,6 @@ namespace BrotliBuilder.Utils{
             }
             
             flowLayoutPanel.ResumeLayout(true);
-        }
-
-        public static bool Toggle(this MenuItem menuItem){
-            bool enable = !menuItem.Checked;
-            menuItem.Checked = enable;
-            return enable;
-        }
-
-        public static MenuItem Add(this MenuItem menuItem, string caption, Action onClick, Shortcut shortcut = Shortcut.None, bool isEnabled = true){
-            var item = menuItem.MenuItems.Add(caption, (_, e) => onClick());
-            item.Shortcut = shortcut;
-            item.Enabled = isEnabled;
-            return item;
-        }
-
-        public static void AddSeparator(this MenuItem menuItem){
-            menuItem.MenuItems.Add("-");
-        }
-
-        public static void AddCheckBox(this MenuItem menuItem, string caption, bool initialState, Action<bool> onToggle){
-            menuItem.MenuItems.Add(caption, (obj, e) => onToggle(((MenuItem)obj!).Toggle())).Checked = initialState;
-        }
-
-        public static void AddRadioOptions(this MenuItem menuItem, string caption, string[] options, string initialState, Action<string> onChange){
-            var parent = menuItem.MenuItems.Add(caption);
-            var parentItems = parent.MenuItems;
-
-            foreach(var option in options){
-                parentItems.Add(option, (obj, e) => {
-                    foreach(var other in parentItems){
-                        ((MenuItem)other!).Checked = ReferenceEquals(obj, other);
-                    }
-
-                    onChange(option);
-                }).RadioCheck = true;
-            }
-
-            parent.MenuItems[Array.IndexOf(options, initialState)].Checked = true;
         }
     }
 }

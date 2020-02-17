@@ -24,12 +24,6 @@
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
-            this.mainMenu = new System.Windows.Forms.MainMenu(this.components);
-            this.menuItemFile = new System.Windows.Forms.MenuItem();
-            this.menuItemView = new System.Windows.Forms.MenuItem();
-            this.menuItemTools = new System.Windows.Forms.MenuItem();
-            this.menuItemEncode = new System.Windows.Forms.MenuItem();
-            this.menuItemTransform = new System.Windows.Forms.MenuItem();
             this.flowPanelBlocks = new System.Windows.Forms.FlowLayoutPanel();
             this.statusBar = new System.Windows.Forms.StatusBar();
             this.statusBarPanelPadding1 = new System.Windows.Forms.StatusBarPanel();
@@ -65,40 +59,6 @@
             this.splitContainerMain.Panel2.SuspendLayout();
             this.splitContainerMain.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // mainMenu
-            // 
-            this.mainMenu.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItemFile,
-            this.menuItemView,
-            this.menuItemTools,
-            this.menuItemEncode,
-            this.menuItemTransform});
-            // 
-            // menuItemFile
-            // 
-            this.menuItemFile.Index = 0;
-            this.menuItemFile.Text = "&File";
-            // 
-            // menuItemView
-            // 
-            this.menuItemView.Index = 1;
-            this.menuItemView.Text = "&View";
-            // 
-            // menuItemTools
-            // 
-            this.menuItemTools.Index = 2;
-            this.menuItemTools.Text = "&Tools";
-            // 
-            // menuItemEncodeFile
-            // 
-            this.menuItemEncode.Index = 3;
-            this.menuItemEncode.Text = "&Encode";
-            // 
-            // menuItemTransform
-            // 
-            this.menuItemTransform.Index = 4;
-            this.menuItemTransform.Text = "Transfor&m";
             // 
             // flowPanelBlocks
             // 
@@ -297,7 +257,6 @@
             this.Controls.Add(this.splitContainerMain);
             this.Controls.Add(this.statusBar);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.Menu = this.mainMenu;
             this.MinimumSize = new System.Drawing.Size(480, 320);
             this.Name = "FormMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -329,8 +288,6 @@
 
         #endregion
 
-        private System.Windows.Forms.MainMenu mainMenu;
-        private System.Windows.Forms.MenuItem menuItemFile;
         private System.Windows.Forms.FlowLayoutPanel flowPanelBlocks;
         private System.Windows.Forms.StatusBar statusBar;
         private System.Windows.Forms.StatusBarPanel statusBarPanelTimeBits;
@@ -338,14 +295,10 @@
         private System.Windows.Forms.StatusBarPanel statusBarPanelPadding1;
         private System.Windows.Forms.StatusBarPanel statusBarPanelPadding2;
         private System.Windows.Forms.Timer timerRegenerationDelay;
-        private System.Windows.Forms.MenuItem menuItemTools;
-        private System.Windows.Forms.MenuItem menuItemEncode;
-        private System.Windows.Forms.MenuItem menuItemView;
         private System.Windows.Forms.SplitContainer splitContainerRightBottom;
         private Components.BrotliFilePanel brotliFilePanelGenerated;
         private Components.BrotliFilePanel brotliFilePanelOriginal;
         private System.Windows.Forms.SplitContainer splitContainerRight;
-        private System.Windows.Forms.MenuItem menuItemTransform;
         private System.Windows.Forms.SplitContainer splitContainerMain;
         private Components.BrotliMarkerInfoPanel brotliMarkerInfoPanel;
         private System.Windows.Forms.Label labelFileStructure;

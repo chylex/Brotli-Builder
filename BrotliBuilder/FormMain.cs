@@ -7,6 +7,7 @@ using BrotliBuilder.Blocks;
 using BrotliBuilder.Components;
 using BrotliBuilder.State;
 using BrotliBuilder.Utils;
+using BrotliBuilder.Utils.Compat;
 using BrotliLib.Brotli;
 
 namespace BrotliBuilder{
@@ -24,13 +25,21 @@ namespace BrotliBuilder{
         
         public FormMain(){
             InitializeComponent();
-
             SuspendLayout();
-            InitializeMenuFile();
-            InitializeMenuView();
-            InitializeMenuTools();
-            InitializeMenuEncoders();
-            InitializeMenuTransformers();
+
+            var mainMenu = DeprecatedControls.CreateMainMenu(this, components);
+            var menuItemFile = mainMenu.AddItem("&File");
+            var menuItemView = mainMenu.AddItem("&View");
+            var menuItemTools = mainMenu.AddItem("&Tools");
+            var menuItemEncode = mainMenu.AddItem("&Encode");
+            var menuItemTransform = mainMenu.AddItem("Transfor&m");
+
+            InitializeMenuFile(menuItemFile);
+            InitializeMenuView(menuItemView);
+            InitializeMenuTools(menuItemTools);
+            InitializeMenuEncoders(menuItemEncode);
+            InitializeMenuTransformers(menuItemTransform);
+
             ResumeLayout(true);
 
             this.fileGenerated = new BrotliFileController(brotliFilePanelGenerated.Title);
