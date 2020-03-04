@@ -24,5 +24,14 @@ namespace BrotliLib.Brotli.Utils{
                 _ => throw new InvalidOperationException("Invalid category: " + category)
             };
         }
+
+        public static int Contexts(this Category category){
+            return category switch{
+                Category.Literal    => 64,
+                Category.InsertCopy => 1,
+                Category.Distance   => 4,
+                _ => throw new InvalidOperationException("Invalid category: " + category)
+            };
+        }
     }
 }

@@ -16,8 +16,8 @@ namespace BrotliLib.Brotli.Encode.Build{
         public DistanceParameters DistanceParameters { get; set; } = DistanceParameters.Zero;
 
         public LiteralContextMode[] LiteralContextModes { get; set; } = { LiteralContextMode.LSB6 };
-        public ContextMap LiteralCtxMap { get; set; } = ContextMap.Literals.Simple;
-        public ContextMap DistanceCtxMap { get; set; } = ContextMap.Distances.Simple;
+        public ContextMap LiteralCtxMap { get; set; } = ContextMapBuilder.Literals.Simple;
+        public ContextMap DistanceCtxMap { get; set; } = ContextMapBuilder.Distances.Simple;
 
         public IReadOnlyList<InsertCopyCommand> InsertCopyCommands => icCommands;
 
