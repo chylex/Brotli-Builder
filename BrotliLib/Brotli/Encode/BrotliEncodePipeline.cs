@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Dictionary;
 using BrotliLib.Brotli.Parameters;
@@ -41,21 +42,37 @@ namespace BrotliLib.Brotli.Encode{
                     encodeInfo = newEncodeInfo;
                 }
                 else{
-                    var state = newEncodeInfo.State;
+                    var (transformedMetaBlocks, transformedState) = ApplyTransformerChain(encodeInfo.State, metaBlock, compressionParameters);
 
-                    foreach(var transformer in Transformers){
-                        var (transformedMetaBlocks, transformedState) = transformer.Transform(metaBlock, state, compressionParameters);
-
-                        bfs.MetaBlocks.AddRange(transformedMetaBlocks);
-                        state = transformedState;
-                    }
-
-                    encodeInfo = encodeInfo.WithState(state);
+                    bfs.MetaBlocks.AddRange(transformedMetaBlocks);
+                    encodeInfo = newEncodeInfo.WithState(transformedState);
                 }
             }while(!encodeInfo.IsFinished);
 
             FinalizeStructure(bfs);
             return bfs;
+        }
+
+        private (IList<MetaBlock>, BrotliGlobalState) ApplyTransformerChain(BrotliGlobalState originalState, MetaBlock encodedMetaBlock, BrotliCompressionParameters compressionParameters){
+            var metaBlocks = new List<MetaBlock>{ encodedMetaBlock };
+            var states = new List<BrotliGlobalState>{ originalState };
+
+            foreach(var transformer in Transformers){
+                var nextMetaBlocks = new List<MetaBlock>();
+                var nextStates = new List<BrotliGlobalState>{ originalState }; // first meta-block starts with original state, second meta-block with the first meta-block's end state, etc.
+
+                for(int index = 0; index < metaBlocks.Count; index++){
+                    foreach(var (transformedMetaBlock, transformedState) in transformer.Transform(metaBlocks[index], states[index], compressionParameters)){
+                        nextMetaBlocks.Add(transformedMetaBlock);
+                        nextStates.Add(transformedState);
+                    }
+                }
+
+                metaBlocks = nextMetaBlocks;
+                states = nextStates;
+            }
+
+            return (metaBlocks, states[^1]);
         }
 
         public class Simple : BrotliEncodePipeline{

@@ -5,7 +5,7 @@ using BrotliLib.Brotli.Parameters;
 
 namespace BrotliLib.Brotli.Encode{
     public abstract class BrotliTransformerBase : IBrotliTransformer{
-        (IList<MetaBlock> MetaBlocks, BrotliGlobalState NextState) IBrotliTransformer.Transform(MetaBlock original, BrotliGlobalState state, BrotliCompressionParameters parameters){
+        IList<(MetaBlock MetaBlock, BrotliGlobalState NextState)> IBrotliTransformer.Transform(MetaBlock original, BrotliGlobalState state, BrotliCompressionParameters parameters){
             return original switch{
                 MetaBlock.LastEmpty le   => TransformLastEmpty(le, state, parameters),
                 MetaBlock.PaddedEmpty pe => TransformPaddedEmpty(pe, state, parameters),
@@ -15,24 +15,24 @@ namespace BrotliLib.Brotli.Encode{
             };
         }
 
-        protected virtual (IList<MetaBlock>, BrotliGlobalState) TransformLastEmpty(MetaBlock.LastEmpty original, BrotliGlobalState state, BrotliCompressionParameters parameters){
+        protected virtual IList<(MetaBlock MetaBlock, BrotliGlobalState NextState)> TransformLastEmpty(MetaBlock.LastEmpty original, BrotliGlobalState state, BrotliCompressionParameters parameters){
             original.Decompress(state);
-            return (Array.Empty<MetaBlock>(), state);
+            return Array.Empty<(MetaBlock, BrotliGlobalState)>();
         }
 
-        protected virtual (IList<MetaBlock>, BrotliGlobalState) TransformPaddedEmpty(MetaBlock.PaddedEmpty original, BrotliGlobalState state, BrotliCompressionParameters parameters){
+        protected virtual IList<(MetaBlock MetaBlock, BrotliGlobalState NextState)> TransformPaddedEmpty(MetaBlock.PaddedEmpty original, BrotliGlobalState state, BrotliCompressionParameters parameters){
             original.Decompress(state);
-            return (new MetaBlock[]{ original }, state);
+            return new (MetaBlock, BrotliGlobalState)[]{ (original, state) };
         }
 
-        protected virtual (IList<MetaBlock>, BrotliGlobalState) TransformUncompressed(MetaBlock.Uncompressed original, BrotliGlobalState state, BrotliCompressionParameters parameters){
+        protected virtual IList<(MetaBlock MetaBlock, BrotliGlobalState NextState)> TransformUncompressed(MetaBlock.Uncompressed original, BrotliGlobalState state, BrotliCompressionParameters parameters){
             original.Decompress(state);
-            return (new MetaBlock[]{ original }, state);
+            return new (MetaBlock, BrotliGlobalState)[]{ (original, state) };
         }
 
-        protected virtual (IList<MetaBlock>, BrotliGlobalState) TransformCompressed(MetaBlock.Compressed original, BrotliGlobalState state, BrotliCompressionParameters parameters){
+        protected virtual IList<(MetaBlock MetaBlock, BrotliGlobalState NextState)> TransformCompressed(MetaBlock.Compressed original, BrotliGlobalState state, BrotliCompressionParameters parameters){
             original.Decompress(state);
-            return (new MetaBlock[]{ original }, state);
+            return new (MetaBlock, BrotliGlobalState)[]{ (original, state) };
         }
     }
 }

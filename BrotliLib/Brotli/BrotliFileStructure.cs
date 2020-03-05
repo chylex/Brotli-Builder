@@ -51,18 +51,18 @@ namespace BrotliLib.Brotli{
         }
 
         public BrotliFileStructure Transform(IBrotliTransformer transformer, BrotliCompressionParameters compressionParameters){
-            var copy = new BrotliFileStructure(Parameters);
+            var transformed = new BrotliFileStructure(Parameters);
             var state = new BrotliGlobalState(Parameters);
 
             foreach(MetaBlock original in MetaBlocks){
-                var (transformedMetaBlocks, transformedState) = transformer.Transform(original, state, compressionParameters);
-
-                copy.MetaBlocks.AddRange(transformedMetaBlocks);
-                state = transformedState;
+                foreach(var (transformedMetaBlock, transformedState) in transformer.Transform(original, state, compressionParameters)){
+                    transformed.MetaBlocks.Add(transformedMetaBlock);
+                    state = transformedState; // we only care about the last state
+                }
             }
 
-            copy.Fixup();
-            return copy;
+            transformed.Fixup();
+            return transformed;
         }
 
         public void Fixup(){

@@ -4,6 +4,6 @@ using BrotliLib.Brotli.Parameters;
 
 namespace BrotliLib.Brotli.Encode{
     public interface IBrotliTransformer{
-        (IList<MetaBlock> MetaBlocks, BrotliGlobalState NextState) Transform(MetaBlock original, BrotliGlobalState state, BrotliCompressionParameters parameters);
+        IList<(MetaBlock MetaBlock, BrotliGlobalState NextState)> Transform(MetaBlock original, BrotliGlobalState state, BrotliCompressionParameters parameters);
     }
 }
