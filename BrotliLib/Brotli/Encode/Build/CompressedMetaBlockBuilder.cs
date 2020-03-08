@@ -29,7 +29,6 @@ namespace BrotliLib.Brotli.Encode.Build{
         private readonly List<InsertCopyCommand> icCommands = new List<InsertCopyCommand>();
         private int totalLiterals;
         private int totalExplicitDistances;
-        private DistanceCodeZeroStrategy? finalInsertDistanceCodeZeroStrategy;
         
         private readonly BrotliGlobalState initialState;
         private readonly BrotliGlobalState intermediateState;
@@ -91,8 +90,7 @@ namespace BrotliLib.Brotli.Encode.Build{
             return this;
         }
 
-        public CompressedMetaBlockBuilder AddInsertFinal(IList<Literal> literals, DistanceCodeZeroStrategy dczStrategy = DistanceCodeZeroStrategy.PreferEnabled){
-            finalInsertDistanceCodeZeroStrategy = dczStrategy;
+        public CompressedMetaBlockBuilder AddInsertFinal(IList<Literal> literals){
             return AddInsertCopy(new InsertCopyCommand(literals));
         }
 
@@ -183,6 +181,7 @@ namespace BrotliLib.Brotli.Encode.Build{
             for(int icIndex = 0; icIndex < icCommandCount; icIndex++){
                 var icCommand = icCommands[icIndex];
                 int icBlockID = blockTrackers[Category.InsertCopy].SimulateCommand();
+                var icFreq = icLengthCodeFreq[icBlockID];
 
                 for(int literalIndex = 0; literalIndex < icCommand.Literals.Count; literalIndex++){
                     var literal = icCommand.Literals[literalIndex];
@@ -203,7 +202,15 @@ namespace BrotliLib.Brotli.Encode.Build{
                         throw new InvalidOperationException("Insert&copy command that ends after literals must be the last.");
                     }
 
-                    icLengthCode = icLengthValues.MakeCode(finalInsertDistanceCodeZeroStrategy ?? throw new InvalidOperationException());
+                    icLengthCode = icLengthValues.MakeCode(DistanceCodeZeroStrategy.PreferEnabled);
+
+                    if (icLengthCode.UseDistanceCodeZero){
+                        var alternativeCode = icLengthValues.MakeCode(DistanceCodeZeroStrategy.Disable);
+
+                        if (icFreq[alternativeCode] > icFreq[icLengthCode]){
+                            icLengthCode = alternativeCode; // if the first code uses DCZ, try a non-DCZ code and pick whichever one was used more often
+                        }
+                    }
                 }
                 else{
                     DistanceCode? distanceCode = null;
@@ -234,7 +241,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                     state.OutputCopy(icCommand.CopyLength, icCommand.CopyDistance);
                 }
 
-                icLengthCodeFreq[icBlockID].Add(icLengthCode);
+                icFreq.Add(icLengthCode);
                 icCommandsFinal[icIndex] = icCommand;
             }
 
