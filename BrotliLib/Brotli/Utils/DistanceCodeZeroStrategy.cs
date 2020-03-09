@@ -7,17 +7,17 @@ namespace BrotliLib.Brotli.Utils{
     /// </summary>
     public enum DistanceCodeZeroStrategy{
         /// <summary>
-        /// Always sets <see cref="InsertCopyLengthCode.UseDistanceCodeZero"/> to <code>false</code>.
+        /// Always sets <see cref="InsertCopyLengthCode.UseDistanceCodeZero"/> to <c>false</c>.
         /// </summary>
         Disable,
 
         /// <summary>
-        /// Sets <see cref="InsertCopyLengthCode.UseDistanceCodeZero"/> to <code>true</code> if possible with the provided insert & copy codes, <code>false</code> otherwise.
+        /// Sets <see cref="InsertCopyLengthCode.UseDistanceCodeZero"/> to <c>true</c> if possible with the provided insert & copy codes, <c>false</c> otherwise.
         /// </summary>
         PreferEnabled,
 
         /// <summary>
-        /// Sets <see cref="InsertCopyLengthCode.UseDistanceCodeZero"/> to <code>true</code> if possible with the provided insert & copy codes, throws <see cref="ArgumentOutOfRangeException"/> otherwise.
+        /// Sets <see cref="InsertCopyLengthCode.UseDistanceCodeZero"/> to <c>true</c> if possible with the provided insert & copy codes, throws <see cref="ArgumentOutOfRangeException"/> otherwise.
         /// </summary>
         ForceEnabled
     }

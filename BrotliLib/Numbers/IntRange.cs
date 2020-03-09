@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace BrotliLib.Numbers{
     /// <summary>
-    /// Represents a range of integers. When not initialized (using <code>default</code> or <code>new IntRange()</code>), the range will contain all 32-bit integers.
+    /// Represents a range of integers. When not initialized (using <c>default</c> or <c>new IntRange()</c>), the range will contain all 32-bit integers.
     /// </summary>
     public readonly struct IntRange{
         /// <summary>

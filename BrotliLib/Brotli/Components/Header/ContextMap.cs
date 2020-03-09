@@ -53,7 +53,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
         /// <summary>
         /// Returns how many zeroes there are in a sequence starting at <paramref name="startIndex"/> in the <paramref name="contextMap"/>.
-        /// Returns <code>-1</code> if <paramref name="startIndex"/> points beyond the end of the <paramref name="contextMap"/>.
+        /// Returns <c>-1</c> if <paramref name="startIndex"/> points beyond the end of the <paramref name="contextMap"/>.
         /// </summary>
         private static int FindRunLength(byte[] contextMap, int startIndex){
             for(int index = startIndex; index < contextMap.Length + 1; index++){

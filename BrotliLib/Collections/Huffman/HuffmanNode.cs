@@ -10,7 +10,7 @@ namespace BrotliLib.Collections.Huffman{
     public abstract partial class HuffmanNode<T>{
         /// <summary>
         /// Traverses through the tree, consuming the <paramref name="bits"/> reader until it hits a <see cref="Leaf"/> node.
-        /// Returns the found value, or <code>default(T)</code> if the <paramref name="bits"/> reader reaches the end.
+        /// Returns the found value, or <c>default(T)</c> if the <paramref name="bits"/> reader reaches the end.
         /// </summary>
         /// <param name="bits">Bit reader used to determine the <see cref="Path"/> to traverse to retrieve a value.</param>
         public abstract T LookupValue(IBitReader bits);

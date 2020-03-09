@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BrotliLib.Collections{
     /// <summary>
-    /// Compact tree structure that maps <code>byte[]</code> keys to one or more values of type <typeparamref name="V"/>.
+    /// Compact tree structure that maps <c>byte[]</c> keys to one or more values of type <typeparamref name="V"/>.
     /// Each node splits the path at a specific bit into 2 branches. The search ends when a branch leads back into its owner or one of the parents.
     /// </summary>
     public sealed class PatriciaTree<V>{

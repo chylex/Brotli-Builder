@@ -5,7 +5,7 @@ using BrotliLib.Serialization.Reader;
 namespace BrotliLib.Collections.Huffman{
     partial class HuffmanNode<T>{
         /// <summary>
-        /// Leaf node that contains a <see cref="value"/> of type <code>T</code>.
+        /// Leaf node that contains a <see cref="value"/> of type <c>T</c>.
         /// </summary>
         public sealed class Leaf : HuffmanNode<T>{
             private readonly T value;
