@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
-using BrotliLib.Brotli.Encode.Heuristics;
+using BrotliLib.Brotli.Parameters.Heuristics;
 using BrotliLib.Collections;
 
 namespace BrotliLib.Brotli.Parameters{
@@ -10,14 +9,13 @@ namespace BrotliLib.Brotli.Parameters{
         public static BrotliCompressionParameters Default { get; } = new Builder().Build();
 
         public delegate HuffmanTree<T> GenerateHuffmanTree<T>(FrequencyList<T> frequencies) where T : IComparable<T>;
-        public delegate T PickCode<T>(List<T> picks, FrequencyList<T> previouslySeen) where T : IComparable<T>;
 
         public GenerateHuffmanTree<Literal>              GenerateLiteralTree      { get; private set; }
         public GenerateHuffmanTree<InsertCopyLengthCode> GenerateLengthCodeTree   { get; private set; }
         public GenerateHuffmanTree<DistanceCode>         GenerateDistanceCodeTree { get; private set; }
 
-        public PickCode<DistanceCode> DistanceCodePicker { get; private set; }
-        public PickCode<BlockTypeCode> BlockTypeCodePicker { get; private set; }
+        public PickCodeHeuristics<DistanceCode>.Picker  DistanceCodePicker  { get; private set; }
+        public PickCodeHeuristics<BlockTypeCode>.Picker BlockTypeCodePicker { get; private set; }
         
         #pragma warning disable CS8618
         private BrotliCompressionParameters(){}
@@ -28,8 +26,8 @@ namespace BrotliLib.Brotli.Parameters{
             public GenerateHuffmanTree<InsertCopyLengthCode> GenerateLengthCodeTree   { get; set; } = HuffmanTree<InsertCopyLengthCode>.FromSymbols;
             public GenerateHuffmanTree<DistanceCode>         GenerateDistanceCodeTree { get; set; } = HuffmanTree<DistanceCode>.FromSymbols;
 
-            public PickCode<DistanceCode> DistanceCodePicker { get; set; } = PickCodeHeuristics<DistanceCode>.PickFirstOption; // TODO
-            public PickCode<BlockTypeCode> BlockTypeCodePicker { get; set; } = PickCodeHeuristics<BlockTypeCode>.PickFirstOption; // TODO
+            public PickCodeHeuristics<DistanceCode>.Picker  DistanceCodePicker  { get; set; } = PickCodeHeuristics<DistanceCode>.PickFirstOption; // TODO
+            public PickCodeHeuristics<BlockTypeCode>.Picker BlockTypeCodePicker { get; set; } = PickCodeHeuristics<BlockTypeCode>.PickFirstOption; // TODO
 
             public Builder(){}
 
