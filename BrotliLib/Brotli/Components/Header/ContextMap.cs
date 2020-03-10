@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using BrotliLib.Brotli.Parameters;
 using BrotliLib.Brotli.Utils;
 using BrotliLib.Collections;
@@ -18,6 +19,8 @@ namespace BrotliLib.Brotli.Components.Header{
 
         public int ContextsPerBlockType { get; }
         public int BlockTypes => contextMap.Length / ContextsPerBlockType;
+
+        public byte this[int index] => contextMap[index];
 
         private readonly byte[] contextMap;
 
@@ -51,49 +54,189 @@ namespace BrotliLib.Brotli.Components.Header{
         
         // Helpers
 
+        public struct Run{
+            public const int MinSpecialCodeLength = 2;
+
+            /// <summary>
+            /// Returns the RLE code required to encode the specified <see cref="Length"/>. The codes follow the pattern:
+            /// <list type="bullet">
+            /// <item><description>code 1 ... values 2-3,</description></item>
+            /// <item><description>code 2 ... values 4-7,</description></item>
+            /// <item><description>code 3 ... values 8-15,</description></item>
+            /// <item><description>code 4 ... values 16-31,</description></item>
+            /// <item><description>(up to code 16)</description></item>
+            /// </list>
+            /// If <see cref="Length"/> is less than <see cref="MinSpecialCodeLength"/>, returns 0.
+            /// </summary>
+            public byte Code => Log2.Floor(Length);
+
+            /// <summary>
+            /// Amount of zero symbols in the run.
+            /// </summary>
+            public int Length { get; }
+
+            public Run(int length){
+                this.Length = length;
+            }
+
+            /// <summary>
+            /// Does not use RLE for this run.
+            /// </summary>
+            public int Reject() => 0;
+
+            /// <summary>
+            /// Uses RLE for this run.
+            /// </summary>
+            public int Accept() => Length;
+
+            /// <summary>
+            /// Uses RLE for a shorter run of length <paramref name="retainedLength"/>.
+            /// If the remaining length is at least <see cref="MinSpecialCodeLength"/>, it will become a new run.
+            /// If either side of the split cannot use RLE, it will be encoded as plain zeros instead.
+            /// </summary>
+            public int Retain(int retainedLength){
+                if (retainedLength < 1){
+                    throw new ArgumentOutOfRangeException(nameof(retainedLength));
+                }
+
+                return retainedLength; // if retainedLength > Length, will crash in RunDecider.Resolve
+            }
+        }
+
         /// <summary>
-        /// Returns how many zeroes there are in a sequence starting at <paramref name="startIndex"/> in the <paramref name="contextMap"/>.
-        /// Returns <c>-1</c> if <paramref name="startIndex"/> points beyond the end of the <paramref name="contextMap"/>.
+        /// Decides substitution of runs in (potentially move-to-front transformed) context map data.
         /// </summary>
-        private static int FindRunLength(byte[] contextMap, int startIndex){
-            for(int index = startIndex; index < contextMap.Length + 1; index++){
-                if (index == contextMap.Length || contextMap[index] != 0){
-                    return index - startIndex;
+        public sealed class RunDecider{
+            public int DataLength => data.Length;
+
+            private readonly byte[] data;
+
+            public RunDecider(byte[] data){
+                this.data = data;
+            }
+
+            /// <summary>
+            /// Returns the byte at the specified <paramref name="index"/>.
+            /// </summary>
+            public byte GetByteAt(int index){
+                return data[index];
+            }
+
+            /// <summary>
+            /// Returns how many zeroes there are in a sequence starting at <paramref name="startIndex"/>.
+            /// </summary>
+            public int GetRunLength(int startIndex){
+                for(int index = startIndex; index < data.Length + 1; index++){
+                    if (index == data.Length || data[index] != 0){
+                        return index - startIndex;
+                    }
+                }
+
+                throw new ArgumentOutOfRangeException(nameof(startIndex));
+            }
+
+            /// <summary>
+            /// Applies a resolution function over all runs in the data.
+            /// </summary>
+            public RunResolution Resolve(Func<Run, int> resolver){
+                var resolution = new RunResolution.Builder();
+
+                for(int index = 0; index < data.Length;){
+                    byte symbol = data[index];
+
+                    if (symbol == 0){
+                        int runLength = GetRunLength(index);
+                        int retained = runLength < Run.MinSpecialCodeLength ? runLength : resolver(new Run(runLength));
+
+                        if (retained > runLength){
+                            throw new InvalidOperationException("Cannot request encoding a run longer than originally asked for (" + retained + " > " + runLength + ").");
+                        }
+
+                        if (retained < Run.MinSpecialCodeLength){
+                            for(int i = 0; i < retained; i++){
+                                resolution.AddRaw(0);
+                            }
+                        }
+                        else{
+                            resolution.AddRun(retained);
+                        }
+
+                        index += retained;
+                    }
+                    else{
+                        resolution.AddRaw(symbol);
+                        index += 1;
+                    }
+                }
+
+                return resolution.Build();
+            }
+        }
+
+        public sealed class RunResolution{
+            public int LongestRun { get; }
+            public int RunLengthCodeCount => new Run(LongestRun).Code;
+
+            public IEnumerable<int> RunLengths => intermediate.Where(code => code < 0).Select(code => -code);
+            
+            private readonly List<int> intermediate;
+
+            private RunResolution(List<int> intermediate, int longestRun){
+                this.intermediate = intermediate;
+                this.LongestRun = longestRun;
+            }
+
+            public (List<int>, Queue<int>) GenerateSymbolsAndExtraBits(){
+                var symbols = new List<int>();
+                var extra = new Queue<int>();
+
+                int runLengthCodeCount = RunLengthCodeCount;
+                    
+                foreach(int code in intermediate){
+                    if (code == 0){
+                        symbols.Add(0);
+                    }
+                    else if (code > 0){
+                        symbols.Add(code + runLengthCodeCount);
+                    }
+                    else{
+                        var run = new Run(-code);
+                        int runLengthCode = run.Code;
+
+                        symbols.Add(runLengthCode);
+                        extra.Enqueue(run.Length - (1 << runLengthCode));
+                    }
+                }
+
+                return (symbols, extra);
+            }
+
+            public sealed class Builder{
+                private List<int>? intermediate = new List<int>();
+                private int longestRun;
+
+                public void AddRaw(byte value){
+                    intermediate?.Add(value);
+                }
+
+                public void AddRun(int length){
+                    intermediate?.Add(-length);
+
+                    if (length > longestRun){
+                        longestRun = length;
+                    }
+                }
+
+                public RunResolution Build(){
+                    if (intermediate == null){
+                        throw new InvalidOperationException("The builder has already been built.");
+                    }
+
+                    var built = new RunResolution(intermediate, longestRun);
+                    intermediate = null;
+                    return built;
                 }
             }
-
-            return -1;
-        }
-
-        /// <summary>
-        /// Returns the RLE code required to encode the specified <paramref name="value"/>.
-        /// The codes follow the pattern:
-        /// <list type="bullet">
-        /// <item><description>code 1 ... values 1-2,</description></item>
-        /// <item><description>code 2 ... values 3-6,</description></item>
-        /// <item><description>code 3 ... values 7-14,</description></item>
-        /// <item><description>code 4 ... values 15-30,</description></item>
-        /// <item><description>(up to code 16)</description></item>
-        /// </list>
-        /// </summary>
-        private static byte CalculateRunLengthCodeFor(int value){
-            return Log2.Floor(value + 1);
-        }
-
-        /// <summary>
-        /// Returns the RLE code required to encode the longest sequence of zeroes in the <paramref name="contextMap"/>.
-        /// </summary>
-        private static byte CalculateLargestRunLengthCode(byte[] contextMap){
-            int longestZeroSequence = 0;
-            int lastStartIndex = 0;
-            int lastRunLength;
-
-            while((lastRunLength = FindRunLength(contextMap, lastStartIndex)) != -1){
-                longestZeroSequence = Math.Max(longestZeroSequence, lastRunLength);
-                lastStartIndex += lastRunLength + 1;
-            }
-
-            return longestZeroSequence > 1 ? CalculateRunLengthCodeFor(longestZeroSequence - 1) : (byte)0;
         }
 
         // Serialization
@@ -112,7 +255,7 @@ namespace BrotliLib.Brotli.Components.Header{
                 var contextMap = new byte[context.TypeCount * category.Contexts()];
 
                 if (treeCount > 1){
-                    byte runLengthCodeCount = (byte)reader.MarkValue("RLEMAX", () => reader.NextBit() ? 1 + reader.NextChunk(4) : 0);
+                    int runLengthCodeCount = reader.MarkValue("RLEMAX", () => reader.NextBit() ? 1 + reader.NextChunk(4) : 0);
                     
                     var codeContext = GetCodeTreeContext(treeCount + runLengthCodeCount);
                     var codeLookup = reader.ReadStructure(HuffmanTree<int>.Deserialize, codeContext, "code tree").Root;
@@ -150,10 +293,10 @@ namespace BrotliLib.Brotli.Components.Header{
             VariableLength11Code.Serialize(writer, new VariableLength11Code(obj.TreeCount), NoContext.Value);
 
             if (obj.TreeCount > 1){
-                bool imtf = parameters.UseContextMapIMTF(obj);
+                bool mtf = parameters.ContextMapMTF(obj);
                 byte[] contextMap;
 
-                if (imtf){
+                if (mtf){
                     contextMap = CollectionHelper.Clone(obj.contextMap);
                     MoveToFront.Encode(contextMap);
                 }
@@ -161,8 +304,9 @@ namespace BrotliLib.Brotli.Components.Header{
                     contextMap = obj.contextMap;
                 }
 
-                byte runLengthCodeCount = parameters.UseContextMapRLE(obj) ? CalculateLargestRunLengthCode(contextMap) : (byte)0;
-                
+                var runs = parameters.ContextMapRLE(new RunDecider(contextMap));
+                int runLengthCodeCount = runs.RunLengthCodeCount;
+
                 if (runLengthCodeCount > 0){
                     writer.WriteBit(true);
                     writer.WriteChunk(4, runLengthCodeCount - 1);
@@ -171,34 +315,10 @@ namespace BrotliLib.Brotli.Components.Header{
                     writer.WriteBit(false);
                 }
 
-                List<int> symbols = new List<int>();
-                Queue<int> extra = new Queue<int>();
-
-                for(int index = 0; index < contextMap.Length; index++){
-                    byte symbol = contextMap[index];
-
-                    if (symbol == 0){
-                        int runLength = runLengthCodeCount == 0 ? 0 : FindRunLength(contextMap, index) - 1;
-
-                        if (runLength > 0){
-                            byte code = CalculateRunLengthCodeFor(runLength);
-
-                            symbols.Add(code);
-                            extra.Enqueue(runLength - ((1 << code) - 1));
-
-                            index += runLength;
-                        }
-                        else{
-                            symbols.Add(0);
-                        }
-                    }
-                    else{
-                        symbols.Add(symbol + runLengthCodeCount);
-                    }
-                }
+                var (symbols, extra) = runs.GenerateSymbolsAndExtraBits();
 
                 var codeContext = GetCodeTreeContext(obj.TreeCount + runLengthCodeCount);
-                var codeTree = HuffmanTree<int>.FromSymbols(new FrequencyList<int>(symbols));
+                var codeTree = parameters.GenerateContextMapTree(new FrequencyList<int>(symbols));
 
                 HuffmanTree<int>.Serialize(writer, codeTree, codeContext, parameters);
 
@@ -210,7 +330,7 @@ namespace BrotliLib.Brotli.Components.Header{
                     }
                 }
 
-                writer.WriteBit(imtf);
+                writer.WriteBit(mtf);
             }
         };
     }

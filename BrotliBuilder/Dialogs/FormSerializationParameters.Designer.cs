@@ -27,7 +27,7 @@
             this.checkBoxComplexTreeRepeatCode = new System.Windows.Forms.CheckBox();
             this.groupHuffmanTrees = new System.Windows.Forms.GroupBox();
             this.groupContextMaps = new System.Windows.Forms.GroupBox();
-            this.checkBoxContextMapIMTF = new System.Windows.Forms.CheckBox();
+            this.checkBoxContextMapMTF = new System.Windows.Forms.CheckBox();
             this.checkBoxContextMapRLE = new System.Windows.Forms.CheckBox();
             this.buttonReserialize = new System.Windows.Forms.Button();
             // 
@@ -70,7 +70,7 @@
             // 
             // groupContextMaps
             // 
-            this.groupContextMaps.Controls.Add(this.checkBoxContextMapIMTF);
+            this.groupContextMaps.Controls.Add(this.checkBoxContextMapMTF);
             this.groupContextMaps.Controls.Add(this.checkBoxContextMapRLE);
             this.groupContextMaps.Location = new System.Drawing.Point(237, 12);
             this.groupContextMaps.Name = "groupContextMaps";
@@ -81,16 +81,16 @@
             // 
             // checkBoxContextMapIMTF
             // 
-            this.checkBoxContextMapIMTF.AutoSize = true;
-            this.checkBoxContextMapIMTF.Checked = true;
-            this.checkBoxContextMapIMTF.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxContextMapIMTF.Location = new System.Drawing.Point(12, 22);
-            this.checkBoxContextMapIMTF.Margin = new System.Windows.Forms.Padding(9, 3, 3, 3);
-            this.checkBoxContextMapIMTF.Name = "checkBoxContextMapIMTF";
-            this.checkBoxContextMapIMTF.Size = new System.Drawing.Size(226, 19);
-            this.checkBoxContextMapIMTF.TabIndex = 0;
-            this.checkBoxContextMapIMTF.Text = "Use Inverse Move-To-Front Transform";
-            this.checkBoxContextMapIMTF.UseVisualStyleBackColor = true;
+            this.checkBoxContextMapMTF.AutoSize = true;
+            this.checkBoxContextMapMTF.Checked = true;
+            this.checkBoxContextMapMTF.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxContextMapMTF.Location = new System.Drawing.Point(12, 22);
+            this.checkBoxContextMapMTF.Margin = new System.Windows.Forms.Padding(9, 3, 3, 3);
+            this.checkBoxContextMapMTF.Name = "checkBoxContextMapMTF";
+            this.checkBoxContextMapMTF.Size = new System.Drawing.Size(226, 19);
+            this.checkBoxContextMapMTF.TabIndex = 0;
+            this.checkBoxContextMapMTF.Text = "Use Move-To-Front Transform";
+            this.checkBoxContextMapMTF.UseVisualStyleBackColor = true;
             // 
             // checkBoxContextMapRLE
             // 
@@ -137,7 +137,7 @@
         private System.Windows.Forms.CheckBox checkBoxComplexTreeRepeatCode;
         private System.Windows.Forms.GroupBox groupHuffmanTrees;
         private System.Windows.Forms.GroupBox groupContextMaps;
-        private System.Windows.Forms.CheckBox checkBoxContextMapIMTF;
+        private System.Windows.Forms.CheckBox checkBoxContextMapMTF;
         private System.Windows.Forms.CheckBox checkBoxContextMapRLE;
         private System.Windows.Forms.Button buttonReserialize;
     }

@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
 using BrotliLib.Brotli.Components.Header;
+using BrotliLib.Brotli.Parameters.Heuristics;
 
 namespace BrotliLib.Brotli.Parameters{
     public sealed class BrotliSerializationParameters{
         public static BrotliSerializationParameters Default { get; } = new Builder().Build();
 
-        public delegate bool DecideContextMapFeature(ContextMap contextMap);
         public delegate bool DecideComplexTreeFeature(IReadOnlyList<byte> symbolBits);
 
-        public DecideContextMapFeature UseContextMapIMTF { get; private set; }
-        public DecideContextMapFeature UseContextMapRLE  { get; private set; }
+        public ContextMapHeuristics.DecideFeature  ContextMapMTF          { get; private set; }
+        public ContextMapHeuristics.DecideRuns     ContextMapRLE          { get; private set; }
+        public HuffmanTreeHeuristics.Generate<int> GenerateContextMapTree { get; private set; }
 
         public DecideComplexTreeFeature UseComplexTreeSkipCode   { get; private set; }
         public DecideComplexTreeFeature UseComplexTreeRepeatCode { get; private set; }
@@ -19,8 +20,9 @@ namespace BrotliLib.Brotli.Parameters{
         #pragma warning restore CS8618
 
         public sealed class Builder{
-            public DecideContextMapFeature UseContextMapIMTF { get; set; } = _ => true;
-            public DecideContextMapFeature UseContextMapRLE  { get; set; } = _ => true;
+            public ContextMapHeuristics.DecideFeature  ContextMapMTF          { get; set; } = ContextMapHeuristics.MTF.Enable;
+            public ContextMapHeuristics.DecideRuns     ContextMapRLE          { get; set; } = ContextMapHeuristics.RLE.KeepAll;
+            public HuffmanTreeHeuristics.Generate<int> GenerateContextMapTree { get; set; } = HuffmanTree<int>.FromSymbols;
 
             public DecideComplexTreeFeature UseComplexTreeSkipCode   { get; set; } = _ => true;
             public DecideComplexTreeFeature UseComplexTreeRepeatCode { get; set; } = _ => true;
@@ -28,8 +30,9 @@ namespace BrotliLib.Brotli.Parameters{
             public Builder(){}
 
             public Builder(BrotliSerializationParameters original){
-                UseContextMapIMTF = original.UseContextMapIMTF;
-                UseContextMapRLE = original.UseContextMapRLE;
+                ContextMapMTF = original.ContextMapMTF;
+                ContextMapRLE = original.ContextMapRLE;
+                GenerateContextMapTree = original.GenerateContextMapTree;
 
                 UseComplexTreeSkipCode = original.UseComplexTreeSkipCode;
                 UseComplexTreeRepeatCode = original.UseComplexTreeRepeatCode;
@@ -37,8 +40,9 @@ namespace BrotliLib.Brotli.Parameters{
 
             public BrotliSerializationParameters Build(){
                 return new BrotliSerializationParameters{
-                    UseContextMapIMTF = UseContextMapIMTF,
-                    UseContextMapRLE = UseContextMapRLE,
+                    ContextMapMTF = ContextMapMTF,
+                    ContextMapRLE = ContextMapRLE,
+                    GenerateContextMapTree = GenerateContextMapTree,
 
                     UseComplexTreeSkipCode = UseComplexTreeSkipCode,
                     UseComplexTreeRepeatCode = UseComplexTreeRepeatCode
