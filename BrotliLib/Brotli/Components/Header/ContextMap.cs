@@ -260,24 +260,25 @@ namespace BrotliLib.Brotli.Components.Header{
                     var codeContext = GetCodeTreeContext(treeCount + runLengthCodeCount);
                     var codeLookup = reader.ReadStructure(HuffmanTree<int>.Deserialize, codeContext, "code tree").Root;
                     
-                    for(int index = 0; index < contextMap.Length; index++){
+                    for(int index = 0; index < contextMap.Length;){
                         reader.MarkStart();
 
                         int code = codeLookup.LookupValue(reader);
 
                         if (code > 0){
                             if (code <= runLengthCodeCount){
-                                index += (1 << code) - 1 + reader.NextChunk(code);
+                                int skip = (1 << code) + reader.NextChunk(code);
 
-                                reader.MarkEndTitle("skip to index " + (index + 1));
+                                reader.MarkEndTitle("repeat " + skip + " zeros");
+                                index += skip;
                                 continue;
                             }
-                            else{
-                                contextMap[index] = (byte)(code - runLengthCodeCount);
-                            }
+
+                            contextMap[index] = (byte)(code - runLengthCodeCount);
                         }
                         
-                        reader.MarkEndValue("CMAP" + context.Category.Id() + "[" + index + "]", contextMap[index]);
+                        reader.MarkEndValue("CMAP" + category.Id() + "[" + index + "]", contextMap[index]);
+                        index += 1;
                     }
 
                     if (reader.NextBit("IMTF")){
@@ -289,7 +290,7 @@ namespace BrotliLib.Brotli.Components.Header{
             }
         );
 
-        public static BitSerializer<ContextMap, BlockTypeInfo, BrotliSerializationParameters> Serialize = (writer, obj, context, parameters) => {
+        public static BitSerializer<ContextMap, NoContext, BrotliSerializationParameters> Serialize = (writer, obj, context, parameters) => {
             VariableLength11Code.Serialize(writer, new VariableLength11Code(obj.TreeCount), NoContext.Value);
 
             if (obj.TreeCount > 1){
