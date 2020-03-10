@@ -7,6 +7,7 @@ using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Brotli.Dictionary.Index;
 using BrotliLib.Brotli.Parameters;
+using BrotliLib.Brotli.Parameters.Heuristics;
 using BrotliLib.Brotli.Utils;
 using BrotliLib.Collections;
 
@@ -288,7 +289,7 @@ namespace BrotliLib.Brotli.Encode.Build{
             return array;
         }
 
-        private static HuffmanTree<T>[] ConstructHuffmanTrees<T>(FrequencyList<T>[] source, BrotliCompressionParameters.GenerateHuffmanTree<T> generator) where T : IComparable<T>{
+        private static HuffmanTree<T>[] ConstructHuffmanTrees<T>(FrequencyList<T>[] source, HuffmanTreeHeuristics.Generate<T> generator) where T : IComparable<T>{
             HuffmanTree<T>[] array = new HuffmanTree<T>[source.Length];
 
             for(int index = 0; index < array.Length; index++){
