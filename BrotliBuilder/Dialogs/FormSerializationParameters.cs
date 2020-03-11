@@ -12,6 +12,7 @@ namespace BrotliBuilder.Dialogs{
         public event EventHandler? Reserialize;
 
         private readonly Builder parameters;
+        private readonly Dictionary<RadioButton, HuffmanTreeHeuristics.DecideRuns> optionsHuffmanTreesRLE;
         private readonly Dictionary<RadioButton, ContextMapHeuristics.DecideRuns> optionsContextMapsRLE;
 
         public FormSerializationParameters(BrotliSerializationParameters parameters){
@@ -20,6 +21,13 @@ namespace BrotliBuilder.Dialogs{
             this.parameters = new Builder(parameters);
             this.buttonReserialize.Click += buttonReserialize_Click;
             this.Disposed += FormParameters_Disposed;
+
+            this.optionsHuffmanTreesRLE = new Dictionary<RadioButton, HuffmanTreeHeuristics.DecideRuns>{
+                { radioHuffmanRleDisable,           HuffmanTreeHeuristics.RLE.Disable },
+                { radioHuffmanRleKeepAll,           HuffmanTreeHeuristics.RLE.KeepAll },
+                { radioHuffmanRleSplit1AB,          HuffmanTreeHeuristics.RLE.SplitOneAboveBoundary },
+                { radioHuffmanRleOfficialHeuristic, HuffmanTreeHeuristics.RLE.OfficialHeuristic },
+            };
 
             this.optionsContextMapsRLE = new Dictionary<RadioButton, ContextMapHeuristics.DecideRuns>{
                 { radioContextMapsRleDisable,  ContextMapHeuristics.RLE.Disable },
@@ -42,6 +50,10 @@ namespace BrotliBuilder.Dialogs{
         // Option handling
 
         private void SetupOptionEvents(){
+            this.radioHuffmanRleDisable.CheckedChanged += OnOptionChanged;
+            this.radioHuffmanRleKeepAll.CheckedChanged += OnOptionChanged;
+            this.radioHuffmanRleSplit1AB.CheckedChanged += OnOptionChanged;
+            this.radioHuffmanRleOfficialHeuristic.CheckedChanged += OnOptionChanged;
 
             this.checkBoxContextMapMTF.CheckedChanged += OnOptionChanged;
             this.radioContextMapsRleDisable.CheckedChanged += OnOptionChanged;
@@ -57,12 +69,14 @@ namespace BrotliBuilder.Dialogs{
         }
 
         private void LoadOptions(){
+            ProcessRadio(optionsHuffmanTreesRLE, kvp => ReferenceEquals(parameters.HuffmanTreeRLE, kvp.Value), kvp => kvp.Key.Checked = true);
             ProcessRadio(optionsContextMapsRLE,  kvp => ReferenceEquals(parameters.ContextMapRLE, kvp.Value),  kvp => kvp.Key.Checked = true);
 
             checkBoxContextMapMTF.Checked = !ReferenceEquals(parameters.ContextMapMTF, ContextMapHeuristics.MTF.Disable);
         }
 
         private void OnOptionChanged(object? sender, EventArgs e){
+            ProcessRadio(optionsHuffmanTreesRLE, kvp => kvp.Key.Checked, kvp => parameters.HuffmanTreeRLE = kvp.Value);
             ProcessRadio(optionsContextMapsRLE,  kvp => kvp.Key.Checked, kvp => parameters.ContextMapRLE = kvp.Value);
 
             parameters.ContextMapMTF = checkBoxContextMapMTF.Checked ? ContextMapHeuristics.MTF.Enable : ContextMapHeuristics.MTF.Disable;

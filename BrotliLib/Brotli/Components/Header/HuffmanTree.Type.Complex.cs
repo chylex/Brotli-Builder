@@ -4,10 +4,7 @@ using System.Linq;
 using BrotliLib.Brotli.Parameters;
 using BrotliLib.Collections.Huffman;
 using BrotliLib.Markers.Serialization;
-using BrotliLib.Markers.Serialization.Reader;
 using BrotliLib.Serialization;
-using BrotliLib.Serialization.Writer;
-using ComplexLengthNode = BrotliLib.Collections.Huffman.HuffmanNode<byte>;
 
 namespace BrotliLib.Brotli.Components.Header{
     partial class HuffmanTree<T>{
@@ -22,8 +19,8 @@ namespace BrotliLib.Brotli.Components.Header{
                 (reader, context) => {
                     Func<int, T> getSymbol = context.BitsToSymbol;
 
-                    var defaultRepeatCode = new HuffmanGenerator<T>.Entry(getSymbol(0), ComplexLengthCode.DefaultRepeatCode);
-                    var lengthCodes = ComplexLengthCode.Read(reader, context.SkippedComplexCodeLengths);
+                    var defaultRepeatCode = new HuffmanGenerator<T>.Entry(getSymbol(0), HuffmanTreeLengthCode.InitialRepeatedCode);
+                    var lengthCodes = HuffmanTreeLengthCode.Read(reader, context.SkippedComplexCodeLengths);
                     byte nextForcedCode = NoForcedCode;
 
                     int symbolIndex = 0;
@@ -51,13 +48,13 @@ namespace BrotliLib.Brotli.Components.Header{
                             nextForcedCode = NoForcedCode;
                         }
                         
-                        if (nextCode == ComplexLengthCode.Skip){
+                        if (nextCode == HuffmanTreeLengthCode.Skip){
                             reader.MarkStart();
 
                             int NextSkipData() => 3 + reader.NextChunk(3, "skip data");
                             int skipCount = NextSkipData();
 
-                            while((nextForcedCode = reader.ReadValue(lengthCodes, "code", code => code.Code)) == ComplexLengthCode.Skip){
+                            while((nextForcedCode = reader.ReadValue(lengthCodes, "code", code => code.Code)) == HuffmanTreeLengthCode.Skip){
                                 skipCount = 8 * (skipCount - 2) + NextSkipData();
                             }
 
@@ -65,7 +62,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
                             symbolIndex += skipCount;
                         }
-                        else if (nextCode == ComplexLengthCode.Repeat){
+                        else if (nextCode == HuffmanTreeLengthCode.Repeat){
                             byte repeatedCode = symbolEntries.DefaultIfEmpty(defaultRepeatCode).Select(entry => entry.Bits).Last(value => value > 0);
                             int sumPerRepeat = SymbolBitSpace >> repeatedCode;
                             
@@ -74,7 +71,7 @@ namespace BrotliLib.Brotli.Components.Header{
                             int NextRepeatData() => 3 + reader.NextChunk(2, "repeat data");
                             int repeatCount = NextRepeatData();
 
-                            while(bitSpaceRemaining - sumPerRepeat * repeatCount > 0 && (nextForcedCode = reader.ReadValue(lengthCodes, "code", code => code.Code)) == ComplexLengthCode.Repeat){
+                            while(bitSpaceRemaining - sumPerRepeat * repeatCount > 0 && (nextForcedCode = reader.ReadValue(lengthCodes, "code", code => code.Code)) == HuffmanTreeLengthCode.Repeat){
                                 repeatCount = 4 * (repeatCount - 2) + NextRepeatData();
                             }
 
@@ -89,7 +86,7 @@ namespace BrotliLib.Brotli.Components.Header{
                         else if (nextCode == 0){
                             ++symbolIndex;
                         }
-                        else if (nextCode <= ComplexLengthCode.MaxLength){
+                        else if (nextCode <= HuffmanTreeLengthCode.MaxLength){
                             AddMarkedSymbol(new HuffmanGenerator<T>.Entry(getSymbol(symbolIndex++), nextCode));
                             bitSpaceRemaining -= SymbolBitSpace >> nextCode;
                         }
@@ -105,247 +102,42 @@ namespace BrotliLib.Brotli.Components.Header{
                 Func<int, T> getSymbol = context.BitsToSymbol;
                 
                 int symbolCount = context.AlphabetSize.SymbolCount;
-                var symbolEntries = new List<HuffmanGenerator<T>.Entry>();
-
-                Queue<byte> extra = new Queue<byte>();
+                var symbolLengths = new List<byte>();
                 
                 for(int symbolIndex = 0, bitSpaceRemaining = SymbolBitSpace; bitSpaceRemaining > 0 && symbolIndex < symbolCount; symbolIndex++){
-                    T symbol = getSymbol(symbolIndex);
-                    BitPath? path = obj.FindPathOrNull(symbol);
-
+                    BitPath? path = obj.FindPathOrNull(getSymbol(symbolIndex));
                     byte length = path?.Length ?? 0;
                     
                     if (length > 0){
                         bitSpaceRemaining -= SymbolBitSpace >> length;
                     }
                     else if (symbolIndex == symbolCount - 1){
-                        length = 15; // if the tree is incomplete, a zero lengh last symbol would generate an ending length code 0 or 17, which Brotli spec forbids
+                        length = 15; // if the tree is incomplete, a zero length last symbol would generate an ending length code 0 or 17, which Brotli spec forbids
                                      // if the tree is complete and the final symbol was supposed to be a 0, the writer will run out of bit space before it writes the final symbol
                     }
 
-                    symbolEntries.Add(new HuffmanGenerator<T>.Entry(symbol, length));
+                    symbolLengths.Add(length);
                 }
 
-                var symbolBits = symbolEntries.Select(entry => entry.Bits).ToArray();
-                bool enableSkipCode = parameters.UseComplexTreeSkipCode(symbolBits);
-                bool enableRepeatCode = parameters.UseComplexTreeRepeatCode(symbolBits);
-
-                int ProcessRepetitions(int length, int multiplier){
-                    Stack<byte> newExtra = new Stack<byte>();
-
-                    int remaining = length - 3;
-
-                    do{
-                        newExtra.Push((byte)(remaining % multiplier));
-                        remaining /= multiplier;
-                    }while(--remaining >= 0);
-
-                    foreach(byte entry in newExtra){
-                        extra.Enqueue(entry);
-                    }
-
-                    return newExtra.Count;
-                }
-
-                int ReplaceSequence(int index, byte code, int removeLength, int insertLength){
-                    symbolEntries.RemoveRange(index, removeLength);
-                    symbolEntries.InsertRange(index, Enumerable.Repeat(new HuffmanGenerator<T>.Entry(default!, code), insertLength));
-                    return index + insertLength;
-                }
-
-                int ReplaceSequenceWithRepetition(int index, byte code, int length, int multiplier){
-                    if ((code == ComplexLengthCode.Skip && !enableSkipCode) || (code == ComplexLengthCode.Repeat && !enableRepeatCode)){
-                        return index + length;
-                    }
-
-                    if (length - 3 == multiplier){
-                        // when the amount of repetitions equals the first value that requires a second repetition code to encode, it's more efficient to write it as 1 literal code and 1 repetition code
-                        // TODO official compressor (and this) only works for the first value that crosses the boundary... potential point for improvement?
-                        --length;
-                        ++index;
-                    }
-
-                    return ReplaceSequence(index, code, length, ProcessRepetitions(length, multiplier));
-                }
-
-                byte FindLastNonRepetitionNonZeroCode(int startIndex){
-                    for(int index = startIndex; index >= 0; index--){
-                        byte bits = symbolEntries[index].Bits;
-
-                        if (bits != 0 && bits != ComplexLengthCode.Skip && bits != ComplexLengthCode.Repeat){
-                            return bits;
-                        }
-                    }
-
-                    return 0;
-                }
+                var runDecider = new HuffmanTreeLengthCode.RunDecider(symbolLengths, context.AlphabetSize);
+                var (lengthCodes, extra) = parameters.HuffmanTreeRLE(runDecider).GenerateCodesAndExtraBits();
                 
-                if (enableSkipCode || enableRepeatCode){
-                    for(int entryIndex = 0, lastRepeatStartIndex = 1, lastRepeatCode = ComplexLengthCode.DefaultRepeatCode; entryIndex < symbolEntries.Count + 1; entryIndex++){
-                        int nextCode = entryIndex < symbolEntries.Count ? symbolEntries[entryIndex].Bits : -1;
-
-                        if (nextCode != lastRepeatCode){
-                            if (lastRepeatCode == 0 || lastRepeatCode == FindLastNonRepetitionNonZeroCode(lastRepeatStartIndex - 2)){
-                                --lastRepeatStartIndex;
-                            }
-
-                            int skipLength = entryIndex - lastRepeatStartIndex;
-
-                            if (skipLength >= 3){
-                                entryIndex = lastRepeatCode == 0 ? ReplaceSequenceWithRepetition(lastRepeatStartIndex, ComplexLengthCode.Skip, skipLength, 8)
-                                                                 : ReplaceSequenceWithRepetition(lastRepeatStartIndex, ComplexLengthCode.Repeat, skipLength, 4);
-                            }
-                            
-                            lastRepeatCode = nextCode;
-                            lastRepeatStartIndex = entryIndex + 1;
-                        }
-                    }
-                }
+                var lengthEntries = lengthCodes.GroupBy(length => length).Select(group => new HuffmanGenerator<byte>.SymbolFreq(group.Key, group.Count())).ToArray();
+                var lengthMap = HuffmanGenerator<byte>.FromFrequenciesCanonical(lengthEntries, HuffmanTreeLengthCode.LengthMaxDepth).GenerateValueMapOptimized();
                 
-                var lengthEntries = symbolEntries.GroupBy(kvp => kvp.Bits).Select(group => new HuffmanGenerator<byte>.SymbolFreq(group.Key, group.Count())).ToArray();
-                var lengthMap = HuffmanGenerator<byte>.FromFrequenciesCanonical(lengthEntries, ComplexLengthCode.LengthMaxDepth).GenerateValueMapOptimized();
+                HuffmanTreeLengthCode.Write(writer, lengthMap);
                 
-                ComplexLengthCode.Write(writer, lengthMap);
-                
-                foreach(byte code in symbolEntries.Select(entry => entry.Bits)){
+                foreach(byte code in lengthCodes){
                     writer.WriteBits(lengthMap[code]);
 
-                    if (code == ComplexLengthCode.Skip){
-                        writer.WriteChunk(3, extra.Dequeue());
+                    if (code == HuffmanTreeLengthCode.Skip){
+                        writer.WriteChunk(HuffmanTreeLengthCode.SkipCodeExtraBits, extra.Dequeue());
                     }
-                    else if (code == ComplexLengthCode.Repeat){
-                        writer.WriteChunk(2, extra.Dequeue());
+                    else if (code == HuffmanTreeLengthCode.Repeat){
+                        writer.WriteChunk(HuffmanTreeLengthCode.RepeatCodeExtraBits, extra.Dequeue());
                     }
                 }
             };
         }
-    }
-
-    internal sealed class ComplexLengthCode : IComparable<ComplexLengthCode>{
-        public const byte MaxLength = 15;
-        public const byte Repeat = 16;
-        public const byte Skip = 17;
-
-        public const byte DefaultRepeatCode = 8;
-        
-        /// <summary>
-        /// Order of the complex length codes as they appear in the bit stream.
-        /// </summary>
-        private static readonly byte[] Order = {
-            1, 2, 3, 4, 0, 5, Skip, 6, Repeat, 7, 8, 9, 10, 11, 12, 13, 14, 15
-        };
-
-        /// <summary>
-        /// List of all complex length codes ordered by their integer value.
-        /// </summary>
-        private static readonly ComplexLengthCode[] Codes = Enumerable.Range(0, Order.Length).Select(code => new ComplexLengthCode(code)).ToArray();
-
-        /// <summary>
-        /// Huffman tree used to encode lengths of the complex length codes.
-        /// </summary>
-        private static readonly ComplexLengthNode Lengths = new ComplexLengthNode.Path(
-            new ComplexLengthNode.Path(        // x0
-                new ComplexLengthNode.Leaf(0), // 00
-                new ComplexLengthNode.Leaf(3)  // 01
-            ),
-            new ComplexLengthNode.Path(                //   x1
-                new ComplexLengthNode.Leaf(4),         //   01
-                new ComplexLengthNode.Path(            //  x11
-                    new ComplexLengthNode.Leaf(2),     //  011
-                    new ComplexLengthNode.Path(        // x111
-                        new ComplexLengthNode.Leaf(1), // 0111
-                        new ComplexLengthNode.Leaf(5)  // 1111
-                    )
-                )
-            )
-        );
-
-        private static readonly Dictionary<byte, BitPath> LengthLookup = Lengths.GenerateValueMapOptimized();
-        
-        public const byte LengthMaxDepth = 5;
-        private const int LengthBitSpace = 1 << LengthMaxDepth;
-        
-        // Data
-
-        public byte Code { get; }
-
-        private ComplexLengthCode(int code){
-            this.Code = (byte)code;
-        }
-
-        public int CompareTo(ComplexLengthCode other){
-            return Code.CompareTo(other.Code);
-        }
-
-        // Object
-
-        public override bool Equals(object obj){
-            return obj is ComplexLengthCode code &&
-                   Code == code.Code;
-        }
-
-        public override int GetHashCode(){
-            return HashCode.Combine(Code);
-        }
-
-        public override string ToString(){
-            return Code switch{
-                Repeat => "Repeat",
-                Skip => "Skip",
-                _ => "Length = " + Code,
-            };
-        }
-
-        // Serialization
-
-        public static void Write(IBitWriter writer, IReadOnlyDictionary<byte, BitPath> lengthMap){
-            int skippedAmount;
-
-            if (!lengthMap.ContainsKey(Order[0]) && !lengthMap.ContainsKey(Order[1])){
-                skippedAmount = lengthMap.ContainsKey(Order[2]) ? 2 : 3;
-            }
-            else{
-                skippedAmount = 0;
-            }
-
-            writer.WriteChunk(2, skippedAmount);
-
-            if (lengthMap.Count == 1){
-                // if lengthMap has only 1 element, its path length is zero, which would omit the element completely
-                // instead, a length of 3 is chosen because its path is encoded using only 2 bits
-                lengthMap = new Dictionary<byte, BitPath>{
-                    { lengthMap.Keys.First(), new BitPath(0, 3) }
-                };
-            }
-            
-            for(int index = skippedAmount, bitSpaceRemaining = LengthBitSpace; bitSpaceRemaining > 0 && index < Order.Length; index++){
-                byte code = Order[index];
-                byte length = lengthMap.TryGetValue(code, out BitPath path) ? path.Length : (byte)0;
-
-                writer.WriteBits(LengthLookup[length]);
-
-                if (length > 0){
-                    bitSpaceRemaining -= LengthBitSpace >> length;
-                }
-            }
-        }
-
-        public static HuffmanNode<ComplexLengthCode> Read(IMarkedBitReader reader, int skippedAmount) => reader.MarkTitle("Bit Lengths", () => {
-            byte[] bitCounts = new byte[Codes.Length];
-
-            for(int index = skippedAmount, bitSpaceRemaining = LengthBitSpace; bitSpaceRemaining > 0 && index < Order.Length; index++){
-                byte bitCount = reader.ReadValue(Lengths, "bit length for code " + Order[index]);
-
-                if (bitCount != 0){
-                    bitCounts[Order[index]] = bitCount;
-                    bitSpaceRemaining -= LengthBitSpace >> bitCount;
-                }
-            }
-
-            var lengthEntries = Codes.Zip(bitCounts, HuffmanGenerator<ComplexLengthCode>.MakeEntry).ToArray();
-            var filteredLengthEntries = lengthEntries.Where(entry => entry.Bits > 0).ToArray();
-
-            return HuffmanGenerator<ComplexLengthCode>.FromBitCountsCanonical(filteredLengthEntries.Length == 0 ? lengthEntries : filteredLengthEntries);
-        });
     }
 }
