@@ -5,6 +5,7 @@ using BrotliLib.Collections;
 namespace BrotliLib.Brotli.Parameters.Heuristics{
     public static class HuffmanTreeHeuristics{
         public delegate HuffmanTree<T> Generate<T>(FrequencyList<T> frequencies) where T : IComparable<T>;
+        public delegate HuffmanTree<T> GenerateLimited<T>(FrequencyList<T> frequencies, byte maxDepth) where T : IComparable<T>;
         public delegate HuffmanTreeLengthCode.RunResolution DecideRuns(HuffmanTreeLengthCode.RunDecider decider);
 
         public static class RLE{

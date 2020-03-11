@@ -9,7 +9,8 @@ namespace BrotliLib.Brotli.Parameters{
         public ContextMapHeuristics.DecideRuns     ContextMapRLE          { get; private set; }
         public HuffmanTreeHeuristics.Generate<int> GenerateContextMapTree { get; private set; }
 
-        public HuffmanTreeHeuristics.DecideRuns HuffmanTreeRLE { get; private set; }
+        public HuffmanTreeHeuristics.DecideRuns            HuffmanTreeRLE                { get; private set; }
+        public HuffmanTreeHeuristics.GenerateLimited<byte> GenerateHuffmanLengthCodeTree { get; private set; }
 
         #pragma warning disable CS8618
         private BrotliSerializationParameters(){}
@@ -20,7 +21,8 @@ namespace BrotliLib.Brotli.Parameters{
             public ContextMapHeuristics.DecideRuns     ContextMapRLE          { get; set; } = ContextMapHeuristics.RLE.KeepAll;
             public HuffmanTreeHeuristics.Generate<int> GenerateContextMapTree { get; set; } = HuffmanTree<int>.FromSymbols;
             
-            public HuffmanTreeHeuristics.DecideRuns HuffmanTreeRLE { get; set; } = HuffmanTreeHeuristics.RLE.OfficialHeuristic;
+            public HuffmanTreeHeuristics.DecideRuns            HuffmanTreeRLE                { get; set; } = HuffmanTreeHeuristics.RLE.OfficialHeuristic;
+            public HuffmanTreeHeuristics.GenerateLimited<byte> GenerateHuffmanLengthCodeTree { get; set; } = HuffmanTree<byte>.FromSymbols;
 
             public Builder(){}
 
@@ -30,6 +32,7 @@ namespace BrotliLib.Brotli.Parameters{
                 GenerateContextMapTree = original.GenerateContextMapTree;
 
                 HuffmanTreeRLE = original.HuffmanTreeRLE;
+                GenerateHuffmanLengthCodeTree = original.GenerateHuffmanLengthCodeTree;
             }
 
             public BrotliSerializationParameters Build(){
@@ -38,7 +41,8 @@ namespace BrotliLib.Brotli.Parameters{
                     ContextMapRLE = ContextMapRLE,
                     GenerateContextMapTree = GenerateContextMapTree,
 
-                    HuffmanTreeRLE = HuffmanTreeRLE
+                    HuffmanTreeRLE = HuffmanTreeRLE,
+                    GenerateHuffmanLengthCodeTree = GenerateHuffmanLengthCodeTree
                 };
             }
         }

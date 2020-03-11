@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BrotliLib.Brotli.Parameters;
+using BrotliLib.Collections;
 using BrotliLib.Collections.Huffman;
 using BrotliLib.Markers.Serialization;
 using BrotliLib.Serialization;
@@ -119,16 +120,13 @@ namespace BrotliLib.Brotli.Components.Header{
                     symbolLengths.Add(length);
                 }
 
-                var runDecider = new HuffmanTreeLengthCode.RunDecider(symbolLengths, context.AlphabetSize);
-                var (lengthCodes, extra) = parameters.HuffmanTreeRLE(runDecider).GenerateCodesAndExtraBits();
+                var (lengthCodes, extra) = parameters.HuffmanTreeRLE(new HuffmanTreeLengthCode.RunDecider(symbolLengths, context.AlphabetSize)).GenerateCodesAndExtraBits();
+                var lengthCodeMap = parameters.GenerateHuffmanLengthCodeTree(new FrequencyList<byte>(lengthCodes), HuffmanTreeLengthCode.LengthMaxDepth).Root.GenerateValueMapOptimized();
                 
-                var lengthEntries = lengthCodes.GroupBy(length => length).Select(group => new HuffmanGenerator<byte>.SymbolFreq(group.Key, group.Count())).ToArray();
-                var lengthMap = HuffmanGenerator<byte>.FromFrequenciesCanonical(lengthEntries, HuffmanTreeLengthCode.LengthMaxDepth).GenerateValueMapOptimized();
-                
-                HuffmanTreeLengthCode.Write(writer, lengthMap);
+                HuffmanTreeLengthCode.Write(writer, lengthCodeMap);
                 
                 foreach(byte code in lengthCodes){
-                    writer.WriteBits(lengthMap[code]);
+                    writer.WriteBits(lengthCodeMap[code]);
 
                     if (code == HuffmanTreeLengthCode.Skip){
                         writer.WriteChunk(HuffmanTreeLengthCode.SkipCodeExtraBits, extra.Dequeue());
