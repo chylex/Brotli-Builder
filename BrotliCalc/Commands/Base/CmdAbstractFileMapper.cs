@@ -49,7 +49,17 @@ namespace BrotliCalc.Commands.Base{
                         try{
                             Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
 
-                            using(var stream = new FileStream(outputFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read)){
+                            if (Path.GetFullPath(outputFile) == Path.GetFullPath(file.Path)){
+                                string outputFileTmp = outputFile + ".tmp";
+
+                                using(var stream = new FileStream(outputFileTmp, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read)){
+                                    MapFile(group, file, stream);
+                                }
+
+                                File.Move(outputFileTmp, outputFile, true);
+                            }
+                            else{
+                                using var stream = new FileStream(outputFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
                                 MapFile(group, file, stream);
                             }
 
