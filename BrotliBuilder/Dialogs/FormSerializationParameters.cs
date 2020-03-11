@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using BrotliLib.Brotli.Parameters;
 using BrotliLib.Brotli.Parameters.Heuristics;
@@ -10,12 +12,20 @@ namespace BrotliBuilder.Dialogs{
         public event EventHandler? Reserialize;
 
         private readonly Builder parameters;
+        private readonly Dictionary<RadioButton, ContextMapHeuristics.DecideRuns> optionsContextMapsRLE;
 
         public FormSerializationParameters(BrotliSerializationParameters parameters){
             InitializeComponent();
 
             this.parameters = new Builder(parameters);
+            this.buttonReserialize.Click += buttonReserialize_Click;
             this.Disposed += FormParameters_Disposed;
+
+            this.optionsContextMapsRLE = new Dictionary<RadioButton, ContextMapHeuristics.DecideRuns>{
+                { radioContextMapsRleDisable,  ContextMapHeuristics.RLE.Disable },
+                { radioContextMapsRleKeepAll,  ContextMapHeuristics.RLE.KeepAll },
+                { radioContextMapsRleSplit1AB, ContextMapHeuristics.RLE.SplitOneAboveBoundary },
+            };
 
             LoadOptions();
             SetupOptionEvents();
@@ -25,37 +35,37 @@ namespace BrotliBuilder.Dialogs{
             Reserialize = null;
         }
 
-        private void buttonReserialize_Click(object sender, EventArgs e){
+        private void buttonReserialize_Click(object? sender, EventArgs e){
             Reserialize?.Invoke(this, e);
         }
 
         // Option handling
 
-        private static readonly DecideComplexTreeFeature ComplexTreeFeatureEnable  = _ => true;
-        private static readonly DecideComplexTreeFeature ComplexTreeFeatureDisable = _ => false;
-
         private void SetupOptionEvents(){
-            this.checkBoxComplexTreeSkipCode.CheckedChanged   += OnOptionChanged;
-            this.checkBoxComplexTreeRepeatCode.CheckedChanged += OnOptionChanged;
 
             this.checkBoxContextMapMTF.CheckedChanged += OnOptionChanged;
-            this.checkBoxContextMapRLE.CheckedChanged += OnOptionChanged;
+            this.radioContextMapsRleDisable.CheckedChanged += OnOptionChanged;
+            this.radioContextMapsRleKeepAll.CheckedChanged += OnOptionChanged;
+            this.radioContextMapsRleSplit1AB.CheckedChanged += OnOptionChanged;
+        }
+
+        private void ProcessRadio<T>(Dictionary<RadioButton, T> dictionary, Func<KeyValuePair<RadioButton, T>, bool> predicate, Action<KeyValuePair<RadioButton, T>> action){
+            foreach(var kvp in dictionary.Where(predicate)){
+                action(kvp);
+                break;
+            }
         }
 
         private void LoadOptions(){
-            checkBoxComplexTreeSkipCode.Checked   = !ReferenceEquals(parameters.UseComplexTreeSkipCode,   ComplexTreeFeatureDisable);
-            checkBoxComplexTreeRepeatCode.Checked = !ReferenceEquals(parameters.UseComplexTreeRepeatCode, ComplexTreeFeatureDisable);
+            ProcessRadio(optionsContextMapsRLE,  kvp => ReferenceEquals(parameters.ContextMapRLE, kvp.Value),  kvp => kvp.Key.Checked = true);
 
             checkBoxContextMapMTF.Checked = !ReferenceEquals(parameters.ContextMapMTF, ContextMapHeuristics.MTF.Disable);
-            checkBoxContextMapRLE.Checked = !ReferenceEquals(parameters.ContextMapRLE, ContextMapHeuristics.RLE.Disable);
         }
 
         private void OnOptionChanged(object? sender, EventArgs e){
-            parameters.UseComplexTreeSkipCode   = checkBoxComplexTreeSkipCode.Checked   ? ComplexTreeFeatureEnable : ComplexTreeFeatureDisable;
-            parameters.UseComplexTreeRepeatCode = checkBoxComplexTreeRepeatCode.Checked ? ComplexTreeFeatureEnable : ComplexTreeFeatureDisable;
+            ProcessRadio(optionsContextMapsRLE,  kvp => kvp.Key.Checked, kvp => parameters.ContextMapRLE = kvp.Value);
 
             parameters.ContextMapMTF = checkBoxContextMapMTF.Checked ? ContextMapHeuristics.MTF.Enable : ContextMapHeuristics.MTF.Disable;
-            parameters.ContextMapRLE = checkBoxContextMapRLE.Checked ? ContextMapHeuristics.RLE.KeepAll : ContextMapHeuristics.RLE.Disable;
 
             Updated?.Invoke(this, parameters.Build());
         }
