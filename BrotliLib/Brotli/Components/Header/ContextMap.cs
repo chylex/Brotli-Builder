@@ -153,6 +153,10 @@ namespace BrotliLib.Brotli.Components.Header{
                         }
 
                         if (retained < Run.MinSpecialCodeLength){
+                            if (retained == 0){
+                                retained = runLength;
+                            }
+
                             for(int i = 0; i < retained; i++){
                                 resolution.AddRaw(0);
                             }
