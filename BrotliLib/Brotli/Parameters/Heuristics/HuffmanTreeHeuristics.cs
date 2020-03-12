@@ -12,17 +12,27 @@ namespace BrotliLib.Brotli.Parameters.Heuristics{
             public static DecideRuns Disable { get; } = decider => decider.Resolve(run => run.Reject());
             public static DecideRuns KeepAll { get; } = decider => decider.Resolve(run => run.Accept());
 
+            /// <summary>
+            /// When the amount of repetitions equals the first value that requires a second repetition code to encode,
+            /// it's more efficient to write it as 1 normal code and 1 repetition code.
+            ///
+            /// Official compressor (<see cref="OfficialHeuristic"/>) only does this for the first value that crosses the boundary.
+            /// If this was merged into the official heuristic, it would result in shorter encoding, but the difference is so tiny it wouldn't be worth the CPU cycles.
+            /// </summary>
             public static DecideRuns SplitOneAboveBoundary { get; } = decider => decider.Resolve(run => {
-                int multiplier = 1 << (run.Symbol == 0 ? HuffmanTreeLengthCode.SkipCodeExtraBits : HuffmanTreeLengthCode.RepeatCodeExtraBits);
+                long multiplier = 1 << (run.Symbol == 0 ? HuffmanTreeLengthCode.SkipCodeExtraBits : HuffmanTreeLengthCode.RepeatCodeExtraBits);
+                long remaining = run.Length - HuffmanTreeLengthCode.Run.MinSpecialCodeLength;
 
-                if (run.Length - HuffmanTreeLengthCode.Run.MinSpecialCodeLength == multiplier){
-                    // when the amount of repetitions equals the first value that requires a second repetition code to encode,
-                    // it's more efficient to write it as 1 literal code and 1 repetition code
-                    // TODO official compressor (and this) only works for the first value that crosses the boundary... potential point for improvement?
-                    return run.Split(run.Length - 1);
+                if (remaining == 0){
+                    return run.Accept();
                 }
 
-                return run.Accept();
+                while(remaining > 0){
+                    remaining -= multiplier;
+                    multiplier *= multiplier;
+                }
+
+                return remaining == 0 ? run.Split(run.Length - 1) : run.Accept();
             });
 
             /// <summary>
