@@ -58,10 +58,10 @@ namespace BrotliLib.Brotli.Components.Data{
 
         // Types
 
-        public static List<DistanceCode> ForValue(in DistanceParameters parameters, BrotliGlobalState state, int value){
+        public static List<DistanceCode> ForValue(in DistanceParameters parameters, BrotliGlobalState state, int value, bool allowCodeZero = true){
             List<DistanceCode> valid = new List<DistanceCode>(3);
 
-            for(int code = 0; code < Last.CodeCount; code++){
+            for(int code = allowCodeZero ? 0 : 1; code < Last.CodeCount; code++){
                 if (Last.Codes[code].CanEncodeValue(state, value)){
                     valid.Add(Last.Codes[code]);
                 }

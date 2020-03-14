@@ -27,18 +27,6 @@ namespace BrotliLib.Brotli.Components.Data{
         
         public InsertCopyCommand(IList<Literal> literals, int copyLength, int copyDistance) : this(literals, copyLength, (DistanceInfo)copyDistance){}
 
-        // Cloning
-
-        private InsertCopyCommand(InsertCopyCommand original, DistanceInfo newDistanceInfo){
-            this.Literals = original.Literals;
-            this.CopyLength = original.CopyLength;
-            this.CopyDistance = newDistanceInfo;
-        }
-
-        public InsertCopyCommand WithDistance(DistanceInfo newDistanceInfo){
-            return CopyDistance == newDistanceInfo ? this : new InsertCopyCommand(this, newDistanceInfo);
-        }
-
         // Object
 
         public override bool Equals(object obj){

@@ -109,9 +109,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                         return AddInsertCopy(literals, copyLength, InsertCopyLengths.CanUseImplicitDCZ(literals.Count, copyLength) ? DistanceInfo.ImplicitCodeZero : DistanceInfo.ExplicitCodeZero);
 
                     case DistanceCodeZeroStrategy.Disable:
-                        // Returns the copy distance verbatim, however note that this still allows the
-                        // distance picker to pick an explicit code zero during the building process.
-                        break;
+                        break; // uses the copy distance verbatim
                 }
             }
 
@@ -214,29 +212,32 @@ namespace BrotliLib.Brotli.Encode.Build{
                     }
                 }
                 else{
-                    DistanceCode? distanceCode = null;
                     var distanceCodes = icCommand.CopyDistance.MakeCode(DistanceParameters, state);
                     
-                    if (distanceCodes != null){
+                    if (distanceCodes == null){
+                        icLengthCode = icLengthValues.MakeCode(DistanceCodeZeroStrategy.ForceEnabled);
+                    }
+                    else{
                         int blockID = blockTrackers[Category.Distance].SimulateCommand();
                         int contextID = icLengthValues.DistanceContextID;
                         int treeID = DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
                         var codeList = distanceCodeFreq[treeID];
-                        codeList.Add(distanceCode = parameters.DistanceCodePicker(distanceCodes, codeList));
-                    }
+                        DistanceCode distanceCode;
 
-                    bool isImplicitCodeZero = distanceCode == null;
-                    bool isDistanceCodeZero = isImplicitCodeZero || distanceCode!.Equals(DistanceCode.Zero);
+                        if (icCommand.CopyDistance == DistanceInfo.ExplicitCodeZero){
+                            distanceCode = DistanceCode.Zero;
+                        }
+                        else{
+                            distanceCode = parameters.DistanceCodePicker(distanceCodes, codeList);
 
-                    icLengthCode = icLengthValues.MakeCode(isImplicitCodeZero ? DistanceCodeZeroStrategy.ForceEnabled : DistanceCodeZeroStrategy.Disable);
-                    // TODO not allowed to use implicit code unless defined in the command, as implicit code doesn't advance the distance block tracker and would require lengths to be recalculated
+                            if (distanceCode.Equals(DistanceCode.Zero)){
+                                throw new InvalidOperationException("Cannot pick distance code zero for an insert&copy command that does not explicitly request it.");
+                            }
+                        }
 
-                    if (icLengthCode.UseDistanceCodeZero){
-                        icCommand = icCommand.WithDistance(DistanceInfo.ImplicitCodeZero);
-                    }
-                    else if (isDistanceCodeZero){
-                        icCommand = icCommand.WithDistance(DistanceInfo.ExplicitCodeZero);
+                        codeList.Add(distanceCode);
+                        icLengthCode = icLengthValues.MakeCode(DistanceCodeZeroStrategy.Disable);
                     }
 
                     state.OutputCopy(icCommand.CopyLength, icCommand.CopyDistance);
