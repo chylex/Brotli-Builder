@@ -110,7 +110,7 @@ namespace BrotliBuilder.Blocks{
                 AddMetaBlock(new MetaBlock.LastEmpty());
             }
             else{
-                AddMetaBlock(new MetaBlock.PaddedEmpty(isLast: false, Array.Empty<byte>()));
+                AddMetaBlock(new MetaBlock.PaddedEmpty(Array.Empty<byte>()));
             }
         }
 
@@ -197,7 +197,7 @@ namespace BrotliBuilder.Blocks{
             public void HandleNotification(EventArgs args){
                 switch(args){
                     case BuildEmptyMetaBlock.HiddenBytesNotifyArgs hbna:
-                        ReplaceMetaBlock(new MetaBlock.PaddedEmpty(isLast: false, hbna.Bytes));
+                        ReplaceMetaBlock(new MetaBlock.PaddedEmpty(hbna.Bytes));
                         break;
 
                     case BuildUncompressedMetaBlock.UncompressedBytesNotifyArgs ubna:

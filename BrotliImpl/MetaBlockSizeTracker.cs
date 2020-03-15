@@ -47,7 +47,7 @@ namespace BrotliImpl{
             var nextState = state.Clone();
 
             try{
-                MetaBlock.Serialize(writer, tested, nextState, serializationParameters ?? BrotliSerializationParameters.Default);
+                MetaBlock.Serialize(writer, tested.Mark(isLast: false), nextState, serializationParameters ?? BrotliSerializationParameters.Default);
                 return (writer.Length, nextState);
             }catch(Exception ex){
                 Debug.WriteLine(ex.ToString());

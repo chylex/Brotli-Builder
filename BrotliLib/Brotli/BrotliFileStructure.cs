@@ -16,7 +16,7 @@ namespace BrotliLib.Brotli{
     public sealed class BrotliFileStructure{
         public static BrotliFileStructure NewEmpty(){
             var bfs = new BrotliFileStructure(BrotliFileParameters.Default);
-            bfs.MetaBlocks.Add(new MetaBlock.LastEmpty());
+            bfs.Fixup();
             return bfs;
         }
 
@@ -71,10 +71,6 @@ namespace BrotliLib.Brotli{
 
             if (MetaBlocks.Count == 0 || MetaBlocks[^1] is MetaBlock.Uncompressed){
                 MetaBlocks.Add(new MetaBlock.LastEmpty());
-            }
-
-            for(int index = 0, last = MetaBlocks.Count - 1; index <= last; index++){
-                MetaBlocks[index].IsLast = index == last;
             }
         }
 

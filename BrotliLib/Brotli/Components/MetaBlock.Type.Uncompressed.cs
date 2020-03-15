@@ -17,11 +17,11 @@ namespace BrotliLib.Brotli.Components{
 
             private readonly byte[] uncompressedData;
 
-            public Uncompressed(byte[] uncompressedData) : base(false, new DataLength(uncompressedData.Length)){
+            public Uncompressed(byte[] uncompressedData) : base(new DataLength(uncompressedData.Length)){
                 this.uncompressedData = CollectionHelper.Clone(uncompressedData);
             }
 
-            public Uncompressed(byte[] uncompressedData, int start, int count) : base(false, new DataLength(count)){
+            public Uncompressed(byte[] uncompressedData, int start, int count) : base(new DataLength(count)){
                 this.uncompressedData = CollectionHelper.Slice(uncompressedData, start, count);
             }
 
@@ -40,8 +40,8 @@ namespace BrotliLib.Brotli.Components{
             }
 
             // Serialization
-        
-            internal new static readonly BitDeserializer<Uncompressed, Context> Deserialize = MarkedBitDeserializer.Title<Uncompressed, Context>(
+            
+            internal new static readonly BitDeserializer<Uncompressed, ReadContext> Deserialize = MarkedBitDeserializer.Title<Uncompressed, ReadContext>(
                 "Contents",
 
                 (reader, context) => {
@@ -75,20 +75,17 @@ namespace BrotliLib.Brotli.Components{
                 }
             );
 
-            internal new static readonly BitSerializer<Uncompressed, Context> Serialize = (writer, obj, context) => {
+            internal new static readonly BitSerializer<Uncompressed, BrotliGlobalState> Serialize = (writer, obj, context) => {
                 byte[] bytes = obj.uncompressedData;
 
                 if (bytes.Length == 0){
                     throw new InvalidOperationException("Uncompressed meta-block must not be empty.");
                 }
-                else if (bytes.Length != context.DataLength.UncompressedBytes){
-                    throw new InvalidOperationException("Uncompressed meta-block has invalid data length (" + bytes.Length + " != " + context.DataLength.UncompressedBytes + ").");
-                }
 
                 writer.AlignToByteBoundary();
                 writer.WriteAlignedBytes(bytes);
 
-                context.State.OutputBytes(bytes);
+                context.OutputBytes(bytes);
             };
         }
     }

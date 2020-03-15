@@ -11,42 +11,56 @@ namespace BrotliLib.Brotli.Components{
     /// https://tools.ietf.org/html/rfc7932#section-9.3
     /// </summary>
     public abstract partial class MetaBlock{
-        internal class Context{
-            public bool IsLast { get; }
-            public DataLength DataLength { get; }
+        internal sealed class ReadContext{
             public BrotliGlobalState State { get; }
+            public DataLength DataLength { get; }
 
-            public Context(bool isLast, DataLength dataLength, BrotliGlobalState state){
-                this.IsLast = isLast;
-                this.DataLength = dataLength;
+            public ReadContext(BrotliGlobalState state, DataLength dataLength){
                 this.State = state;
+                this.DataLength = dataLength;
             }
         }
 
         // Data
 
-        public bool IsLast { get; internal set; }
         public DataLength DataLength { get; }
         
-        protected MetaBlock(bool isLast, DataLength dataLength){
-            this.IsLast = isLast;
+        protected MetaBlock(DataLength dataLength){
             this.DataLength = dataLength;
         }
 
         public abstract void Decompress(BrotliGlobalState state);
 
         protected bool Equals(MetaBlock other){
-            return IsLast == other.IsLast &&
-                   DataLength.Equals(other.DataLength);
+            return DataLength.Equals(other.DataLength);
         }
 
         protected int ParentHashCode(){
-            return HashCode.Combine(IsLast, DataLength);
+            return HashCode.Combine(DataLength);
         }
 
         // Serialization
 
-        public static readonly BitDeserializer<MetaBlock, BrotliGlobalState> Deserialize = MarkedBitDeserializer.Title<MetaBlock, BrotliGlobalState>(
+        public Marked Mark(bool isLast){
+            return new Marked(this, isLast);
+        }
+
+        public readonly struct Marked{
+            public MetaBlock MetaBlock { get; }
+            public bool IsLast { get; }
+
+            public Marked(MetaBlock metaBlock, bool isLast){
+                this.MetaBlock = metaBlock;
+                this.IsLast = isLast;
+            }
+
+            public void Deconstruct(out MetaBlock metaBlock, out bool isLast){
+                metaBlock = MetaBlock;
+                isLast = IsLast;
+            }
+        }
+
+        public static readonly BitDeserializer<Marked, BrotliGlobalState> Deserialize = MarkedBitDeserializer.Title<Marked, BrotliGlobalState>(
             "Meta-Block",
 
             (reader, context) => {
@@ -54,34 +68,36 @@ namespace BrotliLib.Brotli.Components{
                 bool isLastEmpty = isLast && reader.NextBit("ISLASTEMPTY");
 
                 if (isLastEmpty){
-                    return new LastEmpty();
+                    return LastEmpty.Marked;
                 }
 
                 DataLength dataLength = DataLength.Deserialize(reader, NoContext.Value);
 
                 if (dataLength.UncompressedBytes == 0){
-                    return PaddedEmpty.Deserialize(reader, new Context(isLast, DataLength.Empty, context));
+                    return new Marked(PaddedEmpty.Deserialize(reader, NoContext.Value), isLast);
                 }
                 
                 bool isUncompressed = !isLast && reader.NextBit("ISUNCOMPRESSED");
 
                 if (isUncompressed){
-                    return Uncompressed.Deserialize(reader, new Context(isLast: false, dataLength, context));
+                    return new Marked(Uncompressed.Deserialize(reader, new ReadContext(context, dataLength)), false);
                 }
                 else{
-                    return Compressed.Deserialize(reader, new Context(isLast, dataLength, context));
+                    return new Marked(Compressed.Deserialize(reader, new ReadContext(context, dataLength)), isLast);
                 }
             }
         );
 
-        public static readonly BitSerializer<MetaBlock, BrotliGlobalState, BrotliSerializationParameters> Serialize = (writer, obj, context, parameters) => {
-            if (obj is LastEmpty){
+        public static readonly BitSerializer<Marked, BrotliGlobalState, BrotliSerializationParameters> Serialize = (writer, obj, context, parameters) => {
+            var (metaBlock, isLast) = obj;
+
+            if (metaBlock is LastEmpty){
                 writer.WriteBit(true); // ISLAST
                 writer.WriteBit(true); // ISLASTEMPTY
                 return;
             }
 
-            if (obj.IsLast){
+            if (isLast){
                 writer.WriteBit(true); // ISLAST
                 writer.WriteBit(false); // ISLASTEMPTY
             }
@@ -89,30 +105,30 @@ namespace BrotliLib.Brotli.Components{
                 writer.WriteBit(false); // ISLAST
             }
 
-            DataLength.Serialize(writer, obj.DataLength, NoContext.Value);
+            DataLength.Serialize(writer, metaBlock.DataLength, NoContext.Value);
 
-            switch(obj){
+            switch(metaBlock){
                 case PaddedEmpty pe:
                     PaddedEmpty.Serialize(writer, pe, NoContext.Value);
                     break;
 
                 case Uncompressed u:
-                    if (u.IsLast){
+                    if (isLast){
                         throw new InvalidOperationException("An uncompressed meta-block cannot also be the last.");
                     }
                     else{
                         writer.WriteBit(true); // ISUNCOMPRESSED
                     }
 
-                    Uncompressed.Serialize(writer, u, new Context(u.IsLast, u.DataLength, context));
+                    Uncompressed.Serialize(writer, u, context);
                     break;
 
                 case Compressed c:
-                    if (!c.IsLast){
+                    if (!isLast){
                         writer.WriteBit(false); // ISUNCOMPRESSED
                     }
 
-                    Compressed.Serialize(writer, c, new Context(c.IsLast, c.DataLength, context), parameters);
+                    Compressed.Serialize(writer, c, context, parameters);
                     break;
             }
         };

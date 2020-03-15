@@ -7,7 +7,9 @@ namespace BrotliLib.Brotli.Components{
         /// <code>ISLAST = 1, ISLASTEMPTY = 1</code>
         /// </summary>
         public class LastEmpty : MetaBlock{
-            public LastEmpty() : base(true, DataLength.Empty){}
+            public new static Marked Marked { get; } = new LastEmpty().Mark(isLast: true);
+
+            public LastEmpty() : base(DataLength.Empty){}
 
             public override void Decompress(BrotliGlobalState state){}
 

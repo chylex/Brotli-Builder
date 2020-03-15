@@ -16,7 +16,7 @@ namespace BrotliLib.Brotli.Components{
             public CompressedHeader Header { get; }
             public CompressedData Data { get; }
 
-            public Compressed(bool isLast, DataLength dataLength, CompressedHeader header, CompressedData data) : base(isLast, dataLength){
+            public Compressed(DataLength dataLength, CompressedHeader header, CompressedData data) : base(dataLength){
                 this.Header = header;
                 this.Data = data;
             }
@@ -43,19 +43,19 @@ namespace BrotliLib.Brotli.Components{
             }
 
             // Serialization
-        
-            internal new static readonly BitDeserializer<Compressed, Context> Deserialize = MarkedBitDeserializer.Wrap<Compressed, Context>(
+            
+            internal new static readonly BitDeserializer<Compressed, ReadContext> Deserialize = MarkedBitDeserializer.Wrap<Compressed, ReadContext>(
                 (reader, context) => {
                     var header = reader.ReadStructure(CompressedHeader.Deserialize, NoContext.Value, "Header");
                     var data = reader.ReadStructure(CompressedData.Deserialize, new CompressedData.Context(header, context.DataLength, context.State), "Data");
 
-                    return new Compressed(context.IsLast, context.DataLength, header, data);
+                    return new Compressed(context.DataLength, header, data);
                 }
             );
 
-            internal new static readonly BitSerializer<Compressed, Context, BrotliSerializationParameters> Serialize = (writer, obj, context, parameters) => {
+            internal new static readonly BitSerializer<Compressed, BrotliGlobalState, BrotliSerializationParameters> Serialize = (writer, obj, context, parameters) => {
                 CompressedHeader.Serialize(writer, obj.Header, NoContext.Value, parameters);
-                CompressedData.Serialize(writer, obj.Data, new CompressedData.Context(obj.Header, context.DataLength, context.State));
+                CompressedData.Serialize(writer, obj.Data, new CompressedData.Context(obj.Header, obj.DataLength, context));
             };
         }
     }

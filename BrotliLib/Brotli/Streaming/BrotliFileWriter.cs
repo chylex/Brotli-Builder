@@ -40,8 +40,7 @@ namespace BrotliLib.Brotli.Streaming{
             CheckCanWrite();
 
             if (nextToWrite != null){
-                nextToWrite.IsLast = false;
-                MetaBlock.Serialize(writer!, nextToWrite, state, SerializationParameters);
+                MetaBlock.Serialize(writer!, nextToWrite.Mark(isLast: false), state, SerializationParameters);
             }
 
             nextToWrite = metaBlock;
@@ -59,16 +58,14 @@ namespace BrotliLib.Brotli.Streaming{
             CheckCanWrite();
 
             if (nextToWrite == null){ // no meta-blocks have been written
-                MetaBlock.Serialize(writer!, new MetaBlock.LastEmpty(), state, SerializationParameters);
+                MetaBlock.Serialize(writer!, MetaBlock.LastEmpty.Marked, state, SerializationParameters);
             }
             else if (nextToWrite is MetaBlock.Uncompressed){
-                nextToWrite.IsLast = false;
-                MetaBlock.Serialize(writer!, nextToWrite, state, SerializationParameters);
-                MetaBlock.Serialize(writer!, new MetaBlock.LastEmpty(), state, SerializationParameters);
+                MetaBlock.Serialize(writer!, nextToWrite.Mark(isLast: false), state, SerializationParameters);
+                MetaBlock.Serialize(writer!, MetaBlock.LastEmpty.Marked, state, SerializationParameters);
             }
             else{
-                nextToWrite.IsLast = true;
-                MetaBlock.Serialize(writer!, nextToWrite, state, SerializationParameters);
+                MetaBlock.Serialize(writer!, nextToWrite.Mark(isLast: true), state, SerializationParameters);
             }
 
             var finalBits = bits!;

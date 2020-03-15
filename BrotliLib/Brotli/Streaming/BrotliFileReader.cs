@@ -51,8 +51,9 @@ namespace BrotliLib.Brotli.Streaming{
                 return null;
             }
 
-            MetaBlock metaBlock = MetaBlock.Deserialize(reader, state);
-            isAtEnd = metaBlock.IsLast;
+            var (metaBlock, isLast) = MetaBlock.Deserialize(reader, state);
+
+            isAtEnd = isLast;
             return metaBlock;
         }
     }

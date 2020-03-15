@@ -266,7 +266,7 @@ namespace BrotliLib.Brotli.Encode.Build{
             var data = new CompressedData(icCommandsFinal, blockTypes.Select(built => built.Commands));
             var dataLength = new DataLength(OutputSize);
 
-            return (new MetaBlock.Compressed(isLast: false, dataLength, header, data), state);
+            return (new MetaBlock.Compressed(dataLength, header, data), state);
         }
 
         // Helpers
