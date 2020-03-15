@@ -5,7 +5,7 @@ using BrotliCalc.Helpers;
 namespace BrotliCalc.Commands{
     class CmdReserialize : CmdAbstractFileMapper.Compressed{
         public override string FullName => "reserialize";
-        public override string ShortName => "r";
+        public override string ShortName => "rs";
 
         protected override string WorkDesc => "Reserialized";
 

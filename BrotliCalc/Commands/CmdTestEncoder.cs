@@ -2,23 +2,15 @@
 using System.Collections.Generic;
 using BrotliCalc.Commands.Base;
 using BrotliCalc.Helpers;
-using BrotliImpl.Encoders;
 using BrotliLib.Brotli.Encode;
 
 namespace BrotliCalc.Commands{
     class CmdTestEncoder : CmdAbstractFileTable.Uncompressed{
-        private static readonly Dictionary<string, IBrotliEncoder> Encoders = new Dictionary<string, IBrotliEncoder>{
-            { "literals", new EncodeLiterals() },
-            { "greedy-copies", new EncodeGreedySearch.OnlyBackReferences(minLength: 4) },
-            { "greedy-dict", new EncodeGreedySearch.OnlyDictionary() },
-            { "greedy-mixed", new EncodeGreedySearch.Mixed(minCopyLength: 4) }
-        };
-
         public override string FullName => "test-encoder";
         public override string ShortName => "te";
 
         protected override int ExtraArgumentCount => 1;
-        protected override string ExtraArgumentDesc => "<{" + string.Join('|', Encoders.Keys) + "}>";
+        protected override string ExtraArgumentDesc => CmdEncode.EncoderArgumentDesc;
 
         protected override string[] Columns { get; } = {
             "File", "Uncompressed Bytes", "Encoded Bytes", "Encoded-Uncompressed"
@@ -27,9 +19,7 @@ namespace BrotliCalc.Commands{
         private IBrotliEncoder? encoder;
 
         protected override void Setup(string[] args){
-            if (!Encoders.TryGetValue(args[0], out encoder)){
-                throw new ArgumentException($"Unknown encoder: {args[0]}");
-            }
+            encoder = CmdEncode.GetEncoder(args[0]);
         }
 
         protected override IEnumerable<object?[]> GenerateRows(BrotliFileGroup group, BrotliFile.Uncompressed file){

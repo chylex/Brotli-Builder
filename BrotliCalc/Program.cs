@@ -11,9 +11,12 @@ using BrotliLib.Numbers;
 namespace BrotliCalc{
     public static class Program{
         private static readonly List<ICommand> Commands = new List<ICommand>{
+            new CmdCopyUncompressed(),
             new CmdCompress(),
             new CmdCompressStats(),
-            new CmdCopyUncompressed(),
+            new CmdEncode(),
+            new CmdRebuild(),
+            new CmdTransform(),
             new CmdReserialize(),
             new CmdGenerateMarkers(),
             new CmdExtractWindowSize(),

@@ -11,16 +11,11 @@ using BrotliLib.Brotli.Streaming;
 
 namespace BrotliCalc.Commands{
     class CmdTestTransformer : CmdAbstractFileTable.Compressed{
-        private static readonly Dictionary<string, IBrotliTransformer> Transformers = new Dictionary<string, IBrotliTransformer>{
-            { "distanceparams", new TransformTestDistanceParameters() },
-            { "spliticlengths", new TransformSplitInsertCopyLengths() }
-        };
-
         public override string FullName => "test-transformer";
         public override string ShortName => "tt";
 
         protected override int ExtraArgumentCount => 1;
-        protected override string ExtraArgumentDesc => "<{" + string.Join('|', Transformers.Keys) + "}>";
+        protected override string ExtraArgumentDesc => CmdTransform.TransformerArgumentDesc;
 
         protected override string[] Columns { get; } = {
             "File", "Quality", "Original Bytes", "Rebuild Bytes", "Transformed Bytes", "Transformed-Original", "Transformed-Rebuild"
@@ -29,9 +24,7 @@ namespace BrotliCalc.Commands{
         private IBrotliTransformer? transformer;
 
         protected override void Setup(string[] args){
-            if (!Transformers.TryGetValue(args[0], out transformer)){
-                throw new ArgumentException($"Unknown transformer: {args[0]}");
-            }
+            transformer = CmdTransform.GetTransformer(args[0]);
         }
 
         protected override IEnumerable<object?[]> GenerateRows(BrotliFileGroup group, BrotliFile.Compressed file){
