@@ -31,7 +31,7 @@ namespace BrotliLib.Brotli.Components.Data{
         }
 
         public static bool CanUseImplicitDCZ(int insertLength, int copyLength){
-            return new InsertCopyLengths(insertLength, copyLength).MakeCode(DistanceCodeZeroStrategy.PreferEnabled).UseDistanceCodeZero;
+            return new InsertCopyLengths(insertLength, copyLength).MakeCode(ImplicitDistanceCodeZero.PreferEnabled).UseDistanceCodeZero;
         }
 
         // Insert code tables
@@ -96,14 +96,14 @@ namespace BrotliLib.Brotli.Components.Data{
         /// <summary>
         /// Constructs an <see cref="InsertCopyLengthCode"/> that can encode the stored lengths, and can therefore be used as context in the <see cref="Serialize"/>.
         /// </summary>
-        public InsertCopyLengthCode MakeCode(DistanceCodeZeroStrategy dczStrategy){
+        public InsertCopyLengthCode MakeCode(ImplicitDistanceCodeZero implicitDCZ){
             int insertLength = InsertLength;
             int copyLength = CopyLength;
 
             int insertCode = CollectionHelper.FindRangeIndex(InsertCodeRanges, insertLength);
             int copyCode = CollectionHelper.FindRangeIndex(CopyCodeRanges, copyLength);
 
-            return new InsertCopyLengthCode(insertCode, copyCode, dczStrategy);
+            return new InsertCopyLengthCode(insertCode, copyCode, implicitDCZ);
         }
 
         /// <summary>

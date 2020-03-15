@@ -99,18 +99,9 @@ namespace BrotliLib.Brotli.Encode.Build{
             return AddInsertCopy(new InsertCopyCommand(literals, copyLength, copyDistance));
         }
 
-        public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, int copyLength, int copyDistance, DistanceCodeZeroStrategy dczStrategy = DistanceCodeZeroStrategy.PreferEnabled){
+        public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, int copyLength, int copyDistance, DistanceCodeZeroStrategy dczStrategy = DistanceCodeZeroStrategy.PreferImplicit){
             if (copyDistance == LastDistance){
-                switch(dczStrategy){
-                    case DistanceCodeZeroStrategy.ForceEnabled:
-                        return AddInsertCopy(literals, copyLength, DistanceInfo.ImplicitCodeZero);
-
-                    case DistanceCodeZeroStrategy.PreferEnabled:
-                        return AddInsertCopy(literals, copyLength, InsertCopyLengths.CanUseImplicitDCZ(literals.Count, copyLength) ? DistanceInfo.ImplicitCodeZero : DistanceInfo.ExplicitCodeZero);
-
-                    case DistanceCodeZeroStrategy.Disable:
-                        break; // uses the copy distance verbatim
-                }
+                return AddInsertCopy(literals, copyLength, dczStrategy.Decide(literals.Count, copyLength, copyDistance));
             }
 
             return AddInsertCopy(new InsertCopyCommand(literals, copyLength, copyDistance));
@@ -120,10 +111,10 @@ namespace BrotliLib.Brotli.Encode.Build{
             var startDistance = 1 + Math.Min(intermediateState.Parameters.WindowSize.Bytes, intermediateState.OutputSize + literals.Count);
             var entryDistance = dictionaryEntry.Packed + startDistance;
 
-            return AddInsertCopy(literals, dictionaryEntry.CopyLength, entryDistance, DistanceCodeZeroStrategy.Disable);
+            return AddInsertCopy(literals, dictionaryEntry.CopyLength, entryDistance, DistanceCodeZeroStrategy.Avoid);
         }
 
-        public CompressedMetaBlockBuilder AddCopy(int copyLength, int copyDistance, DistanceCodeZeroStrategy dczStrategy = DistanceCodeZeroStrategy.PreferEnabled){
+        public CompressedMetaBlockBuilder AddCopy(int copyLength, int copyDistance, DistanceCodeZeroStrategy dczStrategy = DistanceCodeZeroStrategy.PreferImplicit){
             return AddInsertCopy(Array.Empty<Literal>(), copyLength, copyDistance, dczStrategy);
         }
         
@@ -201,10 +192,10 @@ namespace BrotliLib.Brotli.Encode.Build{
                         throw new InvalidOperationException("Insert&copy command that ends after literals must be the last.");
                     }
 
-                    icLengthCode = icLengthValues.MakeCode(DistanceCodeZeroStrategy.PreferEnabled);
+                    icLengthCode = icLengthValues.MakeCode(ImplicitDistanceCodeZero.PreferEnabled);
 
                     if (icLengthCode.UseDistanceCodeZero){
-                        var alternativeCode = icLengthValues.MakeCode(DistanceCodeZeroStrategy.Disable);
+                        var alternativeCode = icLengthValues.MakeCode(ImplicitDistanceCodeZero.Disable);
 
                         if (icFreq[alternativeCode] > icFreq[icLengthCode]){
                             icLengthCode = alternativeCode; // if the first code uses DCZ, try a non-DCZ code and pick whichever one was used more often
@@ -215,7 +206,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                     var distanceCodes = icCommand.CopyDistance.MakeCode(DistanceParameters, state);
                     
                     if (distanceCodes == null){
-                        icLengthCode = icLengthValues.MakeCode(DistanceCodeZeroStrategy.ForceEnabled);
+                        icLengthCode = icLengthValues.MakeCode(ImplicitDistanceCodeZero.ForceEnabled);
                     }
                     else{
                         int blockID = blockTrackers[Category.Distance].SimulateCommand();
@@ -237,7 +228,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                         }
 
                         codeList.Add(distanceCode);
-                        icLengthCode = icLengthValues.MakeCode(DistanceCodeZeroStrategy.Disable);
+                        icLengthCode = icLengthValues.MakeCode(ImplicitDistanceCodeZero.Disable);
                     }
 
                     state.OutputCopy(icCommand.CopyLength, icCommand.CopyDistance);

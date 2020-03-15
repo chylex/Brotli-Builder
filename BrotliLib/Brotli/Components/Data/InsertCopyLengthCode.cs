@@ -81,7 +81,7 @@ namespace BrotliLib.Brotli.Components.Data{
         /// <summary>
         /// Initializes the code with the concrete insert and copy codes, and the flag which determines whether to use an implied distance code zero.
         /// </summary>
-        public InsertCopyLengthCode(int insertCode, int copyCode, DistanceCodeZeroStrategy dczStrategy){
+        public InsertCopyLengthCode(int insertCode, int copyCode, ImplicitDistanceCodeZero implicitDCZ){
             if (insertCode < 0 || insertCode > 23){
                 throw new ArgumentOutOfRangeException(nameof(insertCode), "Insert code must be in the range [0; 23].");
             }
@@ -90,7 +90,7 @@ namespace BrotliLib.Brotli.Components.Data{
                 throw new ArgumentOutOfRangeException(nameof(copyCode), "Copy code must be in the range [0; 23].");
             }
 
-            bool useDistanceCodeZero = dczStrategy.Determine(insertCode, copyCode);
+            bool useDistanceCodeZero = implicitDCZ.Decide(insertCode, copyCode);
 
             int cell = DetermineCellIndex(insertCode, copyCode, useDistanceCodeZero);
 

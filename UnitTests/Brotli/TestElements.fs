@@ -272,8 +272,8 @@ module InsertCopyLengths =
         for original in icCodeRange do
             let dczStrategy =
                 match original.UseDistanceCodeZero with
-                | true  -> DistanceCodeZeroStrategy.ForceEnabled
-                | false -> DistanceCodeZeroStrategy.Disable
+                | true  -> ImplicitDistanceCodeZero.ForceEnabled
+                | false -> ImplicitDistanceCodeZero.Disable
             
             let reconstructed = InsertCopyLengthCode(original.InsertCode, original.CopyCode, dczStrategy)
             Assert.Equal(original.CompactedCode, reconstructed.CompactedCode)

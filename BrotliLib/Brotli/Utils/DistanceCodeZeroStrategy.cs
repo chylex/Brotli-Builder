@@ -3,44 +3,40 @@ using BrotliLib.Brotli.Components.Data;
 
 namespace BrotliLib.Brotli.Utils{
     /// <summary>
-    /// Determines how to set <see cref="InsertCopyLengthCode.UseDistanceCodeZero"/> during construction.
+    /// Determines how to pick <see cref="DistanceInfo"/> for an insert&amp;copy command whose distance can be encoded using <see cref="DistanceCode.Zero"/>.
     /// </summary>
     public enum DistanceCodeZeroStrategy{
         /// <summary>
-        /// Always sets <see cref="InsertCopyLengthCode.UseDistanceCodeZero"/> to <c>false</c>.
+        /// If possible, uses an implicit code zero encoded in <see cref="InsertCopyLengthCode.UseDistanceCodeZero"/>.
+        /// Otherwise, throws <see cref="InvalidOperationException"/>.
         /// </summary>
-        Disable,
+        ForceImplicit,
 
         /// <summary>
-        /// Sets <see cref="InsertCopyLengthCode.UseDistanceCodeZero"/> to <c>true</c> if possible with the provided insert & copy codes, <c>false</c> otherwise.
+        /// If possible, uses an implicit code zero encoded in <see cref="InsertCopyLengthCode.UseDistanceCodeZero"/>.
+        /// Otherwise, uses an explicit <see cref="DistanceCode.Zero"/>.
         /// </summary>
-        PreferEnabled,
+        PreferImplicit,
 
         /// <summary>
-        /// Sets <see cref="InsertCopyLengthCode.UseDistanceCodeZero"/> to <c>true</c> if possible with the provided insert & copy codes, throws <see cref="ArgumentOutOfRangeException"/> otherwise.
+        /// Uses an explicit <see cref="DistanceCode.Zero"/>.
         /// </summary>
-        ForceEnabled
+        Explicit,
+
+        /// <summary>
+        /// Uses a non-zero <see cref="DistanceCode"/>.
+        /// </summary>
+        Avoid
     }
-
-    internal static class DistanceCodeZeroStrategies{
-        public static bool Determine(this DistanceCodeZeroStrategy strategy, int insertCode, int copyCode){
+    
+    internal static class DistanceCodeZeroStrategyExtensions{
+        public static DistanceInfo Decide(this DistanceCodeZeroStrategy strategy, int insertLength, int copyLength, int copyDistance){
             return strategy switch{
-                DistanceCodeZeroStrategy.Disable
-                => false,
-
-                DistanceCodeZeroStrategy.PreferEnabled
-                => insertCode <= 7 && copyCode <= 15,
-
-                DistanceCodeZeroStrategy.ForceEnabled when insertCode > 7
-                => throw new ArgumentOutOfRangeException(nameof(insertCode), "Insert code must be in the range [0; 7] when using implied distance code zero."),
-
-                DistanceCodeZeroStrategy.ForceEnabled when copyCode > 15
-                => throw new ArgumentOutOfRangeException(nameof(copyCode), "Copy code must be in the range [0; 15] when using implied distance code zero."),
-
-                DistanceCodeZeroStrategy.ForceEnabled
-                => true,
-
-                _ => throw new InvalidOperationException("Invalid distance code zero strategy: " + strategy),
+                DistanceCodeZeroStrategy.ForceImplicit  => DistanceInfo.ImplicitCodeZero,
+                DistanceCodeZeroStrategy.PreferImplicit => InsertCopyLengths.CanUseImplicitDCZ(insertLength, copyLength) ? DistanceInfo.ImplicitCodeZero : DistanceInfo.ExplicitCodeZero,
+                DistanceCodeZeroStrategy.Explicit       => DistanceInfo.ExplicitCodeZero,
+                DistanceCodeZeroStrategy.Avoid          => (DistanceInfo)copyDistance,
+                _                                       => throw new InvalidOperationException("Invalid distance code zero strategy: " + strategy),
             };
         }
     }
