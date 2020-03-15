@@ -3,14 +3,14 @@ using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Parameters;
 
 namespace BrotliLib.Brotli.Streaming{
-    public class BrotliFileReaderEncoding : IBrotliFileReader{
+    public class BrotliFileStreamEncoder : IBrotliFileStream{
         public BrotliFileParameters Parameters => encodeInfo.FileParameters;
         public BrotliGlobalState State => encodeInfo.State;
 
         private readonly IBrotliEncoder encoder;
         private BrotliEncodeInfo encodeInfo;
 
-        public BrotliFileReaderEncoding(BrotliFileParameters fileParameters, BrotliCompressionParameters compressionParameters, byte[] bytes, IBrotliEncoder encoder){
+        public BrotliFileStreamEncoder(BrotliFileParameters fileParameters, BrotliCompressionParameters compressionParameters, byte[] bytes, IBrotliEncoder encoder){
             this.encoder = encoder;
             this.encodeInfo = new BrotliEncodeInfo(fileParameters, compressionParameters, bytes);
         }

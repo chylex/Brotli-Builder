@@ -50,16 +50,16 @@ namespace BrotliCalc.Commands{
             };
         }
 
-        private class ReferenceChecker : IBrotliFileReader{
+        private class ReferenceChecker : IBrotliFileStream{
             public BrotliFileParameters Parameters => transformingReader.Parameters;
             public BrotliGlobalState State => transformingReader.State;
 
             public bool IsDifferent { get; private set; }
 
-            private readonly IBrotliFileReader originalReader;
-            private readonly IBrotliFileReader transformingReader;
+            private readonly IBrotliFileStream originalReader;
+            private readonly IBrotliFileStream transformingReader;
 
-            public ReferenceChecker(IBrotliFileReader originalReader, IBrotliFileReader transformingReader){
+            public ReferenceChecker(IBrotliFileStream originalReader, IBrotliFileStream transformingReader){
                 this.originalReader = originalReader;
                 this.transformingReader = transformingReader;
             }

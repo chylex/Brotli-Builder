@@ -9,7 +9,7 @@ namespace BrotliLib.Brotli.Streaming{
     /// <summary>
     /// Provides a streaming meta-block deserializer as an alternative to <see cref="BrotliFileStructure"/>.
     /// </summary>
-    public sealed class BrotliFileReader : IBrotliFileReader{
+    public sealed class BrotliFileReader : IBrotliFileStream{
         public static BrotliFileReader FromBytes(byte[] bytes, MarkerLevel markerLevel, BrotliDictionary? dictionary = null){
             return FromBytes(new BitStream(bytes), markerLevel, dictionary);
         }

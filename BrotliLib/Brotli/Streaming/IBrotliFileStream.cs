@@ -6,7 +6,7 @@ namespace BrotliLib.Brotli.Streaming{
     /// <summary>
     /// Provides a streaming meta-block generator.
     /// </summary>
-    public interface IBrotliFileReader{
+    public interface IBrotliFileStream{
         BrotliFileParameters Parameters { get; }
         BrotliGlobalState State { get; }
 

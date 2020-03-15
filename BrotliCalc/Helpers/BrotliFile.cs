@@ -51,8 +51,8 @@ namespace BrotliCalc.Helpers{
                 return BrotliFileStructure.FromEncoder(Parameters.File, Parameters.Compression, Contents, encoder);
             }
 
-            public IBrotliFileReader Encoding(IBrotliEncoder encoder){
-                return new BrotliFileReaderEncoding(Parameters.File, Parameters.Compression, Contents, encoder);
+            public IBrotliFileStream Encoding(IBrotliEncoder encoder){
+                return new BrotliFileStreamEncoder(Parameters.File, Parameters.Compression, Contents, encoder);
             }
         }
 
@@ -61,7 +61,7 @@ namespace BrotliCalc.Helpers{
             public override string FullName => $"{Name}.{Identifier}{Brotli.CompressedFileExtension}";
 
             public BrotliFileStructure Structure => structureLazy.Value;
-            public IBrotliFileReader Reader => BrotliFileReader.FromBytes(Contents, MarkerLevel.None);
+            public IBrotliFileStream Reader => BrotliFileReader.FromBytes(Contents, MarkerLevel.None);
 
             private readonly Lazy<BrotliFileStructure> structureLazy;
 
@@ -74,8 +74,8 @@ namespace BrotliCalc.Helpers{
                 return Structure.Transform(transformer, Parameters.Compression);
             }
 
-            public IBrotliFileReader Transforming(IBrotliTransformer transformer){
-                return new BrotliFileReaderTransforming(Reader, Parameters.Compression, transformer);
+            public IBrotliFileStream Transforming(IBrotliTransformer transformer){
+                return new BrotliFileStreamTransformer(Reader, Parameters.Compression, transformer);
             }
 
             public MarkerRoot GenerateMarkers(MarkerLevel markerLevel){

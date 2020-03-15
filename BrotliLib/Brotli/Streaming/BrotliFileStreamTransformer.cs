@@ -4,18 +4,18 @@ using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Parameters;
 
 namespace BrotliLib.Brotli.Streaming{
-    public class BrotliFileReaderTransforming : IBrotliFileReader{
+    public class BrotliFileStreamTransformer : IBrotliFileStream{
         public BrotliFileParameters Parameters => original.Parameters;
         public BrotliGlobalState State => transformedState?.Clone() ?? original.State;
 
-        private readonly IBrotliFileReader original;
+        private readonly IBrotliFileStream original;
         private readonly IBrotliTransformer[] transformers;
         private readonly BrotliCompressionParameters compressionParameters;
 
         private readonly Queue<MetaBlock> transformedQueue;
         private BrotliGlobalState? transformedState;
 
-        public BrotliFileReaderTransforming(IBrotliFileReader original, BrotliCompressionParameters compressionParameters, params IBrotliTransformer[] transformers){
+        public BrotliFileStreamTransformer(IBrotliFileStream original, BrotliCompressionParameters compressionParameters, params IBrotliTransformer[] transformers){
             this.original = original;
             this.transformers = transformers;
             this.compressionParameters = compressionParameters;

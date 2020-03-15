@@ -18,7 +18,7 @@ namespace BrotliCalc.Helpers{
         }
 
         private BitStream Validate(BitStream bits){
-            IBrotliFileReader reader = BrotliFileReader.FromBytes(bits, MarkerLevel.None, Parameters.File.Dictionary);
+            IBrotliFileStream reader = BrotliFileReader.FromBytes(bits, MarkerLevel.None, Parameters.File.Dictionary);
 
             var output = new BrotliOutputStored();
             var state = new BrotliGlobalState(reader.Parameters, output);
@@ -32,7 +32,7 @@ namespace BrotliCalc.Helpers{
             return bits;
         }
 
-        public BitStream SerializeAndValidate(IBrotliFileReader reader){
+        public BitStream SerializeAndValidate(IBrotliFileStream reader){
             var writer = new BrotliFileWriter(reader.Parameters, Parameters.Serialization);
             reader.ForEachRemainingMetaBlock(writer.WriteMetaBlock);
             return Validate(writer.Close());
@@ -42,7 +42,7 @@ namespace BrotliCalc.Helpers{
             return Validate(bfs.Serialize(Parameters.Serialization));
         }
 
-        public int CountBytesAndValidate(IBrotliFileReader reader){
+        public int CountBytesAndValidate(IBrotliFileStream reader){
             return (7 + SerializeAndValidate(reader).Length) / 8;
         }
 
