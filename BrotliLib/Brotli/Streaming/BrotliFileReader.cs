@@ -5,11 +5,11 @@ using BrotliLib.Markers;
 using BrotliLib.Markers.Serialization.Reader;
 using BrotliLib.Serialization;
 
-namespace BrotliLib.Brotli{
+namespace BrotliLib.Brotli.Streaming{
     /// <summary>
-    /// Provides a streaming reader as an alternative to <see cref="BrotliFileStructure"/>.
+    /// Provides a streaming meta-block deserializer as an alternative to <see cref="BrotliFileStructure"/>.
     /// </summary>
-    public sealed class BrotliFileReader{
+    public sealed class BrotliFileReader : IBrotliFileReader{
         public static BrotliFileReader FromBytes(byte[] bytes, MarkerLevel markerLevel, BrotliDictionary? dictionary = null){
             return FromBytes(new BitStream(bytes), markerLevel, dictionary);
         }

@@ -4,6 +4,7 @@ using BrotliLib.Brotli.Dictionary;
 using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Output;
 using BrotliLib.Brotli.Parameters;
+using BrotliLib.Brotli.Streaming;
 using BrotliLib.Markers;
 using BrotliLib.Serialization;
 
@@ -89,18 +90,13 @@ namespace BrotliLib.Brotli{
         }
 
         public BitStream Serialize(BrotliSerializationParameters serializationParameters){
-            var stream = new BitStream();
-            var writer = stream.GetWriter();
-
-            var state = new BrotliGlobalState(Parameters);
-
-            WindowSize.Serialize(writer, Parameters.WindowSize, NoContext.Value);
+            var writer = new BrotliFileWriter(Parameters, serializationParameters);
 
             foreach(MetaBlock metaBlock in MetaBlocks){
-                MetaBlock.Serialize(writer, metaBlock, state, serializationParameters);
+                writer.WriteMetaBlock(metaBlock);
             }
 
-            return stream;
+            return writer.Close();
         }
     }
 }

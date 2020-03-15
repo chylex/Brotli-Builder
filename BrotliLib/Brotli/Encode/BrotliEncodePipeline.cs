@@ -53,10 +53,14 @@ namespace BrotliLib.Brotli.Encode{
         }
 
         private (IList<MetaBlock>, BrotliGlobalState) ApplyTransformerChain(BrotliGlobalState originalState, MetaBlock encodedMetaBlock, BrotliCompressionParameters compressionParameters){
+            return ApplyTransformerChain(originalState, encodedMetaBlock, compressionParameters, Transformers);
+        }
+
+        internal static (IList<MetaBlock>, BrotliGlobalState) ApplyTransformerChain(BrotliGlobalState originalState, MetaBlock encodedMetaBlock, BrotliCompressionParameters compressionParameters, IReadOnlyList<IBrotliTransformer> transformers){
             var metaBlocks = new List<MetaBlock>{ encodedMetaBlock };
             var states = new List<BrotliGlobalState>{ originalState };
 
-            foreach(var transformer in Transformers){
+            foreach(var transformer in transformers){
                 var nextMetaBlocks = new List<MetaBlock>();
                 var nextStates = new List<BrotliGlobalState>{ originalState }; // first meta-block starts with original state, second meta-block with the first meta-block's end state, etc.
 
