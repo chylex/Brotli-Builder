@@ -34,7 +34,7 @@ namespace BrotliCalc.Commands{
 
         protected override IEnumerable<object?[]> GenerateRows(BrotliFileGroup group, BrotliFile.Uncompressed file){
             int? uncompressedBytes = file.SizeBytes;
-            int encodeBytes = group.CountBytesAndValidate(file.Encode(encoder!));
+            int encodeBytes = group.CountBytesAndValidate(file.Encoding(encoder!));
 
             return new List<object?[]>{
                 new object?[]{ file.Name, uncompressedBytes, encodeBytes, encodeBytes - uncompressedBytes } // subtraction propagates null

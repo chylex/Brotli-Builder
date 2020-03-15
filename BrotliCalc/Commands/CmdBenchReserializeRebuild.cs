@@ -40,7 +40,7 @@ namespace BrotliCalc.Commands{
                         Stopwatch swReserialize = Stopwatch.StartNew();
 
                         try{
-                            reserializeBytes = group.CountBytesAndValidate(file.Structure);
+                            reserializeBytes = group.CountBytesAndValidate(file.Reader);
                         }catch(Exception e){
                             Debug.WriteLine(e.ToString());
                             ++failedFiles;
@@ -54,7 +54,7 @@ namespace BrotliCalc.Commands{
                         Stopwatch swRebuild = Stopwatch.StartNew();
 
                         try{
-                            rebuildBytes = group.CountBytesAndValidate(file.Transform(new TransformRebuild()));
+                            rebuildBytes = group.CountBytesAndValidate(file.Transforming(new TransformRebuild()));
                         }catch(Exception e){
                             Debug.WriteLine(e.ToString());
                             ++failedFiles;

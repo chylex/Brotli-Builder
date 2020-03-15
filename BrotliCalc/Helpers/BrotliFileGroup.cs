@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using BrotliLib.Brotli;
-using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Output;
+using BrotliLib.Brotli.Streaming;
 using BrotliLib.Collections;
 using BrotliLib.Markers;
 using BrotliLib.Serialization;
@@ -17,24 +17,33 @@ namespace BrotliCalc.Helpers{
             this.Compressed = compressedFiles;
         }
 
-        public BitStream SerializeAndValidate(BrotliFileStructure bfs){
-            var serialized = bfs.Serialize(Parameters.Serialization);
+        private BitStream Validate(BitStream bits){
+            IBrotliFileReader reader = BrotliFileReader.FromBytes(bits, MarkerLevel.None, Parameters.File.Dictionary);
 
-            var reader = BrotliFileReader.FromBytes(serialized, MarkerLevel.None, Parameters.File.Dictionary);
             var output = new BrotliOutputStored();
             var state = new BrotliGlobalState(reader.Parameters, output);
 
-            MetaBlock? metaBlock;
-
-            while((metaBlock = reader.NextMetaBlock()) != null){
-                metaBlock.Decompress(state);
-            }
+            reader.ForEachRemainingMetaBlock(metaBlock => metaBlock.Decompress(state));
 
             if (!CollectionHelper.Equal(output.AsBytes, Uncompressed.Contents)){
                 throw new InvalidOperationException("Mismatched output bytes.");
             }
 
-            return serialized;
+            return bits;
+        }
+
+        public BitStream SerializeAndValidate(IBrotliFileReader reader){
+            var writer = new BrotliFileWriter(reader.Parameters, Parameters.Serialization);
+            reader.ForEachRemainingMetaBlock(writer.WriteMetaBlock);
+            return Validate(writer.Close());
+        }
+
+        public BitStream SerializeAndValidate(BrotliFileStructure bfs){
+            return Validate(bfs.Serialize(Parameters.Serialization));
+        }
+
+        public int CountBytesAndValidate(IBrotliFileReader reader){
+            return (7 + SerializeAndValidate(reader).Length) / 8;
         }
 
         public int CountBytesAndValidate(BrotliFileStructure bfs){

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using BrotliCalc.Commands.Base;
 using BrotliCalc.Helpers;
 using BrotliImpl.Transformers;
+using BrotliLib.Brotli;
+using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Encode;
+using BrotliLib.Brotli.Parameters;
+using BrotliLib.Brotli.Streaming;
 
 namespace BrotliCalc.Commands{
     class CmdTestTransformer : CmdAbstractFileTable.Compressed{
@@ -32,15 +35,16 @@ namespace BrotliCalc.Commands{
         }
 
         protected override IEnumerable<object?[]> GenerateRows(BrotliFileGroup group, BrotliFile.Compressed file){
-            var transformed = file.Transform(transformer!);
+            var checkingTransformer = new ReferenceChecker(file.Reader, file.Transforming(transformer!));
 
-            if (transformed.MetaBlocks.SequenceEqual(file.Structure.MetaBlocks)){ // if the references have not changed, there was no transformation
+            int? originalBytes = file.SizeBytes;
+            int transformedBytes = group.CountBytesAndValidate(checkingTransformer);
+
+            if (!checkingTransformer.IsDifferent){
                 return new List<object[]>();
             }
 
-            int? originalBytes = file.SizeBytes;
-            int rebuildBytes = group.CountBytesAndValidate(file.Transform(new TransformRebuild()));
-            int transformedBytes = group.CountBytesAndValidate(transformed);
+            int rebuildBytes = group.CountBytesAndValidate(file.Transforming(new TransformRebuild()));
 
             return new List<object?[]>{
                 new object?[]{ file.Name, file.Identifier, originalBytes, rebuildBytes, transformedBytes, transformedBytes - originalBytes, transformedBytes - rebuildBytes } // subtraction propagates null
@@ -51,6 +55,36 @@ namespace BrotliCalc.Commands{
             return new List<object?[]>{
                 new object?[]{ file.Name, file.Identifier, file.SizeBytes, null, null, null, null }
             };
+        }
+
+        private class ReferenceChecker : IBrotliFileReader{
+            public BrotliFileParameters Parameters => transformingReader.Parameters;
+            public BrotliGlobalState State => transformingReader.State;
+
+            public bool IsDifferent { get; private set; }
+
+            private readonly IBrotliFileReader originalReader;
+            private readonly IBrotliFileReader transformingReader;
+
+            public ReferenceChecker(IBrotliFileReader originalReader, IBrotliFileReader transformingReader){
+                this.originalReader = originalReader;
+                this.transformingReader = transformingReader;
+            }
+
+            public MetaBlock? NextMetaBlock(){
+                if (IsDifferent){
+                    return transformingReader.NextMetaBlock();
+                }
+
+                var original = originalReader.NextMetaBlock();
+                var transformed = transformingReader.NextMetaBlock();
+
+                if (!ReferenceEquals(original, transformed)){ // if the references have not changed, there was no transformation
+                    IsDifferent = true;
+                }
+
+                return transformed;
+            }
         }
     }
 }

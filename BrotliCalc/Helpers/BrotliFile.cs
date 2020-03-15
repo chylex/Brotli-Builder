@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Encode;
+using BrotliLib.Brotli.Streaming;
 using BrotliLib.Markers;
 
 namespace BrotliCalc.Helpers{
@@ -49,6 +50,10 @@ namespace BrotliCalc.Helpers{
             public BrotliFileStructure Encode(IBrotliEncoder encoder){
                 return BrotliFileStructure.FromEncoder(Parameters.File, Parameters.Compression, Contents, encoder);
             }
+
+            public IBrotliFileReader Encoding(IBrotliEncoder encoder){
+                return new BrotliFileReaderEncoding(Parameters.File, Parameters.Compression, Contents, encoder);
+            }
         }
 
         internal class Compressed : BrotliFile{
@@ -56,7 +61,7 @@ namespace BrotliCalc.Helpers{
             public override string FullName => $"{Name}.{Identifier}{Brotli.CompressedFileExtension}";
 
             public BrotliFileStructure Structure => structureLazy.Value;
-            public BrotliFileReader Reader => BrotliFileReader.FromBytes(Contents, MarkerLevel.None);
+            public IBrotliFileReader Reader => BrotliFileReader.FromBytes(Contents, MarkerLevel.None);
 
             private readonly Lazy<BrotliFileStructure> structureLazy;
 
@@ -67,6 +72,10 @@ namespace BrotliCalc.Helpers{
 
             public BrotliFileStructure Transform(IBrotliTransformer transformer){
                 return Structure.Transform(transformer, Parameters.Compression);
+            }
+
+            public IBrotliFileReader Transforming(IBrotliTransformer transformer){
+                return new BrotliFileReaderTransforming(Reader, Parameters.Compression, transformer);
             }
 
             public MarkerRoot GenerateMarkers(MarkerLevel markerLevel){
