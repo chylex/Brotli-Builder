@@ -11,8 +11,8 @@ namespace BrotliCalc.Commands{
         private static readonly Dictionary<string, IBrotliEncoder> Encoders = new Dictionary<string, IBrotliEncoder>{
             { "literals",      new EncodeLiterals() },
             { "greedy-copies", new EncodeGreedySearch.OnlyBackReferences(minLength: 4) },
-            { "greedy-dict",   new EncodeGreedySearch.OnlyDictionary() },
-            { "greedy-mixed",  new EncodeGreedySearch.Mixed(minCopyLength: 4) },
+            { "greedy-dict",   new EncodeGreedySearch.OnlyDictionary(minLength: 4) },
+            { "greedy-mixed",  new EncodeGreedySearch.Mixed(minCopyLength: 4, minDictionaryLength: 4) },
         };
 
         public static string EncoderArgumentDesc { get; }  = "<{" + string.Join('|', Encoders.Keys) + "}>";

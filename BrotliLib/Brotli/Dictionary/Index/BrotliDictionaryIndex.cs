@@ -8,8 +8,6 @@ using BrotliLib.Collections;
 
 namespace BrotliLib.Brotli.Dictionary.Index{
     public sealed class BrotliDictionaryIndex{
-        private const int MinEntryLength = 4; // TODO test to find whichever length is the most reasonable
-
         private readonly IDictionaryFormat format;
         private readonly IReadOnlyList<WordTransform> transforms;
         private readonly Dictionary<TransformType, PatriciaTree<(int, int)>> lookups;
@@ -26,7 +24,7 @@ namespace BrotliLib.Brotli.Dictionary.Index{
             this.lookups = TransformTypes.All.ToDictionary(type => type, type => {
                 var tree = new PatriciaTree<(int, int)>();
 
-                foreach(var length in format.WordLengths.Where(length => type.GetTransformedLength(length) >= MinEntryLength)){
+                foreach(var length in format.WordLengths.Where(length => type.GetTransformedLength(length) >= 1)){
                     for(int word = 0, count = format.WordCount(length); word < count; word++){
                         byte[] bytes = type.Process(dictionary.ReadRaw(length, word));
                         tree.Insert(bytes, (length, word));
@@ -43,14 +41,17 @@ namespace BrotliLib.Brotli.Dictionary.Index{
             Debug.WriteLine("Constructed dictionary index in " + sw.ElapsedMilliseconds + " ms.");
         }
 
-        public List<DictionaryIndexEntry> Find(ArraySegment<byte> bytes, int maxLength = int.MaxValue){
+        /// <summary>
+        /// Finds all <see cref="DictionaryIndexEntry"/> that match prefixes between <paramref name="minLength"/> and <paramref name="maxLength"/> long in the input <paramref name="bytes"/>.
+        /// The order of results is undefined.
+        /// </summary>
+        public List<DictionaryIndexEntry> Find(ArraySegment<byte> bytes, int minLength = 1, int maxLength = int.MaxValue){
             var entries = new List<DictionaryIndexEntry>();
 
             // default dictionary guarantees executing 44 identity, 12 ferment first, 12 ferment all transformations
-            // TODO longest may not find correct entries w/ suffix, but it seems to work well enough
-            var identityNoPrefixWords     = lookups[TransformType.Identity].FindLongest(bytes);
-            var fermentFirstNoPrefixWords = lookups[TransformType.FermentFirst].FindLongest(bytes);
-            var fermentAllNoPrefixWords   = lookups[TransformType.FermentAll].FindLongest(bytes);
+            var identityNoPrefixWords     = lookups[TransformType.Identity].FindAll(bytes, minLength);
+            var fermentFirstNoPrefixWords = lookups[TransformType.FermentFirst].FindAll(bytes, minLength);
+            var fermentAllNoPrefixWords   = lookups[TransformType.FermentAll].FindAll(bytes, minLength);
 
             IEnumerable<(int, int)> LookupWords(TransformType type, int prefixLength){
                 if (prefixLength == 0){
@@ -62,7 +63,7 @@ namespace BrotliLib.Brotli.Dictionary.Index{
                 }
 
                 if (prefixLength <= bytes.Count){
-                    return lookups[type].FindLongest(bytes.Slice(prefixLength));
+                    return lookups[type].FindAll(bytes.Slice(prefixLength), minLength);
                 }
                 else{
                     return Enumerable.Empty<(int, int)>();
@@ -89,7 +90,6 @@ namespace BrotliLib.Brotli.Dictionary.Index{
                 }
             }
 
-            entries.Sort((e1, e2) => e2.OutputLength.CompareTo(e1.OutputLength));
             return entries;
         }
     }

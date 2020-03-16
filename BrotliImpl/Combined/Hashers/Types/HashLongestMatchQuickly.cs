@@ -86,7 +86,7 @@ namespace BrotliImpl.Combined.Hashers.Types{
                 DictionaryIndexEntry? bestEntry = null;
                 int bestScore = int.MinValue;
 
-                foreach(var entry in dictionary.Index.Find(new ArraySegment<byte>(input, ip, input.Length - ip), maxLength)){
+                foreach(var entry in dictionary.Index.Find(new ArraySegment<byte>(input, ip, input.Length - ip), minLength: 4, maxLength)){ // TODO
                     int distance = dictionaryStart + entry.Packed;
                     int score = HasherSearchResult.BackwardReferenceScore(entry.OutputLength, distance);
 

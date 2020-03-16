@@ -21,8 +21,8 @@ namespace BrotliBuilder{
             menu.AddSeparator();
 
             menu.Add("Greedy Search (Only Copies)",     () => OpenFileWithEncoder(parameters, new EncodeGreedySearch.OnlyBackReferences(minLength: 4)));
-            menu.Add("Greedy Search (Only Dictionary)", () => OpenFileWithEncoder(parameters, new EncodeGreedySearch.OnlyDictionary()));
-            menu.Add("Greedy Search (Mixed)",           () => OpenFileWithEncoder(parameters, new EncodeGreedySearch.Mixed(minCopyLength: 4)));
+            menu.Add("Greedy Search (Only Dictionary)", () => OpenFileWithEncoder(parameters, new EncodeGreedySearch.OnlyDictionary(minLength: 4)));
+            menu.Add("Greedy Search (Mixed)",           () => OpenFileWithEncoder(parameters, new EncodeGreedySearch.Mixed(minCopyLength: 4, minDictionaryLength: 4)));
 
             menu.AddSeparator();
 

@@ -83,6 +83,23 @@ namespace BrotliLib.Collections{
             }
         }
 
+        public IReadOnlyList<V> FindAll(ArraySegment<byte> key, int minLength){
+            var results = new List<V>();
+
+            var parentBit = root.bit;
+            var node = root.left;
+
+            while(node.bit > parentBit){
+                if (node.CheckMatch(key) && node.key.Length >= minLength){
+                    results.AddRange(node.values);
+                }
+
+                node = Bit(key, parentBit = node.bit) ? node.right : node.left;
+            }
+
+            return results;
+        }
+
         public IReadOnlyList<V> FindLongest(ArraySegment<byte> key){
             var parentBit = root.bit;
             var node = root.left;

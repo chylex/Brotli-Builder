@@ -19,7 +19,7 @@ namespace BrotliImpl.Encoders{
         public sealed class OnlyBackReferences : EncodeGreedySearch{
             private readonly int minLength;
 
-            public OnlyBackReferences(int minLength = 0){
+            public OnlyBackReferences(int minLength){
                 this.minLength = Math.Max(minLength, InsertCopyLengths.MinCopyLength);
             }
 
@@ -46,14 +46,32 @@ namespace BrotliImpl.Encoders{
         }
 
         public sealed class OnlyDictionary : EncodeGreedySearch{
+            private readonly int minLength;
+
+            public OnlyDictionary(int minLength){
+                this.minLength = minLength;
+            }
+
             private protected override Copy? FindCopy(BrotliFileParameters parameters, ArraySegment<byte> bytes, int start, int maxLength){
-                var entries = parameters.Dictionary.Index.Find(bytes.Slice(start), maxLength);
+                var entries = parameters.Dictionary.Index.Find(bytes.Slice(start), minLength, maxLength);
 
                 if (entries.Count == 0){
                     return null;
                 }
 
-                return new Copy.Dictionary(entries[0]);
+                var bestEntry = entries[0];
+                int bestOutputLength = bestEntry.OutputLength;
+                int bestPacked = bestEntry.Packed;
+
+                for(int index = 1; index < entries.Count; index++){
+                    var entry = entries[index];
+
+                    if (entry.OutputLength > bestOutputLength || (entry.OutputLength == bestOutputLength && entry.Packed < bestPacked)){
+                        bestEntry = entry;
+                    }
+                }
+
+                return new Copy.Dictionary(bestEntry);
             }
         }
 
@@ -61,9 +79,9 @@ namespace BrotliImpl.Encoders{
             private readonly EncodeGreedySearch findBackReferences;
             private readonly EncodeGreedySearch findDictionary;
 
-            public Mixed(int minCopyLength = 0){
+            public Mixed(int minCopyLength, int minDictionaryLength){
                 this.findBackReferences = new OnlyBackReferences(minCopyLength);
-                this.findDictionary = new OnlyDictionary();
+                this.findDictionary = new OnlyDictionary(minDictionaryLength);
             }
 
             private protected override Copy? FindCopy(BrotliFileParameters parameters, ArraySegment<byte> bytes, int start, int maxLength){
