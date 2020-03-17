@@ -44,9 +44,10 @@ namespace BrotliCalc.Commands{
                     items.Parallelize().ForAll(item => {
                         var (quality, group) = item;
                         var file = group.Uncompressed;
-
+                        
+                        progress.Start($"Processing {file} (quality {quality})");
                         Compress(wbits, quality, file.Path);
-                        progress.Post($"Finished {file} (quality {quality})");
+                        progress.Finish($"Completed  {file} (quality {quality})");
                     });
                 }catch(Exception e) when (HasWin32Exception(e, out var we)){
                     if (CustomExePath == null){

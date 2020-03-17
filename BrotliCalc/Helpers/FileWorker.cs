@@ -45,15 +45,16 @@ namespace BrotliCalc.Helpers{
                 var (index, (group, file)) = entry;
 
                 try{
+                    progress.Start($"Processing {name(file)}");
                     results[index] = work(group, file).ToList();
                 }catch(Exception e){
                     results[index] = error == null ? ErrorEntry : error(group, file, e).ToList();
                     Interlocked.Increment(ref errors);
 
-                    progress.Print($"Error processing {name(file)}: {e.Message}");
+                    progress.Print(ConsoleColor.Red, $"Error processing {name(file)}: {e.Message}");
                     Debug.WriteLine(e.ToString());
                 }finally{
-                    progress.Post($"Finished {name(file)}");
+                    progress.Finish($"Completed  {name(file)}");
                 }
             });
 
@@ -62,10 +63,10 @@ namespace BrotliCalc.Helpers{
 
             if (writerInfo.MissingEntries.Count > 0){
                 foreach(int index in writerInfo.MissingEntries){
-                    progress.Print($"Missing result entry for file {items[index].file}");
+                    progress.Print(ConsoleColor.Red, $"Missing result entry for file {items[index].file}");
                 }
 
-                progress.Print("");
+                progress.Print(ConsoleColor.Red, "");
             }
 
             return new Result(count, errors);

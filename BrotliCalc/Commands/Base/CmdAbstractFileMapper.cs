@@ -47,6 +47,8 @@ namespace BrotliCalc.Commands.Base{
                         string outputFile = Path.Combine(output, file.FullName + AppendFileName);
 
                         try{
+                            progress.Start($"Processing {file}");
+
                             Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
 
                             if (Path.GetFullPath(outputFile) == Path.GetFullPath(file.Path)){
@@ -63,11 +65,11 @@ namespace BrotliCalc.Commands.Base{
                                 MapFile(group, file, stream);
                             }
 
-                            progress.Post($"Finished {file}");
+                            progress.Finish($"Completed  {file}");
                         }catch(Exception e){
                             Interlocked.Increment(ref errors);
 
-                            progress.Print($"Error processing {file}: {e.Message}");
+                            progress.Print(ConsoleColor.Red, $"Error processing {file}: {e.Message}");
                             Debug.WriteLine(e.ToString());
                         }
                     });

@@ -28,7 +28,7 @@ namespace BrotliCalc.Commands{
                 "File", "Quality", "Original Bytes", "Reserialize Bytes", "Rebuild Bytes", "Avg Reserialize Time (ms)", "Avg Rebuild Time (ms)"
             })){
                 foreach(var (group, file) in items){
-                    progress.Post($"Processing {file}...");
+                    progress.Start($"Processing {file}");
 
                     int? originalBytes = file.SizeBytes;
                     int? reserializeBytes = null;
@@ -73,6 +73,8 @@ namespace BrotliCalc.Commands{
                     
                     ++totalFiles;
                     table.AddRow(file.Name, file.Identifier, originalBytes, reserializeBytes, rebuildBytes, reserializeTotalTime / CountedRuns, rebuildTotalTime / CountedRuns); // subtraction propagates null
+
+                    progress.Finish($"Completed  {file}");
                 }
             }
 
