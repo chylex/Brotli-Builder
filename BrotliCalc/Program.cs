@@ -22,6 +22,7 @@ namespace BrotliCalc{
             new CmdExtractWindowSize(),
             new CmdExtractHeaderMeta(),
             new CmdExtractContextMaps(),
+            new CmdExtractInsertCopyStats(),
             new CmdTestReserializeRebuild(),
             new CmdTestEncoder(),
             new CmdTestTransformer(),
