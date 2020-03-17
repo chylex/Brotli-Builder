@@ -10,6 +10,7 @@ using BrotliLib.Brotli.Parameters;
 using BrotliLib.Brotli.Parameters.Heuristics;
 using BrotliLib.Brotli.Utils;
 using BrotliLib.Collections;
+using static BrotliLib.Brotli.Utils.DistanceCodeZeroStrategy;
 
 namespace BrotliLib.Brotli.Encode.Build{
     public sealed class CompressedMetaBlockBuilder{
@@ -20,14 +21,14 @@ namespace BrotliLib.Brotli.Encode.Build{
         public ContextMap LiteralCtxMap { get; set; } = ContextMapBuilder.Literals.Simple;
         public ContextMap DistanceCtxMap { get; set; } = ContextMapBuilder.Distances.Simple;
 
-        public IReadOnlyList<InsertCopyCommand> InsertCopyCommands => icCommands;
+        public IReadOnlyList<InsertCopyCommand> InsertCopyCommands => commands;
 
         public int OutputSize => intermediateState.OutputSize - initialState.OutputSize;
         public int LastDistance => intermediateState.DistanceBuffer.Front;
 
         // Fields
 
-        private readonly List<InsertCopyCommand> icCommands = new List<InsertCopyCommand>();
+        private readonly List<InsertCopyCommand> commands = new List<InsertCopyCommand>();
         private int totalLiterals;
         private int totalExplicitDistances;
         
@@ -54,25 +55,30 @@ namespace BrotliLib.Brotli.Encode.Build{
             this.DistanceCtxMap = header.DistanceCtxMap;
 
             foreach(InsertCopyCommand command in data.InsertCopyCommands){
-                AddInsertCopy(command);
+                AddInsertCopyCommand(command);
             }
         }
 
-        // Data
+        // General
 
         public int GetTotalBlockLength(Category category){
             return category switch{
                 Category.Literal    => totalLiterals,
-                Category.InsertCopy => icCommands.Count,
+                Category.InsertCopy => commands.Count,
                 Category.Distance   => totalExplicitDistances,
                 _ => throw new InvalidOperationException("Invalid category: " + category)
             };
         }
 
+        public CompressedMetaBlockBuilder UseSameLiteralContextMode(LiteralContextMode mode){
+            LiteralContextModes = Enumerable.Repeat(mode, BlockTypes[Category.Literal].TypeCount).ToArray();
+            return this;
+        }
+
         // Commands
 
-        private CompressedMetaBlockBuilder AddInsertCopy(InsertCopyCommand command){
-            icCommands.Add(command);
+        public CompressedMetaBlockBuilder AddInsertCopyCommand(InsertCopyCommand command){
+            commands.Add(command);
 
             var literals = command.Literals;
             var distance = command.CopyDistance;
@@ -92,38 +98,39 @@ namespace BrotliLib.Brotli.Encode.Build{
         }
 
         public CompressedMetaBlockBuilder AddInsertFinal(IList<Literal> literals){
-            return AddInsertCopy(new InsertCopyCommand(literals));
+            return AddInsertCopyCommand(new InsertCopyCommand(literals));
         }
 
         public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, int copyLength, DistanceInfo copyDistance){
-            return AddInsertCopy(new InsertCopyCommand(literals, copyLength, copyDistance));
+            return AddInsertCopyCommand(new InsertCopyCommand(literals, copyLength, copyDistance));
         }
 
-        public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, int copyLength, int copyDistance, DistanceCodeZeroStrategy dczStrategy = DistanceCodeZeroStrategy.PreferImplicit){
+        public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, int copyLength, int copyDistance, DistanceCodeZeroStrategy dczStrategy = PreferImplicit){
             if (copyDistance == LastDistance){
                 return AddInsertCopy(literals, copyLength, dczStrategy.Decide(literals.Count, copyLength, copyDistance));
             }
-
-            return AddInsertCopy(new InsertCopyCommand(literals, copyLength, copyDistance));
+            else{
+                return AddInsertCopyCommand(new InsertCopyCommand(literals, copyLength, copyDistance));
+            }
         }
 
-        public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, DictionaryIndexEntry dictionaryEntry){
+        public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, DictionaryIndexEntry dictionaryEntry, DistanceCodeZeroStrategy dczStrategy = PreferImplicit){
             var startDistance = 1 + Math.Min(intermediateState.Parameters.WindowSize.Bytes, intermediateState.OutputSize + literals.Count);
             var entryDistance = dictionaryEntry.Packed + startDistance;
 
-            return AddInsertCopy(literals, dictionaryEntry.CopyLength, entryDistance, DistanceCodeZeroStrategy.Avoid);
-        }
-
-        public CompressedMetaBlockBuilder AddCopy(int copyLength, int copyDistance, DistanceCodeZeroStrategy dczStrategy = DistanceCodeZeroStrategy.PreferImplicit){
-            return AddInsertCopy(Array.Empty<Literal>(), copyLength, copyDistance, dczStrategy);
+            return AddInsertCopy(literals, dictionaryEntry.CopyLength, entryDistance, dczStrategy);
         }
         
         public CompressedMetaBlockBuilder AddCopy(int copyLength, DistanceInfo copyDistance){
             return AddInsertCopy(Array.Empty<Literal>(), copyLength, copyDistance);
         }
 
-        public CompressedMetaBlockBuilder AddCopy(DictionaryIndexEntry dictionaryEntry){
-            return AddInsertCopy(Array.Empty<Literal>(), dictionaryEntry);
+        public CompressedMetaBlockBuilder AddCopy(int copyLength, int copyDistance, DistanceCodeZeroStrategy dczStrategy = PreferImplicit){
+            return AddInsertCopy(Array.Empty<Literal>(), copyLength, copyDistance, dczStrategy);
+        }
+
+        public CompressedMetaBlockBuilder AddCopy(DictionaryIndexEntry dictionaryEntry, DistanceCodeZeroStrategy dczStrategy = PreferImplicit){
+            return AddInsertCopy(Array.Empty<Literal>(), dictionaryEntry, dczStrategy);
         }
 
         // Building
@@ -145,12 +152,12 @@ namespace BrotliLib.Brotli.Encode.Build{
             var icLengthCodeFreq = NewFreqArray<InsertCopyLengthCode>(blockTypes[Category.InsertCopy].Info.TypeCount);
             var distanceCodeFreq = NewFreqArray<DistanceCode>(DistanceCtxMap.TreeCount);
 
-            var icCommandCount = icCommands.Count;
+            var icCommandCount = commands.Count;
             var icCommandsFinal = new InsertCopyCommand[icCommandCount];
 
             // Early validation
 
-            if (icCommands.Count == 0){
+            if (icCommandCount == 0){
                 throw new InvalidOperationException("Cannot build a compressed meta-block with no insert&copy commands.");
             }
 
@@ -169,7 +176,7 @@ namespace BrotliLib.Brotli.Encode.Build{
             // Command processing
 
             for(int icIndex = 0; icIndex < icCommandCount; icIndex++){
-                var icCommand = icCommands[icIndex];
+                var icCommand = commands[icIndex];
                 int icBlockID = blockTrackers[Category.InsertCopy].SimulateCommand();
                 var icFreq = icLengthCodeFreq[icBlockID];
 

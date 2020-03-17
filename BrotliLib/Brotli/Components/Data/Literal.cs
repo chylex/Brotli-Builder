@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using BrotliLib.Brotli.Components.Header;
 using BrotliLib.Numbers;
 using LiteralTree = BrotliLib.Brotli.Components.Header.HuffmanTree<BrotliLib.Brotli.Components.Data.Literal>;
@@ -31,6 +32,10 @@ namespace BrotliLib.Brotli.Components.Data{
 
         public static IList<Literal> FromBytes(in ArraySegment<byte> segment){
             return FromBytes(segment.Array, segment.Offset, segment.Count);
+        }
+
+        public static IList<Literal> FromString(string text, Encoding encoding){
+            return FromBytes(encoding.GetBytes(text));
         }
 
         // Data

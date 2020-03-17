@@ -9,14 +9,20 @@ using BrotliLib.Collections;
 
 namespace BrotliLib.Brotli.Encode.Build{
     public sealed class BlockSwitchBuilder{
-        private const int FinalBlockSwitchLengthPlaceholder = -1;
+        public const int FinalBlockSwitchLengthPlaceholder = -1;
 
         public Category Category { get; }
         public int InitialLength { get; private set; }
 
-        public int TypeCount => 1 + commands.Max(command => command.Type);
+        public IReadOnlyList<BlockSwitchCommand> Commands => commands;
+        
+        public int TypeCount => commands.Count == 0 ? 1 : 1 + commands.Max(command => command.Type);
+
+        // Fields
 
         private readonly List<BlockSwitchCommand> commands = new List<BlockSwitchCommand>();
+
+        // Construction
 
         public BlockSwitchBuilder(BlockTypeInfo info){
             this.Category = info.Category;
@@ -28,6 +34,12 @@ namespace BrotliLib.Brotli.Encode.Build{
         }
 
         // Commands
+
+        public BlockSwitchBuilder Reset(){
+            InitialLength = BlockTypeInfo.Empty[Category].InitialLength;
+            commands.Clear();
+            return this;
+        }
 
         public BlockSwitchBuilder SetInitialLength(int initialLength){
             InitialLength = initialLength;

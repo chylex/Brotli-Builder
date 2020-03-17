@@ -32,7 +32,7 @@ namespace BrotliLib.Brotli.Utils{
     internal static class DistanceCodeZeroStrategyExtensions{
         public static DistanceInfo Decide(this DistanceCodeZeroStrategy strategy, int insertLength, int copyLength, int copyDistance){
             return strategy switch{
-                DistanceCodeZeroStrategy.ForceImplicit  => DistanceInfo.ImplicitCodeZero,
+                DistanceCodeZeroStrategy.ForceImplicit  => InsertCopyLengths.CanUseImplicitDCZ(insertLength, copyLength) ? DistanceInfo.ImplicitCodeZero : throw new InvalidOperationException("Cannot use implicit distance code zero (insert length " + insertLength + ", copy length " + copyLength + ")."),
                 DistanceCodeZeroStrategy.PreferImplicit => InsertCopyLengths.CanUseImplicitDCZ(insertLength, copyLength) ? DistanceInfo.ImplicitCodeZero : DistanceInfo.ExplicitCodeZero,
                 DistanceCodeZeroStrategy.Explicit       => DistanceInfo.ExplicitCodeZero,
                 DistanceCodeZeroStrategy.Avoid          => (DistanceInfo)copyDistance,
