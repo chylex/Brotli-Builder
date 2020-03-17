@@ -57,17 +57,23 @@ namespace BrotliLib.Brotli.Components.Data{
         }
 
         public override string ToString(){
-            if (Value == '\n'){
+            if (Value >= 32 && Value < 127){
+                return "'" + (char)Value + "'";
+            }
+            else if (Value == '\n'){
                 return "\\n";
             }
             else if (Value == '\r'){
                 return "\\r";
             }
-            else if (Value >= 32 && Value < 127){
-                return "'" + (char)Value + "'";
+            else if (Value == '\t'){
+                return "\\t";
+            }
+            else if (Value == '\v'){
+                return "\\v";
             }
             else{
-                return "\\" + Value;
+                return Value.ToString();
             }
         }
     }

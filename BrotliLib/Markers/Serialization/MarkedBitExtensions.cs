@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Collections.Huffman;
 using BrotliLib.Markers.Serialization.Reader;
 using BrotliLib.Serialization;
@@ -67,7 +68,7 @@ namespace BrotliLib.Markers.Serialization{
 
             byte result = reader.NextAlignedByte();
 
-            reader.MarkEndValue(name, result);
+            reader.MarkEndValue(name, new Literal(result));
             return result;
         }
 
