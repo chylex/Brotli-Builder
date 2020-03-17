@@ -33,6 +33,7 @@ namespace BrotliCalc{
 
                     Print("-brotliexe <path>", "Path to brotli executable used for compression.");
                     Print("-maxdop <n>", "Maximum degree of parallelism (threads/processes) to use for parallel tasks.");
+                    Print("-fileorder {system|quality}", "Whether to process files in system order, or order by compression quality.");
 
                     Environment.Exit(0);
                     return 1;
@@ -43,6 +44,15 @@ namespace BrotliCalc{
 
                 case "-maxdop":
                     Linq.MaxThreads = ParseInt(key, value, IntRange.AtLeast(1));
+                    return 2;
+
+                case "-fileorder":
+                    Brotli.FileOrder = value switch{
+                        "system"  => Brotli.FileOrdering.System,
+                        "quality" => Brotli.FileOrdering.Quality,
+                        _ => throw new ArgumentException($"Unknown file ordering {value}")
+                    };
+
                     return 2;
 
                 default:

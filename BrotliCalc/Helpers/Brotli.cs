@@ -8,6 +8,12 @@ namespace BrotliCalc.Helpers{
     static class Brotli{
         public const string CompressedFileExtension = ".br";
         public const char DirectorySeparator = '/';
+
+        public static FileOrdering FileOrder { get; set; } = FileOrdering.System;
+
+        public enum FileOrdering{
+            System, Quality
+        }
         
         private static readonly Regex RegexCompressionIdentifier = new Regex(@"\.([^.]+)\.br$");
 
@@ -62,7 +68,16 @@ namespace BrotliCalc.Helpers{
         }
 
         public static IEnumerable<(BrotliFileGroup, BrotliFile.Compressed)> SelectCompressedFiles(this IEnumerable<BrotliFileGroup> me){
-            return me.SelectMany(group => group.Compressed.Select(file => (group, file)));
+            var files = me.SelectMany(group => group.Compressed.Select(file => (group, file)));
+            
+            return FileOrder switch{
+                FileOrdering.Quality => files.OrderBy(item => {
+                    var identifier = item.file.Identifier;
+                    return int.TryParse(identifier, out int _) ? identifier.PadLeft(item.group.Compressed.Max(file => file.Identifier.Length), '0') : identifier;
+                }),
+
+                _ => files
+            };
         }
     }
 }
