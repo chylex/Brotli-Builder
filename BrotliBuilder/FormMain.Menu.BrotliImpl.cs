@@ -33,6 +33,7 @@ namespace BrotliBuilder{
 
         private void InitializeMenuTransformers(MainMenuBase.Item menu){
             menu.Add("Rebuild",                   () => TransformCurrentFile(new TransformRebuild()));
+            menu.Add("Convert to Uncompressed",   () => TransformCurrentFile(new TransformCompressedIntoUncompressed()));
             menu.Add("Test Distance Parameters",  () => TransformCurrentFile(new TransformTestDistanceParameters()));
             menu.Add("Split Insert Copy Lengths", () => TransformCurrentFile(new TransformSplitInsertCopyLengths()));
         }
