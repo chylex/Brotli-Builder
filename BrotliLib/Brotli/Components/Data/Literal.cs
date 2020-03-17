@@ -29,7 +29,7 @@ namespace BrotliLib.Brotli.Components.Data{
             return literals;
         }
 
-        public static IList<Literal> FromBytes(ArraySegment<byte> segment){
+        public static IList<Literal> FromBytes(in ArraySegment<byte> segment){
             return FromBytes(segment.Array, segment.Offset, segment.Count);
         }
 

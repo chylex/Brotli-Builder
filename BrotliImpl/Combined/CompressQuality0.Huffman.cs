@@ -11,7 +11,7 @@ namespace BrotliImpl.Combined{
             /// <summary>
             /// Adapted from https://github.com/google/brotli/blob/master/c/enc/compress_fragment.c (BuildAndStoreLiteralPrefixCode).
             /// </summary>
-            private static FrequencyList<Literal> SampleLiterals(ArraySegment<byte> bytes){
+            private static FrequencyList<Literal> SampleLiterals(in ArraySegment<byte> bytes){
                 FrequencyList<Literal> samples = new FrequencyList<Literal>();
 
                 if (bytes.Count < (1 << 15)){
@@ -47,7 +47,7 @@ namespace BrotliImpl.Combined{
             /// <summary>
             /// Adapted from https://github.com/google/brotli/blob/master/c/enc/compress_fragment.c (BuildAndStoreLiteralPrefixCode).
             /// </summary>
-            public static (HuffmanTree<Literal>, int) EstimateLiteralRatio(ArraySegment<byte> bytes){
+            public static (HuffmanTree<Literal>, int) EstimateLiteralRatio(in ArraySegment<byte> bytes){
                 var literalHistogram = SampleLiterals(bytes);
                 var literalTree = HuffmanTree<Literal>.FromSymbols(literalHistogram);
 

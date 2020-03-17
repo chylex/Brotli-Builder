@@ -25,11 +25,11 @@ namespace BrotliLib.Collections{
             return -1;
         }
         
-        public static ArraySegment<byte> SliceAtMost(ArraySegment<byte> input, int count){
+        public static ArraySegment<byte> SliceAtMost(in ArraySegment<byte> input, int count){
             return input.Slice(0, Math.Min(input.Count, count));
         }
 
-        public static bool ContainsAt(ArraySegment<byte> input, int start, byte[] contents){
+        public static bool ContainsAt(in ArraySegment<byte> input, int start, byte[] contents){
             if (contents.Length == 0){
                 return true;
             }

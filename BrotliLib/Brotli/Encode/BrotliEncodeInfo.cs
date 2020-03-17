@@ -15,7 +15,7 @@ namespace BrotliLib.Brotli.Encode{
 
         private readonly BrotliGlobalState state;
 
-        private BrotliEncodeInfo(BrotliFileParameters fileParameters, BrotliCompressionParameters compressionParameters, BrotliGlobalState state, ArraySegment<byte> bytes){
+        private BrotliEncodeInfo(BrotliFileParameters fileParameters, BrotliCompressionParameters compressionParameters, BrotliGlobalState state, in ArraySegment<byte> bytes){
             this.FileParameters = fileParameters;
             this.CompressionParameters = compressionParameters;
 

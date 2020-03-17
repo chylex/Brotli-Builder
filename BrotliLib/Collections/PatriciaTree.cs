@@ -10,7 +10,7 @@ namespace BrotliLib.Collections{
         /// <summary>
         /// Returns the value of the bit at position <paramref name="bit"/> in the provided <paramref name="key"/>.
         /// </summary>
-        private static bool Bit(ArraySegment<byte> key, short bit){
+        private static bool Bit(in ArraySegment<byte> key, short bit){
             int index = bit / 8;
             return index < key.Count && (key[index] & (1 << (bit % 8))) != 0;
         }
@@ -83,7 +83,7 @@ namespace BrotliLib.Collections{
             }
         }
 
-        public IReadOnlyList<V> FindAll(ArraySegment<byte> key, int minLength){
+        public IReadOnlyList<V> FindAll(in ArraySegment<byte> key, int minLength){
             var results = new List<V>();
 
             var parentBit = root.bit;
@@ -100,7 +100,7 @@ namespace BrotliLib.Collections{
             return results;
         }
 
-        public IReadOnlyList<V> FindLongest(ArraySegment<byte> key){
+        public IReadOnlyList<V> FindLongest(in ArraySegment<byte> key){
             var parentBit = root.bit;
             var node = root.left;
 
@@ -152,7 +152,7 @@ namespace BrotliLib.Collections{
             /// <summary>
             /// Returns true if the <see cref="key"/> in this node is a prefix to the provided <paramref name="segment"/>.
             /// </summary>
-            public bool CheckMatch(ArraySegment<byte> segment){
+            public bool CheckMatch(in ArraySegment<byte> segment){
                 if (segment.Count < key.Length){
                     return false;
                 }
