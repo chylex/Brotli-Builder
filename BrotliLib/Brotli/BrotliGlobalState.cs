@@ -20,8 +20,8 @@ namespace BrotliLib.Brotli{
         public RingBuffer<byte> LiteralBuffer { get; }
         public RingBuffer<int> DistanceBuffer { get; }
         
-        private readonly IBrotliOutput outputState;
-        
+        private IBrotliOutput outputState;
+
         // Construction
         
         public BrotliGlobalState(BrotliFileParameters parameters, IBrotliOutput outputState){
@@ -64,11 +64,24 @@ namespace BrotliLib.Brotli{
             }
         }
 
-        // Output handling
+        // Output delegates
 
-        internal byte GetOutput(int distance){
-            return outputState.GetByte(distance);
+        public void AddOutputCallback(IBrotliOutput callback){
+            if (!(outputState is BrotliOutputMultiple multi)){
+                multi = new BrotliOutputMultiple(outputState);
+                outputState = multi;
+            }
+
+            multi.AddCallback(callback);
         }
+
+        public void RemoveOutputCallback(IBrotliOutput callback){
+            if (outputState is BrotliOutputMultiple multi){
+                multi.RemoveCallback(callback);
+            }
+        }
+
+        // Output handling
 
         public void OutputLiteral(in Literal literal){
             var value = literal.Value;

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using BrotliLib.Brotli.Components.Data;
 using BrotliLib.Brotli.Components.Header;
+using BrotliLib.Brotli.Output;
 using BrotliLib.Brotli.Utils;
 using BrotliLib.Collections;
 using BrotliLib.Markers.Serialization;
@@ -76,8 +77,16 @@ namespace BrotliLib.Brotli.Components.Compressed{
                 }
                 else{
                     reader.MarkStart();
+
+                    var written = new BrotliOutputStored();
+                    written.Write((byte)'"');
+
+                    State.AddOutputCallback(written);
                     CopyOutputInfo copy = WriteCopyTracked(length, distance);
-                    reader.MarkEnd(GenerateCopyMarker(copy));
+                    State.RemoveOutputCallback(written);
+                    
+                    written.Write((byte)'"');
+                    reader.MarkEnd(new ValueMarker(copy.IsBackReference ? "backreference" : "dictionary", Encoding.UTF8.GetString(written.AsBytes)));
                 }
             }
 
@@ -86,19 +95,6 @@ namespace BrotliLib.Brotli.Components.Compressed{
 
                 bytesWritten += info.BytesWritten;
                 return info;
-            }
-
-            private IMarkerInfo GenerateCopyMarker(CopyOutputInfo info){
-                int written = Math.Min(info.BytesWritten, State.Parameters.WindowSize.Bytes); // State.GetOutput doesn't guarantee access past window size
-                byte[] value = new byte[written + 2];
-
-                for(int index = 0; index < written; index++){
-                    value[index + 1] = State.GetOutput(written - index);
-                }
-
-                value[0] = value[written + 1] = (byte)'"';
-
-                return new ValueMarker(info.IsBackReference ? "backreference" : "dictionary", Encoding.UTF8.GetString(value));
             }
         }
 
