@@ -3,8 +3,7 @@ using BrotliLib.Collections.Huffman;
 
 namespace BrotliLib.Serialization.Writer{
     public class BitWriter : IBitWriter{
-        private const int ByteSize = 8;
-        private const int MaxChunkSize = ByteSize * sizeof(int);
+        private const int MaxChunkSize = BitStream.ByteSize * sizeof(int);
 
         private readonly BitStream stream;
 
@@ -41,10 +40,10 @@ namespace BrotliLib.Serialization.Writer{
         }
 
         public void AlignToByteBoundary(){
-            long relativeIndex = stream.Length % ByteSize;
+            long relativeIndex = stream.Length & BitStream.ByteMask;
 
             if (relativeIndex > 0){
-                for(long bitsLeft = ByteSize - relativeIndex; bitsLeft > 0; bitsLeft--){
+                for(long bitsLeft = BitStream.ByteSize - relativeIndex; bitsLeft > 0; bitsLeft--){
                     stream.Add(false);
                 }
             }

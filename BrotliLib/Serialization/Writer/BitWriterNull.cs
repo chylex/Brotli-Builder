@@ -2,8 +2,6 @@
 
 namespace BrotliLib.Serialization.Writer{
     public class BitWriterNull : IBitWriter{
-        private const int ByteSize = 8;
-
         public int Length { get; private set; }
 
         public void WriteBit(bool bit){
@@ -23,16 +21,16 @@ namespace BrotliLib.Serialization.Writer{
         }
 
         public void AlignToByteBoundary(){
-            int relativeIndex = Length % ByteSize;
+            int relativeIndex = Length & BitStream.ByteMask;
 
             if (relativeIndex > 0){
-                Length += ByteSize - relativeIndex;
+                Length += BitStream.ByteSize - relativeIndex;
             }
         }
 
         public void WriteAlignedBytes(byte[] bytes){
             AlignToByteBoundary();
-            Length += bytes.Length * ByteSize;
+            Length += bytes.Length * BitStream.ByteSize;
         }
     }
 }

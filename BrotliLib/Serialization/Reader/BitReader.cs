@@ -3,8 +3,7 @@ using System.Collections.Generic;
 
 namespace BrotliLib.Serialization.Reader{
     public class BitReader : IBitReader{
-        private const int ByteSize = 8;
-        private const int MaxChunkSize = ByteSize * sizeof(int);
+        private const int MaxChunkSize = BitStream.ByteSize * sizeof(int);
 
         public int Index { get; private set; }
         
@@ -47,10 +46,10 @@ namespace BrotliLib.Serialization.Reader{
         }
 
         public void AlignToByteBoundary(){
-            int relativeIndex = Index % ByteSize;
+            int relativeIndex = Index & BitStream.ByteMask;
 
             if (relativeIndex > 0){
-                for(int bitsLeft = ByteSize - relativeIndex; bitsLeft > 0; bitsLeft--){
+                for(int bitsLeft = BitStream.ByteSize - relativeIndex; bitsLeft > 0; bitsLeft--){
                     NextBit();
                 }
             }
@@ -58,7 +57,7 @@ namespace BrotliLib.Serialization.Reader{
 
         public byte NextAlignedByte(){
             AlignToByteBoundary();
-            return (byte)NextChunk(ByteSize);
+            return (byte)NextChunk(BitStream.ByteSize);
         }
     }
 }

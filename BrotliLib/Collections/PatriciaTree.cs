@@ -12,7 +12,7 @@ namespace BrotliLib.Collections{
         /// </summary>
         private static bool Bit(in ArraySegment<byte> key, short bit){
             int index = bit / 8;
-            return index < key.Count && (key[index] & (1 << (bit % 8))) != 0;
+            return index < key.Count && (key[index] & (1 << (bit & 0b111))) != 0;
         }
 
         private readonly Node root = new Node();

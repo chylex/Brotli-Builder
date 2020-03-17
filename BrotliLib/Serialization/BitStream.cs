@@ -16,7 +16,9 @@ namespace BrotliLib.Serialization{
         private const int CombinationMask = (1 << CombinationBits) - 1;
         private static readonly string[] Combinations = Enumerable.Range(0, 1 << CombinationBits).Select(i => string.Join("", Convert.ToString(i, 2).PadLeft(CombinationBits, '0').Reverse())).ToArray();
 
-        private const int ByteSize = 8;
+        public const int ByteSize = 8;
+        public const int ByteMask = 0b111;
+
         internal const int BytesPerEntry = sizeof(ulong);
         internal const int BitEntrySize = ByteSize * BytesPerEntry;
         private const int BitEntryMask = BitEntrySize - 1;

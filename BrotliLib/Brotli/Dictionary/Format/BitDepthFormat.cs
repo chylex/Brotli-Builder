@@ -14,6 +14,7 @@ namespace BrotliLib.Brotli.Dictionary.Format{
         private readonly int minLength, maxLength;
         private readonly int[] wordLengthBits;
         private readonly int[] wordCounts;
+        private readonly int[] wordMasks;
         private readonly int[] wordOffsets;
         
         public BitDepthFormat(int[] wordLengthBits){
@@ -21,7 +22,8 @@ namespace BrotliLib.Brotli.Dictionary.Format{
             this.maxLength = Array.FindLastIndex(wordLengthBits, bits => bits > 0);
             
             this.wordLengthBits = wordLengthBits;
-            this.wordCounts = wordLengthBits.Select(bits => bits == 0 ? 0 : 1 << bits).ToArray();
+            this.wordCounts = Array.ConvertAll(wordLengthBits, bits => bits == 0 ? 0 : 1 << bits);
+            this.wordMasks = Array.ConvertAll(wordCounts, count => count - 1);
             this.wordOffsets = new int[wordLengthBits.Length];
 
             for(int length = 0; length < wordOffsets.Length - 1; length++){
@@ -31,7 +33,7 @@ namespace BrotliLib.Brotli.Dictionary.Format{
         
         public int UnpackWordIndex(int length, int packed){
             CheckLengthBounds(length);
-            return packed % wordCounts[length];
+            return packed & wordMasks[length];
         }
 
         public int UnpackTransformIndex(int length, int packed){
