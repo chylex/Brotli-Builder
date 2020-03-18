@@ -10,6 +10,9 @@ namespace BrotliLib.Brotli.Parameters{
         public HuffmanTreeHeuristics.Generate<InsertCopyLengthCode> GenerateLengthCodeTree   { get; private set; }
         public HuffmanTreeHeuristics.Generate<DistanceCode>         GenerateDistanceCodeTree { get; private set; }
 
+        public HuffmanTreeHeuristics.Generate<BlockTypeCode>   GenerateBlockTypeCodeTree   { get; private set; }
+        public HuffmanTreeHeuristics.Generate<BlockLengthCode> GenerateBlockLengthCodeTree { get; private set; }
+
         public PickCodeHeuristics<DistanceCode>.Picker  DistanceCodePicker  { get; private set; }
         public PickCodeHeuristics<BlockTypeCode>.Picker BlockTypeCodePicker { get; private set; }
         
@@ -22,6 +25,9 @@ namespace BrotliLib.Brotli.Parameters{
             public HuffmanTreeHeuristics.Generate<InsertCopyLengthCode> GenerateLengthCodeTree   { get; set; } = HuffmanTree<InsertCopyLengthCode>.FromSymbols;
             public HuffmanTreeHeuristics.Generate<DistanceCode>         GenerateDistanceCodeTree { get; set; } = HuffmanTree<DistanceCode>.FromSymbols;
 
+            public HuffmanTreeHeuristics.Generate<BlockTypeCode>   GenerateBlockTypeCodeTree   { get; set; } = HuffmanTree<BlockTypeCode>.FromSymbols;
+            public HuffmanTreeHeuristics.Generate<BlockLengthCode> GenerateBlockLengthCodeTree { get; set; } = HuffmanTree<BlockLengthCode>.FromSymbols;
+
             public PickCodeHeuristics<DistanceCode>.Picker  DistanceCodePicker  { get; set; } = PickCodeHeuristics<DistanceCode>.PickFirstOption; // TODO
             public PickCodeHeuristics<BlockTypeCode>.Picker BlockTypeCodePicker { get; set; } = PickCodeHeuristics<BlockTypeCode>.PickFirstOption; // TODO
 
@@ -32,6 +38,9 @@ namespace BrotliLib.Brotli.Parameters{
                 GenerateLengthCodeTree = original.GenerateLengthCodeTree;
                 GenerateDistanceCodeTree = original.GenerateDistanceCodeTree;
 
+                GenerateBlockTypeCodeTree = original.GenerateBlockTypeCodeTree;
+                GenerateBlockLengthCodeTree = original.GenerateBlockLengthCodeTree;
+
                 DistanceCodePicker = original.DistanceCodePicker;
                 BlockTypeCodePicker = original.BlockTypeCodePicker;
             }
@@ -41,6 +50,9 @@ namespace BrotliLib.Brotli.Parameters{
                     GenerateLiteralTree = GenerateLiteralTree,
                     GenerateLengthCodeTree = GenerateLengthCodeTree,
                     GenerateDistanceCodeTree = GenerateDistanceCodeTree,
+
+                    GenerateBlockTypeCodeTree = GenerateBlockTypeCodeTree,
+                    GenerateBlockLengthCodeTree = GenerateBlockLengthCodeTree,
 
                     DistanceCodePicker = DistanceCodePicker,
                     BlockTypeCodePicker = BlockTypeCodePicker

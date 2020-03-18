@@ -74,16 +74,16 @@ namespace BrotliLib.Brotli.Encode.Build{
             var tracker = new BlockTypeTracker(typeCount);
             int remainingLength = totalLength - InitialLength;
 
-            var typeCodeList = new FrequencyList<BlockTypeCode>();
-            var lengthCodeList = new FrequencyList<BlockLengthCode>{ BlockLengthCode.MakeCode(InitialLength) };
+            var typeCodeFreq = new FrequencyList<BlockTypeCode>();
+            var lengthCodeFreq = new FrequencyList<BlockLengthCode>{ BlockLengthCode.MakeCode(InitialLength) };
 
             for(int index = 0; index < commands.Count; index++){
                 var command = commands[index];
 
                 var codes = tracker.FindCodes(command.Type);
-                var code = parameters.BlockTypeCodePicker(codes, typeCodeList);
+                var code = parameters.BlockTypeCodePicker(codes, typeCodeFreq);
 
-                typeCodeList.Add(code);
+                typeCodeFreq.Add(code);
 
                 int length;
 
@@ -101,7 +101,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                     length = command.Length;
                 }
 
-                lengthCodeList.Add(BlockLengthCode.MakeCode(length));
+                lengthCodeFreq.Add(BlockLengthCode.MakeCode(length));
                 remainingLength -= length;
             }
 
@@ -113,8 +113,8 @@ namespace BrotliLib.Brotli.Encode.Build{
                 Category,
                 typeCount,
                 InitialLength,
-                HuffmanTree<BlockTypeCode>.FromSymbols(typeCodeList),
-                HuffmanTree<BlockLengthCode>.FromSymbols(lengthCodeList)
+                parameters.GenerateBlockTypeCodeTree(typeCodeFreq),
+                parameters.GenerateBlockLengthCodeTree(lengthCodeFreq)
             ), commandsFinal);
         }
     }
