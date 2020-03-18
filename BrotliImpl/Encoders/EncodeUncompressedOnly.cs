@@ -9,11 +9,10 @@ namespace BrotliImpl.Encoders{
     /// </summary>
     public class EncodeUncompressedOnly : IBrotliEncoder{
         public (MetaBlock, BrotliEncodeInfo) Encode(BrotliEncodeInfo info){
-            var state = info.State;
-            var bytes = CollectionHelper.SliceAtMost(info.Bytes, DataLength.MaxUncompressedBytes).ToArray();
+            var bytes = CollectionHelper.SliceAtMost(info.Bytes, DataLength.MaxUncompressedBytes);
+            var mb = new MetaBlock.Uncompressed(bytes);
 
-            state.OutputBytes(bytes);
-            return (new MetaBlock.Uncompressed(bytes), info.WithProcessedBytes(state, bytes.Length));
+            return (mb, info.WithOutputtedMetaBock(mb));
         }
     }
 }
