@@ -123,7 +123,7 @@ namespace BrotliImpl.Encoders{
             }
 
             if (nextLiteralBatch.Count > 0){
-                builder.AddInsertFinal(nextLiteralBatch);
+                builder.AddInsert(nextLiteralBatch);
             }
 
             return builder.Build(info);

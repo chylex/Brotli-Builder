@@ -272,7 +272,7 @@ namespace BrotliImpl.Combined{
                         return NextStep.OutputUncompressed;
                     }
                     else{
-                        builder.AddInsertFinal(Literal.FromBytes(input, nextEmit, insert));
+                        builder.AddInsert(Literal.FromBytes(input, nextEmit, insert));
                     }
                 }
 

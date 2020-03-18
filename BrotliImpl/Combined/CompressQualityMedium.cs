@@ -107,7 +107,7 @@ namespace BrotliImpl.Combined{
                 }while(lastProcessedPos + lastInsertLen < input.Length && ShouldContinueThisBlock(builder));
 
                 if (lastInsertLen > 0){
-                    builder.AddInsertFinal(Literal.FromBytes(info.Bytes.Slice(builder.OutputSize, lastInsertLen)));
+                    builder.AddInsert(Literal.FromBytes(info.Bytes.Slice(builder.OutputSize, lastInsertLen)));
                     lastInsertLen = 0;
                 }
 

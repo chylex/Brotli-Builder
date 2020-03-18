@@ -13,7 +13,7 @@ namespace BrotliImpl.Encoders{
             var bytes = CollectionHelper.SliceAtMost(info.Bytes, DataLength.MaxUncompressedBytes).ToArray();
 
             return info.NewBuilder()
-                       .AddInsertFinal(Literal.FromBytes(bytes))
+                       .AddInsert(Literal.FromBytes(bytes))
                        .Build(info);
         }
     }

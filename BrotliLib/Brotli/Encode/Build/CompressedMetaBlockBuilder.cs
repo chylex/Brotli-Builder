@@ -26,6 +26,19 @@ namespace BrotliLib.Brotli.Encode.Build{
         public int OutputSize => intermediateState.OutputSize - initialState.OutputSize;
         public int LastDistance => intermediateState.DistanceBuffer.Front;
 
+        private InsertCopyCommand? FinalInsertCommand{
+            get{
+                int count = commands.Count;
+
+                if (count == 0){
+                    return null;
+                }
+
+                var lastCommand = commands[count - 1];
+                return lastCommand.CopyDistance == DistanceInfo.EndsAfterLiterals ? lastCommand : null;
+            }
+        }
+
         // Fields
 
         private readonly List<InsertCopyCommand> commands = new List<InsertCopyCommand>();
@@ -78,10 +91,17 @@ namespace BrotliLib.Brotli.Encode.Build{
         // Commands
 
         public CompressedMetaBlockBuilder AddInsertCopyCommand(InsertCopyCommand command){
-            commands.Add(command);
-
             var literals = command.Literals;
             var distance = command.CopyDistance;
+
+            var finalInsertCommand = FinalInsertCommand;
+
+            if (finalInsertCommand != null){
+                commands[^1] = new InsertCopyCommand(finalInsertCommand.Literals.Concat(literals).ToList(), command.CopyLength, distance); // silently merge with previous command
+            }
+            else{
+                commands.Add(command);
+            }
 
             intermediateState.OutputLiterals(literals);
 
@@ -97,7 +117,7 @@ namespace BrotliLib.Brotli.Encode.Build{
             return this;
         }
 
-        public CompressedMetaBlockBuilder AddInsertFinal(IList<Literal> literals){
+        public CompressedMetaBlockBuilder AddInsert(IList<Literal> literals){
             return AddInsertCopyCommand(new InsertCopyCommand(literals));
         }
 
@@ -107,7 +127,8 @@ namespace BrotliLib.Brotli.Encode.Build{
 
         public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, int copyLength, int copyDistance, DistanceCodeZeroStrategy dczStrategy = PreferImplicit){
             if (copyDistance == LastDistance){
-                return AddInsertCopy(literals, copyLength, dczStrategy.Decide(literals.Count, copyLength, copyDistance));
+                var literalsToMerge = FinalInsertCommand?.Literals.Count ?? 0;
+                return AddInsertCopyCommand(new InsertCopyCommand(literals, copyLength, dczStrategy.Decide(literals.Count + literalsToMerge, copyLength, copyDistance)));
             }
             else{
                 return AddInsertCopyCommand(new InsertCopyCommand(literals, copyLength, copyDistance));
