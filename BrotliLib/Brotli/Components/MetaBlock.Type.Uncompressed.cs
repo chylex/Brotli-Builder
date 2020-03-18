@@ -25,6 +25,10 @@ namespace BrotliLib.Brotli.Components{
                 this.uncompressedData = CollectionHelper.Slice(uncompressedData, start, count);
             }
 
+            public Uncompressed(ArraySegment<byte> uncompressedData) : base(new DataLength(uncompressedData.Count)){
+                this.uncompressedData = uncompressedData.ToArray();
+            }
+
             public override void Decompress(BrotliGlobalState state){
                 state.OutputBytes(uncompressedData);
             }
