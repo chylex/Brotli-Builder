@@ -10,23 +10,28 @@ using BrotliLib.Numbers;
 
 namespace BrotliCalc{
     public static class Program{
-        private static readonly List<ICommand> Commands = new List<ICommand>{
-            new CmdCopyUncompressed(),
+        private static readonly List<ICommand?> CommandsAndSeparators = new List<ICommand?>{
             new CmdCompress(),
             new CmdCompressStats(),
-            new CmdEncode(),
-            new CmdRebuild(),
-            new CmdTransform(),
+            null,
             new CmdReserialize(),
+            new CmdRebuild(),
+            new CmdEncode(),
+            new CmdTransform(),
+            null,
+            new CmdTestReserializeRebuild(),
+            new CmdTestEncoder(),
+            new CmdTestTransformer(),
+            null,
             new CmdGenerateMarkers(),
             new CmdExtractWindowSize(),
             new CmdExtractHeaderMeta(),
             new CmdExtractContextMaps(),
             new CmdExtractInsertCopyStats(),
-            new CmdTestReserializeRebuild(),
-            new CmdTestEncoder(),
-            new CmdTestTransformer(),
+            null,
             new CmdValidateCompression(),
+            null,
+            new CmdCopyUncompressed(),
             new CmdBenchReserializeRebuild(),
             new CmdTimeDictionaryIndex()
         };
@@ -50,11 +55,16 @@ namespace BrotliCalc{
             Console.WriteLine("Available commands:");
             Console.WriteLine();
             
-            foreach(ICommand command in Commands){
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.Write($" {command.ShortName} / {command.FullName} ");
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine(command.ArgumentDesc);
+            foreach(ICommand? command in CommandsAndSeparators){
+                if (command == null){
+                    Console.WriteLine();
+                }
+                else{
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.Write($" {command.ShortName} / {command.FullName} ");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine(command.ArgumentDesc);
+                }
             }
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -81,7 +91,7 @@ namespace BrotliCalc{
                     break;
                 }
                 
-                var command = Commands.FirstOrDefault(cmd1 => trigger == cmd1.FullName) ?? Commands.FirstOrDefault(cmd2 => trigger == cmd2.ShortName);
+                var command = CommandsAndSeparators.FirstOrDefault(cmd => cmd != null && (trigger == cmd.ShortName || trigger == cmd.FullName));
 
                 if (command == null){
                     Console.WriteLine("Command not found.");
