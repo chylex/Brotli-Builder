@@ -81,7 +81,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                 var command = commands[index];
 
                 var codes = tracker.FindCodes(command.Type);
-                var code = parameters.BlockTypeCodePicker(codes, typeCodeFreq);
+                var code = codes.Count > 1 ? parameters.BlockTypeCodePicker(codes, typeCodeFreq) : codes[0];
 
                 typeCodeFreq.Add(code);
 

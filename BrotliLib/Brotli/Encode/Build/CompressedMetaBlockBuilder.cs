@@ -241,21 +241,21 @@ namespace BrotliLib.Brotli.Encode.Build{
                         int contextID = icLengthValues.DistanceContextID;
                         int treeID = DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
-                        var codeList = distanceCodeFreq[treeID];
+                        var distanceFreq = distanceCodeFreq[treeID];
                         DistanceCode distanceCode;
 
                         if (icCommand.CopyDistance == DistanceInfo.ExplicitCodeZero){
                             distanceCode = DistanceCode.Zero;
                         }
                         else{
-                            distanceCode = parameters.DistanceCodePicker(distanceCodes, codeList);
+                            distanceCode = distanceCodes.Count > 1 ? parameters.DistanceCodePicker(distanceCodes, distanceFreq) : distanceCodes[0];
 
                             if (distanceCode.Equals(DistanceCode.Zero)){
                                 throw new InvalidOperationException("Cannot pick distance code zero for an insert&copy command that does not explicitly request it.");
                             }
                         }
 
-                        codeList.Add(distanceCode);
+                        distanceFreq.Add(distanceCode);
                         icLengthCode = icLengthValues.MakeCode(ImplicitDistanceCodeZero.Disable);
                     }
 
