@@ -63,7 +63,7 @@ namespace BrotliLib.Brotli.Dictionary.Index{
                 }
 
                 if (prefixLength <= bytes.Count){
-                    return lookups[type].FindAll(bytes.Slice(prefixLength), minLength);
+                    return lookups[type].FindAll(bytes.Slice(prefixLength), Math.Max(1, minLength - prefixLength));
                 }
                 else{
                     return Enumerable.Empty<(int, int)>();
@@ -76,16 +76,18 @@ namespace BrotliLib.Brotli.Dictionary.Index{
                 var wt = transforms[transform];
 
                 var type = wt.Type;
-                int prefixLength = wt.Prefix.Length;
+                var prefix = wt.Prefix;
+                var suffix = wt.Suffix;
+
+                int prefixLength = prefix.Length;
+                int suffixLength = suffix.Length;
 
                 foreach(var (length, word) in LookupWords(type, prefixLength)){
-                    var transformedLength = type.GetTransformedLength(length);
+                    int transformedLength = type.GetTransformedLength(length);
+                    int outputLength = transformedLength + prefixLength + suffixLength;
 
-                    if (transformedLength <= maxLength && CollectionHelper.ContainsAt(bytes, prefixLength + transformedLength, wt.Suffix)){
-                        int packedValue = format.GetPackedValue(length, word, transform);
-                        int outputLength = transformedLength + prefixLength + wt.Suffix.Length;
-
-                        entries.Add(new DictionaryIndexEntry(packedValue, length, outputLength));
+                    if (outputLength >= minLength && outputLength <= maxLength && CollectionHelper.ContainsAt(bytes, prefixLength + transformedLength, suffix)){
+                        entries.Add(new DictionaryIndexEntry(format.GetPackedValue(length, word, transform), length, outputLength));
                     }
                 }
             }
