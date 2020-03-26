@@ -36,7 +36,7 @@ namespace BrotliBuilder.Utils.Compat.Legacy{
             public override Item AddCheckBox(string caption, bool initialState, Action<bool> onToggle){
                 var item = menuItem.MenuItems.Add(caption, (obj, e) => {
                     bool enable = !((MenuItem)obj!).Checked;
-                    menuItem.Checked = enable;
+                    ((MenuItem)obj!).Checked = enable;
                     onToggle(enable);
                 });
 
