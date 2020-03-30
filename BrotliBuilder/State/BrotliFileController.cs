@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using BrotliBuilder.Utils;
 using BrotliLib.Brotli;
 using BrotliLib.Brotli.Dictionary;
@@ -33,9 +34,9 @@ namespace BrotliBuilder.State{
 
         // State handling
 
-        private void StartWorker(Action<int> work){
+        private void StartWorker(Action<CancellationToken, int> work){
             int token = ++currentToken;
-            worker.Start(() => work(token));
+            worker.Start(cancel => work((CancellationToken)cancel, token));
         }
 
         private void UpdateState(int token, BrotliFileState newState) => worker.Sync(() => {
@@ -55,6 +56,10 @@ namespace BrotliBuilder.State{
 
             StateChanged?.Invoke(this, new StateChangedEventArgs(prevState, newState));
         });
+
+        private bool Check(CancellationToken cancel){
+            return cancel.IsCancellationRequested;
+        }
 
         // Public triggers
 
@@ -82,53 +87,53 @@ namespace BrotliBuilder.State{
         
         #pragma warning disable IDE0011 // Add braces
 
-        public void LoadFile(string path) => StartWorker(token => {
+        public void LoadFile(string path) => StartWorker((cancel, token) => {
             UpdateState(token, new BrotliFileState.Starting());
 
-            if (!TryReadFile(token, path, out byte[] bytes)) return;
+            if (!TryReadFile(token, path, out byte[] bytes) || Check(cancel)) return;
             BitStream bits = new BitStream(bytes);
             UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), null));
 
-            if (!TryDeserialize(token, new BitStream(bytes), out BrotliFileStructure structure, out MarkerRoot markerRoot, out Stopwatch swDeserialize)) return;
+            if (!TryDeserialize(token, new BitStream(bytes), out BrotliFileStructure structure, out MarkerRoot markerRoot, out Stopwatch swDeserialize) || Check(cancel)) return;
             UpdateState(token, new BrotliFileState.HasMarkers(markerRoot));
             UpdateState(token, new BrotliFileState.HasStructure(structure, swDeserialize));
 
-            if (!TryDecompress(token, structure, out BrotliOutputStored output, out Stopwatch swOutput)) return;
+            if (!TryDecompress(token, structure, out BrotliOutputStored output, out Stopwatch swOutput) || Check(cancel)) return;
             UpdateState(token, new BrotliFileState.HasOutput(null, output.AsBytes, swOutput));
 
             UpdateState(token, new BrotliFileState.Loaded(structure, bits, output, markerRoot));
         });
 
-        public void LoadStructure(BrotliFileStructure structure, byte[]? checkAgainst = null) => StartWorker(token => {
+        public void LoadStructure(BrotliFileStructure structure, byte[]? checkAgainst = null) => StartWorker((cancel, token) => {
             UpdateState(token, new BrotliFileState.Starting());
             UpdateState(token, new BrotliFileState.HasStructure(structure, null));
 
-            if (!TrySerialize(token, structure, out BitStream bits, out Stopwatch swSerialization)) return;
+            if (!TrySerialize(token, structure, out BitStream bits, out Stopwatch swSerialization) || Check(cancel)) return;
             UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), swSerialization));
 
-            if (!TryDeserialize(token, bits, out BrotliFileStructure _, out MarkerRoot markerRoot, out Stopwatch _)) return;
+            if (!TryDeserialize(token, bits, out _, out MarkerRoot markerRoot, out _) || Check(cancel)) return;
             UpdateState(token, new BrotliFileState.HasMarkers(markerRoot));
 
-            if (!TryDecompress(token, structure, out BrotliOutputStored output, out Stopwatch swOutput)) return;
+            if (!TryDecompress(token, structure, out BrotliOutputStored output, out Stopwatch swOutput) || Check(cancel)) return;
             UpdateState(token, new BrotliFileState.HasOutput(checkAgainst, output.AsBytes, swOutput));
 
             UpdateState(token, new BrotliFileState.Loaded(structure, bits, output, markerRoot));
         });
 
-        private void EncodeInternal(string path, Func<byte[], BrotliFileStructure> structureGenerator) => StartWorker(token => {
+        private void EncodeInternal(string path, Func<byte[], BrotliFileStructure> structureGenerator) => StartWorker((cancel, token) => {
             UpdateState(token, new BrotliFileState.Starting());
 
-            if (!TryReadFile(token, path, out byte[] bytes)) return;
-            if (!TryEncode(token, bytes, structureGenerator, out BrotliFileStructure structure, out Stopwatch swEncode)) return;
+            if (!TryReadFile(token, path, out byte[] bytes) || Check(cancel)) return;
+            if (!TryEncode(token, bytes, structureGenerator, out BrotliFileStructure structure, out Stopwatch swEncode) || Check(cancel)) return;
             UpdateState(token, new BrotliFileState.HasStructure(structure, swEncode));
 
-            if (!TrySerialize(token, structure, out BitStream bits, out Stopwatch swSerialization)) return;
+            if (!TrySerialize(token, structure, out BitStream bits, out Stopwatch swSerialization) || Check(cancel)) return;
             UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), swSerialization));
             
-            if (!TryDeserialize(token, bits, out BrotliFileStructure _, out MarkerRoot markerRoot, out Stopwatch _)) return;
+            if (!TryDeserialize(token, bits, out _, out MarkerRoot markerRoot, out _) || Check(cancel)) return;
             UpdateState(token, new BrotliFileState.HasMarkers(markerRoot));
 
-            if (!TryDecompress(token, structure, out BrotliOutputStored output, out Stopwatch swOutput)) return;
+            if (!TryDecompress(token, structure, out BrotliOutputStored output, out Stopwatch swOutput) || Check(cancel)) return;
             UpdateState(token, new BrotliFileState.HasOutput(bytes, output.AsBytes, swOutput));
 
             UpdateState(token, new BrotliFileState.Loaded(structure, bits, output, markerRoot));
@@ -142,21 +147,22 @@ namespace BrotliBuilder.State{
             EncodeInternal(path, bytes => pipeline.Apply(bytes, dictionary));
         }
 
-        private void TransformInternal(BrotliFileStructure structure, IBrotliTransformer transformer) => StartWorker(token => {
+        private void TransformInternal(BrotliFileStructure structure, IBrotliTransformer transformer) => StartWorker((cancel, token) => {
             UpdateState(token, new BrotliFileState.Starting());
 
-            TryDecompress(token, structure, out BrotliOutputStored prevOutput, out Stopwatch _);
+            TryDecompress(token, structure, out BrotliOutputStored prevOutput, out _);
+            if (Check(cancel)) return;
 
-            if (!TryTransform(token, structure, transformer, out structure, out Stopwatch swTransform)) return;
+            if (!TryTransform(token, structure, transformer, out structure, out Stopwatch swTransform) || Check(cancel)) return;
             UpdateState(token, new BrotliFileState.HasStructure(structure, swTransform));
 
-            if (!TrySerialize(token, structure, out BitStream bits, out Stopwatch swSerialization)) return;
+            if (!TrySerialize(token, structure, out BitStream bits, out Stopwatch swSerialization) || Check(cancel)) return;
             UpdateState(token, new BrotliFileState.HasBits(bits.ToString(), swSerialization));
             
-            if (!TryDeserialize(token, bits, out BrotliFileStructure _, out MarkerRoot markerRoot, out Stopwatch _)) return;
+            if (!TryDeserialize(token, bits, out _, out MarkerRoot markerRoot, out _) || Check(cancel)) return;
             UpdateState(token, new BrotliFileState.HasMarkers(markerRoot));
 
-            if (!TryDecompress(token, structure, out BrotliOutputStored output, out Stopwatch swOutput)) return;
+            if (!TryDecompress(token, structure, out BrotliOutputStored output, out Stopwatch swOutput) || Check(cancel)) return;
             UpdateState(token, new BrotliFileState.HasOutput(prevOutput?.AsBytes ?? Array.Empty<byte>(), output.AsBytes, swOutput));
 
             UpdateState(token, new BrotliFileState.Loaded(structure, bits, output, markerRoot));

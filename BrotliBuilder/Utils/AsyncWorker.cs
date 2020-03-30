@@ -8,20 +8,23 @@ namespace BrotliBuilder.Utils{
 
         private readonly TaskFactory taskFactory = new TaskFactory(TaskScheduler.FromCurrentSynchronizationContext());
         private Thread? currentThread;
+        private CancellationTokenSource? currentToken;
 
         public AsyncWorker(string name){
             this.Name = name;
         }
 
-        public void Start(Action action){
+        public void Start(Action<object> action){
             Abort();
 
-            currentThread = new Thread(new ThreadStart(action)){
+            currentToken = new CancellationTokenSource();
+
+            currentThread = new Thread(new ParameterizedThreadStart(action)){
                 Name = this.Name,
                 IsBackground = true
             };
 
-            currentThread.Start();
+            currentThread.Start(currentToken.Token);
         }
 
         public void Sync(Action action){
@@ -32,8 +35,16 @@ namespace BrotliBuilder.Utils{
             Thread? thread = currentThread;
 
             if (thread != null && thread.IsAlive){
-                thread.Abort();
+                currentToken?.Cancel();
+
+                try{
+                    thread.Abort();
+                }catch(PlatformNotSupportedException){
+                    thread.Priority = ThreadPriority.Lowest; // cannot kill, so it will just stay in the background until it reaches a cancellation point...
+                }
+                
                 currentThread = null;
+                currentToken = null;
             }
         }
     }
