@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace BrotliCalc.Helpers{
     sealed class Progress : IDisposable{
+        private const int BufferExpandHeight = 250;
+        private const int BufferMaxHeight = 5000;
+
         private readonly object consoleLock = new object();
 
         private readonly string total;
@@ -40,10 +44,13 @@ namespace BrotliCalc.Helpers{
             else{
                 lock(consoleLock){
                     var prevColor = Console.ForegroundColor;
+                    int lines = 1 + ((message.Length - 1) / Console.BufferWidth);
+
+                    PrepareToWriteLine(1 + lines + threadLines.Values.Max(line => line.Offset));
 
                     Console.ForegroundColor = color;
-                    WriteAndJumpBack(0, message.PadRight(Console.BufferWidth, ' '));
-                    Console.CursorTop += 1;
+                    WriteAndJumpBack(0, message.PadRight(Console.BufferWidth * lines, ' '));
+                    Console.CursorTop += lines;
                     Console.ForegroundColor = prevColor;
 
                     WriteLine(statusLine);
@@ -99,6 +106,17 @@ namespace BrotliCalc.Helpers{
 
         // Helpers
 
+        private void PrepareToWriteLine(int offset){
+            if (Console.CursorTop + offset >= Console.BufferHeight){
+                if (Console.BufferHeight >= BufferMaxHeight){
+                    Console.Clear();
+                }
+                else{
+                    Console.BufferHeight += BufferExpandHeight;
+                }
+            }
+        }
+
         private string PadWithEllipsis(string message, int maxLength){
             if (maxLength < 3){
                 return new string('.', maxLength);
@@ -124,6 +142,7 @@ namespace BrotliCalc.Helpers{
         }
 
         private void WriteAndJumpBack(int line, string text){
+            PrepareToWriteLine(line);
             int prevTop = Console.CursorTop;
 
             Console.CursorTop = prevTop + line;
