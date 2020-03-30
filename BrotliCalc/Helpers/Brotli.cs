@@ -37,7 +37,8 @@ namespace BrotliCalc.Helpers{
                 return new BrotliFileGroup[]{ new BrotliFileGroup(file, Array.Empty<BrotliFile.Compressed>()) };
             }
 
-            int fullPathLength = Path.GetFullPath(path).Length;
+            path = Path.GetFullPath(path);
+            int fullPathLength = path.Length;
 
             string GetRelativePath(string file){
                 return file.Substring(fullPathLength).Replace(Path.DirectorySeparatorChar, DirectorySeparator).Replace(Path.AltDirectorySeparatorChar, DirectorySeparator).TrimStart(DirectorySeparator);
