@@ -20,4 +20,10 @@ namespace BrotliLib.Brotli.Streaming{
             }
         }
     }
+
+    public static class IBrotliFileStreamExtensions{
+        public static void ForEachRemainingMetaBlock(this IBrotliFileStream me, Action<MetaBlock> action){
+            me.ForEachRemainingMetaBlock(action);
+        }
+    }
 }

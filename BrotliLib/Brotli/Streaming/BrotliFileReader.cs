@@ -1,5 +1,6 @@
 ﻿using BrotliLib.Brotli.Components;
 using BrotliLib.Brotli.Dictionary;
+using BrotliLib.Brotli.Output;
 using BrotliLib.Brotli.Parameters;
 using BrotliLib.Markers;
 using BrotliLib.Markers.Serialization.Reader;
@@ -38,6 +39,16 @@ namespace BrotliLib.Brotli.Streaming{
             }.Build();
 
             this.state = new BrotliGlobalState(Parameters);
+        }
+
+        // Output
+
+        public void AddOutputCallback(IBrotliOutput callback){
+            state.AddOutputCallback(callback);
+        }
+
+        public void RemoveOutputCallback(IBrotliOutput callback){
+            state.RemoveOutputCallback(callback);
         }
 
         // Reader
