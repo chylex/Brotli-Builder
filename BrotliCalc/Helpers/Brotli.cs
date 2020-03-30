@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -30,25 +29,14 @@ namespace BrotliCalc.Helpers{
         }
 
         public static IEnumerable<BrotliFileGroup> ListPath(string path){
-            if (!File.GetAttributes(path).HasFlag(FileAttributes.Directory)){
-                var name = Path.GetFileName(path) ?? path;
-                var file = new BrotliFile.Uncompressed(path, name);
-
-                return new BrotliFileGroup[]{ new BrotliFileGroup(file, Array.Empty<BrotliFile.Compressed>()) };
-            }
-
             path = Path.GetFullPath(path);
-            int fullPathLength = path.Length;
+
+            bool isFolder = File.GetAttributes(path).HasFlag(FileAttributes.Directory);
+            string rootPath = isFolder ? path : Path.GetDirectoryName(path) ?? path;
+            int rootLength = rootPath.Length;
 
             string GetRelativePath(string file){
-                return file.Substring(fullPathLength).Replace(Path.DirectorySeparatorChar, DirectorySeparator).Replace(Path.AltDirectorySeparatorChar, DirectorySeparator).TrimStart(DirectorySeparator);
-            }
-
-            BrotliFile.Compressed ConstructCompressed(string file){
-                var match = RegexCompressionIdentifier.Match(file);
-                var identifier = match.Success ? match.Groups[1].Value : "?";
-
-                return new BrotliFile.Compressed(file, GetUncompressedName(GetRelativePath(file)), identifier);
+                return file.Substring(rootLength).Replace(Path.DirectorySeparatorChar, DirectorySeparator).Replace(Path.AltDirectorySeparatorChar, DirectorySeparator).TrimStart(DirectorySeparator);
             }
 
             BrotliFileGroup ProcessGroup(IGrouping<string, string> group){
@@ -61,7 +49,24 @@ namespace BrotliCalc.Helpers{
                 );
             }
 
-            return Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories).GroupBy(GetUncompressedName).Select(ProcessGroup);
+            BrotliFile.Compressed ConstructCompressed(string file){
+                var match = RegexCompressionIdentifier.Match(file);
+                var identifier = match.Success ? match.Groups[1].Value : "?";
+
+                return new BrotliFile.Compressed(file, GetUncompressedName(GetRelativePath(file)), identifier);
+            }
+
+            IEnumerable<IGrouping<string, string>> groupings;
+
+            if (isFolder){
+                groupings = Directory.EnumerateFiles(rootPath, "*.*", SearchOption.AllDirectories).GroupBy(GetUncompressedName);
+            }
+            else{
+                var group = GetUncompressedName(path);
+                groupings = Directory.EnumerateFiles(rootPath, "*.*", SearchOption.TopDirectoryOnly).GroupBy(GetUncompressedName).Where(g => g.Key == group).Take(1);
+            }
+
+            return groupings.Select(ProcessGroup);
         }
 
         public static IEnumerable<(BrotliFileGroup, BrotliFile.Uncompressed)> SelectUncompressedFiles(this IEnumerable<BrotliFileGroup> me){
