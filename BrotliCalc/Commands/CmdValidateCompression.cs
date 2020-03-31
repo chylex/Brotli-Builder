@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using BrotliCalc.Commands.Base;
 using BrotliCalc.Helpers;
+using BrotliLib.Brotli.Output;
 using BrotliLib.Collections;
 
 namespace BrotliCalc.Commands{
@@ -12,26 +13,36 @@ namespace BrotliCalc.Commands{
         protected override string WorkDesc => "Validated";
 
         protected override string[] Columns { get; } = {
-            "File", "Quality", "Matches"
+            "File", "Quality", "Result"
         };
 
         protected override IEnumerable<object?[]> GenerateRows(BrotliFileGroup group, BrotliFile.Compressed file){
             var original = group.Uncompressed.Contents;
-            var decompressed = file.Structure.Decompress().AsBytes;
 
-            if (!CollectionHelper.Equal(decompressed, original)){
-                throw new InvalidOperationException("Mismatched output bytes.");
+            var reader = file.Reader;
+            var output = new BrotliOutputStored();
+
+            reader.AddOutputCallback(output);
+            while(reader.NextMetaBlock() != null){}
+            reader.RemoveOutputCallback(output);
+
+            if (!CollectionHelper.Equal(output.AsBytes, original)){
+                throw new MismatchedOutputBytesException();
             }
 
             return new List<object?[]>{
-                new object?[]{ file.Name, file.Identifier, 1 }
+                new object?[]{ file.Name, file.Identifier, "OK" }
             };
         }
 
         protected override IEnumerable<object?[]> OnError(BrotliFileGroup group, BrotliFile.Compressed file, Exception ex){
             return new List<object?[]>{
-                new object?[]{ file.Name, file.Identifier, 0 }
+                new object?[]{ file.Name, file.Identifier, ex is MismatchedOutputBytesException ? "Mismatch" : "Error" }
             };
+        }
+
+        private sealed class MismatchedOutputBytesException : Exception{
+            public MismatchedOutputBytesException() : base("Mismatched output bytes."){}
         }
     }
 }
