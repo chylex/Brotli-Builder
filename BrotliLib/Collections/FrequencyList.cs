@@ -34,13 +34,25 @@ namespace BrotliLib.Collections{
         public int Count => frequencies.Count;
         public int Sum => frequencies.Sum(kvp => kvp.Value);
 
-        public int this[T symbol]{
-            get => frequencies.TryGetValue(symbol, out int count) ? count : 0;
-            set => frequencies[symbol] = value;
-        }
-
         public IList<HuffmanGenerator<T>.SymbolFreq> HuffmanFreq{
             get => frequencies.Select(kvp => new HuffmanGenerator<T>.SymbolFreq(kvp.Key, kvp.Value)).ToArray();
+        }
+
+        public int this[T symbol]{
+            get{
+                return frequencies.TryGetValue(symbol, out int count) ? count : 0;
+            }
+            set{
+                if (value < 0){
+                    throw new ArgumentOutOfRangeException(nameof(value), "Symbol cannot have a negative frequency.");
+                }
+                else if (value == 0){
+                    frequencies.Remove(symbol);
+                }
+                else{
+                    frequencies[symbol] = value;
+                }
+            }
         }
 
         private readonly Dictionary<T, int> frequencies = new Dictionary<T, int>();
