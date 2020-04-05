@@ -169,9 +169,9 @@ namespace BrotliLib.Brotli.Encode.Build{
             var blockTypes = BlockTypes.Select(builder => builder.Build(GetTotalBlockLength(builder.Category), parameters));
             var blockTrackers = blockTypes.Select(built => new BlockSwitchTracker.Writing(built.Info, new Queue<BlockSwitchCommand>(built.Commands)));
 
-            var literalFreq = NewFreqArray<Literal>(LiteralCtxMap.TreeCount);
-            var icLengthCodeFreq = NewFreqArray<InsertCopyLengthCode>(blockTypes[Category.InsertCopy].Info.TypeCount);
-            var distanceCodeFreq = NewFreqArray<DistanceCode>(DistanceCtxMap.TreeCount);
+            var literalFreq = FrequencyList<Literal>.Array(LiteralCtxMap.TreeCount);
+            var icLengthCodeFreq = FrequencyList<InsertCopyLengthCode>.Array(blockTypes[Category.InsertCopy].Info.TypeCount);
+            var distanceCodeFreq = FrequencyList<DistanceCode>.Array(DistanceCtxMap.TreeCount);
 
             var icCommandCount = commands.Count;
             var icCommandsFinal = new InsertCopyCommand[icCommandCount];
@@ -298,16 +298,6 @@ namespace BrotliLib.Brotli.Encode.Build{
         }
 
         // Helpers
-
-        private static FrequencyList<T>[] NewFreqArray<T>(int arraySize) where T : IComparable<T>{
-            FrequencyList<T>[] array = new FrequencyList<T>[arraySize];
-
-            for(int index = 0; index < arraySize; index++){
-                array[index] = new FrequencyList<T>();
-            }
-
-            return array;
-        }
 
         private static HuffmanTree<T>[] ConstructHuffmanTrees<T>(FrequencyList<T>[] source, HuffmanTreeHeuristics.Generate<T> generator) where T : IComparable<T>{
             HuffmanTree<T>[] array = new HuffmanTree<T>[source.Length];

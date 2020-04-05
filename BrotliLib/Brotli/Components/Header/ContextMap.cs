@@ -323,7 +323,7 @@ namespace BrotliLib.Brotli.Components.Header{
                 var (symbols, extra) = runs.GenerateSymbolsAndExtraBits();
 
                 var codeContext = GetCodeTreeContext(obj.TreeCount + runLengthCodeCount);
-                var codeTree = parameters.GenerateContextMapTree(new FrequencyList<int>(symbols));
+                var codeTree = parameters.GenerateContextMapTree(FrequencyList<int>.FromSequence(symbols));
 
                 HuffmanTree<int>.Serialize(writer, codeTree, codeContext, parameters);
 

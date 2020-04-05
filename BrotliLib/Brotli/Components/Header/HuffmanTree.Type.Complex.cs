@@ -121,7 +121,7 @@ namespace BrotliLib.Brotli.Components.Header{
                 }
 
                 var (lengthCodes, extra) = parameters.HuffmanTreeRLE(new HuffmanTreeLengthCode.RunDecider(symbolLengths, context.AlphabetSize)).GenerateCodesAndExtraBits();
-                var lengthCodeMap = parameters.GenerateHuffmanLengthCodeTree(new FrequencyList<byte>(lengthCodes), HuffmanTreeLengthCode.LengthMaxDepth).Root.GenerateValueMapOptimized();
+                var lengthCodeMap = parameters.GenerateHuffmanLengthCodeTree(FrequencyList<byte>.FromSequence(lengthCodes), HuffmanTreeLengthCode.LengthMaxDepth).Root.GenerateValueMapOptimized();
                 
                 HuffmanTreeLengthCode.Write(writer, lengthCodeMap);
                 
