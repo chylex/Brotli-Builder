@@ -8,7 +8,7 @@ using BrotliLib.Serialization.Writer;
 
 namespace BrotliImpl{
     class MetaBlockSizeTracker{
-        public (MetaBlock, BrotliGlobalState)? Smallest { get; private set; } = null;
+        public (MetaBlock.Compressed, BrotliGlobalState)? Smallest { get; private set; } = null;
         public int SmallestSize { get; private set; } = int.MaxValue;
 
         private readonly BrotliGlobalState initialState;
@@ -17,7 +17,7 @@ namespace BrotliImpl{
             this.initialState = initialState;
         }
 
-        public void Test(MetaBlock tested, BrotliSerializationParameters? serializationParameters = null, string? debugText = null){
+        public void Test(MetaBlock.Compressed tested, BrotliSerializationParameters? serializationParameters = null, string? debugText = null){
             var (testedSize, nextState) = CountBits(tested, initialState.Clone(), serializationParameters) ?? (int.MaxValue, null!);
 
             if (debugText != null){

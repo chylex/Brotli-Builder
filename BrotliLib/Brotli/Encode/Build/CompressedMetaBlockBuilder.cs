@@ -156,12 +156,12 @@ namespace BrotliLib.Brotli.Encode.Build{
 
         // Building
 
-        public (MetaBlock MetaBlock, BrotliEncodeInfo NextInfo) Build(BrotliEncodeInfo info, BrotliCompressionParameters? parameters = null){
+        public (MetaBlock.Compressed MetaBlock, BrotliEncodeInfo NextInfo) Build(BrotliEncodeInfo info, BrotliCompressionParameters? parameters = null){
             var (metaBlock, nextState) = Build(parameters ?? info.CompressionParameters);
             return (metaBlock, info.WithProcessedBytes(nextState, OutputSize));
         }
 
-        public (MetaBlock MetaBlock, BrotliGlobalState NextState) Build(BrotliCompressionParameters parameters){
+        public (MetaBlock.Compressed MetaBlock, BrotliGlobalState NextState) Build(BrotliCompressionParameters parameters){
             var state = initialState.Clone();
 
             // Setup
