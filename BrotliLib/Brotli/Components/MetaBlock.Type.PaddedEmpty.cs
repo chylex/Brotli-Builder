@@ -38,6 +38,7 @@ namespace BrotliLib.Brotli.Components{
             // Instance
 
             public byte[] HiddenData => CollectionHelper.Clone(hiddenData);
+            public int HiddenDataLength => hiddenData.Length;
 
             private readonly byte[] hiddenData;
 

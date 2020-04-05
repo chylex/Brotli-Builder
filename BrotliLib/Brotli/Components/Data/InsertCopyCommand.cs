@@ -154,7 +154,7 @@ namespace BrotliLib.Brotli.Components.Data{
 
             DistanceInfo distanceInfo = obj.CopyDistance;
             
-            if (distanceInfo != DistanceInfo.ImplicitCodeZero){
+            if (distanceInfo.HasExplicitDistanceCode()){
                 int blockID = context.NextBlockID(Category.Distance);
                 int contextID = icLengths.DistanceContextID;
                 int treeID = header.DistanceCtxMap.DetermineTreeID(blockID, contextID);

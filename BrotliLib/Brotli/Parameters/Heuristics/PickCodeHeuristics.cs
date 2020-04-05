@@ -9,5 +9,6 @@ namespace BrotliLib.Brotli.Parameters.Heuristics{
 
         public static Picker PickFirstOption    { get; } = (picks, previouslySeen) => picks[0];
         public static Picker PickPreviouslySeen { get; } = (picks, previouslySeen) => picks.FirstOrDefault(previouslySeen.Contains) ?? picks[0];
+        public static Picker PickMostFrequent   { get; } = (picks, previouslySeen) => picks.OrderByDescending(pick => previouslySeen[pick]).First();
     }
 }

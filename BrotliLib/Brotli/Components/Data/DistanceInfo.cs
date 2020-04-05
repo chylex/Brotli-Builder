@@ -33,6 +33,10 @@ namespace BrotliLib.Brotli.Components.Data{
             return info >= DistanceInfo.FirstExactValue;
         }
 
+        public static bool HasExplicitDistanceCode(this DistanceInfo info){
+            return info != DistanceInfo.EndsAfterLiterals && info != DistanceInfo.ImplicitCodeZero;
+        }
+
         public static bool CanEncodeUsing(this DistanceInfo info, DistanceCode code, BrotliGlobalState state){
             switch(info){
                 case DistanceInfo.EndsAfterLiterals:

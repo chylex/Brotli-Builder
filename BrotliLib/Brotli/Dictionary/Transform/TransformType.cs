@@ -17,11 +17,25 @@ namespace BrotliLib.Brotli.Dictionary.Transform{
         FermentFirst = 1,
         FermentAll = 2,
         OmitFirstN = 2, // OmitFirstN + 1-9, range 3-11
-        OmitFirst1 = 3,
-        OmitFirst9 = 11,
+        OmitFirst1 = OmitFirstN + 1,
+        OmitFirst2 = OmitFirstN + 2,
+        OmitFirst3 = OmitFirstN + 3,
+        OmitFirst4 = OmitFirstN + 4,
+        OmitFirst5 = OmitFirstN + 5,
+        OmitFirst6 = OmitFirstN + 6,
+        OmitFirst7 = OmitFirstN + 7,
+        OmitFirst8 = OmitFirstN + 8,
+        OmitFirst9 = OmitFirstN + 9,
         OmitLastN = 11, // OmitLastN + 1-9, range 12-20
-        OmitLast1 = 12,
-        OmitLast9 = 20
+        OmitLast1 = OmitLastN + 1,
+        OmitLast2 = OmitLastN + 2,
+        OmitLast3 = OmitLastN + 3,
+        OmitLast4 = OmitLastN + 4,
+        OmitLast5 = OmitLastN + 5,
+        OmitLast6 = OmitLastN + 6,
+        OmitLast7 = OmitLastN + 7,
+        OmitLast8 = OmitLastN + 8,
+        OmitLast9 = OmitLastN + 9
     }
 
     public static class TransformTypes{
@@ -58,38 +72,13 @@ namespace BrotliLib.Brotli.Dictionary.Transform{
             }
             else{
                 input = CollectionHelper.Clone(input);
-                
-                int Ferment(int position){
-                    byte value = input[position];
-
-                    if (value >= 97 && value <= 122){
-                        // uppercase ASCII characters (a-z)
-                        input[position] ^= 32;
-                        return 1;
-                    }
-                    else if (value < 192){
-                        // ignore other 1-byte UTF-8 characters
-                        return 1;
-                    }
-                    else if (value < 224){
-                        // swap case on certain 2-byte UTF-8 characters
-                        // probably intended for Latin-1 Supplement, Greek, and Cyrillic, but it will xor anything in the specified range
-                        Xor(input, position + 1, 32);
-                        return 2;
-                    }
-                    else{
-                        // literally a magic number that just worked well when the devs were testing 100 languages
-                        Xor(input, position + 2, 5);
-                        return 3;
-                    }
-                }
 
                 if (type == TransformType.FermentFirst){
-                    Ferment(0);
+                    Ferment(input, 0);
                 }
                 else if (type == TransformType.FermentAll){
                     for(int position = 0; position < input.Length;){
-                        position += Ferment(position);
+                        position += Ferment(input, position);
                     }
                 }
 
@@ -97,9 +86,41 @@ namespace BrotliLib.Brotli.Dictionary.Transform{
             }
         }
 
-        private static void Xor(byte[] output, int position, byte by){
-            if (position < output.Length){
-                output[position] ^= by;
+        /// <summary>
+        /// Applies the Ferment operation to the input at a specific position, and returns how far the position should be advanced before the next Ferment call.
+        /// </summary>
+        public static int Ferment(byte[] input, int position){
+            byte value = input[position];
+
+            if (value >= 97 && value <= 122){
+                // uppercase ASCII characters (a-z)
+                input[position] ^= 32;
+                return 1;
+            }
+            else if (value < 192){
+                // ignore other 1-byte UTF-8 characters
+                return 1;
+            }
+            else if (value < 224){
+                position += 1;
+
+                if (position < input.Length){
+                    // swap case on certain 2-byte UTF-8 characters
+                    // probably intended for Latin-1 Supplement, Greek, and Cyrillic, but it will xor anything in the specified range
+                    input[position] ^= 32;
+                }
+
+                return 2;
+            }
+            else{
+                position += 2;
+
+                if (position < input.Length){
+                    // literally a magic number that just worked well when the devs were testing 100 languages
+                    input[position] ^= 5;
+                }
+
+                return 3;
             }
         }
     }

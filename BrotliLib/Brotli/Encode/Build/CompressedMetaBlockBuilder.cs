@@ -107,13 +107,14 @@ namespace BrotliLib.Brotli.Encode.Build{
 
             if (distance != DistanceInfo.EndsAfterLiterals){
                 intermediateState.OutputCopy(command.CopyLength, distance);
-
-                if (distance != DistanceInfo.ImplicitCodeZero){
-                    totalExplicitDistances++;
-                }
             }
 
             totalLiterals += literals.Count;
+
+            if (distance.HasExplicitDistanceCode()){
+                totalExplicitDistances++;
+            }
+
             return this;
         }
 
