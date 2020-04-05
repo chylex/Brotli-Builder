@@ -38,6 +38,7 @@
             this.labelFilter = new System.Windows.Forms.Label();
             this.labelWordCount = new System.Windows.Forms.Label();
             this.labelWordCountValue = new System.Windows.Forms.Label();
+            this.checkBoxFilterAnchors = new System.Windows.Forms.CheckBox();
             this.checkBoxShowTransforms = new System.Windows.Forms.CheckBox();
             this.labelDuplicateCount = new System.Windows.Forms.Label();
             this.labelDuplicateCountValue = new System.Windows.Forms.Label();
@@ -137,7 +138,7 @@
             this.textBoxFilter.Location = new System.Drawing.Point(15, 27);
             this.textBoxFilter.Margin = new System.Windows.Forms.Padding(3, 3, 12, 3);
             this.textBoxFilter.Name = "textBoxFilter";
-            this.textBoxFilter.Size = new System.Drawing.Size(282, 23);
+            this.textBoxFilter.Size = new System.Drawing.Size(355, 23);
             this.textBoxFilter.TabIndex = 1;
             this.textBoxFilter.TextChanged += new System.EventHandler(this.textBoxFilter_TextChanged);
             // 
@@ -154,7 +155,7 @@
             // 
             this.labelWordCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelWordCount.AutoSize = true;
-            this.labelWordCount.Location = new System.Drawing.Point(629, 12);
+            this.labelWordCount.Location = new System.Drawing.Point(629, 15);
             this.labelWordCount.Margin = new System.Windows.Forms.Padding(3);
             this.labelWordCount.Name = "labelWordCount";
             this.labelWordCount.Size = new System.Drawing.Size(80, 15);
@@ -165,49 +166,62 @@
             // 
             this.labelWordCountValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelWordCountValue.AutoEllipsis = true;
-            this.labelWordCountValue.Location = new System.Drawing.Point(712, 12);
+            this.labelWordCountValue.Location = new System.Drawing.Point(712, 15);
             this.labelWordCountValue.Margin = new System.Windows.Forms.Padding(0, 3, 3, 3);
             this.labelWordCountValue.Name = "labelWordCountValue";
             this.labelWordCountValue.Size = new System.Drawing.Size(60, 15);
-            this.labelWordCountValue.TabIndex = 3;
+            this.labelWordCountValue.TabIndex = 4;
             this.labelWordCountValue.Text = "0";
             this.labelWordCountValue.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // checkBoxFilterAnchors
+            // 
+            this.checkBoxFilterAnchors.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBoxFilterAnchors.Enabled = false;
+            this.checkBoxFilterAnchors.Location = new System.Drawing.Point(385, 14);
+            this.checkBoxFilterAnchors.Margin = new System.Windows.Forms.Padding(3, 3, 3, 1);
+            this.checkBoxFilterAnchors.Name = "checkBoxFilterAnchors";
+            this.checkBoxFilterAnchors.Size = new System.Drawing.Size(93, 19);
+            this.checkBoxFilterAnchors.TabIndex = 2;
+            this.checkBoxFilterAnchors.Text = "Anchors: ^$";
+            this.checkBoxFilterAnchors.UseVisualStyleBackColor = true;
+            this.checkBoxFilterAnchors.CheckedChanged += new System.EventHandler(this.checkBoxFilter_CheckedChanged);
             // 
             // checkBoxShowTransforms
             // 
             this.checkBoxShowTransforms.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.checkBoxShowTransforms.AutoSize = true;
             this.checkBoxShowTransforms.Checked = true;
             this.checkBoxShowTransforms.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBoxShowTransforms.Enabled = false;
-            this.checkBoxShowTransforms.Location = new System.Drawing.Point(312, 29);
+            this.checkBoxShowTransforms.Location = new System.Drawing.Point(385, 35);
+            this.checkBoxShowTransforms.Margin = new System.Windows.Forms.Padding(3, 1, 3, 3);
             this.checkBoxShowTransforms.Name = "checkBoxShowTransforms";
-            this.checkBoxShowTransforms.Size = new System.Drawing.Size(85, 19);
-            this.checkBoxShowTransforms.TabIndex = 2;
+            this.checkBoxShowTransforms.Size = new System.Drawing.Size(93, 19);
+            this.checkBoxShowTransforms.TabIndex = 3;
             this.checkBoxShowTransforms.Text = "Transforms";
             this.checkBoxShowTransforms.UseVisualStyleBackColor = true;
-            this.checkBoxShowTransforms.CheckedChanged += new System.EventHandler(this.checkBoxShowTransforms_CheckedChanged);
+            this.checkBoxShowTransforms.CheckedChanged += new System.EventHandler(this.checkBoxFilter_CheckedChanged);
             // 
             // labelDuplicateCount
             // 
             this.labelDuplicateCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelDuplicateCount.AutoSize = true;
-            this.labelDuplicateCount.Location = new System.Drawing.Point(608, 33);
+            this.labelDuplicateCount.Location = new System.Drawing.Point(608, 36);
             this.labelDuplicateCount.Margin = new System.Windows.Forms.Padding(3);
             this.labelDuplicateCount.Name = "labelDuplicateCount";
             this.labelDuplicateCount.Size = new System.Drawing.Size(101, 15);
-            this.labelDuplicateCount.TabIndex = 4;
+            this.labelDuplicateCount.TabIndex = 5;
             this.labelDuplicateCount.Text = "Shown Duplicates";
             // 
             // labelDuplicateCountValue
             // 
             this.labelDuplicateCountValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelDuplicateCountValue.AutoEllipsis = true;
-            this.labelDuplicateCountValue.Location = new System.Drawing.Point(712, 33);
+            this.labelDuplicateCountValue.Location = new System.Drawing.Point(712, 36);
             this.labelDuplicateCountValue.Margin = new System.Windows.Forms.Padding(0, 3, 3, 3);
             this.labelDuplicateCountValue.Name = "labelDuplicateCountValue";
             this.labelDuplicateCountValue.Size = new System.Drawing.Size(60, 15);
-            this.labelDuplicateCountValue.TabIndex = 5;
+            this.labelDuplicateCountValue.TabIndex = 6;
             this.labelDuplicateCountValue.Text = "(...)";
             this.labelDuplicateCountValue.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
@@ -222,13 +236,14 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelFilters.Controls.Add(this.textBoxFilter);
             this.panelFilters.Controls.Add(this.labelFilter);
+            this.panelFilters.Controls.Add(this.checkBoxFilterAnchors);
             this.panelFilters.Controls.Add(this.checkBoxShowTransforms);
             this.panelFilters.Location = new System.Drawing.Point(0, 0);
             this.panelFilters.Margin = new System.Windows.Forms.Padding(0);
             this.panelFilters.MinimumSize = new System.Drawing.Size(180, 0);
             this.panelFilters.Name = "panelFilters";
             this.panelFilters.Padding = new System.Windows.Forms.Padding(12, 9, 0, 0);
-            this.panelFilters.Size = new System.Drawing.Size(400, 60);
+            this.panelFilters.Size = new System.Drawing.Size(480, 60);
             this.panelFilters.TabIndex = 1;
             // 
             // FormStaticDictionary
@@ -270,6 +285,7 @@
         private System.Windows.Forms.Label labelFilter;
         private System.Windows.Forms.Label labelWordCount;
         private System.Windows.Forms.Label labelWordCountValue;
+        private System.Windows.Forms.CheckBox checkBoxFilterAnchors;
         private System.Windows.Forms.CheckBox checkBoxShowTransforms;
         private System.Windows.Forms.Label labelDuplicateCount;
         private System.Windows.Forms.Label labelDuplicateCountValue;

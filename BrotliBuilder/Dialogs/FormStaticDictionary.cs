@@ -124,6 +124,7 @@ namespace BrotliBuilder.Dialogs{
                 dataGridViewWords.DataSource = view;
                 dataGridViewWords.Enabled = true;
                 textBoxFilter.Enabled = true;
+                checkBoxFilterAnchors.Enabled = true;
                 checkBoxShowTransforms.Enabled = true;
             }
         }
@@ -139,16 +140,33 @@ namespace BrotliBuilder.Dialogs{
             UpdateFilter();
         }
 
-        private void checkBoxShowTransforms_CheckedChanged(object? sender, EventArgs e){
+        private void checkBoxFilter_CheckedChanged(object? sender, EventArgs e){
             UpdateFilter();
         }
 
         private void UpdateFilter(){
             string matchingText = textBoxFilter.Text.Replace(' ', FormatSpace);
             bool showTransforms = checkBoxShowTransforms.Checked;
+
+            Func<DataRow, bool> filter = row => ((int)row[colTransform] == 0 || showTransforms) && ((string)row[colText]).Contains(matchingText);
+
+            if (checkBoxFilterAnchors.Checked){
+                if (matchingText.StartsWith('^') && matchingText.EndsWith('$')){
+                    matchingText = matchingText[1..^1];
+                    filter = row => ((int)row[colTransform] == 0 || showTransforms) && ((string)row[colText]).Equals(matchingText);
+                }
+                else if (matchingText.StartsWith('^')){
+                    matchingText = matchingText[1..];
+                    filter = row => ((int)row[colTransform] == 0 || showTransforms) && ((string)row[colText]).StartsWith(matchingText);
+                }
+                else if (matchingText.EndsWith('$')){
+                    matchingText = matchingText[..^1];
+                    filter = row => ((int)row[colTransform] == 0 || showTransforms) && ((string)row[colText]).EndsWith(matchingText);
+                }
+            }
             
             DataTable data = ((DataView)dataGridViewWords.DataSource).Table;
-            DataView filtered = data.AsEnumerable().Where(row => ((int)row[colTransform] == 0 || showTransforms) && ((string)row[colText]).Contains(matchingText)).AsDataView();
+            DataView filtered = data.AsEnumerable().Where(filter).AsDataView();
 
             dataGridViewWords.DataSource = filtered;
             UpdateCounters(filtered);
