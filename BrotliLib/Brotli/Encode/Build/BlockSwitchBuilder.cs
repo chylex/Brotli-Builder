@@ -9,14 +9,15 @@ using BrotliLib.Collections;
 
 namespace BrotliLib.Brotli.Encode.Build{
     public sealed class BlockSwitchBuilder{
-        public const int FinalBlockSwitchLengthPlaceholder = -1;
+        public const int FinalCommandLengthPlaceholder = -1;
 
         public Category Category { get; }
         public int InitialLength { get; private set; }
 
         public IReadOnlyList<BlockSwitchCommand> Commands => commands;
-        
         public int TypeCount => commands.Count == 0 ? 1 : 1 + commands.Max(command => command.Type);
+
+        private BlockSwitchCommand? LastCommand => commands.Count > 0 ? commands[^1] : null;
 
         // Fields
 
@@ -47,12 +48,34 @@ namespace BrotliLib.Brotli.Encode.Build{
         }
 
         public BlockSwitchBuilder AddBlockSwitch(int type, int length){
-            commands.Add(new BlockSwitchCommand(type, length));
+            var lastCommand = LastCommand;
+
+            if (lastCommand?.Length == FinalCommandLengthPlaceholder){
+                throw new InvalidOperationException("Cannot add another block-switch command after the final command.");
+            }
+            else if (lastCommand?.Type == type){
+                commands[^1] = new BlockSwitchCommand(type, length + lastCommand.Length);
+            }
+            else{
+                commands.Add(new BlockSwitchCommand(type, length));
+            }
+
             return this;
         }
 
         public BlockSwitchBuilder AddFinalBlockSwitch(int type){
-            commands.Add(new BlockSwitchCommand(type, FinalBlockSwitchLengthPlaceholder));
+            var lastCommand = LastCommand;
+
+            if (lastCommand?.Type == type){
+                commands[^1] = new BlockSwitchCommand(type, FinalCommandLengthPlaceholder);
+            }
+            else if (lastCommand?.Length != FinalCommandLengthPlaceholder){
+                commands.Add(new BlockSwitchCommand(type, FinalCommandLengthPlaceholder));
+            }
+            else{
+                throw new InvalidOperationException("Cannot add another block-switch command after the final command.");
+            }
+
             return this;
         }
 
@@ -69,6 +92,10 @@ namespace BrotliLib.Brotli.Encode.Build{
                 throw new InvalidOperationException("Cannot generate block-switch chain that only refers to 1 block type.");
             }
 
+            if (InitialLength < 1){
+                throw new InvalidOperationException("Initial block length must be at least 1.");
+            }
+
             var commandsFinal = commands;
 
             var tracker = new BlockTypeTracker(typeCount);
@@ -77,21 +104,13 @@ namespace BrotliLib.Brotli.Encode.Build{
             var typeCodeFreq = new FrequencyList<BlockTypeCode>();
             var lengthCodeFreq = new FrequencyList<BlockLengthCode>{ BlockLengthCode.MakeCode(InitialLength) };
 
-            for(int index = 0; index < commands.Count; index++){
-                var command = commands[index];
-
-                var codes = tracker.FindCodes(command.Type);
-                var code = codes.Count > 1 ? parameters.BlockTypeCodePicker(codes, typeCodeFreq) : codes[0];
-
-                typeCodeFreq.Add(code);
+            foreach(var command in commands){
+                var typeCodes = tracker.FindCodes(command.Type);
+                var typeCode = typeCodes.Count > 1 ? parameters.BlockTypeCodePicker(typeCodes, typeCodeFreq) : typeCodes[0];
 
                 int length;
 
-                if (command.Length == FinalBlockSwitchLengthPlaceholder){
-                    if (index != commands.Count - 1){
-                        throw new InvalidOperationException("Block-switch command that is marked as final must be the last.");
-                    }
-
+                if (command.Length == FinalCommandLengthPlaceholder){
                     length = remainingLength;
                     
                     commandsFinal = new List<BlockSwitchCommand>(commands);
@@ -101,8 +120,17 @@ namespace BrotliLib.Brotli.Encode.Build{
                     length = command.Length;
                 }
 
+                typeCodeFreq.Add(typeCode);
                 lengthCodeFreq.Add(BlockLengthCode.MakeCode(length));
+
                 remainingLength -= length;
+
+                if (remainingLength < 0){
+                    long totalCommandLength = InitialLength + commands.Sum(cmd => cmd.Length == FinalCommandLengthPlaceholder ? 0L : cmd.Length);
+                    bool hasFinalCommand = commands.Any(cmd => cmd.Length == FinalCommandLengthPlaceholder);
+
+                    throw new InvalidOperationException("Block-switch command lengths exceed the actual amount of symbols in " + Category + " category (total " + totalCommandLength + (hasFinalCommand ? "+final" : "") + ", actual " + totalLength + ").");
+                }
             }
 
             if (remainingLength > 0){
