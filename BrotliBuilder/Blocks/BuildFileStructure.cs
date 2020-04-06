@@ -179,19 +179,12 @@ namespace BrotliBuilder.Blocks{
             }
 
             public Func<IBuildingBlockContext, UserControl>? CreateStructureBlock(){
-                switch(Value){
-                    case MetaBlock.PaddedEmpty pe:
-                        return ctx => new BuildEmptyMetaBlock(ctx, pe);
-
-                    case MetaBlock.Uncompressed u:
-                        return ctx => new BuildUncompressedMetaBlock(ctx, u);
-
-                    case MetaBlock.Compressed c:
-                        // TODO
-
-                    default:
-                        return null;
-                }
+                return Value switch{
+                    MetaBlock.PaddedEmpty pe => ctx => new BuildEmptyMetaBlock(ctx, pe),
+                    MetaBlock.Uncompressed u => ctx => new BuildUncompressedMetaBlock(ctx, u),
+                    MetaBlock.Compressed   c => ctx => new BuildCompressedMetaBlock(c),
+                    _                        => null
+                };
             }
 
             public void HandleNotification(EventArgs args){
@@ -211,30 +204,13 @@ namespace BrotliBuilder.Blocks{
                     return n.ToString("N0", Program.Culture);
                 }
 
-                string detail;
-
-                switch(Value){
-                    case MetaBlock.LastEmpty _:
-                        detail = "Empty, Last";
-                        break;
-
-                    case MetaBlock.PaddedEmpty pe:
-                        int length = pe.HiddenData.Length;
-                        detail = length == 0 ? "Empty, Padded" : $"Empty, Skip {Number(length)} B";
-                        break;
-
-                    case MetaBlock.Uncompressed u:
-                        detail = $"Uncompressed, {Number(u.DataLength.UncompressedBytes)} B";
-                        break;
-
-                    case MetaBlock.Compressed c:
-                        detail = $"Compressed, {Number(c.DataLength.UncompressedBytes)} B";
-                        break;
-
-                    default:
-                        detail = "Unknown";
-                        break;
-                }
+                var detail = Value switch{
+                    MetaBlock.LastEmpty    _ => "Empty, Last",
+                    MetaBlock.PaddedEmpty pe => pe.HiddenDataLength == 0 ? "Empty, Padded" : $"Empty, Skip {Number(pe.HiddenDataLength)} B",
+                    MetaBlock.Uncompressed u => $"Uncompressed, {Number(u.DataLength.UncompressedBytes)} B",
+                    MetaBlock.Compressed   c => $"Compressed, {Number(c.DataLength.UncompressedBytes)} B",
+                    _ => "Unknown"
+                };
 
                 return $"Meta-Block ({detail})";
             }

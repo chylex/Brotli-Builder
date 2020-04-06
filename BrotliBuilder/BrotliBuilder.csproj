@@ -53,6 +53,12 @@
     <Compile Update="Blocks\Structure\BuildUncompressedMetaBlock.Designer.cs">
       <DependentUpon>BuildUncompressedMetaBlock.cs</DependentUpon>
     </Compile>
+    <Compile Update="Blocks\Structure\BuildCompressedMetaBlock.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Blocks\Structure\BuildCompressedMetaBlock.Designer.cs">
+      <DependentUpon>BuildCompressedMetaBlock.cs</DependentUpon>
+    </Compile>
     <Compile Update="Blocks\Structure\BuildWindowSize.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -97,6 +103,9 @@
     </EmbeddedResource>
     <EmbeddedResource Update="Blocks\Structure\BuildUncompressedMetaBlock.resx">
       <DependentUpon>BuildUncompressedMetaBlock.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Blocks\Structure\BuildCompressedMetaBlock.resx">
+      <DependentUpon>BuildCompressedMetaBlock.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Blocks\Structure\BuildWindowSize.resx">
       <DependentUpon>BuildWindowSize.cs</DependentUpon>
