@@ -54,10 +54,10 @@ namespace BrotliLib.Brotli.Encode.Build{
                 throw new InvalidOperationException("Cannot add another block-switch command after the final command.");
             }
             else if (lastCommand?.Type == type){
-                commands[^1] = new BlockSwitchCommand(type, length + lastCommand.Length);
+                commands[^1] = new BlockSwitchCommand((byte)type, length + lastCommand.Length);
             }
             else{
-                commands.Add(new BlockSwitchCommand(type, length));
+                commands.Add(new BlockSwitchCommand((byte)type, length));
             }
 
             return this;
@@ -67,10 +67,10 @@ namespace BrotliLib.Brotli.Encode.Build{
             var lastCommand = LastCommand;
 
             if (lastCommand?.Type == type){
-                commands[^1] = new BlockSwitchCommand(type, FinalCommandLengthPlaceholder);
+                commands[^1] = new BlockSwitchCommand((byte)type, FinalCommandLengthPlaceholder);
             }
             else if (lastCommand?.Length != FinalCommandLengthPlaceholder){
-                commands.Add(new BlockSwitchCommand(type, FinalCommandLengthPlaceholder));
+                commands.Add(new BlockSwitchCommand((byte)type, FinalCommandLengthPlaceholder));
             }
             else{
                 throw new InvalidOperationException("Cannot add another block-switch command after the final command.");
@@ -94,6 +94,10 @@ namespace BrotliLib.Brotli.Encode.Build{
 
             if (InitialLength < 1){
                 throw new InvalidOperationException("Initial block length must be at least 1.");
+            }
+
+            if (InitialLength >= totalLength){
+                throw new InvalidOperationException("Initial block length must not cover or exceed all symbols (" + InitialLength + " >= " + totalLength + ").");
             }
 
             var commandsFinal = commands;

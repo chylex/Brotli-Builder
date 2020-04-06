@@ -17,27 +17,35 @@ namespace BrotliLib.Brotli.Components.Data{
         public const int MinLength = 1;
         public const int MaxLength = 16625 + (1 << 24) - 1;
 
+        public static readonly IntRange LengthRange = new IntRange(MinLength, MaxLength);
+
         public static readonly AlphabetSize AlphabetSize = new AlphabetSize(26);
         public static readonly BlockLengthCodeTree.Context TreeContext = new BlockLengthCodeTree.Context(AlphabetSize, value => new BlockLengthCode(value), symbol => symbol.Code);
 
         // Block length tables
 
-        private static readonly int[] BlockLengthExtraBits = {
+        private static readonly int[] BlockLengthCodeExtraBits = {
             2, 2, 2,  2,  3,  3,  3,  3, 4,
             4, 4, 4,  5,  5,  5,  5,  6, 6,
             7, 8, 9, 10, 11, 12, 13, 24,
         };
 
-        private static readonly int[] BlockLengthOffsets = {
+        private static readonly int[] BlockLengthCodeOffsets = {
               1,   5,   9,   13,   17,   25,   33,    41,  49,
              65,  81,  97,  113,  145,  177,  209,   241, 305,
             369, 497, 753, 1265, 2289, 4337, 8433, 16625,
         };
+        
+        private static readonly IntRange[] BlockLengthCodeRanges = BlockLengthCodeOffsets.Zip(BlockLengthCodeExtraBits, IntRange.FromOffsetBitPair).ToArray();
 
-        private static readonly IntRange[] BlockLengthRanges = BlockLengthOffsets.Zip(BlockLengthExtraBits, IntRange.FromOffsetBitPair).ToArray();
+        public static void CheckBounds(int length){
+            if (!LengthRange.Contains(length)){
+                throw new ArgumentOutOfRangeException(nameof(length), length, "Block length must be in the range " + LengthRange + ".");
+            }
+        }
 
         public static BlockLengthCode MakeCode(int length){
-            return new BlockLengthCode(CollectionHelper.FindRangeIndex(BlockLengthRanges, length));
+            return new BlockLengthCode(CollectionHelper.FindRangeIndex(BlockLengthCodeRanges, length));
         }
 
         // Data
@@ -49,15 +57,15 @@ namespace BrotliLib.Brotli.Components.Data{
         }
 
         public bool CanEncodeValue(int value){
-            return BlockLengthRanges[Code].Contains(value);
+            return BlockLengthCodeRanges[Code].Contains(value);
         }
 
         private int ReadValue(IBitReader reader){
-            return BlockLengthOffsets[Code] + reader.NextChunk(BlockLengthExtraBits[Code]);
+            return BlockLengthCodeOffsets[Code] + reader.NextChunk(BlockLengthCodeExtraBits[Code]);
         }
 
         private void WriteValue(IBitWriter writer, int value){
-            writer.WriteChunk(BlockLengthExtraBits[Code], value - BlockLengthOffsets[Code]);
+            writer.WriteChunk(BlockLengthCodeExtraBits[Code], value - BlockLengthCodeOffsets[Code]);
         }
 
         public int CompareTo(BlockLengthCode other){

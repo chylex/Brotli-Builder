@@ -6,10 +6,12 @@ using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli.Components.Data{
     public sealed class BlockSwitchCommand{
-        public int Type { get; }
+        public byte Type { get; }
         public int Length { get; }
         
-        public BlockSwitchCommand(int type, int length){
+        public BlockSwitchCommand(byte type, int length){
+            BlockLengthCode.CheckBounds(length);
+
             this.Type = type;
             this.Length = length;
         }
@@ -51,7 +53,7 @@ namespace BrotliLib.Brotli.Components.Data{
                 var info = context.Info;
 
                 var typeCode = reader.ReadValue(info.TypeCodeTree!.Root, "BTYPE (code)");
-                int typeValue = reader.MarkValue("BTYPE (value)", () => context.Tracker.NextType(typeCode));
+                byte typeValue = reader.MarkValue("BTYPE (value)", () => context.Tracker.NextType(typeCode));
                 
                 var lengthCode = reader.ReadValue(info.LengthCodeTree!.Root, "BLEN (code)");
                 int lengthValue = reader.ReadValue(BlockLengthCode.Deserialize, lengthCode, "BLEN (value)");

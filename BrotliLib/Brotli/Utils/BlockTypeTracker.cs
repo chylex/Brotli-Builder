@@ -10,18 +10,18 @@ namespace BrotliLib.Brotli.Utils{
         private static readonly BlockTypeCode Code0 = new BlockTypeCode(0);
         private static readonly BlockTypeCode Code1 = new BlockTypeCode(1);
 
-        private int Code0Value => last.Back;
-        private int Code1Value => (1 + last.Front) % count;
+        private byte Code0Value => last.Back;
+        private byte Code1Value => (byte)((1 + last.Front) % count);
 
         private readonly int count;
-        private readonly RingBuffer<int> last;
+        private readonly RingBuffer<byte> last;
         
         public BlockTypeTracker(int count){
             this.count = count;
-            this.last = new RingBuffer<int>(1, 0);
+            this.last = new RingBuffer<byte>(1, 0);
         }
 
-        public List<BlockTypeCode> FindCodes(int value){
+        public List<BlockTypeCode> FindCodes(byte value){
             var list = new List<BlockTypeCode>(3);
 
             if (value == Code0Value){
@@ -37,12 +37,12 @@ namespace BrotliLib.Brotli.Utils{
             return list;
         }
 
-        public int NextType(BlockTypeCode code){
+        public byte NextType(BlockTypeCode code){
             int id = code.Code;
-            int value = id switch{
+            byte value = id switch{
                 0 => Code0Value,
                 1 => Code1Value,
-                _ => id - 2,
+                _ => (byte)(id - 2),
             };
 
             last.Push(value);
