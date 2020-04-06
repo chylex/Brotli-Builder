@@ -168,7 +168,7 @@ namespace BrotliLib.Brotli.Encode.Build{
             // Setup
             
             var blockTypes = BlockTypes.Select(builder => builder.Build(GetTotalBlockLength(builder.Category), parameters));
-            var blockTrackers = blockTypes.Select(built => new BlockSwitchTracker.Writing(built.Info, new Queue<BlockSwitchCommand>(built.Commands)));
+            var blockTrackers = blockTypes.Select(built => new BlockSwitchTracker.Simulating(built.Info, built.Commands));
 
             var literalFreq = FrequencyList<Literal>.Array(LiteralCtxMap.TreeCount);
             var icLengthCodeFreq = FrequencyList<InsertCopyLengthCode>.Array(blockTypes[Category.InsertCopy].Info.TypeCount);
@@ -199,13 +199,13 @@ namespace BrotliLib.Brotli.Encode.Build{
 
             for(int icIndex = 0; icIndex < icCommandCount; icIndex++){
                 var icCommand = commands[icIndex];
-                int icBlockID = blockTrackers[Category.InsertCopy].SimulateCommand();
+                int icBlockID = blockTrackers[Category.InsertCopy].Advance();
                 var icFreq = icLengthCodeFreq[icBlockID];
 
                 for(int literalIndex = 0; literalIndex < icCommand.Literals.Count; literalIndex++){
                     var literal = icCommand.Literals[literalIndex];
 
-                    int blockID = blockTrackers[Category.Literal].SimulateCommand();
+                    int blockID = blockTrackers[Category.Literal].Advance();
                     int contextID = state.NextLiteralContextID(LiteralContextModes[blockID]);
                     int treeID = LiteralCtxMap.DetermineTreeID(blockID, contextID);
 
@@ -238,7 +238,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                         icLengthCode = icLengthValues.MakeCode(ImplicitDistanceCodeZero.ForceEnabled);
                     }
                     else{
-                        int blockID = blockTrackers[Category.Distance].SimulateCommand();
+                        int blockID = blockTrackers[Category.Distance].Advance();
                         int contextID = icLengthValues.DistanceContextID;
                         int treeID = DistanceCtxMap.DetermineTreeID(blockID, contextID);
 

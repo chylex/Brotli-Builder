@@ -52,10 +52,12 @@ namespace BrotliLib.Brotli.Components.Data{
             (reader, context) => {
                 CompressedHeader header = context.Header;
                 BrotliGlobalState state = context.State;
+
+                var blockTrackers = context.BlockTrackers;
                 
                 // Insert&copy lengths
                 
-                int icBlockID = context.NextBlockID(Category.InsertCopy);
+                int icBlockID = blockTrackers[Category.InsertCopy].Advance();
                 var icLengthCode = reader.ReadValue(header.InsertCopyTrees[icBlockID].Root, "length code");
                 var icLengthValues = reader.ReadValue(InsertCopyLengths.Deserialize, icLengthCode, "length values");
 
@@ -67,7 +69,7 @@ namespace BrotliLib.Brotli.Components.Data{
                 Literal[] literals = insertLength == 0 ? Array.Empty<Literal>() : new Literal[insertLength];
                 
                 for(int insertIndex = 0; insertIndex < insertLength; insertIndex++){
-                    int blockID = context.NextBlockID(Category.Literal);
+                    int blockID = blockTrackers[Category.Literal].Advance();
                     int contextID = state.NextLiteralContextID(header.LiteralCtxModes[blockID]);
                     int treeID = header.LiteralCtxMap.DetermineTreeID(blockID, contextID);
 
@@ -96,7 +98,7 @@ namespace BrotliLib.Brotli.Components.Data{
                     distanceInfo = DistanceInfo.ImplicitCodeZero;
                 }
                 else{
-                    int blockID = context.NextBlockID(Category.Distance);
+                    int blockID = blockTrackers[Category.Distance].Advance();
                     int contextID = icLengthValues.DistanceContextID;
                     int treeID = header.DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
@@ -118,6 +120,8 @@ namespace BrotliLib.Brotli.Components.Data{
         internal static readonly BitSerializer<InsertCopyCommand, CompressedData.DataContext> Serialize = (writer, obj, context) => {
             CompressedHeader header = context.Header;
             BrotliGlobalState state = context.State;
+
+            var blockTrackers = context.BlockTrackers;
             
             bool endsAfterLiterals = obj.CopyDistance == DistanceInfo.EndsAfterLiterals;
             bool implicitDistanceCodeZero = obj.CopyDistance == DistanceInfo.ImplicitCodeZero;
@@ -125,7 +129,7 @@ namespace BrotliLib.Brotli.Components.Data{
             // Insert&copy lengths
 
             InsertCopyLengths icLengths = obj.Lengths;
-            int icBlockID = context.NextBlockID(Category.InsertCopy);
+            int icBlockID = blockTrackers[Category.InsertCopy].Advance();
 
             var icLengthEntry = endsAfterLiterals ? header.InsertCopyTrees[icBlockID].FindShortest(icLengths, (code, lengths) => lengths.CanEncodeUsing(code)) 
                                                   : header.InsertCopyTrees[icBlockID].FindShortest(icLengths, implicitDistanceCodeZero, (code, lengths, dcz) => dcz == code.UseDistanceCodeZero && lengths.CanEncodeUsing(code));
@@ -138,7 +142,7 @@ namespace BrotliLib.Brotli.Components.Data{
             for(int insertIndex = 0; insertIndex < icLengths.InsertLength; insertIndex++){
                 var literal = obj.Literals[insertIndex];
 
-                int blockID = context.NextBlockID(Category.Literal);
+                int blockID = blockTrackers[Category.Literal].Advance();
                 int contextID = state.NextLiteralContextID(header.LiteralCtxModes[blockID]);
                 int treeID = header.LiteralCtxMap.DetermineTreeID(blockID, contextID);
 
@@ -155,7 +159,7 @@ namespace BrotliLib.Brotli.Components.Data{
             DistanceInfo distanceInfo = obj.CopyDistance;
             
             if (distanceInfo.HasExplicitDistanceCode()){
-                int blockID = context.NextBlockID(Category.Distance);
+                int blockID = blockTrackers[Category.Distance].Advance();
                 int contextID = icLengths.DistanceContextID;
                 int treeID = header.DistanceCtxMap.DetermineTreeID(blockID, contextID);
 
