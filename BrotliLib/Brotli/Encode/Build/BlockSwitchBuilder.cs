@@ -104,6 +104,8 @@ namespace BrotliLib.Brotli.Encode.Build{
             var typeCodeFreq = new FrequencyList<BlockTypeCode>();
             var lengthCodeFreq = new FrequencyList<BlockLengthCode>{ BlockLengthCode.MakeCode(InitialLength) };
 
+            bool previousCommandReachedEnd = false;
+
             foreach(var command in commands){
                 var typeCodes = tracker.FindCodes(command.Type);
                 var typeCode = typeCodes.Count > 1 ? parameters.BlockTypeCodePicker(typeCodes, typeCodeFreq) : typeCodes[0];
@@ -125,11 +127,17 @@ namespace BrotliLib.Brotli.Encode.Build{
 
                 remainingLength -= length;
 
-                if (remainingLength < 0){
-                    long totalCommandLength = InitialLength + commands.Sum(cmd => cmd.Length == FinalCommandLengthPlaceholder ? 0L : cmd.Length);
-                    bool hasFinalCommand = commands.Any(cmd => cmd.Length == FinalCommandLengthPlaceholder);
-
-                    throw new InvalidOperationException("Block-switch command lengths exceed the actual amount of symbols in " + Category + " category (total " + totalCommandLength + (hasFinalCommand ? "+final" : "") + ", actual " + totalLength + ").");
+                if (remainingLength <= 0){
+                    if (!previousCommandReachedEnd){
+                        previousCommandReachedEnd = true;
+                    }
+                    else{
+                        long totalCommandLength = InitialLength + commands.Sum(cmd => cmd.Length == FinalCommandLengthPlaceholder ? 0L : cmd.Length);
+                        bool hasFinalCommand = commands.Any(cmd => cmd.Length == FinalCommandLengthPlaceholder);
+                        
+                        string totalStr = totalCommandLength + (hasFinalCommand ? "+final" : "");
+                        throw new InvalidOperationException("Non-last block-switch command length exceeded the actual amount of symbols in " + Category + " category (total " + totalStr + ", actual " + totalLength + ").");
+                    }
                 }
             }
 
