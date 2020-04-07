@@ -14,11 +14,11 @@ namespace BrotliLib.Brotli.Utils{
         private byte Code1Value => (byte)((1 + last.Front) % count);
 
         private readonly int count;
-        private readonly RingBuffer<byte> last;
+        private readonly RingBufferFast<byte> last;
         
         public BlockTypeTracker(int count){
             this.count = count;
-            this.last = new RingBuffer<byte>(1, 0);
+            this.last = RingBufferFast<byte>.From(1, 0);
         }
 
         public List<BlockTypeCode> FindCodes(byte value){
