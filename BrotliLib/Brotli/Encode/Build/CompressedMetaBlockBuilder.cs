@@ -197,6 +197,8 @@ namespace BrotliLib.Brotli.Encode.Build{
             
             // Command processing
 
+            var validDistanceCodes = new List<DistanceCode>(5);
+
             for(int icIndex = 0; icIndex < icCommandCount; icIndex++){
                 var icCommand = commands[icIndex];
                 int icBlockID = blockTrackers[Category.InsertCopy].Advance();
@@ -232,9 +234,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                     }
                 }
                 else{
-                    var distanceCodes = icCommand.CopyDistance.MakeCode(DistanceParameters, state);
-                    
-                    if (distanceCodes == null){
+                    if (!icCommand.CopyDistance.FindCodes(DistanceParameters, state, validDistanceCodes)){
                         icLengthCode = icLengthValues.MakeCode(ImplicitDistanceCodeZero.ForceEnabled);
                     }
                     else{
@@ -249,7 +249,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                             distanceCode = DistanceCode.Zero;
                         }
                         else{
-                            distanceCode = distanceCodes.Count > 1 ? parameters.DistanceCodePicker(distanceCodes, distanceFreq) : distanceCodes[0];
+                            distanceCode = validDistanceCodes.Count > 1 ? parameters.DistanceCodePicker(validDistanceCodes, distanceFreq) : validDistanceCodes[0];
 
                             if (distanceCode.Equals(DistanceCode.Zero)){
                                 throw new InvalidOperationException("Cannot pick distance code zero for an insert&copy command that does not explicitly request it.");

@@ -43,6 +43,10 @@ namespace BrotliLib.Brotli.Components.Data{
 
         // Object
 
+        public bool Equals(DistanceCode code){
+            return Code == code.Code;
+        }
+
         public override bool Equals(object obj){
             return obj is DistanceCode code &&
                    Code == code.Code;
@@ -58,23 +62,21 @@ namespace BrotliLib.Brotli.Components.Data{
 
         // Types
 
-        public static List<DistanceCode> ForValue(in DistanceParameters parameters, BrotliGlobalState state, int value, bool allowCodeZero = true){
-            List<DistanceCode> valid = new List<DistanceCode>(3);
+        internal static void ForValueExcludingCodeZero(in DistanceParameters parameters, BrotliGlobalState state, int value, List<DistanceCode> outputCodes){
+            outputCodes.Clear();
 
-            for(int code = allowCodeZero ? 0 : 1; code < Last.CodeCount; code++){
+            for(int code = 1; code < Last.CodeCount; code++){
                 if (Last.Codes[code].CanEncodeValue(state, value)){
-                    valid.Add(Last.Codes[code]);
+                    outputCodes.Add(Last.Codes[code]);
                 }
             }
 
             if (value <= parameters.DirectCodeCount){
-                valid.Add(new Direct(value + DirectCodeOffset));
+                outputCodes.Add(new Direct(value + DirectCodeOffset));
             }
             else{
-                valid.Add(Complex.ForValue(parameters, value));
+                outputCodes.Add(Complex.ForValue(parameters, value));
             }
-
-            return valid;
         }
 
         public static DistanceCode Create(in DistanceParameters parameters, int code){
@@ -95,33 +97,33 @@ namespace BrotliLib.Brotli.Components.Data{
         // Context
 
         internal readonly struct DistanceContext{
-            private readonly DistanceCode code;
-            private readonly BrotliGlobalState state;
+            public DistanceCode Code { get; }
+            public BrotliGlobalState State { get; }
 
             public DistanceContext(DistanceCode code, BrotliGlobalState state){
-                this.code = code;
-                this.state = state;
-            }
-
-            internal DistanceInfo Read(IBitReader reader){
-                if (code.Code == 0){
-                    return DistanceInfo.ExplicitCodeZero;
-                }
-                else{
-                    return (DistanceInfo)code.ReadValue(state, reader);
-                }
-            }
-
-            internal void Write(IBitWriter writer, DistanceInfo info){
-                if (info >= DistanceInfo.FirstExactValue){
-                    code.WriteValue(state, info.GetValue(state), writer);
-                }
+                this.Code = code;
+                this.State = state;
             }
         }
 
         // Serialization
 
-        internal static readonly BitDeserializer<DistanceInfo, DistanceContext> Deserialize = (reader, context) => context.Read(reader);
-        internal static readonly BitSerializer<DistanceInfo, DistanceContext> Serialize = (writer, obj, context) => context.Write(writer, obj);
+        internal static readonly BitDeserializer<DistanceInfo, DistanceContext> Deserialize = (reader, context) => {
+            var code = context.Code;
+
+            if (code.Equals(Zero)){
+                return DistanceInfo.ExplicitCodeZero;
+            }
+            else{
+                return (DistanceInfo)code.ReadValue(context.State, reader);
+            }
+        };
+
+        internal static readonly BitSerializer<DistanceInfo, DistanceContext> Serialize = (writer, obj, context) => {
+            if (obj >= DistanceInfo.FirstExactValue){
+                var state = context.State;
+                context.Code.WriteValue(state, obj.GetValue(state), writer);
+            }
+        };
     }
 }

@@ -27,6 +27,12 @@ namespace BrotliLib.Brotli.Components.Data{
         
         public InsertCopyCommand(IList<Literal> literals, int copyLength, int copyDistance) : this(literals, copyLength, (DistanceInfo)copyDistance){}
 
+        private InsertCopyCommand(Literal[] literals, int copyLength, DistanceInfo copyDistance){
+            this.Literals = literals;
+            this.CopyLength = copyLength;
+            this.CopyDistance = copyDistance;
+        }
+
         // Object
 
         public override bool Equals(object obj){
@@ -87,7 +93,7 @@ namespace BrotliLib.Brotli.Components.Data{
                 }
 
                 if (!context.NeedsMoreData){
-                    return new InsertCopyCommand(literals, copyLength);
+                    return new InsertCopyCommand(literals, copyLength, DistanceInfo.EndsAfterLiterals);
                 }
 
                 // Distance

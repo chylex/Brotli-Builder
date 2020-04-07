@@ -65,17 +65,20 @@ namespace BrotliLib.Brotli.Components.Data{
             }
         }
 
-        public static List<DistanceCode>? MakeCode(this DistanceInfo info, in DistanceParameters parameters, BrotliGlobalState state){
+        public static bool FindCodes(this DistanceInfo info, in DistanceParameters parameters, BrotliGlobalState state, List<DistanceCode> outputCodes){
             switch(info){
                 case DistanceInfo.EndsAfterLiterals:
                 case DistanceInfo.ImplicitCodeZero:
-                    return null;
+                    return false;
                     
                 case DistanceInfo.ExplicitCodeZero:
-                    return new List<DistanceCode>{ DistanceCode.Zero };
+                    outputCodes.Clear();
+                    outputCodes.Add(DistanceCode.Zero);
+                    return true;
 
                 default:
-                    return DistanceCode.ForValue(parameters, state, (int)info, allowCodeZero: false);
+                    DistanceCode.ForValueExcludingCodeZero(in parameters, state, (int)info, outputCodes);
+                    return true;
             }
         }
     }

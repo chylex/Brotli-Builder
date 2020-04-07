@@ -97,11 +97,8 @@ namespace BrotliLib.Brotli.Components.Data{
         /// Constructs an <see cref="InsertCopyLengthCode"/> that can encode the stored lengths, and can therefore be used as context in the <see cref="Serialize"/>.
         /// </summary>
         public InsertCopyLengthCode MakeCode(ImplicitDistanceCodeZero implicitDCZ){
-            int insertLength = InsertLength;
-            int copyLength = CopyLength;
-
-            int insertCode = CollectionHelper.FindRangeIndex(InsertCodeRanges, insertLength);
-            int copyCode = CollectionHelper.FindRangeIndex(CopyCodeRanges, copyLength);
+            int insertCode = CollectionHelper.FindRangeIndex(InsertCodeRanges, InsertLength);
+            int copyCode = CollectionHelper.FindRangeIndex(CopyCodeRanges, CopyLength);
 
             return new InsertCopyLengthCode(insertCode, copyCode, implicitDCZ);
         }
