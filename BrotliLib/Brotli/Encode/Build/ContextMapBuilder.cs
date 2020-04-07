@@ -8,12 +8,16 @@ namespace BrotliLib.Brotli.Encode.Build{
     public abstract class ContextMapBuilder{
         public sealed class Literals : ContextMapBuilder{
             public static readonly ContextMap Simple = new Literals(1).Build();
+
             public Literals(int blockTypeCount) : base(Category.Literal, blockTypeCount){}
+            public Literals(CompressedMetaBlockBuilder builder) : this(builder.BlockTypes[Category.Literal].TypeCount){}
         }
 
         public sealed class Distances : ContextMapBuilder{
             public static readonly ContextMap Simple = new Distances(1).Build();
+
             public Distances(int blockTypeCount) : base(Category.Distance, blockTypeCount){}
+            public Distances(CompressedMetaBlockBuilder builder) : this(builder.BlockTypes[Category.Distance].TypeCount){}
         }
 
         public static ContextMapBuilder For(BlockTypeInfo blockTypeInfo){
