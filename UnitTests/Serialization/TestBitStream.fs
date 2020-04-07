@@ -2,6 +2,7 @@
 
 open Xunit
 open System
+open System.Linq;
 open BrotliLib.Serialization
 
 
@@ -62,6 +63,14 @@ module Representations =
     let ``constructing from string yields correct byte array representation with zero padding`` (bits: string, [<ParamArray>] bytes: byte array) =
         Assert.Equal<byte array>(bytes, BitStream(bits).ToByteArray())
         
+    [<Fact>]
+    let ``constructing various lengths yields correct enumeration size for all lengths`` () =
+        let stream = BitStream()
+
+        for i in 0..256 do
+            stream.Add(i % 2 = 0)
+            Assert.Equal(stream.Length, stream.Count())
+
 
 module Equality =
     let equal : obj array seq = seq {

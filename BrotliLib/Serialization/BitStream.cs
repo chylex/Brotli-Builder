@@ -27,7 +27,7 @@ namespace BrotliLib.Serialization{
 
         public int Length { get; private set; }
         
-        private readonly List<ulong> entryCollection = new List<ulong>(128);
+        private readonly List<ulong> entryCollection;
         private int LastEntryIndex => entryCollection.Count - 1;
         
         #region Construction
@@ -36,7 +36,7 @@ namespace BrotliLib.Serialization{
         /// Initializes an empty <see cref="BitStream"/>.
         /// </summary>
         public BitStream(){
-            this.entryCollection.Add(0UL);
+            this.entryCollection = new List<ulong>(128){ 0UL };
         }
 
         /// <summary>
@@ -58,7 +58,9 @@ namespace BrotliLib.Serialization{
         /// Initializes a <see cref="BitStream"/> from a byte array.
         /// </summary>
         /// <param name="bytes">Input byte array segment.</param>
-        public BitStream(byte[] bytes) : this(){
+        public BitStream(byte[] bytes){
+            this.entryCollection = new List<ulong>(1 + (bytes.Length / BytesPerEntry)){ 0UL };
+
             foreach(byte value in bytes){
                 int offset = PrepareOffsetForNextBit();
                 
@@ -72,7 +74,7 @@ namespace BrotliLib.Serialization{
         /// </summary>
         /// <param name="source">Source stream.</param>
         private BitStream(BitStream source){
-            this.entryCollection.AddRange(source.entryCollection);
+            this.entryCollection = new List<ulong>(source.entryCollection);
             this.Length = source.Length;
         }
 
@@ -169,16 +171,31 @@ namespace BrotliLib.Serialization{
         /// Returns an enumerator that traverses the stream, converting 0s to false, and 1s to true.
         /// </summary>
         public IEnumerator<bool> GetEnumerator(){
-            int bitsLeft = Length;
+            if (Length == 0){
+                yield break;
+            }
 
-            foreach(ulong bitEntry in entryCollection){
+            for(int index = 0, count = entryCollection.Count - 1; index < count; index++){
+                ulong bitEntry = entryCollection[index];
+
                 for(int bitIndex = 0; bitIndex < BitEntrySize; bitIndex++){
-                    if (--bitsLeft < 0){
-                        yield break;
-                    }
-
                     yield return (bitEntry & (1UL << bitIndex)) != 0;
                 }
+            }
+            
+            ulong lastBitEntry = entryCollection[^1];
+            int bitsLeft = Length & BitEntryMask;
+
+            if (bitsLeft == 0){
+                bitsLeft = BitEntrySize;
+            }
+
+            for(int bitIndex = 0; bitIndex < BitEntrySize; bitIndex++){
+                if (--bitsLeft < 0){
+                    yield break;
+                }
+
+                yield return (lastBitEntry & (1UL << bitIndex)) != 0;
             }
         }
 
@@ -199,7 +216,7 @@ namespace BrotliLib.Serialization{
         /// Converts the stream into a byte array, with zero padding at the end if needed.
         /// </summary>
         public byte[] ToByteArray(){
-            const int ByteMask = (1 << ByteSize) - 1;
+            const int ByteValueMask = (1 << ByteSize) - 1;
 
             byte[] bytes = new byte[(Length + ByteSize - 1) / ByteSize];
             int index = -1;
@@ -209,14 +226,14 @@ namespace BrotliLib.Serialization{
                     break;
                 }
 
-                bytes[index] = (byte)(bitEntry & ByteMask);
+                bytes[index] = (byte)(bitEntry & ByteValueMask);
 
                 for(int byteOffset = 1; byteOffset < BytesPerEntry; byteOffset++){
                     if (++index >= bytes.Length){
                         break;
                     }
 
-                    bytes[index] = (byte)((bitEntry >> (ByteSize * byteOffset)) & ByteMask);
+                    bytes[index] = (byte)((bitEntry >> (ByteSize * byteOffset)) & ByteValueMask);
                 }
             }
 
