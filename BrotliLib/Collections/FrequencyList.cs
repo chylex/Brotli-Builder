@@ -34,8 +34,8 @@ namespace BrotliLib.Collections{
         public int Count => frequencies.Count;
         public int Sum => frequencies.Sum(kvp => kvp.Value);
 
-        public IList<HuffmanGenerator<T>.SymbolFreq> HuffmanFreq{
-            get => frequencies.Select(kvp => new HuffmanGenerator<T>.SymbolFreq(kvp.Key, kvp.Value)).ToArray();
+        public IEnumerable<HuffmanGenerator<T>.SymbolFreq> HuffmanFreq{
+            get => frequencies.Select(kvp => new HuffmanGenerator<T>.SymbolFreq(kvp.Key, kvp.Value));
         }
 
         public int this[T symbol]{

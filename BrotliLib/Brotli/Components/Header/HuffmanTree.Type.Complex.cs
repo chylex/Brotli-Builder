@@ -95,7 +95,7 @@ namespace BrotliLib.Brotli.Components.Header{
 
                     reader.MarkEndTitle("Symbols");
 
-                    return new HuffmanTree<T>(HuffmanGenerator<T>.FromBitCountsCanonical(symbolEntries));
+                    return new HuffmanTree<T>(HuffmanGenerator<T>.FromBitCountsCanonical(symbolEntries.ToArray()));
                 }
             );
 

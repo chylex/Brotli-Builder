@@ -35,7 +35,7 @@ namespace BrotliLib.Brotli.Components.Header{
                 return new HuffmanTree<T>(new HuffmanNode<T>.Leaf(symbolFrequencies.First()));
             }
             else{
-                return new HuffmanTree<T>(HuffmanGenerator<T>.FromFrequenciesCanonical(symbolFrequencies.HuffmanFreq, maxDepth));
+                return new HuffmanTree<T>(HuffmanGenerator<T>.FromFrequenciesCanonical(symbolFrequencies.HuffmanFreq.ToArray(), maxDepth));
             }
         }
 
