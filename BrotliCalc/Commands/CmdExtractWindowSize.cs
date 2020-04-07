@@ -23,8 +23,8 @@ namespace BrotliCalc.Commands{
                     sizes[level + 1] = compressed.Reader.Parameters.WindowSize.Bits;
                 }
             }
-
-            yield return new object[]{ file.Name }.Concat(sizes.Cast<object>()).ToArray();
+            
+            yield return sizes.Cast<object>().Prepend(file.Name).ToArray();
         }
     }
 }

@@ -33,7 +33,7 @@ namespace BrotliImpl.Utils{
             }
 
             internal override int AddCommand(CompressedMetaBlockBuilder builder, IList<Literal> literals){
-                builder.AddInsertCopy(literals, entry);
+                builder.AddInsertCopy(literals, in entry);
                 return entry.OutputLength;
             }
         }

@@ -102,7 +102,7 @@ namespace BrotliImpl.Encoders{
             var nextLiteralBatch = new List<Literal>();
 
             for(int index = 0; index < length;){
-                var copy = FindCopy(info.FileParameters, bytes, index, DataLength.MaxUncompressedBytes - nextLiteralBatch.Count);
+                var copy = FindCopy(info.FileParameters, in bytes, index, DataLength.MaxUncompressedBytes - nextLiteralBatch.Count);
                 int mbSize;
 
                 if (copy == null){

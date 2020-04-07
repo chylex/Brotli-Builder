@@ -54,7 +54,7 @@ namespace BrotliLib.Brotli.Components.Header{
         
         // Helpers
 
-        public struct Run{
+        public readonly struct Run{
             public const int MinSpecialCodeLength = 2;
 
             /// <summary>

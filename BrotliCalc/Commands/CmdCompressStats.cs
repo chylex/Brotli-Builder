@@ -24,7 +24,7 @@ namespace BrotliCalc.Commands{
                 }
             }
 
-            yield return new object[]{ file.Name }.Concat(sizes.Cast<object>()).ToArray();
+            yield return sizes.Cast<object>().Prepend(file.Name).ToArray();
         }
     }
 }

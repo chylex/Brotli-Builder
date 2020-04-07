@@ -48,7 +48,7 @@ namespace BrotliImpl.Combined{
             /// Adapted from https://github.com/google/brotli/blob/master/c/enc/compress_fragment.c (BuildAndStoreLiteralPrefixCode).
             /// </summary>
             public static (HuffmanTree<Literal>, int) EstimateLiteralRatio(in ArraySegment<byte> bytes){
-                var literalHistogram = SampleLiterals(bytes);
+                var literalHistogram = SampleLiterals(in bytes);
                 var literalTree = HuffmanTree<Literal>.FromSymbols(literalHistogram);
 
                 int histogramTotal = literalHistogram.Sum(literal => literalHistogram[literal]);

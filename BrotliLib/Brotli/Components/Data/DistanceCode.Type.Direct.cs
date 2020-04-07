@@ -16,7 +16,7 @@ namespace BrotliLib.Brotli.Components.Data{
                 this.encodedValue = code - DirectCodeOffset;
 
                 if (this.encodedValue < 1 || this.encodedValue > DistanceParameters.MaxDirectCodeCount){
-                    throw new ArgumentOutOfRangeException(nameof(code), "Direct distance codes (normalized) must be within range [1; " + DistanceParameters.MaxDirectCodeCount + "].");
+                    throw new ArgumentOutOfRangeException(nameof(code), "Direct distance codes (normalized) must be in the range [1; " + DistanceParameters.MaxDirectCodeCount + "].");
                 }
             }
 

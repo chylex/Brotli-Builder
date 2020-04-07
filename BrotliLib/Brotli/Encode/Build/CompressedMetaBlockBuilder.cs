@@ -136,7 +136,7 @@ namespace BrotliLib.Brotli.Encode.Build{
             }
         }
 
-        public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, DictionaryIndexEntry dictionaryEntry, DistanceCodeZeroStrategy dczStrategy = PreferImplicit){
+        public CompressedMetaBlockBuilder AddInsertCopy(IList<Literal> literals, in DictionaryIndexEntry dictionaryEntry, DistanceCodeZeroStrategy dczStrategy = PreferImplicit){
             var startDistance = 1 + Math.Min(intermediateState.Parameters.WindowSize.Bytes, intermediateState.OutputSize + literals.Count);
             var entryDistance = dictionaryEntry.Packed + startDistance;
 
@@ -151,8 +151,8 @@ namespace BrotliLib.Brotli.Encode.Build{
             return AddInsertCopy(Array.Empty<Literal>(), copyLength, copyDistance, dczStrategy);
         }
 
-        public CompressedMetaBlockBuilder AddCopy(DictionaryIndexEntry dictionaryEntry, DistanceCodeZeroStrategy dczStrategy = PreferImplicit){
-            return AddInsertCopy(Array.Empty<Literal>(), dictionaryEntry, dczStrategy);
+        public CompressedMetaBlockBuilder AddCopy(in DictionaryIndexEntry dictionaryEntry, DistanceCodeZeroStrategy dczStrategy = PreferImplicit){
+            return AddInsertCopy(Array.Empty<Literal>(), in dictionaryEntry, dczStrategy);
         }
 
         // Building

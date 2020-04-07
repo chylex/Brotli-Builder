@@ -27,7 +27,7 @@ namespace BrotliCalc.Commands{
             var wbits = args.Length >= 3 ? new WindowSize(int.Parse(args[2])).Bits : AutoWindowSize;
 
             if (!qualities.Values.All(QualityRange.Contains)){
-                throw new ArgumentException($"Compression quality must be in range {QualityRange}.");
+                throw new ArgumentException($"Compression quality must be in the range {QualityRange}.");
             }
 
             var groups = Brotli.ListPath(path).ToArray();
