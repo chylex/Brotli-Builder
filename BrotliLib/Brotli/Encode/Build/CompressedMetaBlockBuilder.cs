@@ -275,6 +275,12 @@ namespace BrotliLib.Brotli.Encode.Build{
                 }
             }
 
+            foreach(var icLengthCodeList in icLengthCodeFreq){
+                if (icLengthCodeList.Count == 0){
+                    icLengthCodeList.Add(new InsertCopyLengthCode(0));
+                }
+            }
+
             foreach(var distanceCodeList in distanceCodeFreq){
                 if (distanceCodeList.Count == 0){
                     distanceCodeList.Add(DistanceCode.Zero);
