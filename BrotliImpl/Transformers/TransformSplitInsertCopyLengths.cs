@@ -17,7 +17,7 @@ namespace BrotliImpl.Transformers{
             var icCommands = builder.GetTotalBlockLength(Category.InsertCopy);
 
             icBlocks.SetInitialLength(icCommands / 2)
-                    .AddFinalBlockSwitch(1);
+                    .AddFinalBlock(1);
 
             return builder.Build(parameters);
         }
