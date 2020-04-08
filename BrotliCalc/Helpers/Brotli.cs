@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -42,6 +43,10 @@ namespace BrotliCalc.Helpers{
             BrotliFileGroup ProcessGroup(IGrouping<string, string> group){
                 var uncompressed = group.FirstOrDefault(IsUncompressed);
                 var compressed = group.Except(new string[]{ uncompressed });
+
+                if (uncompressed == null){
+                    throw new ArgumentException("Missing uncompressed file in group:\n" + string.Join(",\n", compressed), nameof(group));
+                }
                 
                 return new BrotliFileGroup(
                     new BrotliFile.Uncompressed(uncompressed, GetRelativePath(uncompressed)),
