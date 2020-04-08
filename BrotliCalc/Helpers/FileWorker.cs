@@ -27,7 +27,7 @@ namespace BrotliCalc.Helpers{
             var items = input.ToArray();
             var count = items.Length;
 
-            var results = new List<object?[]>[count];
+            var results = new List<object?[]>?[count];
             using var progress = new Progress(count);
 
             var writerToken = new CancellationTokenSource();
@@ -84,12 +84,12 @@ namespace BrotliCalc.Helpers{
 
         private class ResultWriter{
             public Table Output { get; }
-            public List<object?[]>[] Results { get; }
+            public List<object?[]>?[] Results { get; }
             public CancellationToken Token { get; }
 
             public List<int> MissingEntries { get; } = new List<int>();
 
-            public ResultWriter(Table output, List<object?[]>[] results, CancellationToken token){
+            public ResultWriter(Table output, List<object?[]>?[] results, CancellationToken token){
                 this.Output = output;
                 this.Results = results;
                 this.Token = token;
