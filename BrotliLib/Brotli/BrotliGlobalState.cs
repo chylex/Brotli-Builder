@@ -6,6 +6,7 @@ using BrotliLib.Brotli.Output;
 using BrotliLib.Brotli.Parameters;
 using BrotliLib.Brotli.Utils;
 using BrotliLib.Collections;
+using BrotliLib.Exceptions;
 
 namespace BrotliLib.Brotli{
     /// <summary>
@@ -19,6 +20,8 @@ namespace BrotliLib.Brotli{
         
         public RingBufferFast<byte> LiteralBuffer { get; }
         public RingBufferFast<int> DistanceBuffer { get; }
+
+        internal ExceptionStack Exceptions { get; }
         
         private IBrotliOutput outputState;
 
@@ -30,6 +33,8 @@ namespace BrotliLib.Brotli{
 
             this.LiteralBuffer = RingBufferFast<byte>.From(0, 0);
             this.DistanceBuffer = RingBufferFast<int>.From(16, 15, 11, 4);
+
+            this.Exceptions = new ExceptionStack();
         }
 
         public BrotliGlobalState(BrotliFileParameters parameters) : this(parameters, new BrotliOutputWindowed(parameters.WindowSize)){}
@@ -40,6 +45,8 @@ namespace BrotliLib.Brotli{
 
             this.LiteralBuffer = new RingBufferFast<byte>(original.LiteralBuffer);
             this.DistanceBuffer = new RingBufferFast<int>(original.DistanceBuffer);
+
+            this.Exceptions = new ExceptionStack(); // TODO clone
         }
 
         public BrotliGlobalState Clone(){
