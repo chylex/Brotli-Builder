@@ -5,6 +5,8 @@ open System.Collections.Generic
 open BrotliLib.Collections.Huffman
 open BrotliLib.Serialization
 
+#nowarn "0058" // dumb indentation warning
+
 
 module Helper =
     let leaf = HuffmanNode.Leaf('a')
