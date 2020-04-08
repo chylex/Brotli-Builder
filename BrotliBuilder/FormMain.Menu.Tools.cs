@@ -23,6 +23,11 @@ namespace BrotliBuilder{
             menuItemCloneOriginalToGenerated = menu.Add("Generated << Original", CloneOriginalToGenerated, isEnabled: false);
             menu.AddSeparator();
             menu.Add("Static Dictionary", OpenStaticDictionaryDialog, Shortcut.CtrlD);
+
+            if (Debugger.IsAttached){
+                menu.AddSeparator();
+                menu.Add("Debug (Break)", DebugStructure);
+            }
         }
 
         private void OpenSerializationParametersDialog(){
@@ -88,6 +93,17 @@ namespace BrotliBuilder{
                 Debug.WriteLine(ex.ToString());
                 MessageBox.Show(ex.Message, "Static Dictionary Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void DebugStructure(){
+            var original = fileOriginal.CurrentFile;
+            var generated = fileGenerated.CurrentFile;
+
+            Debugger.Break();
+
+            // ensure locals are not optimized away
+            Trace.Assert(original == null || original != null);
+            Trace.Assert(generated == null || generated != null);
         }
     }
 }
