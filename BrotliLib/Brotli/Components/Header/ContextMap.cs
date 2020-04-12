@@ -24,10 +24,10 @@ namespace BrotliLib.Brotli.Components.Header{
 
         private readonly byte[] contextMap;
 
-        public ContextMap(Category category, int treeCount, byte[] contextMap){
-            this.Category = category;
-            this.TreeCount = treeCount;
+        public ContextMap(Category category, byte[] contextMap){
             this.contextMap = CollectionHelper.Clone(contextMap);
+            this.Category = category;
+            this.TreeCount = 1 + contextMap.Max();
             this.ContextsPerBlockType = category.Contexts();
         }
 
@@ -290,7 +290,13 @@ namespace BrotliLib.Brotli.Components.Header{
                     }
                 }
 
-                return new ContextMap(category, treeCount, contextMap);
+                var constructed = new ContextMap(category, contextMap);
+
+                if (constructed.TreeCount != treeCount){
+                    throw new InvalidOperationException("Calculated context map tree count does not match the serialized number (" + constructed.TreeCount + " != " + treeCount + ").");
+                }
+
+                return constructed;
             }
         );
 

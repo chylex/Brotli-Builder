@@ -135,7 +135,7 @@ namespace BrotliLib.Brotli.Encode.Build{
         }
 
         public ContextMap Build(){
-            return new ContextMap(category, TreeCount, contextMap);
+            return new ContextMap(category, contextMap);
         }
     }
 }
