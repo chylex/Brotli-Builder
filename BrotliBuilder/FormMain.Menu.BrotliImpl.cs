@@ -32,8 +32,16 @@ namespace BrotliBuilder{
         }
 
         private void InitializeMenuTransformers(MainMenuBase.Item menu){
-            menu.Add("Rebuild",                   () => TransformCurrentFile(new TransformRebuild()));
-            menu.Add("Convert to Uncompressed",   () => TransformCurrentFile(new TransformCompressedIntoUncompressed()));
+            menu.Add("Rebuild", () => TransformCurrentFile(new TransformRebuild()));
+
+            menu.AddSeparator();
+
+            menu.Add("Convert to Uncompressed",             () => TransformCurrentFile(new TransformCompressedIntoUncompressed()));
+            menu.Add("Reset Distance Parameters",           () => TransformCurrentFile(new TransformResetDistanceParameters()));
+            menu.Add("Reset Block Splits & Context Models", () => TransformCurrentFile(new TransformResetBlockSplitsContextModels()));
+
+            menu.AddSeparator();
+
             menu.Add("Test Distance Parameters",  () => TransformCurrentFile(new TransformTestDistanceParameters()));
             menu.Add("Split Insert Copy Lengths", () => TransformCurrentFile(new TransformSplitInsertCopyLengths()));
         }
