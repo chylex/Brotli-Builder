@@ -86,11 +86,22 @@ namespace BrotliImpl.Combined.Hashers.Types{
                 DictionaryIndexEntry? bestEntry = null;
                 int bestScore = int.MinValue;
 
-                foreach(var entry in dictionary.Index.Find(new ArraySegment<byte>(input, ip, input.Length - ip), minLength: 4, maxLength)){ // TODO
+                foreach(var entry in dictionary.Index.Find(new ArraySegment<byte>(input, ip, input.Length - ip), minLength: 4, maxLength)){
+                    var copyLength = entry.CopyLength;
+                    var wordIndex = dictionary.Format.UnpackWordIndex(copyLength, entry.Packed);
+
+                    if (!LimitedDictionary.CanUseWord(copyLength, wordIndex, shallow: true)){
+                        continue;
+                    }
+
+                    var transform = dictionary.Transforms[dictionary.Format.UnpackTransformIndex(copyLength, entry.Packed)];
+
+                    if (!LimitedDictionary.CanUseTransform(transform)){
+                        continue;
+                    }
+
                     int distance = dictionaryStart + entry.Packed;
                     int score = HasherSearchResult.BackwardReferenceScore(entry.OutputLength, distance);
-
-                    // TODO investigate what the "cutoff" does
 
                     if (score > bestScore){ // TODO check distance to make sure it doesn't go beyond what can be represented?
                         bestEntry = entry;
