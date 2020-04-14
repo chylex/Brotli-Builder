@@ -139,7 +139,8 @@ namespace BrotliBuilder{
 
             switch(e.To){
                 case BrotliFileState.NoFile _:
-                    menuItemCompareMarkers!.Enabled = false;
+                    menuItemCompareMarkersWithBitCounts!.Enabled = false;
+                    menuItemCompareMarkersNoBitCounts!.Enabled = false;
                     menuItemCloneGeneratedToOriginal!.Enabled = false;
                     break;
 
@@ -183,7 +184,8 @@ namespace BrotliBuilder{
                     menuItemCloneGeneratedToOriginal!.Enabled = true;
 
                     if (brotliFilePanelOriginal.MarkerRoot != null && brotliFilePanelGenerated.MarkerRoot != null){
-                        menuItemCompareMarkers!.Enabled = true;
+                        menuItemCompareMarkersWithBitCounts!.Enabled = true;
+                        menuItemCompareMarkersNoBitCounts!.Enabled = true;
                     }
 
                     break;
@@ -203,7 +205,8 @@ namespace BrotliBuilder{
                     splitContainerRightBottom.Panel2Collapsed = true;
 
                     menuItemCloseOriginal!.Enabled = false;
-                    menuItemCompareMarkers!.Enabled = false;
+                    menuItemCompareMarkersWithBitCounts!.Enabled = false;
+                    menuItemCompareMarkersNoBitCounts!.Enabled = false;
                     menuItemCloneOriginalToGenerated!.Enabled = false;
 
                     lastOriginalFileBytes = null;

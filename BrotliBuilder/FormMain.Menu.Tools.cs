@@ -10,14 +10,16 @@ using BrotliLib.Brotli.Parameters;
 
 namespace BrotliBuilder{
     partial class FormMain{
-        private MainMenuBase.Item? menuItemCompareMarkers;
+        private MainMenuBase.Item? menuItemCompareMarkersWithBitCounts;
+        private MainMenuBase.Item? menuItemCompareMarkersNoBitCounts;
         private MainMenuBase.Item? menuItemCloneGeneratedToOriginal;
         private MainMenuBase.Item? menuItemCloneOriginalToGenerated;
 
         private void InitializeMenuTools(MainMenuBase.Item menu){
             menu.Add("Configure Serialization Parameters", OpenSerializationParametersDialog, Shortcut.CtrlP);
             menu.AddSeparator();
-            menuItemCompareMarkers = menu.Add("Compare Markers", CompareMarkers, Shortcut.CtrlM, isEnabled: false);
+            menuItemCompareMarkersWithBitCounts = menu.Add("Compare Markers (With Bit Counts)", () => CompareMarkers(true), Shortcut.CtrlM, isEnabled: false);
+            menuItemCompareMarkersNoBitCounts = menu.Add("Compare Markers (No Bit Counts)",     () => CompareMarkers(false), Shortcut.CtrlN, isEnabled: false);
             menu.AddSeparator();
             menuItemCloneGeneratedToOriginal = menu.Add("Generated >> Original", CloneGeneratedToOriginal, isEnabled: false);
             menuItemCloneOriginalToGenerated = menu.Add("Generated << Original", CloneOriginalToGenerated, isEnabled: false);
@@ -50,14 +52,14 @@ namespace BrotliBuilder{
             form.ShowDialog();
         }
 
-        private void CompareMarkers(){
+        private void CompareMarkers(bool includeBitCounts){
             if (brotliFilePanelOriginal.MarkerRoot == null || brotliFilePanelGenerated.MarkerRoot == null){
                 MessageBox.Show("No original file opened.", "Compare Markers Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            string originalText = brotliFilePanelOriginal.MarkerRoot.BuildText(includeBitCounts: true);
-            string generatedText = brotliFilePanelGenerated.MarkerRoot.BuildText(includeBitCounts: true);
+            string originalText = brotliFilePanelOriginal.MarkerRoot.BuildText(includeBitCounts);
+            string generatedText = brotliFilePanelGenerated.MarkerRoot.BuildText(includeBitCounts);
 
             try{
                 WinMerge.CompareText(originalText, generatedText);
