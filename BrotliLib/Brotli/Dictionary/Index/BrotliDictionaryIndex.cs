@@ -34,8 +34,8 @@ namespace BrotliLib.Brotli.Dictionary.Index{
                 return tree;
             });
 
-            this.transformsNoPrefix = Enumerable.Range(0, transforms.Count).Where(index => transforms[index].Prefix.Length == 0).ToList();
-            this.transformsWithPrefix = Enumerable.Range(0, transforms.Count).Where(index => transforms[index].Prefix.Length > 0).ToList();
+            this.transformsNoPrefix = Enumerable.Range(0, transforms.Count).Where(index => transforms[index].PrefixLength == 0).ToList();
+            this.transformsWithPrefix = Enumerable.Range(0, transforms.Count).Where(index => transforms[index].PrefixLength > 0).ToList();
 
             sw.Stop();
             Debug.WriteLine("Constructed dictionary index in " + sw.ElapsedMilliseconds + " ms.");
@@ -70,23 +70,20 @@ namespace BrotliLib.Brotli.Dictionary.Index{
                 }
             }
 
-            var transformsMatchingPrefix = transformsNoPrefix.Concat(transformsWithPrefix.Where(index => CollectionHelper.ContainsAt(bytes, 0, transforms[index].Prefix)));
+            var transformsMatchingPrefix = transformsNoPrefix.Concat(transformsWithPrefix.Where(index => transforms[index].MatchesPrefix(bytes)));
 
             foreach(var transform in transformsMatchingPrefix){
                 var wt = transforms[transform];
 
                 var type = wt.Type;
-                var prefix = wt.Prefix;
-                var suffix = wt.Suffix;
-
-                int prefixLength = prefix.Length;
-                int suffixLength = suffix.Length;
+                int prefixLength = wt.PrefixLength;
+                int suffixLength = wt.SuffixLength;
 
                 foreach(var (length, word) in LookupWords(type, prefixLength)){
                     int transformedLength = type.GetTransformedLength(length);
                     int outputLength = transformedLength + prefixLength + suffixLength;
 
-                    if (outputLength >= minLength && outputLength <= maxLength && CollectionHelper.ContainsAt(bytes, prefixLength + transformedLength, suffix)){
+                    if (outputLength >= minLength && outputLength <= maxLength && wt.MatchesSuffix(bytes.Slice(prefixLength + transformedLength))){
                         entries.Add(new DictionaryIndexEntry(format.GetPackedValue(length, word, transform), length, outputLength));
                     }
                 }
