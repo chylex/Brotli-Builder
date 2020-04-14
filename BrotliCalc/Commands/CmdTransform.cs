@@ -9,9 +9,10 @@ using BrotliLib.Brotli.Encode;
 namespace BrotliCalc.Commands{
     class CmdTransform : CmdAbstractFileMapper.Compressed{
         private static readonly Dictionary<string, IBrotliTransformer> Transformers = new Dictionary<string, IBrotliTransformer>{
-            { "touncompressed", new TransformCompressedIntoUncompressed() },
-            { "distanceparams", new TransformTestDistanceParameters() },
-            { "spliticlengths", new TransformSplitInsertCopyLengths() },
+            { "touncompressed",     new TransformCompressedIntoUncompressed() },
+            { "distanceparams",     new TransformTestDistanceParameters() },
+            { "spliticlengths",     new TransformSplitInsertCopyLengths() },
+            { "officiallqsplitter", new TransformOfficialBlockSplitterLQ() },
         };
 
         public static string TransformerArgumentDesc { get; }  = "<{" + string.Join('|', Transformers.Keys) + "}>";
