@@ -29,6 +29,7 @@ namespace BrotliBuilder{
             menu.Add("Quality 0", () => OpenFileWithPipeline(dictionary, new CompressQuality0()));
             menu.Add("Quality 2", () => OpenFileWithPipeline(dictionary, new CompressQuality2()));
             menu.Add("Quality 3", () => OpenFileWithPipeline(dictionary, new CompressQuality3()));
+            menu.Add("Quality 4", () => OpenFileWithPipeline(dictionary, new CompressQuality4()));
         }
 
         private void InitializeMenuTransformers(MainMenuBase.Item menu){

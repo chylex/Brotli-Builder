@@ -19,7 +19,7 @@ namespace BrotliImpl.Combined{
         [Flags]
         public enum Features{
             None = 0,
-            BlockSplit = 1, // TODO implement
+            BlockSplit = 1,
             ExtensiveReferenceSearch = 2, // TODO implement
         }
 
