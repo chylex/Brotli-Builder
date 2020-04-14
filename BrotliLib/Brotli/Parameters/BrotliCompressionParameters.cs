@@ -28,8 +28,8 @@ namespace BrotliLib.Brotli.Parameters{
             public HuffmanTreeHeuristics.Generate<BlockTypeCode>   GenerateBlockTypeCodeTree   { get; set; } = HuffmanTree<BlockTypeCode>.FromSymbols;
             public HuffmanTreeHeuristics.Generate<BlockLengthCode> GenerateBlockLengthCodeTree { get; set; } = HuffmanTree<BlockLengthCode>.FromSymbols;
 
-            public PickCodeHeuristics<DistanceCode>.Picker  DistanceCodePicker  { get; set; } = PickCodeHeuristics<DistanceCode>.PickFirstOption; // TODO
-            public PickCodeHeuristics<BlockTypeCode>.Picker BlockTypeCodePicker { get; set; } = PickCodeHeuristics<BlockTypeCode>.PickFirstOption; // TODO
+            public PickCodeHeuristics<DistanceCode>.Picker  DistanceCodePicker  { get; set; } = PickCodeHeuristics<DistanceCode>.PickFirstOption;
+            public PickCodeHeuristics<BlockTypeCode>.Picker BlockTypeCodePicker { get; set; } = PickCodeHeuristics<BlockTypeCode>.PickFirstOption;
 
             public Builder(){}
 
