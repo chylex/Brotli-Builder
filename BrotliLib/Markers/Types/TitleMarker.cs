@@ -11,7 +11,7 @@ namespace BrotliLib.Markers.Types{
         }
 
         public void ToString(StringBuilder build, int length){
-            if (length == MarkerRoot.OmitBitCounts){
+            if (length == MarkerNode.OmitBitCounts){
                 build.Append('[').Append(title).Append(']');
             }
             else{

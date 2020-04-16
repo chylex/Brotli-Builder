@@ -5,6 +5,7 @@ using BrotliLib.Brotli;
 using BrotliLib.Brotli.Encode;
 using BrotliLib.Brotli.Streaming;
 using BrotliLib.Markers;
+using BrotliLib.Markers.Builders;
 
 namespace BrotliCalc.Helpers{
     abstract class BrotliFile{
@@ -61,13 +62,13 @@ namespace BrotliCalc.Helpers{
             public override string FullName => $"{Name}.{Identifier}{Brotli.CompressedFileExtension}";
 
             public BrotliFileStructure Structure => structureLazy.Value;
-            public BrotliFileReader Reader => BrotliFileReader.FromBytes(Contents, MarkerLevel.None, Parameters.File.Dictionary);
+            public BrotliFileReader Reader => BrotliFileReader.FromBytes(Contents, Parameters.File.Dictionary);
 
             private readonly Lazy<BrotliFileStructure> structureLazy;
 
             public Compressed(string path, string name, string identifier) : base(path, name){
                 this.Identifier = identifier;
-                this.structureLazy = new Lazy<BrotliFileStructure>(() => BrotliFileStructure.FromBytes(Contents, MarkerLevel.None, Parameters.File.Dictionary).Structure, isThreadSafe: true);
+                this.structureLazy = new Lazy<BrotliFileStructure>(() => BrotliFileStructure.FromBytes(Contents, Parameters.File.Dictionary), isThreadSafe: true);
             }
 
             public BrotliFileStructure Transform(IBrotliTransformer transformer){
@@ -78,10 +79,10 @@ namespace BrotliCalc.Helpers{
                 return new BrotliFileStreamTransformer(Reader, Parameters.Compression, transformer);
             }
 
-            public MarkerRoot GenerateMarkers(MarkerLevel markerLevel){
-                var reader = BrotliFileReader.FromBytes(Contents, markerLevel, Parameters.File.Dictionary);
+            public void WriteMarkers(StreamWriter stream, bool includeBitCounts, MarkerLevel markerLevel){
+                var writer = new MarkerTextWriter(stream, includeBitCounts);
+                var reader = BrotliFileReader.FromBytes(Contents, Parameters.File.Dictionary, new MarkerSettings(markerLevel, writer));
                 while(reader.NextMetaBlock() != null){}
-                return reader.MarkerRoot;
             }
         }
     }

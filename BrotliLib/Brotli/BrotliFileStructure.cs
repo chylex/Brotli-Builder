@@ -6,6 +6,7 @@ using BrotliLib.Brotli.Output;
 using BrotliLib.Brotli.Parameters;
 using BrotliLib.Brotli.Streaming;
 using BrotliLib.Markers;
+using BrotliLib.Markers.Builders;
 using BrotliLib.Serialization;
 
 namespace BrotliLib.Brotli{
@@ -20,21 +21,27 @@ namespace BrotliLib.Brotli{
             return bfs;
         }
 
-        public static (BrotliFileStructure Structure, MarkerRoot MarkerRoot) FromBytes(byte[] bytes, MarkerLevel markerLevel, BrotliDictionary? dictionary = null){
-            return FromBytes(new BitStream(bytes), markerLevel, dictionary);
+        public static BrotliFileStructure FromBytes(BitStream bits, BrotliDictionary? dictionary = null, in MarkerSettings markerSettings = default){
+            var reader = BrotliFileReader.FromBytes(bits, dictionary, markerSettings);
+            var bfs = new BrotliFileStructure(reader.Parameters);
+
+            reader.ForEachRemainingMetaBlock(bfs.MetaBlocks.Add);
+            return bfs;
+        }
+
+        public static BrotliFileStructure FromBytes(byte[] bytes, BrotliDictionary? dictionary = null, in MarkerSettings markerSettings = default){
+            return FromBytes(new BitStream(bytes), dictionary, markerSettings);
         }
 
         public static (BrotliFileStructure Structure, MarkerRoot MarkerRoot) FromBytes(BitStream bits, MarkerLevel markerLevel, BrotliDictionary? dictionary = null){
-            var reader = BrotliFileReader.FromBytes(bits, markerLevel, dictionary);
-            var bfs = new BrotliFileStructure(reader.Parameters);
+            var markerBuilder = new MarkerRootBuilder();
+            var structure = FromBytes(bits, dictionary, new MarkerSettings(markerLevel, markerBuilder));
 
-            MetaBlock? metaBlock;
+            return (structure, markerBuilder.Root);
+        }
 
-            while((metaBlock = reader.NextMetaBlock()) != null){
-                bfs.MetaBlocks.Add(metaBlock);
-            }
-
-            return (bfs, reader.MarkerRoot);
+        public static (BrotliFileStructure Structure, MarkerRoot MarkerRoot) FromBytes(byte[] bytes, MarkerLevel markerLevel, BrotliDictionary? dictionary = null){
+            return FromBytes(new BitStream(bytes), markerLevel, dictionary);
         }
 
         public static BrotliFileStructure FromEncoder(BrotliFileParameters fileParameters, BrotliCompressionParameters compressionParameters, byte[] bytes, IBrotliEncoder encoder, params IBrotliTransformer[] transformers){

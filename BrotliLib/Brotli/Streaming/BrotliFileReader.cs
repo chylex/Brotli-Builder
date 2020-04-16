@@ -11,27 +11,25 @@ namespace BrotliLib.Brotli.Streaming{
     /// Provides a streaming meta-block deserializer as an alternative to <see cref="BrotliFileStructure"/>.
     /// </summary>
     public sealed class BrotliFileReader : IBrotliFileStream{
-        public static BrotliFileReader FromBytes(byte[] bytes, MarkerLevel markerLevel, BrotliDictionary? dictionary = null){
-            return FromBytes(new BitStream(bytes), markerLevel, dictionary);
+        public static BrotliFileReader FromBytes(byte[] bytes, BrotliDictionary? dictionary = null, in MarkerSettings markerSettings = default){
+            return FromBytes(new BitStream(bytes), dictionary, markerSettings);
         }
 
-        public static BrotliFileReader FromBytes(BitStream bits, MarkerLevel markerLevel, BrotliDictionary? dictionary = null){
-            return new BrotliFileReader(bits, markerLevel, dictionary ?? BrotliFileParameters.Default.Dictionary);
+        public static BrotliFileReader FromBytes(BitStream bits, BrotliDictionary? dictionary = null, in MarkerSettings markerSettings = default){
+            return new BrotliFileReader(bits, markerSettings, dictionary ?? BrotliFileParameters.Default.Dictionary);
         }
 
         // Instance
 
         public BrotliFileParameters Parameters { get; }
-
         public BrotliGlobalState State => state.Clone();
-        public MarkerRoot MarkerRoot => reader.MarkerRoot;
 
         private readonly IMarkedBitReader reader;
         private readonly BrotliGlobalState state;
         private bool isAtEnd = false;
 
-        private BrotliFileReader(BitStream bits, MarkerLevel markerLevel, BrotliDictionary dictionary){
-            this.reader = markerLevel.CreateBitReader(bits);
+        private BrotliFileReader(BitStream bits, in MarkerSettings markerSettings, BrotliDictionary dictionary){
+            this.reader = markerSettings.CreateBitReader(bits);
 
             this.Parameters = new BrotliFileParameters.Builder{
                 WindowSize = ReadHeader(),

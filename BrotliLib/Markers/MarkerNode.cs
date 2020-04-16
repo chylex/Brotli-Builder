@@ -2,9 +2,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 
 namespace BrotliLib.Markers{
     public sealed class MarkerNode : IEnumerable<MarkerNode>{
+        internal const int OmitBitCounts = -1;
+
         private static readonly Marker EmptyMarker = new Marker(int.MaxValue, int.MaxValue, new TextMarker("<Invalid>"));
 
         public int Depth { get; set; }
@@ -25,6 +28,16 @@ namespace BrotliLib.Markers{
             else{
                 throw new InvalidOperationException();
             }
+        }
+
+        public void WriteSelf(StringBuilder build, bool includeBitCounts){
+            build.Append('\t', Depth);
+
+            int startIndex = build.Length;
+            Marker.Info.ToString(build, includeBitCounts ? Marker.Length : OmitBitCounts);
+
+            build.Replace("\r", "\\r", startIndex, build.Length - startIndex);
+            build.Replace("\n", "\\n", startIndex, build.Length - startIndex);
         }
 
         public IEnumerator<MarkerNode> GetEnumerator(){

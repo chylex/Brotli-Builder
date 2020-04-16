@@ -4,7 +4,6 @@ using BrotliLib.Brotli;
 using BrotliLib.Brotli.Output;
 using BrotliLib.Brotli.Streaming;
 using BrotliLib.Collections;
-using BrotliLib.Markers;
 using BrotliLib.Serialization;
 
 namespace BrotliCalc.Helpers{
@@ -18,7 +17,7 @@ namespace BrotliCalc.Helpers{
         }
 
         private BitStream Validate(BitStream bits){
-            IBrotliFileStream reader = BrotliFileReader.FromBytes(bits, MarkerLevel.None, Parameters.File.Dictionary);
+            IBrotliFileStream reader = BrotliFileReader.FromBytes(bits, Parameters.File.Dictionary);
 
             var output = new BrotliOutputStored();
             var state = new BrotliGlobalState(reader.Parameters, output);

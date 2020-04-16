@@ -1,42 +1,28 @@
-﻿using System.Collections.Generic;
+﻿using BrotliLib.Markers.Builders;
 using BrotliLib.Markers.Types;
 using BrotliLib.Serialization.Reader;
 
 namespace BrotliLib.Markers.Serialization.Reader{
     class MarkedBitReader : IMarkedBitReader{
-        public MarkerRoot MarkerRoot { get; } = new MarkerRoot();
         public MarkerLevel MarkerLevel { get; }
 
         private readonly IBitReader wrapped;
+        private readonly IMarkerBuilder builder;
         
-        private readonly Stack<MarkerNode> nodes = new Stack<MarkerNode>();
-        private readonly Stack<int> starts = new Stack<int>();
-        
-        public MarkedBitReader(IBitReader wrapped, MarkerLevel level){
+        public MarkedBitReader(IBitReader wrapped, MarkerLevel level, IMarkerBuilder builder){
             this.wrapped = wrapped;
+            this.builder = builder;
             this.MarkerLevel = level;
         }
 
         // Markers
 
         public void MarkStart(){
-            MarkerNode added = new MarkerNode{ Depth = nodes.Count };
-
-            if (nodes.Count == 0){
-                MarkerRoot.AddChild(added);
-            }
-            else{
-                nodes.Peek().AddChildOrSibling(added);
-            }
-
-            starts.Push(Index);
-            nodes.Push(added);
+            builder.MarkStart(Index);
         }
 
         public void MarkEnd(IMarkerInfo info){
-            int start = starts.Pop();
-            int end = Index;
-            nodes.Pop().Marker = new Marker(start, end, info);
+            builder.MarkEnd(Index, info);
         }
 
         public void MarkEndTitle(string title){

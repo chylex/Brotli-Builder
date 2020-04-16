@@ -3,7 +3,6 @@ using BrotliLib.Serialization.Reader;
 
 namespace BrotliLib.Markers.Serialization.Reader{
     interface IMarkedBitReader : IBitReader{
-        MarkerRoot MarkerRoot { get; }
         MarkerLevel MarkerLevel { get; }
 
         void MarkStart();

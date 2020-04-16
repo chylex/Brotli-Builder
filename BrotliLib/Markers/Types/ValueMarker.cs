@@ -17,7 +17,7 @@ namespace BrotliLib.Markers.Types{
                 this.value = string.Intern("{ " + value + " }");
             }
             else if (type == TypeCode.Boolean){
-                this.value = string.Intern(((bool)value ? "TRUE" : "FALSE"));
+                this.value = (bool)value ? "TRUE" : "FALSE";
             }
             else{
                 this.value = string.Intern(value.ToString());
