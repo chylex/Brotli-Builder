@@ -61,7 +61,7 @@ namespace BrotliCalc.Helpers{
             public override string FullName => $"{Name}.{Identifier}{Brotli.CompressedFileExtension}";
 
             public BrotliFileStructure Structure => structureLazy.Value;
-            public BrotliFileReader Reader => BrotliFileReader.FromBytes(Contents, MarkerLevel.None);
+            public BrotliFileReader Reader => BrotliFileReader.FromBytes(Contents, MarkerLevel.None, Parameters.File.Dictionary);
 
             private readonly Lazy<BrotliFileStructure> structureLazy;
 
