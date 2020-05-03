@@ -11,6 +11,7 @@ namespace BrotliCalc.Commands{
         private static readonly Dictionary<string, IBrotliTransformer> Transformers = new Dictionary<string, IBrotliTransformer>{
             { "touncompressed",     new TransformCompressedIntoUncompressed() },
             { "distanceparams",     new TransformTestDistanceParameters() },
+            { "avoidlastdistcodes", new TransformAvoidLastDistanceCodes() },
             { "spliticlengths",     new TransformSplitInsertCopyLengths() },
             { "officiallqsplitter", new TransformOfficialBlockSplitterLQ() },
         };

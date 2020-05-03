@@ -44,6 +44,7 @@ namespace BrotliBuilder{
             menu.AddSeparator();
 
             menu.Add("Test Distance Parameters",     () => TransformCurrentFile(new TransformTestDistanceParameters()));
+            menu.Add("Avoid Last Distance Codes",    () => TransformCurrentFile(new TransformAvoidLastDistanceCodes()));
             menu.Add("Split Insert Copy Lengths",    () => TransformCurrentFile(new TransformSplitInsertCopyLengths()));
             menu.Add("Official Block Splitter (LQ)", () => TransformCurrentFile(new TransformOfficialBlockSplitterLQ()));
         }
