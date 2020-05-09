@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using BrotliCalc.Commands.Base;
 using BrotliCalc.Helpers;
 using BrotliLib.Brotli.Components;
@@ -14,7 +15,7 @@ namespace BrotliCalc.Commands{
 
         protected override string[] Columns { get; } = {
             "File", "Quality", "Meta-Block ID", "Meta-Block Type", "Data Length",
-            "Postfix Bits", "Direct Distance Codes",
+            "Postfix Bits", "Direct Distance Codes", "Literal Context Modes",
             "Block Types [L]", "Block Types [I]", "Block Types [D]",
             "Huffman Trees [L]", "Huffman Trees [I]", "Huffman Trees [D]",
             "Block Switch Commands [L]", "Block Switch Commands [I]", "Block Switch Commands [D]",
@@ -67,6 +68,16 @@ namespace BrotliCalc.Commands{
         private static void ExtractMetadata(List<object> row, CompressedHeader header, CompressedData data){
             row.Add(header.DistanceParameters.PostfixBitCount);
             row.Add(header.DistanceParameters.DirectCodeCount);
+
+            var lcm = header.LiteralCtxModes;
+
+            // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
+            if (Enumerable.Range(1, lcm.Count - 1).All(index => lcm[index] == lcm[0])){
+                row.Add(lcm[0].ToString());
+            }
+            else{
+                row.Add(string.Join(',', lcm.Select(mode => mode.ToString())));
+            }
 
             foreach(var category in Categories.LID){
                 row.Add(header.BlockTypes[category].TypeCount);
