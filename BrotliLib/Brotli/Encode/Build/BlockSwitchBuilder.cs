@@ -27,6 +27,10 @@ namespace BrotliLib.Brotli.Encode.Build{
         public BlockSwitchBuilder(BlockTypeInfo info){
             this.Category = info.Category;
             this.InitialLength = info.InitialLength;
+
+            if (InitialLength == BlockTypeInfo.Empty[Category].InitialLength){
+                InitialLength = 0;
+            }
         }
 
         public BlockSwitchBuilder(BlockTypeInfo info, IReadOnlyList<BlockSwitchCommand> commands) : this(info){
@@ -36,7 +40,7 @@ namespace BrotliLib.Brotli.Encode.Build{
         // Commands
 
         public BlockSwitchBuilder Reset(){
-            InitialLength = BlockTypeInfo.Empty[Category].InitialLength;
+            InitialLength = 0;
             commands.Clear();
             return this;
         }
@@ -112,7 +116,7 @@ namespace BrotliLib.Brotli.Encode.Build{
                 throw new InvalidOperationException("Initial block length must not cover or exceed all symbols (" + InitialLength + " >= " + totalLength + ").");
             }
 
-            var commandsFinal = commands;
+            var commandsFinal = new List<BlockSwitchCommand>(commands);
 
             var tracker = new BlockTypeTracker(typeCount);
             int remainingLength = totalLength - InitialLength;
@@ -130,8 +134,6 @@ namespace BrotliLib.Brotli.Encode.Build{
 
                 if (command.IsFinalPlaceholder){
                     length = remainingLength;
-                    
-                    commandsFinal = new List<BlockSwitchCommand>(commands);
                     commandsFinal[^1] = new BlockSwitchCommand(command.Type, length); // replace the last command with one that has proper length
                 }
                 else{
