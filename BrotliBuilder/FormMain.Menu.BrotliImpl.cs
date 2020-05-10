@@ -43,10 +43,11 @@ namespace BrotliBuilder{
 
             menu.AddSeparator();
 
-            menu.Add("Test Distance Parameters",     () => TransformCurrentFile(new TransformTestDistanceParameters()));
-            menu.Add("Avoid Last Distance Codes",    () => TransformCurrentFile(new TransformAvoidLastDistanceCodes()));
-            menu.Add("Split Insert Copy Lengths",    () => TransformCurrentFile(new TransformSplitInsertCopyLengths()));
-            menu.Add("Official Block Splitter (LQ)", () => TransformCurrentFile(new TransformOfficialBlockSplitterLQ()));
+            menu.Add("Test Distance Parameters",       () => TransformCurrentFile(new TransformTestDistanceParameters()));
+            menu.Add("Avoid Last Distance Codes",      () => TransformCurrentFile(new TransformAvoidLastDistanceCodes()));
+            menu.Add("Split Insert Copy Lengths",      () => TransformCurrentFile(new TransformSplitInsertCopyLengths()));
+            menu.Add("Greedy Top-Down Block Splitter", () => TransformCurrentFile(new TransformGreedyTopDownBlockSplitter()));
+            menu.Add("Official Block Splitter (LQ)",   () => TransformCurrentFile(new TransformOfficialBlockSplitterLQ()));
         }
 
         private void OpenFileWith(string title, Action<string> callback){

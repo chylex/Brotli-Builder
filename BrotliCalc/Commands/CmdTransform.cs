@@ -14,6 +14,7 @@ namespace BrotliCalc.Commands{
             { "avoidlastdistcodes", new TransformAvoidLastDistanceCodes() },
             { "spliticlengths",     new TransformSplitInsertCopyLengths() },
             { "officiallqsplitter", new TransformOfficialBlockSplitterLQ() },
+            { "greedytdsplitter",   new TransformGreedyTopDownBlockSplitter() },
         };
 
         public static string TransformerArgumentDesc { get; }  = "<{" + string.Join('|', Transformers.Keys) + "}>";
