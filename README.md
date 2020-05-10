@@ -56,6 +56,12 @@ The main library defines and provides means to the following operations:
 | **Encoding** | `byte[]` | `BrotliFileStructure` | Constructing a compressed file structure |
 | **Transforming** | `BrotliFileStructure` | `BrotliFileStructure` | Modifying a compressed file structure |
 
+All of these operations are also available as streaming APIs, for when the entire structure does not need to be loaded into memory at once:
+ - `BrotliFileReader` for deserialization
+ - `BrotliFileWriter` for serialization
+ - `BrotliFileStreamEncoder` for encoding
+ - `BrotliFileStreamTransformer` for transforming
+
 ## Compression Pipeline
 
 An encoder should focus on how to generate *insert&copy* commands and store them in a `MetaBlock` sequence. The *insert&copy* commands generate the uncompressed output from literals (bytes), backward references, and static dictionary references.
@@ -86,6 +92,6 @@ The project is written primarily in C# and built using Visual Studio 2019. Make 
 - **[.NET Core 3.0 SDK](https://dotnet.microsoft.com/download)** (included in Visual Studio v16.3)
 - **F# desktop language support** (optional, only required for unit tests)
 
-BrotliCalc requires `brotli.exe` in `BrotliCalc/Resources/` folder. You can either supply it from your own build or [official releases](https://github.com/google/brotli/releases), or remove the custom targets in `BrotliCalc.csproj`. At runtime, the executable is only needed if the batch compression command is ran, and can be supplied by the user with the `-brotliexe` command line argument.
+BrotliCalc requires a brotli executable to enable the batch compression command. This repository includes a Windows build based on the [c435f06](https://github.com/google/brotli/commit/c435f06) commit in the `BrotliCalc/Resources/` folder. You can supply your own build either by replacing the file and rebuilding BrotliCalc, or by using the `-brotliexe` command line argument.
 
 Publishing profiles are included for BrotliBuilder and BrotliCalc. The libraries can simply be built in Release configuration to generate the files.
