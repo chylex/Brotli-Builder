@@ -7,7 +7,7 @@
     <Copyright>Daniel Chýlek</Copyright>
     <RepositoryUrl>https://github.com/chylex/Brotli-Builder</RepositoryUrl>
     <Authors>Daniel Chýlek</Authors>
-    <Version>1.1.0</Version>
+    <Version>2.0.0</Version>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <Nullable>enable</Nullable>
   </PropertyGroup>
