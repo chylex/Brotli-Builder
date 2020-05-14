@@ -1,0 +1,12 @@
+\newcommand{\ttspace}{\texttt{\textvisiblespace}}
+\begin{tabular}{r|c|c|c|l}
+	ID  & Function      & Prefix   & Suffix               & Example                                                   \\ \hline
+	0   & Identity      &          &                      & \verb|time| $\rightarrow$ \verb|time|                     \\
+	1   & Identity      &          & \ttspace             & \verb|time| $\rightarrow$ \verb|time|\,\ttspace           \\
+	2   & Identity      & \ttspace & \ttspace             & \verb|time| $\rightarrow$ \ttspace\,\verb|time|\,\ttspace \\
+	3   & Omit First 1  &          &                      & \verb|time| $\rightarrow$ \verb|ime|                      \\
+	9   & Ferment First &          &                      & \verb|time| $\rightarrow$ \verb|Time|                     \\
+	49  & Omit Last 1   &          & \verb|ing|\,\ttspace & \verb|time| $\rightarrow$ \verb|timing|\,\ttspace         \\
+	67  & Identity      & \verb|.| & \verb|(|             & \verb|time| $\rightarrow$ \verb|.time(|                   \\
+	107 & Ferment All   &          & \verb|.|             & \verb|time| $\rightarrow$ \verb|TIME.|
+\end{tabular}

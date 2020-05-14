@@ -1,0 +1,97 @@
+\begin{tikzpicture}
+\begin{axis}[
+	width = 0.985\textwidth,
+	height = 2.05*\axisdefaultheight,
+	xbar,
+	xmin = 0,
+	xmax = 2010000,
+	xtick = {0, 250000, 500000, 750000, 1000000, 1250000, 1500000, 1750000, 2010000},
+	xticklabels = {0, 250K, 500K, 750K, 1M, 1.25M, 1.5M, 1.75M, 2M},
+	y dir = reverse,
+	ytick = data,
+	bar width = 4.75pt,
+	scaled ticks = false,
+	enlarge x limits = {abs = 0},
+	enlarge y limits = {abs = 0.65},
+	legend reversed,
+	legend cell align = {left},
+	legend style = {
+		at = {(0.98, 0.02)},
+		anchor = south east
+	},
+	legend image code/.code = {
+		\draw[#1] (0cm, -0.075cm) rectangle (0.2cm, 0.135cm);
+	},
+	xlabel = Total Bits Used,
+	ylabel = Quality
+]
+\legend{
+	MTF = No, RLE = Split  \\
+	MTF = No, RLE = Full   \\
+	MTF = No, RLE = No     \\
+	MTF = Yes, RLE = Split \\
+	MTF = Yes, RLE = Full  \\
+	MTF = Yes, RLE = No    \\
+}
+\addplot[blue, pattern = north east lines, pattern color = blue!30!white] coordinates {
+	(1977076, 4)
+	(1268889, 5)
+	(1284168, 6)
+	(1280449, 7)
+	(1280609, 8)
+	(1231017, 9)
+	(1173389, 10)
+	( 734348, 11)
+};
+\addplot[red, pattern = north east lines, pattern color = red!30!white] coordinates {
+	(1976132, 4)
+	(1268612, 5)
+	(1283879, 6)
+	(1280145, 7)
+	(1280285, 8)
+	(1230700, 9)
+	(1172110, 10)
+	( 732234, 11)
+};
+\addplot[brown, pattern = north east lines, pattern color = brown!30!white] coordinates {
+	(1993312, 4)
+	(1278295, 5)
+	(1293454, 6)
+	(1289767, 7)
+	(1289896, 8)
+	(1240082, 9)
+	(1177902, 10)
+	( 746310, 11)
+};
+\addplot[blue, fill = blue!30!white] coordinates {
+	( 66052, 4)
+	( 98466, 5)
+	( 98859, 6)
+	( 99001, 7)
+	(100242, 8)
+	( 98290, 9)
+	(664678, 10)
+	(417725, 11)
+};
+\addplot[red, fill = red!30!white] coordinates {
+	(65983, 4)
+	(97420, 5)
+	(97860, 6)
+	(98018, 7)
+	(99227, 8)
+	(97254, 9)
+	(660969, 10)
+	(414774, 11)
+};
+\addplot[brown, fill = brown!30!white] coordinates {
+	(305227, 4)
+	(232071, 5)
+	(233624, 6)
+	(233230, 7)
+	(234143, 8)
+	(227256, 9)
+	(688179, 10)
+	(433459, 11)
+};
+\end{axis}
+\end{tikzpicture}

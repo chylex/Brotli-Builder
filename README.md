@@ -1,6 +1,4 @@
-This is a WIP university project that implements libraries and applications that work with [Brotli](https://github.com/google/brotli) compression.
-
-Do not consider all APIs to be stable yet. Before documentation and the APIs reach a more finished state, I would recommend **reading the rest of the README**, then exploring compressed files in BrotliBuilder, and understanding the example implementations in BrotliImpl.
+This is a university project with libraries and applications that work with [Brotli](https://github.com/google/brotli) compression.
 
 | Project | Type | Framework | Description |
 | ------- | :--: | --------- | ----------- |
@@ -9,7 +7,9 @@ Do not consider all APIs to be stable yet. Before documentation and the APIs rea
 | BrotliBuilder | WinForms&nbsp;App | .NET&nbsp;Core&nbsp;3.0 | GUI for analysis of Brotli-compressed files & static dictionary |
 | BrotliCalc | Console&nbsp;App | .NET&nbsp;Core&nbsp;3.0 | CLI for batch file processing, analysis, and statistics |
 
-A cursory glance at the [Brotli format specification](https://tools.ietf.org/html/rfc7932) is recommended before looking into this project. Classes in *BrotliLib* representing the object structure, as well as the labeled bit stream in *BrotliBuilder*, can greatly help understand the specification and the principles behind how Brotli and its decompression process works.
+A cursory glance at the [thesis](https://github.com/chylex/Brotli-Builder/blob/master/Paper/BrotliCompression.pdf) is recommended before looking into this project. Classes in *BrotliLib*, which represent the object structure, as well as the labeled bit stream in *BrotliBuilder*, can greatly help understand the specification and the principles behind how Brotli and its decompression process works.
+
+The programming projects and the included [Brotli](https://github.com/google/brotli) executable are released under the [MIT license](https://github.com/chylex/Brotli-Builder/blob/master/LICENSE). The [thesis](https://github.com/chylex/Brotli-Builder/blob/master/Paper/BrotliCompression.pdf) and its source code are released under the [CC BY-SA 4.0 license](https://github.com/chylex/Brotli-Builder/tree/master/Paper/LICENSE.md).
 
 # Guide to Brotli Builder
 

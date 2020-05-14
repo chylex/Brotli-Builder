@@ -1,0 +1,108 @@
+\begin{tikzpicture}
+\begin{axis}[
+	width = 0.98\textwidth,
+	height = 1.2*\axisdefaultheight,
+	xbar,
+	xmin = 74,
+	xmax = 106,
+	xtick distance = 2,
+	xmajorgrids = true,
+	y dir = reverse,
+	ytick = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
+	yticklabels = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
+	xmajorgrids = true,
+	xminorgrids = true,
+	minor x tick num = 1,
+	minor grid style = {dashed},
+	scaled ticks = false,
+	enlarge x limits = {abs = 0},
+	enlarge y limits = {abs = 0.8},
+	xlabel = Ratio (\%),
+	ylabel = Quality
+]
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         =  96.9074,
+	lower whisker  =  75.1021,
+	upper whisker  = 100.0000,
+	lower quartile =  96.0119,
+	upper quartile =  97.4844,
+}] coordinates {};
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         =  99.8591,
+	lower whisker  =  95.5679,
+	upper whisker  = 100.0708,
+	lower quartile =  99.7010,
+	upper quartile =  99.9202,
+}] coordinates {};
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         =  99.6665,
+	lower whisker  =  82.8283,
+	upper whisker  = 100.0000,
+	lower quartile =  99.0420,
+	upper quartile =  99.7874,
+}] coordinates {};
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         = 100.0103,
+	lower whisker  =  99.9298,
+	upper whisker  = 102.1739,
+	lower quartile = 100.0040,
+	upper quartile = 100.0496,
+}] coordinates {};
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         = 100.1270,
+	lower whisker  =  99.9824,
+	upper whisker  = 103.9216,
+	lower quartile = 100.0559,
+	upper quartile = 100.4008,
+}] coordinates {};
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         = 100.1420,
+	lower whisker  =  99.9635,
+	upper whisker  = 104.8951,
+	lower quartile = 100.0556,
+	upper quartile = 100.4711,
+}] coordinates {};
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         = 100.1576,
+	lower whisker  =  99.9774,
+	upper whisker  = 104.8951,
+	lower quartile = 100.0628,
+	upper quartile = 100.4864,
+}] coordinates {};
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         = 100.1727,
+	lower whisker  =  99.9829,
+	upper whisker  = 104.8951,
+	lower quartile = 100.0649,
+	upper quartile = 100.4364,
+}] coordinates {};
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         = 100.1754,
+	lower whisker  =  99.9874,
+	upper whisker  = 104.8951,
+	lower quartile = 100.0666,
+	upper quartile = 100.4476,
+}] coordinates {};
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         = 100.1571,
+	lower whisker  =  99.9867,
+	upper whisker  = 104.8951,
+	lower quartile = 100.0663,
+	upper quartile = 100.4608,
+}] coordinates {};
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         = 100.2262,
+	lower whisker  =  99.9944,
+	upper whisker  = 105.5556,
+	lower quartile = 100.0804,
+	upper quartile = 100.6567,
+}] coordinates {};
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         = 100.1615,
+	lower whisker  =  99.9768,
+	upper whisker  = 104.1801,
+	lower quartile = 100.0553,
+	upper quartile = 100.4198,
+}] coordinates {};
+\end{axis}
+\end{tikzpicture}

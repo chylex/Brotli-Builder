@@ -1,0 +1,61 @@
+\begin{tabular}{l}
+	\textbf{Compressed Meta-Block Header} \\
+	\addlinespace
+	\hline
+	\addlinespace
+	Block Type Info $\times$ \verb|[L,I,D]| \\
+	Distance Parameters \\
+	Literal Context Mode Array \\
+	Context Map $\times$ \verb|[L,D]| \\
+	Huffman Tree Array $\times$ \verb|[L,I,D]| \\
+\end{tabular}
+
+\bigskip
+\medskip
+
+\begin{varwidth}[t]{\textwidth}
+	\vspace{0pt}
+	\centering
+	
+	\begin{tabular}[t]{l}
+		\textbf{Block Type Info} \\
+		\addlinespace
+		\hline
+		\addlinespace
+		Block Type Count \\
+		Initial Length \\
+		Huffman Tree for Block Types \\
+		Huffman Tree for Lengths \\
+	\end{tabular}
+	
+\end{varwidth}%
+\hspace{0.75cm}%
+\begin{varwidth}[t]{\textwidth}
+	\vspace{0pt}
+	\centering
+	
+	\begin{tabular}[t]{l}
+		\textbf{Distance Parameters} \\
+		\addlinespace
+		\hline
+		\addlinespace
+		Postfix Bits \\
+		Direct Code Bits \\
+	\end{tabular}
+	
+\end{varwidth}%
+\hspace{0.75cm}%
+\begin{varwidth}[t]{\textwidth}
+	\vspace{0pt}
+	\centering
+	
+	\begin{tabular}[t]{l}
+		\textbf{Context Map} \\
+		\addlinespace
+		\hline
+		\addlinespace
+		Tree Count \\
+		Context Map Array \\
+	\end{tabular}
+	
+\end{varwidth}

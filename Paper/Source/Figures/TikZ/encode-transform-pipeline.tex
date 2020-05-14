@@ -1,0 +1,100 @@
+\begin{tikzpicture}[edge from parent/.style = { draw, -latex }, node distance = 1.05cm]
+\let\sub\textsubscript
+
+\tikzstyle{defheight} = [minimum height = 0.75cm]
+\tikzstyle{defsize} = [minimum width = 1.5cm, defheight, text centered]
+\tikzstyle{txt} = [draw, rectangle, defheight]
+\tikzstyle{mb} = [draw, rectangle, defsize, text centered]
+\tikzstyle{mf} = [mb, minimum width = 0.75cm]
+\tikzstyle{dt} = [defsize, text centered]
+
+\node (enc) [txt] { \textbf{\,Encoder\,} };
+
+\node (encbelow1)  [defheight, below = 0.6cm of enc] {};
+\node (encbelow2)  [defheight, below = of encbelow1] {};
+\node (encbelow3)  [defheight, below = of encbelow2] {};
+\node (encbelow1t) [defheight, below = 0cm of encbelow1, yshift = 0.15cm] {};
+\node (encbelow2t) [defheight, below = 0cm of encbelow2, yshift = 0.15cm] {};
+\node (encbelow3t) [defheight, below = 0cm of encbelow3, yshift = 0.15cm] {};
+
+\node (mb1)   [mb, right = of encbelow1]    { MB\sub{O\sub{1}} };
+\node (mb1t1) [mb, right = of mb1]          { MB\sub{T\sub{1,1}} };
+\node (mb1t2) [mb, right = of mb1t1]        { MB\sub{T\sub{1,2}} };
+\node (mb1tX) [dt, right = 0.33cm of mb1t2] { $\dots$ };
+\node (mb1tM) [mb, right = 0.26cm of mb1tX] { MB\sub{T\sub{1,m}} };
+\node (mb1F)  [mf, right = 1.85cm of mb1tM]  { MB };
+
+\node (mb2)   [mb, right = of encbelow2]    { MB\sub{O\sub{2}} };
+\node (mb2t1) [mb, right = of mb2]          { MB\sub{T\sub{2,1}} };
+\node (mb2t2) [mb, right = of mb2t1]        { MB\sub{T\sub{2,2}} };
+\node (mb2tX) [dt, right = 0.33cm of mb2t2] { $\dots$ };
+\node (mb2tM) [mb, right = 0.26cm of mb2tX] { MB\sub{T\sub{2,m}} };
+\node (mb2F)  [mf, right = 1.85cm of mb2tM]  { MB };
+
+\node (mb3)   [mb, right = of encbelow3]    { MB\sub{O\sub{3}} };
+\node (mb3t1) [mb, right = of mb3]          { MB\sub{T\sub{3,1}} };
+\node (mb3t2) [mb, right = of mb3t1]        { MB\sub{T\sub{3,2}} };
+\node (mb3tX) [dt, right = 0.33cm of mb3t2] { $\dots$ };
+\node (mb3tM) [mb, right = 0.26cm of mb3tX] { MB\sub{T\sub{3,m}} };
+\node (mb3F)  [mf, right = 1.85cm of mb3tM]  { MB };
+
+\node (mbX)   [dt, below = 0.4cm of mb3]   { $\vdots$ };
+\node (mbXtX) [dt, below = 0.4cm of mb3tX] { $\ddots$ };
+\node (mbXtM) [dt, below = 0.4cm of mb3tM] { $\vdots$ };
+\node (mbXF)  [dt, below = 0.3cm of mb3F]  { $\vdots$ };
+
+\node (mbN)   [mb, below = 0.3cm of mbX]    { MB\sub{O\sub{n}} };
+\node (mbNt1) [mb, right = of mbN]          { MB\sub{T\sub{n,1}} };
+\node (mbNt2) [mb, right = of mbNt1]        { MB\sub{T\sub{n,2}} };
+\node (mbNtX) [dt, right = 0.33cm of mbNt2] { $\dots$ };
+\node (mbNtM) [mb, right = 0.26cm of mbNtX] { MB\sub{T\sub{n,m}} };
+\node (mbNF)  [mf, right = 1.85cm of mbNtM]  { MB };
+
+\node (t1) [defsize, above = 0.3cm of mb1t1] { T\sub{1} };
+\node (t2) [defsize, above = 0.3cm of mb1t2] { T\sub{2} };
+\node (tM) [defsize, above = 0.3cm of mb1tM] { T\sub{m} };
+
+\node (bfs) [txt, draw = none, above = 0.6cm of mb1F] { \textbf{\,Structure\,} };
+\node (bfsunder) [below = 0.05cm of mbNF] {};
+\draw [thick] (bfs.north west) -- (bfs.north east);
+\draw [thick] (bfs.south west) -- (bfs.south east);
+\node [draw, thick, inner sep = 0cm, fit = (bfs) (bfsunder)] {};
+
+\node [draw, inner sep = 0.3cm, fit = (t1) (mbNt1)] {};
+\node [draw, inner sep = 0.3cm, fit = (t2) (mbNt2)] {};
+\node [draw, inner sep = 0.3cm, fit = (tM) (mbNtM)] {};
+
+\draw [->] (enc)   |- (mb1);
+\draw [->] (mb1)   -- (mb1t1);
+\draw [->] (mb1t1) -- (mb1t2);
+\draw [<-] (mb1tX.center) + (-0.45cm, 0) -- (mb1t2);
+\draw [->] (mb1tX.center) + ( 0.35cm, 0) -- (mb1tM);
+
+\draw [->] (enc)   |- (mb2);
+\draw [->] (mb2)   -- (mb2t1);
+\draw [->] (mb2t1) -- (mb2t2);
+\draw [<-] (mb2tX.center) + (-0.45cm, 0) -- (mb2t2);
+\draw [->] (mb2tX.center) + ( 0.35cm, 0) -- (mb2tM);
+
+\draw [->] (enc)   |- (mb3);
+\draw [->] (mb3)   -- (mb3t1);
+\draw [->] (mb3t1) -- (mb3t2);
+\draw [<-] (mb3tX.center) + (-0.45cm, 0) -- (mb3t2);
+\draw [->] (mb3tX.center) + ( 0.35cm, 0) -- (mb3tM);
+
+\draw [->] (enc)   |- (mbN);
+\draw [->] (mbN)   -- (mbNt1);
+\draw [->] (mbNt1) -- (mbNt2);
+\draw [<-] (mbNtX.center) + (-0.45cm, 0) -- (mbNt2);
+\draw [->] (mbNtX.center) + ( 0.35cm, 0) -- (mbNtM);
+
+\draw [->, dashed] (mb1tM) node[anchor = north west, yshift = -0.55cm] {S\sub{T\sub{1}}} |- (encbelow1t.center);
+\draw [->, dashed] (mb2tM) node[anchor = north west, yshift = -0.55cm] {S\sub{T\sub{2}}} |- (encbelow2t.center);
+\draw [->, dashed] (mb3tM) node[anchor = north west, yshift = -0.55cm] {S\sub{T\sub{3}}} |- (encbelow3t.center);
+
+\path [-] (mb1tM) edge (mb1F);
+\path [-] (mb2tM) edge (mb2F);
+\path [-] (mb3tM) edge (mb3F);
+\path [-] (mbNtM) edge (mbNF);
+
+\end{tikzpicture}

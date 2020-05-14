@@ -1,0 +1,36 @@
+\begin{tikzpicture}
+\begin{axis}[
+	width = 0.892\textwidth,
+	height = 0.51*\axisdefaultheight,
+	xbar,
+	xmin = 99.9,
+	xmax = 100.5,
+	xtick distance = 0.1,
+	xmajorgrids = true,
+	xminorgrids = true,
+	minor x tick num = 1,
+	minor grid style = {dashed},
+	y dir = reverse,
+	ytick = {1, 2},
+	yticklabels = {Prefer Code 1, Non-Special},
+	scaled ticks = false,
+	enlarge x limits = {abs = 0},
+	enlarge y limits = {abs = 0.5},
+	xlabel = Ratio (\%)
+]
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         = 100.0000,
+	lower whisker  =  99.9692,
+	upper whisker  = 100.0233,
+	lower quartile =  99.9998,
+	upper quartile = 100.0000,
+}] coordinates {};
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         = 100.0000,
+	lower whisker  =  99.9870,
+	upper whisker  = 100.4435,
+	lower quartile = 100.0000,
+	upper quartile = 100.0074,
+}] coordinates {};
+\end{axis}
+\end{tikzpicture}

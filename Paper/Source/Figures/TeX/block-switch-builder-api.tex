@@ -1,0 +1,76 @@
+\begin{lstlisting}[frame = top]
+var blocks = builder.BlockTypes[Category.InsertCopy].Reset();
+\end{lstlisting}
+
+$\begin{array}{|*{11}{c|}l}
+\cline{1-11}
+IC_1 & IC_2 & IC_3 & IC_4 & IC_5 & IC_6 & IC_7 & IC_8 & IC_9 & IC_{10} & IC_{11} & \phantom{\begin{aligned}&B\\[-5pt]&B\end{aligned}} \\
+\cline{1-11}
+\addlinespace
+\cline{1-11}
+\addlinespace[0.3ex]
+\multicolumn{11}{c}{BT = 0} & \multicolumn{1}{c}{} \\
+\end{array}$
+
+\bigskip
+
+\begin{lstlisting}[frame = none]
+blocks.SetInitialLength(𝟒);
+\end{lstlisting}
+
+$\begin{array}{|*{12}{c|}}
+\hline
+IC_1 & IC_2 & IC_3 & IC_4 &
+\begin{aligned}BT &=\,? \\[-5pt] BC &=\,?\end{aligned} &
+IC_5 & IC_6 & IC_7 & IC_8 & IC_9 & IC_{10} & IC_{11} \\
+\hline
+\addlinespace
+\cline{1-4} \cline{6-12}
+\addlinespace[0.3ex]
+\multicolumn{4}{c}{BT = 0} & \multicolumn{1}{c}{} &
+\multicolumn{7}{c}{BT =\,?} \\
+\end{array}$
+
+\bigskip
+
+\begin{lstlisting}[frame = none]
+blocks.AddBlock(type: 𝟏, length: 𝟐);
+\end{lstlisting}
+
+$\begin{array}{|*{13}{c|}}
+\hline
+IC_1 & IC_2 & IC_3 & IC_4 &
+\begin{aligned}BT &= 1 \\[-5pt] BC &= 2\end{aligned} &
+IC_5 & IC_6 &
+\begin{aligned}BT &=\,? \\[-5pt] BC &=\,?\end{aligned} &
+IC_7 & IC_8 & IC_9 & IC_{10} & IC_{11} \\
+\hline
+\addlinespace
+\cline{1-4} \cline{6-7} \cline{9-13}
+\addlinespace[0.3ex]
+\multicolumn{4}{c}{BT = 0} & \multicolumn{1}{c}{} &
+\multicolumn{2}{c}{BT = 1} & \multicolumn{1}{c}{} &
+\multicolumn{5}{c}{BT =\,?} \\
+\end{array}$
+
+\bigskip
+
+\begin{lstlisting}[frame = none]
+blocks.AddFinalBlock(type: 𝟐);
+\end{lstlisting}
+
+$\begin{array}{|*{13}{c|}}
+\hline
+IC_1 & IC_2 & IC_3 & IC_4 &
+\begin{aligned}BT &= 1 \\[-5pt] BC &= 2\end{aligned} &
+IC_5 & IC_6 &
+\begin{aligned}BT &= 2 \\[-5pt] BC &= 5\end{aligned} &
+IC_7 & IC_8 & IC_9 & IC_{10} & IC_{11} \\
+\hline
+\addlinespace
+\cline{1-4} \cline{6-7} \cline{9-13}
+\addlinespace[0.3ex]
+\multicolumn{4}{c}{BT = 0} & \multicolumn{1}{c}{} &
+\multicolumn{2}{c}{BT = 1} & \multicolumn{1}{c}{} &
+\multicolumn{5}{c}{BT = 2} \\
+\end{array}$

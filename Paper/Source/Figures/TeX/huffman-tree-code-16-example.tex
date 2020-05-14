@@ -1,0 +1,98 @@
+\newcommand{\colorA}[1]{\textcolor{green!60!black}{#1}}
+\newcommand{\colorB}[1]{\textcolor{magenta!65!black}{#1}}
+\newcommand{\colorC}[1]{\textcolor{cyan!60!black}{#1}}
+
+\begin{minipage}[t]{\textwidth}
+	\vspace{0pt}
+	\newcommand{\codearray}[3]{
+		$\begin{array}{|c|c|}
+			\hline
+			16 & +\colorA{#1} \\
+			\hline
+			\addlinespace[2pt]
+		\end{array} \,= #2 = #3$
+		
+	}
+	
+	\codearray{00}{3 + \colorA{0}}{3}
+	\codearray{01}{3 + \colorA{1}}{4}
+	\codearray{10}{3 + \colorA{2}}{5}
+	\codearray{11}{3 + \colorA{3}}{6}
+\end{minipage}
+
+\vspace{16pt}
+
+\begin{minipage}[t]{0.5\textwidth}
+	\vspace{0pt}
+	\newcommand{\codearray}[4]{
+		$\begin{array}{|c|c|c|c|}
+			\hline
+			16 & +\colorB{#1} & 16 & +\colorA{#2} \\
+			\hline
+			\addlinespace[2pt]
+		\end{array} \,= #3 = #4$
+		
+	}
+	
+	\codearray{00}{00}{3 + (4 \times \colorB{1}) + \colorA{0}}{7}
+	\codearray{00}{01}{3 + (4 \times \colorB{1}) + \colorA{1}}{8}
+	\codearray{00}{10}{3 + (4 \times \colorB{1}) + \colorA{2}}{9}
+	\codearray{00}{11}{3 + (4 \times \colorB{1}) + \colorA{3}}{10}
+	
+	\vspace{16pt}
+	
+	\codearray{10}{00}{3 + (4 \times \colorB{3}) + \colorA{0}}{15}
+	\codearray{10}{01}{3 + (4 \times \colorB{3}) + \colorA{1}}{16}
+	\codearray{10}{10}{3 + (4 \times \colorB{3}) + \colorA{2}}{17}
+	\codearray{10}{11}{3 + (4 \times \colorB{3}) + \colorA{3}}{18}
+\end{minipage}%
+\begin{minipage}[t]{0.5\textwidth}
+	\vspace{0pt}
+	\newcommand{\codearray}[4]{
+		$\begin{array}{|c|c|c|c|}
+			\hline
+			16 & +\colorB{#1} & 16 & +\colorA{#2} \\
+			\hline
+			\addlinespace[2pt]
+		\end{array} \,= #3 = #4$
+		
+	}
+	
+	\codearray{01}{00}{3 + (4 \times \colorB{2}) + \colorA{0}}{11}
+	\codearray{01}{01}{3 + (4 \times \colorB{2}) + \colorA{1}}{12}
+	\codearray{01}{10}{3 + (4 \times \colorB{2}) + \colorA{2}}{13}
+	\codearray{01}{11}{3 + (4 \times \colorB{2}) + \colorA{3}}{14}
+	
+	\vspace{16pt}
+	
+	\codearray{11}{00}{3 + (4 \times \colorB{4}) + \colorA{0}}{19}
+	\codearray{11}{01}{3 + (4 \times \colorB{4}) + \colorA{1}}{20}
+	\codearray{11}{10}{3 + (4 \times \colorB{4}) + \colorA{2}}{21}
+	\codearray{11}{11}{3 + (4 \times \colorB{4}) + \colorA{3}}{22}
+\end{minipage}
+
+\vspace{16pt}
+
+\begin{minipage}[t]{\textwidth}
+	\vspace{0pt}
+	\newcommand{\codearray}[5]{
+		$\begin{array}{|c|c|c|c|c|c|}
+			\hline
+			16 & +\colorC{#1} & 16 & +\colorB{#2} & 16 & +\colorA{#3} \\
+			\hline
+			\addlinespace[2pt]
+		\end{array} \,= #4 = #5$
+		
+	}
+	
+	\codearray{00}{00}{00}{3 + \Big(4 \times \big((4 \times \colorC{1}) + \colorB{1}\big)\Big) + \colorA{0}}{23}
+	\codearray{00}{00}{01}{3 + \Big(4 \times \big((4 \times \colorC{1}) + \colorB{1}\big)\Big) + \colorA{1}}{24}
+	
+	\centerline{\vdots}
+	\vspace{4pt}
+	
+	\codearray{11}{11}{11}{3 + \Big(4 \times \big((4 \times \colorC{4}) + \colorB{4}\big)\Big) + \colorA{3}}{86}
+	
+	\centerline{\vdots}
+	\centerline{etc.}
+\end{minipage}

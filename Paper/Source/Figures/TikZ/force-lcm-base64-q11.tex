@@ -1,0 +1,28 @@
+\begin{tikzpicture}
+\begin{axis}[
+	width = 0.95\textwidth,
+	height = 0.62*\axisdefaultheight,
+	xbar,
+	xmin = 0,
+	xmax = 80,
+	xtick distance = 5,
+	y dir = reverse,
+	ytick = data,
+	yticklabels = {LSB6, MSB6, UTF8, Signed},
+	scaled ticks = false,
+	enlarge x limits = {abs = 0},
+	enlarge y limits = {abs = 0.9},
+	nodes near coords,
+	nodes near coords align = {horizontal},
+	nodes near coords style = {/pgf/number format/.cd, fixed zerofill, precision = 1},
+	xlabel = Total Compressed Size (MiB),
+	ylabel = Mode
+]
+\addplot coordinates {
+	(70.78, 0)
+	(71.20, 1)
+	(71.40, 2)
+	(71.73, 3)
+};
+\end{axis}
+\end{tikzpicture}

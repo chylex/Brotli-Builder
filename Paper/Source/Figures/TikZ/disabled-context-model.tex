@@ -1,0 +1,78 @@
+\begin{tikzpicture}
+\begin{axis}[
+	width = 0.96\textwidth,
+	height = 0.83*\axisdefaultheight,
+	xbar stacked,
+	xmin = 0,
+	xmax = 84,
+	xtick distance = 10,
+	y dir = reverse,
+	ytick = data,
+	ytick pos = left,
+	extra y ticks = {5, 6, 7, 8, 9, 10, 11},
+	extra y tick labels = {$+0.2$, $+0.2$, $+0.2$, $+0.2$, $+0.2$, $+2.7$, $+1.5$},
+	extra y tick style = {ticklabel pos = right},
+	scaled ticks = false,
+	enlarge x limits = {abs = 0},
+	enlarge y limits = {abs = 0.8},
+	nodes near coords,
+	nodes near coords align = {horizontal},
+	nodes near coords style = {xshift = 2pt, /pgf/number format/.cd, fixed zerofill, precision = 1},
+	legend columns = -1,
+	legend style = {
+		at = {(0.5, 1.055)},
+		anchor = south,
+		column sep = 0.05cm,
+		/tikz/every even column/.append style = {
+			column sep = 0.3cm
+		}
+	},
+	legend image code/.code = {
+		\draw[#1] (0cm, -0.075cm) rectangle (0.2cm, 0.135cm);
+	},
+	xlabel = Total Compressed Size (MiB),
+	ylabel = Quality,
+	ylabel style = {yshift = -width(+0.0)}
+]
+\legend{
+	Original,
+	Regressed
+}
+\addplot[blue, fill = blue!30!white] coordinates {
+	(71.05, 5)
+	(69.56, 6)
+	(68.39, 7)
+	(67.53, 8)
+	(66.81, 9)
+	(60.60, 10)
+	(59.04, 11)
+};
+\addplot[red, fill = red!30!white, point meta = x] coordinates {
+	(0.2440, 5)
+	(0.2147, 6)
+	(0.1967, 7)
+	(0.1812, 8)
+	(0.1720, 9)
+	(0, 10)
+	(0, 11)
+};
+\addplot[red, fill = red!30!white, point meta = x, every node near coord/.append style = {/tikz/.cd, xshift = 5.5pt}] coordinates {
+	(0, 5)
+	(0, 6)
+	(0, 7)
+	(0, 8)
+	(0, 9)
+	(2.6912, 10)
+	(0, 11)
+};
+\addplot[red, fill = red!30!white, point meta = x, every node near coord/.append style = {/tikz/.cd, xshift = 2.5pt}] coordinates {
+	(0, 5)
+	(0, 6)
+	(0, 7)
+	(0, 8)
+	(0, 9)
+	(0, 10)
+	(1.4247, 11)
+};
+\end{axis}
+\end{tikzpicture}

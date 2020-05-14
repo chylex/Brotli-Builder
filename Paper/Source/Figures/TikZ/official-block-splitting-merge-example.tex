@@ -1,0 +1,95 @@
+\caption*{(Pre-Merge Blocks)}
+
+\begin{tabular}{|f{110pt}|c|f{40pt}|c|f{40pt}|c|f{70pt}|}
+	\cline{1-1} \cline{3-3} \cline{5-5} \cline{7-7}
+	$B_0$ & $\cdot$ & $B_1$ & $\cdot$ & $B_2$ & $\cdot$ & $B_3$ \fixcline
+	\cline{1-1} \cline{3-3} \cline{5-5} \cline{7-7}
+	\addlinespace
+	\cline{1-1} \cline{3-3} \cline{5-5} \cline{7-7}
+	\addlinespace[0.3ex]
+	\multicolumn{1}{c}{$BT = 0$} & \multicolumn{1}{c}{} &
+	\multicolumn{1}{c}{$BT = 1$} & \multicolumn{1}{c}{} &
+	\multicolumn{1}{c}{$BT = 2$} & \multicolumn{1}{c}{} &
+	\multicolumn{1}{c}{$BT = 1$}
+\end{tabular}
+
+\vspace{20pt}
+
+\begin{minipage}[t]{0.45\textwidth}
+	\centering
+	\vspace{0pt}
+	
+	\caption*{(Merge)}
+	
+	\begin{varwidth}[t]{\textwidth}
+		\vspace{0pt}
+		
+		$\begin{array}{|c|l}
+		\cline{1-1}
+		BT = 0 & \ \rightarrow \fixcline
+		\cline{1-1}
+		\addlinespace[0.44cm]
+		\cline{1-1}
+		BT = 1 & \ \rightarrow \fixcline
+		\cline{1-1}
+		\addlinespace[0.44cm]
+		\cline{1-1}
+		BT = 2 & \ \rightarrow \fixcline
+		\cline{1-1}
+		\end{array}$
+		
+	\end{varwidth}%
+	\begin{varwidth}[t]{\textwidth}
+		\vspace{0pt}
+		
+		\tikzsetnextfilename{official-block-splitting-merge-example}
+		\begin{tikzpicture}[edge from parent/.style = { draw, -latex }]
+		
+		\node at (0, -0) (h1) { $H_0$ };
+		\node at (0, -1) (h2) { $H_1$ };
+		\node at (0, -2) (h3) { $H_2$ };
+		
+		\node at (2, -0) (h1a) { $H_0$ };
+		\node at (2, -1) (h23) { $H_{1,2}$ };
+		
+		\draw (h1) -- (h1a);
+		\draw (h2) -- (h23);
+		\draw (h3) -- +(1, 0) |- (h23);
+		
+		\end{tikzpicture}
+		
+	\end{varwidth}
+\end{minipage}
+\begin{minipage}[t]{0.38\textwidth}
+	\centering
+	\vspace{0pt}
+	
+	\caption*{(Reassign)}
+	
+	$\begin{array}{lcl}
+		B_0 \approx H_0     & \rightarrow\ & BT = 0 \\
+		\addlinespace[0.085cm]
+		B_1 \approx H_{1,2} & \rightarrow\ & BT = 1 \\
+		\addlinespace[0.085cm]
+		B_2 \approx H_{1,2} & \rightarrow\ & BT = 1 \\
+		\addlinespace[0.085cm]
+		B_3 \approx H_0     & \rightarrow\ & BT = 0 \\
+	\end{array}$
+\end{minipage}
+
+\vspace{22pt}
+
+\caption*{(Post-Merge Blocks)}
+
+\hspace{3.5pt}
+\begin{tabular}{|f{110pt}|c|f{107.5pt}|c|f{70pt}|}
+	\cline{1-1} \cline{3-3} \cline{5-5}
+	$B_0$ & $\cdot$ & $B_1 + B_2$ & $\cdot$ & $B_3$ \fixcline
+	\cline{1-1} \cline{3-3} \cline{5-5}
+	\addlinespace
+	\cline{1-1} \cline{3-3} \cline{5-5}
+	\addlinespace[0.3ex]
+	\multicolumn{1}{c}{$BT = 0$} & \multicolumn{1}{c}{} &
+	\multicolumn{1}{c}{$BT = 1$} & \multicolumn{1}{c}{} &
+	\multicolumn{1}{c}{$BT = 0$}
+\end{tabular}

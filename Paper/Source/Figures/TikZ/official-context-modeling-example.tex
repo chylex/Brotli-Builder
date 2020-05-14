@@ -1,0 +1,83 @@
+\begin{minipage}[t]{0.45\textwidth}
+	\centering
+	\vspace{0pt}
+	
+	\caption*{(Merge)}
+	
+	\begin{varwidth}[t]{\textwidth}
+		\vspace{0pt}
+		
+		$\begin{array}{|c|l}
+		\cline{1-1}
+		0 & \ \rightarrow \fixcline
+		\cline{1-1}
+		\addlinespace[0.185cm]
+		\cline{1-1}
+		1 & \ \rightarrow \fixcline
+		\cline{1-1}
+		\addlinespace[0.185cm]
+		\cline{1-1}
+		2 & \ \rightarrow \fixcline
+		\cline{1-1}
+		\addlinespace[0.185cm]
+		\cline{1-1}
+		3 & \ \rightarrow \fixcline
+		\cline{1-1}
+		\end{array}$
+		
+	\end{varwidth}%
+	\begin{varwidth}[t]{\textwidth}
+		\vspace{0pt}
+		
+		\tikzsetnextfilename{official-context-modeling-example}
+		\begin{tikzpicture}[edge from parent/.style = { draw, -latex }]
+		
+		\node at (0, -0.00) (h1) { $H_1$ };
+		\node at (0, -0.75) (h2) { $H_2$ };
+		\node at (0, -1.50) (h3) { $H_3$ };
+		\node at (0, -2.25) (h4) { $H_4$ };
+		
+		\node at (2, -0.00) (h13) { $H_{1,3}$ };
+		\node at (2, -0.75) (h2a) { $H_2$ };
+		\node at (2, -2.25) (h4a) { $H_4$ };
+		
+		\node at (4, -0.00) (h134) { $H_{1,3,4}$ };
+		\node at (4, -0.75) (h2aa) { $H_2$ };
+		
+		\draw (h1) -- (h13);
+		\draw (h2) -- +(0.875, 0) to [bend right = 270] +(1.125, 0) -- (h2a);
+		\draw (h3) -- +(1, 0) |- (h13);
+		\draw (h4) -- (h4a);
+		
+		\draw (h13) -- (h134);
+		\draw (h2a) -- +(0.875, 0) to [bend right = 270] +(1.125, 0) -- (h2aa);
+		\draw (h4a) -- +(1, 0) |- (h134);
+		
+		\end{tikzpicture}
+		
+	\end{varwidth}
+\end{minipage}
+\begin{minipage}[t]{0.35\textwidth}
+	\centering
+	\vspace{0pt}
+	
+	\caption*{(Reassign)}
+	
+	$\begin{array}{lc|c|}
+		\cline{3-3}
+		H_1 \approx H_{1,3,4} & \rightarrow{\ } & 0 \fixcline
+		\cline{3-3}
+		\addlinespace[0.185cm]
+		\cline{3-3}
+		H_2 = H_2             & \rightarrow{\ } & 1 \fixcline
+		\cline{3-3}
+		\addlinespace[0.185cm]
+		\cline{3-3}
+		H_3 \approx H_2       & \rightarrow{\ } & 1 \fixcline
+		\cline{3-3}
+		\addlinespace[0.185cm]
+		\cline{3-3}
+		H_4 \approx H_{1,3,4} & \rightarrow{\ } & 0 \fixcline
+		\cline{3-3}
+	\end{array}$
+\end{minipage}

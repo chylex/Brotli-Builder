@@ -1,0 +1,97 @@
+\begin{tikzpicture}
+\begin{axis}[
+	width = 0.985\textwidth,
+	height = 2.05*\axisdefaultheight,
+	xbar,
+	xmin = 0,
+	xmax = 106000,
+	xtick = {0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000},
+	xticklabels = {0, 10K, 20K, 30K, 40K, 50K, 60K, 70K, 80K, 90K, 100K},
+	y dir = reverse,
+	ytick = data,
+	bar width = 4.75pt,
+	scaled ticks = false,
+	enlarge x limits = {abs = 0},
+	enlarge y limits = {abs = 0.65},
+	legend reversed,
+	legend cell align = {left},
+	legend style = {
+		at = {(0.98, 0.02)},
+		anchor = south east
+	},
+	legend image code/.code = {
+		\draw[#1] (0cm, -0.075cm) rectangle (0.2cm, 0.135cm);
+	},
+	xlabel = Total Bits Used,
+	ylabel = Quality
+]
+\legend{
+	MTF = No, RLE = Split  \\
+	MTF = No, RLE = Full   \\
+	MTF = No, RLE = No     \\
+	MTF = Yes, RLE = Split \\
+	MTF = Yes, RLE = Full  \\
+	MTF = Yes, RLE = No    \\
+}
+\addplot[blue, pattern = north east lines, pattern color = blue!30!white] coordinates {
+	(104549, 4)
+	( 90220, 5)
+	( 94037, 6)
+	( 97062, 7)
+	( 99103, 8)
+	( 98671, 9)
+	( 31004, 10)
+	( 36731, 11)
+};
+\addplot[red, pattern = north east lines, pattern color = red!30!white] coordinates {
+	(103952, 4)
+	( 89616, 5)
+	( 93400, 6)
+	( 96427, 7)
+	( 98475, 8)
+	( 98000, 9)
+	( 31693, 10)
+	( 37400, 11)
+};
+\addplot[brown, pattern = north east lines, pattern color = brown!30!white] coordinates {
+	(103592, 4)
+	( 89250, 5)
+	( 92995, 6)
+	( 96158, 7)
+	( 98192, 8)
+	( 97725, 9)
+	( 30847, 10)
+	( 36587, 11)
+};
+\addplot[blue, fill = blue!30!white] coordinates {
+	(42748, 4)
+	(37320, 5)
+	(38880, 6)
+	(40168, 7)
+	(41155, 8)
+	(41187, 9)
+	(29891, 10)
+	(34029, 11)
+};
+\addplot[red, fill = red!30!white] coordinates {
+	(43212, 4)
+	(37753, 5)
+	(39299, 6)
+	(40626, 7)
+	(41565, 8)
+	(41628, 9)
+	(31164, 10)
+	(35350, 11)
+};
+\addplot[brown, fill = brown!30!white] coordinates {
+	(45122, 4)
+	(39249, 5)
+	(40951, 6)
+	(42363, 7)
+	(43279, 8)
+	(43313, 9)
+	(29759, 10)
+	(33528, 11)
+};
+\end{axis}
+\end{tikzpicture}

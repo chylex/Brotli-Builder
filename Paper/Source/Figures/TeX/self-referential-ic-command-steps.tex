@@ -1,0 +1,96 @@
+\begin{minipage}[t]{0.38\textwidth}
+	\vspace{0pt}
+	\centering
+	
+	$\begin{aligned}
+	insert\ length &= 2 \\
+	copy\ length &= 4 \\
+	distance &= 2
+	\end{aligned}$
+	
+	\medskip
+	$\begin{aligned}
+	L_1 &= a \\
+	L_2 &= b
+	\end{aligned}$
+\end{minipage}%
+\begin{minipage}[t]{0.5\textwidth}
+	\vspace{0pt}
+	
+	\newcommand{\tikzunderarrow}{
+		\tikzset{external/export next=false}
+		\begin{tikzpicture}
+		\draw [->] (0, 0) to [out=325, in=215] (1.3, 0);
+		\end{tikzpicture}
+	}
+	
+	\newcommand{\tikzunderarrowhidden}{
+		\tikzset{external/export next=false}
+		\begin{tikzpicture}
+		\draw [->, draw=none] (0, 0) to [out=325, in=215] (1.3, 0);
+		\end{tikzpicture}
+	}
+	
+	\begin{enumerate} \nosep
+		% \item
+		% $\begin{array}{|*{6}{f{2ex}|}}
+		% \hline
+		% & & & & & \\
+		% \hline
+		% \end{array}$
+		% \\[-1.5pt]
+		% \trimbox{-1.3ex 0.3ex 0 0}{\tikzunderarrowhidden}
+		
+		\item
+		$\begin{array}{|*{6}{f{2ex}|}}
+		\hline
+		a & b & & & & \\
+		\hline
+		\end{array}$
+		\\[-1.5pt]
+		\trimbox{-1.3ex 0.3ex 0 0}{\tikzunderarrowhidden}
+		
+		\item
+		$\begin{array}{|*{6}{f{2ex}|}}
+		\hline
+		a & b & & & & \\
+		\hline
+		\end{array}$
+		\\[-1.5pt]
+		\trimbox{-1.3ex 0.3ex 0 0}{\tikzunderarrow}
+		
+		\item
+		$\begin{array}{|*{6}{f{2ex}|}}
+		\hline
+		a & b & a & & & \\
+		\hline
+		\end{array}$
+		\\[-1.5pt]
+		\trimbox{-5.5ex 0.3ex 0 0}{\tikzunderarrow}
+		
+		\item
+		$\begin{array}{|*{6}{f{2ex}|}}
+		\hline
+		a & b & a & b & & \\
+		\hline
+		\end{array}$
+		\\[-1.5pt]
+		\trimbox{-9.8ex 0.3ex 0 0}{\tikzunderarrow}
+		
+		\item
+		$\begin{array}{|*{6}{f{2ex}|}}
+		\hline
+		a & b & a & b & a & \\
+		\hline
+		\end{array}$
+		\\[-1.5pt]
+		\trimbox{-14ex 0.3ex 0 0}{\tikzunderarrow}
+		
+		\item
+		$\begin{array}{|*{6}{f{2ex}|}}
+		\hline
+		a & b & a & b & a & b \\
+		\hline
+		\end{array}$
+	\end{enumerate}
+\end{minipage}

@@ -1,0 +1,39 @@
+\newcommand{\colg}{\color{green!60!black}}
+\newcommand{\colc}{\color{cyan!60!black}}
+\newcommand{\colm}{\color{magenta!65!black}}
+\newcommand{\colr}{\color{red!75!black}}
+
+\newcommand{\codeOO}{{\colg\texttt{00}}}
+\newcommand{\codeOI}{{\colc\texttt{01}}}
+\newcommand{\codeIO}{{\colm\texttt{10}}}
+\newcommand{\codeII}{{\colr\texttt{11}}}
+
+\newcommand{\pO}{\phantom{0}}
+
+\begin{varwidth}[t]{\textwidth}
+	\vspace{0pt}
+	\centering
+	
+	\begin{tabular}{c|c|c|c}
+		\th{Code} &    \th{Range}     & \th{Difference} & \th{Extra Bits} \\ \hline
+		 \codeOO  &   {\colg  1}--1   &    $0 = 2^0$    &        0        \\
+		 \codeOI  &   {\colc  2}--3   &    $1 = 2^1$    &        1        \\
+		 \codeIO  & \pO{\colm  4}--12 &    $8 = 2^3$    &        3        \\
+		 \codeII  &  {\colr 13}--21   &    $8 = 2^3$    &        3
+	\end{tabular}
+	
+\end{varwidth}%
+\hspace{0.65cm}%
+\begin{varwidth}[t]{\textwidth}
+	\vspace{0pt}
+	\centering
+	
+	\begin{tabular}{c|r||c|r}
+		\th{Example}                           & \th{Value}                 & \th{Example}        & \th{Value}                \\ \hline
+		\codeOO\,\phantom{\texttt{000}}        &                  $\colg 1$ & \codeIO\,\verb|001| &   ${\colm 4} + 1 = \pO 5$ \\
+		\codeOI\,\verb|0|\phantom{\texttt{00}} &        ${\colc 2} + 0 = 2$ & \codeIO\,\verb|111| &      ${\colm 4} + 8 = 12$ \\
+		\codeOI\,\verb|1|\phantom{\texttt{00}} &        ${\colc 2} + 1 = 3$ & \codeII\,\verb|000| &     ${\colr 13} + 0 = 13$ \\
+		\codeIO\,\verb|000|                    &        ${\colm 4} + 0 = 4$ & \codeII\,\verb|111| &     ${\colr 13} + 8 = 21$
+	\end{tabular}
+	
+\end{varwidth}

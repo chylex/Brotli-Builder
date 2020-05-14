@@ -1,0 +1,14 @@
+\newcommand{\highlight}[1]{\textcolor{red!80!white}{#1}}
+
+\begin{tabular}{l|l|l|l}
+	Sequence        & Original                         & Transformed                  & Next Alphabet State                            \\ \hline
+	-               & -                                & -                            & \texttt{abcdefghijkl\highlight{m}nopqrst}\dots \\
+	\verb|m|        & $13$                             & $13$                         & \texttt{mabcdefghijkln\highlight{o}pqrst}\dots \\
+	\verb|mo|       & $13, 15$                         & $13, 15$                     & \texttt{omabcdefghijkl\highlight{n}pqrst}\dots \\
+	\verb|mon|      & $13, 15, 14$                     & $13, 15, 15$                 & \texttt{nomabcdefghijklpqr\highlight{s}t}\dots \\
+	\verb|mons|     & $13, 15, 14, 19$                 & $13, 15, 15, 19$             & \texttt{sn\highlight{o}mabcdefghijklpqrt}\dots \\
+	\verb|monso|    & $13, 15, 14, 19, 15$             & $13, 15, 15, 19, 3$          & \texttt{\highlight{o}snmabcdefghijklpqrt}\dots \\
+	\verb|monsoo|   & $13, 15, 14, 19, 15, 15$         & $13, 15, 15, 19, 3, 1$       & \texttt{os\highlight{n}mabcdefghijklpqrt}\dots \\
+	\verb|monsoon|  & $13, 15, 14, 19, 15, 15, 14$     & $13, 15, 15, 19, 3, 1, 3$    & \texttt{no\highlight{s}mabcdefghijklpqrt}\dots \\
+	\verb|monsoons| & $13, 15, 14, 19, 15, 15, 14, 19$ & $13, 15, 15, 19, 3, 1, 3, 3$ & \texttt{snomabcdefghijklpqrt}\dots
+\end{tabular}

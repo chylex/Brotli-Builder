@@ -1,0 +1,50 @@
+\begin{tikzpicture}
+\begin{axis}[
+	width = 0.96\textwidth,
+	height = 0.435*\axisdefaultheight,
+	xbar stacked,
+	xmin = 0,
+	xmax = 70,
+	xtick distance = 10,
+	y dir = reverse,
+	ytick = data,
+	ytick pos = left,
+	extra y ticks = {10, 11},
+	extra y tick labels = {$+0.6$, $+0.7$},
+	extra y tick style = {ticklabel pos = right},
+	scaled ticks = false,
+	enlarge x limits = {abs = 0},
+	enlarge y limits = {abs = 0.8},
+	nodes near coords,
+	nodes near coords align = {horizontal},
+	nodes near coords style = {xshift = 1pt, /pgf/number format/.cd, fixed zerofill, precision = 1},
+	legend columns = -1,
+	legend style = {
+		at = {(0.5, 1.14)},
+		anchor = south,
+		column sep = 0.05cm,
+		/tikz/every even column/.append style = {
+			column sep = 0.3cm
+		}
+	},
+	legend image code/.code = {
+		\draw[#1] (0cm, -0.075cm) rectangle (0.2cm, 0.135cm);
+	},
+	xlabel = Total Compressed Size (MiB),
+	ylabel = Quality,
+	ylabel style = {yshift = -width(+0.0)}
+]
+\legend{
+	Original,
+	Regressed
+}
+\addplot[blue, fill = blue!30!white] coordinates {
+	(60.60, 10)
+	(59.04, 11)
+};
+\addplot[red, fill = red!30!white, point meta = x] coordinates {
+	(0.55, 10)
+	(0.70, 11)
+};
+\end{axis}
+\end{tikzpicture}

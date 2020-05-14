@@ -1,0 +1,19 @@
+\begin{tikzpicture}[edge from parent/.style = { draw, -latex }]
+\node [draw, circle] { \phantom{-} }
+child {
+	node [draw, circle] { a }
+	edge from parent node [above left] { 0 }
+}
+child {
+	node [draw, circle] { \phantom{-} } 
+	child {
+		node [draw, circle] { b }
+		edge from parent node [above left] { 10 }
+	}
+	child {
+		node [draw, circle] { c }
+		edge from parent node [above right] { 11 }
+	}
+	edge from parent node [above right] { 1 }
+};
+\end{tikzpicture}

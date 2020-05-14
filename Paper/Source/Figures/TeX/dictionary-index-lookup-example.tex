@@ -1,0 +1,36 @@
+\newcolumntype{q}{|@{\hskip4pt}f{8pt}@{\hskip4pt}}
+\newcommand{\rowsep}{\cline{1-18}\addlinespace\cline{1-18}}
+\newcommand{\s}{\textvisiblespace}
+
+\begin{tabular}{qqqqqqqqqqqqqqqqqq|}
+	\hline
+	B & a & c & k & \s & t & o & \s & t & h & e & \s & f & u & t & u & r & e \\
+	\hline
+	\hline
+\end{tabular}
+\\
+\begin{tabular}{qqqqqqqqqqqqqqqqqq|l}
+	\addlinespace
+	\cline{1-18}
+	B & a & c & k & & & & & & & & & & & & & & & \triple{4}{4}{9};\triple{10}{86}{56} \\
+	\rowsep
+	B & a & c & k & \s & & & & & & & & & & & & & & \triple{4}{4}{4} \\
+	\rowsep
+	B & a & c & k & \s & t & & & & & & & & & & & & & \,(no matches) \\
+	\rowsep
+	B & a & c & k & \s & t & o & & & & & & & & & & & & \,(no matches) \\
+	\rowsep
+	B & a & c & k & \s & t & o & \s & & & & & & & & & & & \triple{8}{277}{9} \\
+	\rowsep
+	B & a & c & k & \s & t & o & \s & t & & & & & & & & & & \,(no matches) \\
+	\rowsep
+	B & a & c & k & \s & t & o & \s & t & h & & & & & & & & & \,(no matches) \\
+	\rowsep
+	B & a & c & k & \s & t & o & \s & t & h & e & & & & & & & & \triple{11}{724}{9} \\
+	\rowsep
+	B & a & c & k & \s & t & o & \s & t & h & e & \s & & & & & & & \triple{11}{724}{4};\triple{12}{397}{9} \\
+	\cline{1-18}
+	\addlinespace
+	\multicolumn{18}{c}{(longer prefixes yield no more matches)} & \\
+	\addlinespace
+\end{tabular}

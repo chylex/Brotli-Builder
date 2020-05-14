@@ -1,0 +1,13 @@
+Generated/
+Auxiliary/
+Figures/Assignment1.jpg
+Figures/Declaration.jpg
+
+*.pdf
+
+*.fdb_latexmk
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync

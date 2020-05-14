@@ -1,0 +1,42 @@
+\begin{tikzpicture}
+\begin{axis}[
+	width = 0.967\textwidth,
+	height = 0.6*\axisdefaultheight,
+	xbar,
+	xmin = 98,
+	xmax = 122.75,
+	xmajorgrids = true,
+	xminorgrids = true,
+	minor x tick num = 1,
+	minor grid style = {dashed},
+	y dir = reverse,
+	ytick = {1, 2, 3},
+	yticklabels = {Seen, Frequent, Non-Last},
+	scaled ticks = false,
+	enlarge x limits = {abs = 0},
+	enlarge y limits = {abs = 0.5},
+	xlabel = Ratio (\%)
+]
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         = 100.1211,
+	lower whisker  =  98.7069,
+	upper whisker  = 106.5226,
+	lower quartile = 100.0000,
+	upper quartile = 100.4531,
+}] coordinates {};
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         = 100.1280,
+	lower whisker  =  98.7069,
+	upper whisker  = 106.8631,
+	lower quartile = 100.0000,
+	upper quartile = 100.4834,
+}] coordinates {};
+\addplot[blue, fill = blue!30!white, boxplot prepared = {
+	median         = 100.1316,
+	lower whisker  =  98.4694,
+	upper whisker  = 122.4647,
+	lower quartile = 100.0000,
+	upper quartile = 100.5757,
+}] coordinates {};
+\end{axis}
+\end{tikzpicture}

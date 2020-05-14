@@ -1,0 +1,93 @@
+\begin{tikzpicture}
+\begin{axis}[
+	width = 0.99\textwidth,
+	height = 1.09*\axisdefaultheight,
+	xbar stacked,
+	xmin = 0,
+	xmax = 100,
+	xtick = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100},
+	y dir = reverse,
+	ytick = data,
+	bar width = 8.25pt,
+	scaled ticks = false,
+	enlarge x limits = {abs = 0},
+	enlarge y limits = {abs = 0.9},
+	legend columns = -1,
+	legend style = {
+		at = {(0.5, 1.04)},
+		anchor = south,
+		column sep = 0.05cm,
+		/tikz/every even column/.append style = {
+			column sep = 0.3cm
+		}
+	},
+	legend image code/.code = {
+		\draw[#1] (0cm, -0.075cm) rectangle (0.2cm, 0.135cm);
+	},
+	xlabel = \% of Occurrences in Insert\&Copy Commands,
+	ylabel = Quality
+]
+\legend{
+	CID = 0,
+	CID = 1,
+	CID = 2,
+	CID = 3
+}
+\addplot[blue, fill = blue!30!white] coordinates {
+	(28.18, 0)
+	(31.18, 1)
+	(0.00, 2)
+	(0.00, 3)
+	(0.00, 4)
+	(2.38, 5)
+	(2.31, 6)
+	(2.26, 7)
+	(2.22, 8)
+	(2.23, 9)
+	(3.93, 10)
+	(3.83, 11)
+};
+\addplot[red, fill = red!30!white] coordinates {
+	(10.76, 0)
+	(0.02, 1)
+	(0.0, 2)
+	(0.0, 3)
+	(0.0, 4)
+	(1.8, 5)
+	(1.73, 6)
+	(1.93, 7)
+	(1.91, 8)
+	(2.13, 9)
+	(4.74, 10)
+	(5.51, 11)
+};
+\addplot[brown, fill = brown!30!white] coordinates {
+	(4.98, 0)
+	(9.68, 1)
+	(0.22, 2)
+	(0.2, 3)
+	(0.59, 4)
+	(1.31, 5)
+	(1.29, 6)
+	(1.36, 7)
+	(1.37, 8)
+	(1.46, 9)
+	(4.44, 10)
+	(5.31, 11)
+};
+\addplot[black, fill = black!30!white] coordinates {
+	(56.09, 0)
+	(59.12, 1)
+	(99.78, 2)
+	(99.8, 3)
+	(99.41, 4)
+	(94.51, 5)
+	(94.67, 6)
+	(94.45, 7)
+	(94.5, 8)
+	(94.18, 9)
+	(86.89, 10)
+	(85.35, 11)
+};
+\end{axis}
+\end{tikzpicture}

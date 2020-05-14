@@ -1,0 +1,20 @@
+\newcommand{\corpusCC}{\multirow{2}{*}{\vspace{-5pt}\shortstack[c]{Canterbury\\Corpus}}}
+\newcommand{\corpusSC}{\multirow{2}{*}{\vspace{-5pt}\shortstack[c]{Silesia\\Corpus}}}
+\newcommand{\corpusSD}{\multirow{2}{*}{\vspace{-5pt}\shortstack[c]{Snappy\\Test Data}}}
+\newcommand{\corpusBL}{\multirow{2}{*}{\vspace{-5pt}\shortstack[c]{Bible\\Languages}}}
+\newcommand{\corpusWR}{\multirow{2}{*}{\vspace{-5pt}\shortstack[c]{Website\\Resources}}}
+
+\begin{tabular}{c|c|f{1.58cm}|f{1.58cm}|f{1.58cm}|f{1.58cm}|r}
+     &         &       \multicolumn{4}{c|}{Best/Tied Literal Context Mode}       &                                     \\ \cline{3-6}
+     & Quality & \verb|LSB6| & \verb|MSB6| & \verb|UTF8|         & \verb|Signed| &              \th{Potential Savings} \\ \hline
+	\corpusCC &   10    & 3 / 0       & 1 / 0       & 6 / 0               & 1 / 0         &  \verb|1 831 B| ($\approx 0.36 \%$) \\
+     &   11    & 1 / 1       & 0 / 1       & 6 / 0               & 3 / 1         &  \verb|1 200 B| ($\approx 0.25 \%$) \\ \hline
+	\corpusSC &   10    & 0 / 0       & 2 / 0       & 6 / 0               & 4 / 0         & \verb|35 907 B| ($\approx 0.07 \%$) \\
+     &   11    & 1 / 0       & 1 / 0       & 6 / 0               & 4 / 0         & \verb|15 976 B| ($\approx 0.03 \%$) \\ \hline
+	\corpusSD &   10    & 0 / 0       & 2 / 0       & 4 / 0               & 0 / 0         &    \verb|277 B| ($\approx 0.07 \%$) \\
+     &   11    & 0 / 0       & 2 / 0       & 4 / 0               & 0 / 0         &    \verb|349 B| ($\approx 0.09 \%$) \\ \hline
+	\corpusBL &   10    & 6 / 0       & 0 / 0       & 1 / 0               & 0 / 0         & \verb|31 306 B| ($\approx 0.44 \%$) \\
+     &   11    & 3 / 0       & 0 / 0       & 4 / 0               & 0 / 0         &    \verb|494 B| ($\approx 0.01 \%$) \\ \hline
+	\corpusWR &   10    & 2 / 1       & 8 / 3       & 105 / 1\phantom{00} & 7 / 4         &    \verb|779 B| ($\approx 0.02 \%$) \\
+     &   11    & 2 / 3       & 6 / 7       & 97 / 10             & 12 / 10       &    \verb|993 B| ($\approx 0.02 \%$)
+\end{tabular}
