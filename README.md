@@ -9,7 +9,9 @@ This is a university project with libraries and applications that work with [Bro
 
 A cursory glance at the [thesis](https://github.com/chylex/Brotli-Builder/blob/master/Paper/BrotliCompression.pdf) is recommended before looking into this project. Classes in *BrotliLib*, which represent the object structure, as well as the labeled bit stream in *BrotliBuilder*, can greatly help understand the specification and the principles behind how Brotli and its decompression process works.
 
-The programming projects and the included [Brotli](https://github.com/google/brotli) executable are released under the [MIT license](https://github.com/chylex/Brotli-Builder/blob/master/LICENSE). The [thesis](https://github.com/chylex/Brotli-Builder/blob/master/Paper/BrotliCompression.pdf) and its source code are released under the [CC BY-SA 4.0 license](https://github.com/chylex/Brotli-Builder/tree/master/Paper/LICENSE.md).
+If you are only interested in learning about Brotli and algorithms used in the official compressor, a [simplified version of the thesis](https://github.com/chylex/Brotli-Builder/blob/master/Paper/BrotliCompression-Simplified.pdf) is also available.
+
+The programming projects and the included [Brotli](https://github.com/google/brotli) executable are released under the [MIT license](https://github.com/chylex/Brotli-Builder/blob/master/LICENSE). The [thesis](https://github.com/chylex/Brotli-Builder/blob/master/Paper/BrotliCompression.pdf), its [simplified version](https://github.com/chylex/Brotli-Builder/blob/master/Paper/BrotliCompression-Simplified.pdf), and its source code are released under the [CC BY-SA 4.0 license](https://github.com/chylex/Brotli-Builder/tree/master/Paper/LICENSE.md).
 
 # Guide to Brotli Builder
 
