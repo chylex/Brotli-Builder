@@ -277,7 +277,9 @@
 \let\clearpage\relax
 \listoffigures
 \listoftables
+\ifbool{SIMPLIFIED}{}{
 \lstlistoflistings
+}
 \endgroup
 \cleardoublepage
 \relax
@@ -436,11 +438,17 @@
 }
 % EDIT END
 \begin{otherlanguage}{english}
+% EDIT START
+\ifthenelse{\equal{\the\Dipl@EnglishAbstract}{\empty}}{}{
+% EDIT END
 \noindent\textbf{Abstract}
 \medbreak
 \noindent\the\Dipl@EnglishAbstract
 \bigbreak
 \noindent\textbf{Keywords}:~\the\Dipl@EnglishKeywords\par
+% EDIT START
+}
+% EDIT END
 \end{otherlanguage}
 \cleardoublepage
 }

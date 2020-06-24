@@ -29,6 +29,14 @@
 %\booltrue{VSB}
 \boolfalse{VSB}
 
+\newif\ifSIMPLIFIED
+%\SIMPLIFIEDtrue
+\SIMPLIFIEDfalse
+
+\ifbool{VSB}{
+	\SIMPLIFIEDfalse
+}{}
+
 % COMMAND SETUP
 
 \newcolumntype{d}[1]{D{.}{.}{#1}}
@@ -87,7 +95,11 @@
 \ThesisAuthor{Daniel Chýlek}
 \SubmissionDate{April 30, 2020}
 
+\ifSIMPLIFIED
+\EnglishThesisTitle{Brotli Compression Algorithm (Simplified Version)}
+\else
 \EnglishThesisTitle{Brotli Compression Algorithm}
+\fi
 
 \EnglishAbstract{This thesis is a comprehensive exploration of the Brotli compression algorithm and data format. After explaining key principles Brotli is built upon, the paper introduces a custom implementation that provides tools to study the format and develop new format-compatible compression techniques. The custom implementation is followed by an in-depth look at the official compressor implementation, and how different quality levels utilize features of the format. The paper concludes by using the gained insight to experiment with the format and compression techniques.}
 
@@ -108,6 +120,25 @@
 
 \Thanks{
 
+\ifthenelse{\boolean{SIMPLIFIED}}{
+
+\noindent
+\textbf{Foreword}
+\medbreak
+\noindent
+You are reading a simplified version of my masters thesis.
+\medbreak
+\noindent
+This version focuses on explaining Brotli and exploring the official implementation, and omits details about a custom implementation and experimental modifications to the official compressor. You can find the full thesis at \url{https://github.com/chylex/Brotli-Builder}.
+\medbreak
+\noindent
+I would like to thank doc. Ing. Jan Platoš, Ph.D. for leading and supervising the project.
+
+\EnglishAbstract{}
+\EnglishKeywords{}
+
+}{ % SIMPLIFIED
+
 \noindent
 \textbf{Foreword}
 \medbreak
@@ -127,11 +158,16 @@ I would like to thank doc. Ing. Jan Platoš, Ph.D. for leading and supervising t
 	24 July 2020 & & Corrected minor visual issue with GUI application image. \\
 \end{tabular} 
 
+}
+
 \vspace{50pt}
-}}
+
+}} % SIMPLIFIED
 
 \setboolean{Dipl@PrintCooperatingPersonsDeclaration}{false}
 
+\ifthenelse{\boolean{SIMPLIFIED}}{}{
+	
 \AddAcronym{API}{Application Programming Interface}
 \AddAcronym{CLI}{Command Line Interface}
 \AddAcronym{CRLF}{Carriage Return \texttt{+} Line Feed}
@@ -150,6 +186,8 @@ I would like to thank doc. Ing. Jan Platoš, Ph.D. for leading and supervising t
 \AddAcronym{\texttt{KiB}}{Kibibyte, \texttt{1 KiB} = \texttt{1024 B}}
 \AddAcronym{\texttt{MiB}}{Mebibyte, \texttt{1 MiB} = \texttt{1024 KiB}}
 \AddAcronym{\texttt{GiB}}{Gibibyte, \texttt{1 GiB} = \texttt{1024 MiB}}
+
+} % SIMPLIFIED
 
 \addbibresource{References/sources.bib}
 
@@ -210,6 +248,16 @@ I would like to thank doc. Ing. Jan Platoš, Ph.D. for leading and supervising t
 
 Brotli is a general-purpose lossless compression algorithm developed by Google, Inc. It defines a bit-oriented format inspired by DEFLATE\cite{RFC1951}, which is in essence a combination of LZ77 and Huffman coding. Brotli aims to replace DEFLATE in HTTP compression by providing better compression ratios and more flexibility than current standards.
 
+\ifSIMPLIFIED
+
+Section \ref{sec:setup-and-organization} describes the compression corpus used for testing and validation, and performs a comparison between Brotli, and both current and upcoming HTTP compression standards.
+
+Section \ref{sec:explaining-brotli} explains important compression techniques, and details their use in the Brotli format. It also introduces Brotli-specific concepts and terminology.
+
+Section \ref{sec:official-implementation} explores the official compressor implementation and advanced features of the format. The first part points out differences between quality levels. The second part describes and evaluates official implementations of individual features.
+
+\else % SIMPLIFIED
+
 This thesis introduces a program library, which implements Brotli compression and decompression based on the RFC7932\cite{RFC7932} specification, as well as several utility applications intended to aid understanding and analysis of Brotli compressed files. This is followed by an in-depth exploration of the official implementation, and the differences between it and the custom implementation. The insight gained by studying the format is used to propose and test several experimental modifications to the official implementation, which intend to improve compression while maintaining format compatibility.
 
 Section \ref{sec:setup-and-organization} describes the organization of the programming projects, information about the software setup, and the compression corpus used for testing and validation. The section ends with a comparison between Brotli, and both current and upcoming HTTP compression standards.
@@ -220,8 +268,12 @@ Section \ref{sec:implementing-brotli} talks about the technical background of th
 
 Section \ref{sec:official-implementation} explores the official compressor implementation and advanced features of the format. The first part points out differences between quality levels. The second part describes and evaluates official implementations of individual features. The third part concludes with several experiments that modify the official source code in an attempt to find improvements.
 
+\fi % SIMPLIFIED
+
 \section{Setup \& Organization}
 \label{sec:setup-and-organization}
+	
+	\ifSIMPLIFIED\else
 	
 	\subsection{Project Organization}
 	
@@ -260,6 +312,8 @@ Section \ref{sec:official-implementation} explores the official compressor imple
 		\item \verb|Release| configuration
 	\end{itemize}
 	
+	\fi % SIMPLIFIED
+	
 	\subsection{Test Data}
 	
 	Brotli was designed with multilingual text and web languages encoded with the UTF-8 standard in mind, but it is still able to reasonably compress text in other encoding systems, and certain kinds of binary data.
@@ -269,6 +323,30 @@ Section \ref{sec:official-implementation} explores the official compressor imple
 	The corpus includes commonly used lossless compression corpora, which have a variety of text and binary formats, as well as a collection of multilingual texts and website resources. Files gathered outside of existing corpora were selected to represent the kind of data Brotli is intended for, and thus should benefit from its features and heuristics.
 	
 	The corpus includes 169 files totaling $\approx$ \verb|263 MiB| (median $\approx$ \verb|54.5 KiB|). \ifbool{VSB}{All files were made available in the attachment.}{All files were made available at \url{https://github.com/chylex/Brotli-Builder/blob/master/Paper/Corpus.7z}.}
+	
+	\ifSIMPLIFIED
+	
+	\begin{itemize} \nosep
+		\item The Canterbury Corpus (\verb|2.7 MiB|)
+		\item The Silesia Corpus (\verb|202 MiB|)
+		\item A selection of files from Snappy Test Data (\verb|1.7 MiB|)
+		\begin{itemize} \nosep
+			\item fireworks.jpeg, geo.protodata, html, html\_x\_4, kppkn.gtb, paper-100k.pdf, urls.10K
+		\end{itemize}
+		\item The Bible in various languages (\verb|37 MiB|)
+		\begin{itemize} \nosep
+			\item Arabic, Chinese (Simplified \& Traditional), English, Hindi, Russian, Spanish
+		\end{itemize}
+		\item \verb|HTML|, \verb|CSS|, and \verb|JS| files from several of the most popular websites (\verb|20.4 MiB|)
+		\begin{itemize} \nosep
+			\item Baidu, Facebook, Google, Instagram, VK, Wikipedia, Yandex, YouTube
+		\end{itemize}
+	\end{itemize}
+	
+	\noindent
+	Additional information about where and how the files were obtained is included in the full thesis.
+	
+	\else % SIMPLIFIED
 	
 	\begin{itemize} \nosep
 		\item The Canterbury Corpus\footnote{\url{http://corpus.canterbury.ac.nz/descriptions/\#cantrbry}} (\verb|2.7 MiB|)
@@ -294,6 +372,8 @@ Section \ref{sec:official-implementation} explores the official compressor imple
 			\item Each website was downloaded using the \emph{Save page as...}, \emph{Web Page, complete} feature in an anonymous window in Firefox.
 		\end{itemize}
 	\end{itemize}
+	
+	\fi % SIMPLIFIED
 	
 		\subsubsection{Brotli vs. gzip vs. zstd}
 		
@@ -570,6 +650,8 @@ To understand Brotli, we will look at the pieces that form a compressed meta-blo
 				\\[-0pt]
 				\caption{Distributions of distance context IDs in the test corpus.}
 			\end{figure}
+
+\ifSIMPLIFIED\else
 
 \section{Implementing Brotli}
 \label{sec:implementing-brotli}
@@ -1333,10 +1415,12 @@ To conclude the library introduction, these are a few examples of its intended u
 			\label{fig:rebuild-overall-comparison}
 		\end{figure}
 
+\fi % SIMPLIFIED
+
 \section{Official Implementation}
 \label{sec:official-implementation}
 
-This section focuses on the official compressor implementation. We will begin by summarizing differences between the quality levels (0--11). Then, we will delve into individual features, exploring their implementation and their effect on the test corpus. Finally, we will try experimenting with the source code in an attempt to find improvements.
+This section focuses on the official compressor implementation. We will begin by summarizing differences between the quality levels (0--11). Then, we will delve into individual features, exploring their implementation and their effect on the test corpus. \ifSIMPLIFIED\else Finally, we will try experimenting with the source code in an attempt to find improvements.\fi
 
 	\subsection{Official Quality Levels}
 	
@@ -1613,6 +1697,8 @@ This section focuses on the official compressor implementation. We will begin by
 				\caption{Test corpus size after disabling both block splitting and context modeling.}
 				\label{fig:disabled-block-split-context-model}
 			\end{figure}
+	
+	\ifSIMPLIFIED\else
 	
 	\subsection{Modifications to the Official Compressor}
 	
@@ -1906,16 +1992,26 @@ This section focuses on the official compressor implementation. We will begin by
 			
 			\noindent
 			With the updated algorithm, compression was sped up by $\approx 3.4 \%$ in quality level 10, and by $\approx 1.9 \%$ in quality level 11 when compared against the baseline. The experiment shows potential that could be developed further, but it might call for a new block splitting algorithm designed with literal context modes in mind.
+			
+	\fi % SIMPLIFIED
 
 \section{Conclusion}
 
 Brotli is a promising HTTP compression standard that delivers better overall results than other compression standards commonly used on the World Wide Web. Although the Brotli format specification\cite{RFC7932} covers all information needed to implement a decompression algorithm, one of the goals of this thesis was to provide a more structured explanation with visual aids and examples, which should be compelling even to people with no previous knowledge of compression techniques.
 
+\ifSIMPLIFIED
+
+The full thesis additionally covers a custom implementation of Brotli, and tests several experimental modifications to the official implementation. You can find the source code and full thesis at \url{https://github.com/chylex/Brotli-Builder}.
+
+\else
+	
 Utility applications based on the custom implementation proved to be very helpful when studying features of the Brotli format --- how they are used by different quality levels, and how they were affected by the various experiments with both the format and the official source code. The object representation made it easy to collect statistics about each element of the format, which were used to create many of the figures and tables included in the thesis.
 
 The process of developing the custom implementation prompted questions regarding possible serialization and code picking strategies in various parts of the format. Many different strategies and heuristics were tried on the test corpus, and compared against those used by the official compressor implementation. Sometimes it would reveal a potential for small improvements, other times it would show highly varying results that reaffirm the fact a single strategy almost never works equally well on all possible inputs.
 
 The final goal of this thesis was to design and implement modifications compatible with the Brotli format, and compare their compression size and speed to the official implementation. In order to find where the official implementation could be improved and how it balanced the two compression performance metrics, it was important to (1) look at the differences between quality levels and their real use cases, and (2) understand how exactly were key parts of the format implemented. The thesis explored these parts of the official implementation in vast detail, identifying a few areas where the format was not used to its full potential. The modifications themselves had mixed results; 2 out of 4 modifications --- those targeting context modeling for literals --- demonstrated ideas that could be developed further, but even in their current form led to reasonable size savings and in one case a reduction in compression time.
+
+\fi % SIMPLIFIED
 
 % THESIS APPENDIX
 
