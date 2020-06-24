@@ -118,6 +118,16 @@ You are reading an online version of my masters thesis. The source codes and iss
 I would like to thank doc. Ing. Jan Platoš, Ph.D. for leading and supervising the project.
 
 \vspace{50pt}
+
+\noindent
+\textbf{Updates}
+\medbreak
+\noindent
+\begin{tabular}{@{}lcl}
+	24 July 2020 & & Corrected minor visual issue with GUI application image. \\
+\end{tabular} 
+
+\vspace{50pt}
 }}
 
 \setboolean{Dipl@PrintCooperatingPersonsDeclaration}{false}
@@ -714,6 +724,7 @@ To conclude the library introduction, these are a few examples of its intended u
 	A \verb|BitReader| acts as a cursor within a \verb|BitStream|, keeping track of the current position and exposing an interface to read the next bit or group of bits. An extension of the \verb|BitReader| marks the read bits in a nested hierarchy of text labels, which can then be displayed and navigated in the GUI application, or saved into a text file in the CLI application. A plain text representation of the entire structure allows using external text processing tools, such as \verb|diff| or \verb|grep|, for comparison and analysis.
 	
 	\begin{figure}[H]
+		\pdfimageresolution=96
 		\includegraphics{Figures/ExampleBitMarkerGUI.png}
 		\caption[Example of marked bits in the GUI application.]{Example of marked bits in the GUI application. The image shows a sequence of bit highlighted in the \texttt{Bit Stream} panel, and its label highlighted in the \texttt{Marker Info} panel. The bit sequence encodes the literal \enquote*{A}, as part of an insert\&copy command that produces the text \enquote{Alice\,\textvisiblespace \,was\,\textvisiblespace \,beginning\,\textvisiblespace \,to\,\textvisiblespace}.}
 	\end{figure}
